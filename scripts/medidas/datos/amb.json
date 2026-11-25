@@ -57,53 +57,554 @@
           "nivel": 0,
           "resumen": "Sin plan para el agua y el monte, o prometiendo agua que la cuenca no tiene y tolerando pozos ilegales y vertidos sin depurar.",
           "medidas": [
-            { "nombre": "Prometer agua que no hay", "texto": "Ofrecer nuevos regadíos, trasvases u obras sin comprobar que la cuenca tiene esa agua en los años secos, ni decir de dónde saldrá ni quién la paga." },
-            { "nombre": "Mirar hacia otro lado con pozos y vertidos", "texto": "Tolerar pozos sin derecho, regularizarlos en bloque o retrasar las depuradoras que exige la UE, aunque los acuíferos se sequen o se salinicen." },
-            { "nombre": "El incendio solo como emergencia", "texto": "Gastar en apagar fuegos en verano sin plan para cuidar el monte el resto del año y sin saber cuánto se gasta en prevenir." }
+            {
+              "nombre": "Prometer agua que no hay",
+              "texto": "Ofrecer nuevos regadíos, trasvases u obras sin comprobar que la cuenca tiene esa agua en los años secos, ni decir de dónde saldrá ni quién la paga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes que esperan nuevas concesiones"
+                  ],
+                  "indirecto": [
+                    "empresas de obra pública"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes con derechos ya concedidos en la cuenca",
+                    "pescadores y usuarios del río aguas abajo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan obras sin agua",
+                    "hogares que beben del mismo acuífero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mirar hacia otro lado con pozos y vertidos",
+              "texto": "Tolerar pozos sin derecho, regularizarlos en bloque o retrasar las depuradoras que exige la UE, aunque los acuíferos se sequen o se salinicen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "titulares de pozos sin concesión"
+                  ],
+                  "indirecto": [
+                    "municipios que aplazan el gasto en depuración"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes que pagan su concesión legal",
+                    "vecinos de ríos y costas que reciben vertidos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las multas europeas",
+                    "pescadores y turismo de costa"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "El incendio solo como emergencia",
+              "texto": "Gastar en apagar fuegos en verano sin plan para cuidar el monte el resto del año y sin saber cuánto se gasta en prevenir.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas de medios aéreos de extinción"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de pueblos en zonas de riesgo de incendio",
+                    "propietarios forestales"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan extinciones más caras"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir la base legal: el caudal mínimo de cada río, depurar todas las aguas residuales, cerrar pozos ilegales y prevenir incendios.",
           "medidas": [
-            { "nombre": "Caudal ecológico respetado", "texto": "Cada confederación hidrográfica (el organismo que gestiona cada gran río) hace cumplir el caudal mínimo que debe llevar el río, con control en los puntos clave y sanción si se incumple." },
-            { "nombre": "Depuración completa", "texto": "Terminar las depuradoras que exige la directiva europea de aguas residuales en todos los municipios, con plazo y responsable para cada obra, y evitar así sanciones europeas." },
-            { "nombre": "Cierre de pozos sin derecho", "texto": "Inventariar y clausurar los pozos sin concesión, empezando por los acuíferos sobreexplotados junto a humedales protegidos, con inspección de las confederaciones y de la Guardia Civil." },
-            { "nombre": "Planes de sequía aplicados", "texto": "Cumplir el plan especial de sequía de cada cuenca: qué restricciones se activan en cada fase de escasez y en qué orden, decidido antes y no en plena emergencia." },
-            { "nombre": "Franjas de protección contra incendios", "texto": "Exigir y vigilar franjas sin vegetación alrededor de pueblos y urbanizaciones, y un plan municipal de emergencia por incendio en cada zona de riesgo." }
+            {
+              "nombre": "Caudal ecológico respetado",
+              "texto": "Cada confederación hidrográfica (el organismo que gestiona cada gran río) hace cumplir el caudal mínimo que debe llevar el río, con control en los puntos clave y sanción si se incumple.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pescadores y usuarios recreativos del río",
+                    "poblaciones aguas abajo"
+                  ],
+                  "indirecto": [
+                    "turismo rural ligado a los ríos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes e hidroeléctricas que pierden agua en estiaje"
+                  ],
+                  "indirecto": [
+                    "consumidores de productos de regadío"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Depuración completa",
+              "texto": "Terminar las depuradoras que exige la directiva europea de aguas residuales en todos los municipios, con plazo y responsable para cada obra, y evitar así sanciones europeas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de ríos y playas que hoy reciben vertidos"
+                  ],
+                  "indirecto": [
+                    "pescadores y turismo de costa",
+                    "contribuyentes que se ahorran multas europeas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "municipios pequeños que deben financiar la obra"
+                  ],
+                  "indirecto": [
+                    "hogares que pagan más tasa de saneamiento"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cierre de pozos sin derecho",
+              "texto": "Inventariar y clausurar los pozos sin concesión, empezando por los acuíferos sobreexplotados junto a humedales protegidos, con inspección de las confederaciones y de la Guardia Civil.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes con concesión legal en el acuífero",
+                    "vecinos y negocios ligados a humedales protegidos"
+                  ],
+                  "indirecto": [
+                    "hogares abastecidos del mismo acuífero"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "agricultores que riegan con pozos sin concesión"
+                  ],
+                  "indirecto": [
+                    "jornaleros de explotaciones que dejan de regar",
+                    "consumidores de frutas y hortalizas de regadío"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Planes de sequía aplicados",
+              "texto": "Cumplir el plan especial de sequía de cada cuenca: qué restricciones se activan en cada fase de escasez y en qué orden, decidido antes y no en plena emergencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que dependen del abastecimiento en sequía",
+                    "usuarios del agua que necesitan reglas previsibles"
+                  ],
+                  "indirecto": [
+                    "empresas que planifican su consumo de agua"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes que sufren los primeros recortes"
+                  ],
+                  "indirecto": [
+                    "trabajadores del campo en años de restricción"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Franjas de protección contra incendios",
+              "texto": "Exigir y vigilar franjas sin vegetación alrededor de pueblos y urbanizaciones, y un plan municipal de emergencia por incendio en cada zona de riesgo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de pueblos y urbanizaciones en zona forestal"
+                  ],
+                  "indirecto": [
+                    "servicios de extinción",
+                    "asegurados que pagan menos siniestros"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios obligados a desbrozar sus parcelas",
+                    "ayuntamientos pequeños con poco presupuesto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Gestionar cada cuenca con datos abiertos: saber cuánta agua se saca, reutilizar la depurada, adaptarse a riadas y prevenir incendios todo el año.",
           "medidas": [
-            { "nombre": "Contadores en las grandes tomas", "texto": "Medir con contador las extracciones de regadío, industria y abastecimiento por encima de un umbral, y publicar los datos de cada cuenca en un portal abierto." },
-            { "nombre": "Reutilización del agua depurada", "texto": "Plan por cuenca para regar, limpiar calles y abastecer a la industria con agua depurada bajo las normas europeas de calidad, empezando por la costa mediterránea." },
-            { "nombre": "Prevención de incendios todo el año", "texto": "Cuadrillas forestales contratadas los doce meses, quemas controladas, pastoreo en cortafuegos y planes de gestión para el monte privado abandonado, con las comunidades autónomas." },
-            { "nombre": "Menos fugas en las redes urbanas", "texto": "Plan de renovación de tuberías de ayuntamientos y empresas de agua, con el porcentaje de agua perdida en cada municipio publicado cada año." },
-            { "nombre": "No construir donde se inunda", "texto": "Mapas de zonas inundables vinculantes para urbanizar, espacio para que los ríos se desborden sin daño y planes municipales de calor con sombra y refugios climáticos." }
+            {
+              "nombre": "Contadores en las grandes tomas",
+              "texto": "Medir con contador las extracciones de regadío, industria y abastecimiento por encima de un umbral, y publicar los datos de cada cuenca en un portal abierto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes que cumplen su concesión",
+                    "ciudadanos e investigadores que consultan los datos"
+                  ],
+                  "indirecto": [
+                    "hogares que dependen del mismo acuífero"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios que hoy sacan más agua de la concedida",
+                    "titulares de tomas que pagan el contador"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reutilización del agua depurada",
+              "texto": "Plan por cuenca para regar, limpiar calles y abastecer a la industria con agua depurada bajo las normas europeas de calidad, empezando por la costa mediterránea.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes de la costa mediterránea",
+                    "ayuntamientos que riegan parques y limpian calles"
+                  ],
+                  "indirecto": [
+                    "hogares que comparten el agua potable en sequía"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes que pagan el coste del tratamiento extra"
+                  ],
+                  "indirecto": [
+                    "hogares que pagan la inversión en la tasa del agua"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Prevención de incendios todo el año",
+              "texto": "Cuadrillas forestales contratadas los doce meses, quemas controladas, pastoreo en cortafuegos y planes de gestión para el monte privado abandonado, con las comunidades autónomas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores forestales hoy contratados solo en verano",
+                    "vecinos de zonas rurales con riesgo de incendio",
+                    "ganaderos que pastorean en cortafuegos"
+                  ],
+                  "indirecto": [
+                    "turismo rural y de naturaleza"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes de las comunidades autónomas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Menos fugas en las redes urbanas",
+              "texto": "Plan de renovación de tuberías de ayuntamientos y empresas de agua, con el porcentaje de agua perdida en cada municipio publicado cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares abastecidos por redes urbanas"
+                  ],
+                  "indirecto": [
+                    "regantes y usuarios que comparten la cuenca"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "abonados que pagan la renovación en su recibo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes municipales"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "No construir donde se inunda",
+              "texto": "Mapas de zonas inundables vinculantes para urbanizar, espacio para que los ríos se desborden sin daño y planes municipales de calor con sombra y refugios climáticos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "futuros compradores de vivienda en zonas de riesgo",
+                    "vecinos expuestos a riadas y olas de calor"
+                  ],
+                  "indirecto": [
+                    "asegurados que pagan menos siniestros"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de suelo urbanizable en zona inundable",
+                    "promotores con proyectos en esas zonas"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos que ingresan por licencias de obra"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un pacto estable del agua y la sequía, ríos, humedales y bosques en restauración, y pago a quien cuida el territorio.",
           "medidas": [
-            { "nombre": "Pacto del agua y la sequía", "texto": "Acuerdo entre Estado, comunidades autónomas y usuarios con reglas estables para trasvases, desalación y reservas, que no cambie con cada Gobierno y se revise con los datos de cada ciclo hidrológico." },
-            { "nombre": "Plan nacional de restauración", "texto": "Aplicar el reglamento europeo de restauración de la naturaleza con metas anuales: quitar barreras inútiles en los ríos y recuperar humedales y bosques, con informe público de avance.", "fuente": "https://environment.ec.europa.eu/topics/nature-and-biodiversity/nature-restoration-regulation_en" },
-            { "nombre": "Pago por servicios ambientales", "texto": "Contratos de varios años con propietarios y ganaderos que mantienen bosque maduro, humedales o pastos que frenan incendios, pagados por resultados comprobados sobre el terreno." },
-            { "nombre": "Agencia de incendios rurales", "texto": "Un organismo que coordine prevención y extinción entre Estado y comunidades, evalúe cada gran incendio y publique lo gastado en prevenir y en apagar, como la agencia portuguesa de fuegos rurales.", "fuente": "https://www.rtp.pt/noticias/pais/despesa-do-sistema-de-gestao-de-fogos-rurais-25-abaixo-do-previsto-indica-relatorio_n1679403" },
-            { "nombre": "Acuíferos y costa en recuperación", "texto": "Declarar en riesgo los acuíferos sobreexplotados con planes obligatorios para recuperarlos, y recuperar los tramos de costa que se pierden por erosión." }
+            {
+              "nombre": "Pacto del agua y la sequía",
+              "texto": "Acuerdo entre Estado, comunidades autónomas y usuarios con reglas estables para trasvases, desalación y reservas, que no cambie con cada Gobierno y se revise con los datos de cada ciclo hidrológico.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes y abastecimientos que necesitan reglas estables"
+                  ],
+                  "indirecto": [
+                    "empresas agroalimentarias que planifican inversiones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regiones que aspiran a más agua trasvasada de la pactada",
+                    "cuencas cedentes que quedan atadas a reglas fijas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plan nacional de restauración",
+              "texto": "Aplicar el reglamento europeo de restauración de la naturaleza con metas anuales: quitar barreras inútiles en los ríos y recuperar humedales y bosques, con informe público de avance.",
+              "fuente": "https://environment.ec.europa.eu/topics/nature-and-biodiversity/nature-restoration-regulation_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pescadores y usuarios recreativos de ríos",
+                    "vecinos de zonas con humedales recuperados"
+                  ],
+                  "indirecto": [
+                    "turismo de naturaleza",
+                    "agricultores que ganan polinizadores y suelos sanos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de presas y azudes que se retiran",
+                    "propietarios de suelo agrícola en humedales a recuperar"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian las obras"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pago por servicios ambientales",
+              "texto": "Contratos de varios años con propietarios y ganaderos que mantienen bosque maduro, humedales o pastos que frenan incendios, pagados por resultados comprobados sobre el terreno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios forestales y ganaderos que cuidan el monte"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas rurales con menos incendios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los contratos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Agencia de incendios rurales",
+              "texto": "Un organismo que coordine prevención y extinción entre Estado y comunidades, evalúe cada gran incendio y publique lo gastado en prevenir y en apagar, como la agencia portuguesa de fuegos rurales.",
+              "fuente": "https://www.rtp.pt/noticias/pais/despesa-do-sistema-de-gestao-de-fogos-rurais-25-abaixo-do-previsto-indica-relatorio_n1679403",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de zonas con riesgo de incendio",
+                    "servicios de extinción del Estado y las comunidades"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que ven en qué se gasta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "organismos que ceden parte de su control sobre la extinción"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el nuevo organismo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Acuíferos y costa en recuperación",
+              "texto": "Declarar en riesgo los acuíferos sobreexplotados con planes obligatorios para recuperarlos, y recuperar los tramos de costa que se pierden por erosión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y regantes que dependen de acuíferos en riesgo",
+                    "propietarios y negocios en costa que se erosiona"
+                  ],
+                  "indirecto": [
+                    "turismo de playa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes que deben reducir sus extracciones"
+                  ],
+                  "indirecto": [
+                    "trabajadores agrícolas de zonas con recortes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Repartir cada año el agua que de verdad hay, con el río primero, todo medido y publicado, y la naturaleza en las cuentas públicas.",
           "medidas": [
-            { "nombre": "Concesiones como parte del agua disponible", "texto": "Las concesiones dejan de ser un volumen fijo y pasan a ser un porcentaje del agua disponible: cada año, según embalses y acuíferos, se anuncia cuánto toca, como en la cuenca Murray-Darling de Australia.", "fuente": "https://www.bom.gov.au/water/nwa/2019/mdb/regiondescription/waterrights.shtml" },
-            { "nombre": "Tope de extracción por cuenca", "texto": "Cada plan hidrológico fija cuánto se puede sacar sin dañar la cuenca, después de reservar el caudal ecológico y la recarga de los acuíferos. Nada se reparte por encima de ese tope." },
-            { "nombre": "Contador a distancia en todas las tomas", "texto": "Todas las tomas, grandes y pequeñas, con contador de lectura remota; uso, reservas y calidad publicados por cuenca, y cierre efectivo de cualquier extracción sin derecho." },
-            { "nombre": "Precio que cubre el coste, con mínimo vital", "texto": "Cada uso paga lo que cuesta el agua, también el daño ambiental, como pide la directiva marco europea; los litros básicos de cada hogar quedan protegidos y las cesiones entre usuarios, bajo control público.", "fuente": "https://www.miteco.gob.es/es/agua/temas/planificacion-hidrologica/marco-del-agua/recuperacion_costes.html" },
-            { "nombre": "La naturaleza en las cuentas públicas", "texto": "Cuentas anuales de bosques, ríos, humedales y suelos junto a las cuentas económicas, siguiendo las cuentas europeas de ecosistemas, para ver si el patrimonio natural crece o se pierde.", "fuente": "https://ec.europa.eu/eurostat/en/web/products-eurostat-news/w/cn-20241111-1" }
+            {
+              "nombre": "Concesiones como parte del agua disponible",
+              "texto": "Las concesiones dejan de ser un volumen fijo y pasan a ser un porcentaje del agua disponible: cada año, según embalses y acuíferos, se anuncia cuánto toca, como en la cuenca Murray-Darling de Australia.",
+              "fuente": "https://www.bom.gov.au/water/nwa/2019/mdb/regiondescription/waterrights.shtml",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes que necesitan saber cada año con qué agua cuentan",
+                    "pescadores y usuarios del río en años secos"
+                  ],
+                  "indirecto": [
+                    "hogares con un abastecimiento más seguro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de concesiones con volumen fijo garantizado"
+                  ],
+                  "indirecto": [
+                    "jornaleros de explotaciones que reducen superficie en años secos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tope de extracción por cuenca",
+              "texto": "Cada plan hidrológico fija cuánto se puede sacar sin dañar la cuenca, después de reservar el caudal ecológico y la recarga de los acuíferos. Nada se reparte por encima de ese tope.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de humedales y acuíferos en riesgo",
+                    "quien dependa de la cuenca dentro de décadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes de nuevas concesiones"
+                  ],
+                  "indirecto": [
+                    "sectores que crecían con agua nueva"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contador a distancia en todas las tomas",
+              "texto": "Todas las tomas, grandes y pequeñas, con contador de lectura remota; uso, reservas y calidad publicados por cuenca, y cierre efectivo de cualquier extracción sin derecho.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regantes que cumplen su concesión",
+                    "ciudadanos que consultan los datos del agua"
+                  ],
+                  "indirecto": [
+                    "hogares que dependen del mismo acuífero"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de pequeñas tomas que pagan el contador",
+                    "quien extrae agua sin derecho"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Precio que cubre el coste, con mínimo vital",
+              "texto": "Cada uso paga lo que cuesta el agua, también el daño ambiental, como pide la directiva marco europea; los litros básicos de cada hogar quedan protegidos y las cesiones entre usuarios, bajo control público.",
+              "fuente": "https://www.miteco.gob.es/es/agua/temas/planificacion-hidrologica/marco-del-agua/recuperacion_costes.html",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares con su consumo básico protegido"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que dejan de subvencionar el agua",
+                    "pescadores y usuarios del río"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "regantes que hoy pagan el agua por debajo de su coste",
+                    "grandes consumidores de agua"
+                  ],
+                  "indirecto": [
+                    "consumidores de productos de regadío"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "La naturaleza en las cuentas públicas",
+              "texto": "Cuentas anuales de bosques, ríos, humedales y suelos junto a las cuentas económicas, siguiendo las cuentas europeas de ecosistemas, para ver si el patrimonio natural crece o se pierde.",
+              "fuente": "https://ec.europa.eu/eurostat/en/web/products-eurostat-news/w/cn-20241111-1",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "responsables públicos que deciden con datos",
+                    "ciudadanos que vigilan el patrimonio natural"
+                  ],
+                  "indirecto": [
+                    "sectores que dependen de recursos naturales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es contabilidad estadística con datos que en gran parte ya se recogen: cuesta poco y no quita derechos, ingresos ni agua a nadie."
+              }
+            }
           ]
         }
       ]
@@ -116,50 +617,465 @@
           "nivel": 0,
           "resumen": "Ningún plan para quien pierde con la transición, cierres sin alternativa, o animar a saltarse las normas ambientales y sanitarias.",
           "medidas": [
-            { "nombre": "Cierres sin alternativa", "texto": "Poner fecha al cierre de minas, centrales o explotaciones sin plan de empleo ni inversión para la comarca, de modo que el coste lo pague solo quien vivía de ellas." },
-            { "nombre": "Saltarse las normas como solución", "texto": "Animar a incumplir normas ambientales o sanitarias, o prometer suprimirlas sin medir el daño, en vez de simplificarlas y pagar a quien las cumple." },
-            { "nombre": "Sin plan para el campo", "texto": "No decir nada sobre la renta agraria, los precios en origen ni el relevo generacional, y tratar el campo solo como una cuestión de subvenciones." }
+            {
+              "nombre": "Cierres sin alternativa",
+              "texto": "Poner fecha al cierre de minas, centrales o explotaciones sin plan de empleo ni inversión para la comarca, de modo que el coste lo pague solo quien vivía de ellas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que cierran sin costes de reconversión"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que se ahorran los fondos de transición"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores de minas y centrales que cierran"
+                  ],
+                  "indirecto": [
+                    "comercios y servicios de esas comarcas",
+                    "jóvenes que emigran de la comarca"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Saltarse las normas como solución",
+              "texto": "Animar a incumplir normas ambientales o sanitarias, o prometer suprimirlas sin medir el daño, en vez de simplificarlas y pagar a quien las cumple.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "explotaciones que incumplen normas ambientales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "productores que cumplen y compiten en desventaja",
+                    "vecinos expuestos a la contaminación"
+                  ],
+                  "indirecto": [
+                    "consumidores ante riesgos sanitarios",
+                    "exportadores que pierden la confianza de los mercados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sin plan para el campo",
+              "texto": "No decir nada sobre la renta agraria, los precios en origen ni el relevo generacional, y tratar el campo solo como una cuestión de subvenciones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "intermediarios con más poder en la cadena alimentaria"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "agricultores y ganaderos con renta baja",
+                    "jóvenes que quieren incorporarse al campo"
+                  ],
+                  "indirecto": [
+                    "pueblos que pierden población"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Ayudas con nombre y plazo a comarcas y trabajadores afectados, y cumplir la ley que prohíbe pagar al productor por debajo de su coste.",
           "medidas": [
-            { "nombre": "Fondos para comarcas que pierden industria", "texto": "Fondos para los municipios donde cierra una central o una mina, destinados a empleo y servicios, con la lista de proyectos y lo gastado publicados." },
-            { "nombre": "Protección del trabajador que pierde su empleo", "texto": "Prejubilación, recolocación o formación pagada para los trabajadores de las instalaciones que cierran, pactadas con empresas y sindicatos." },
-            { "nombre": "Cumplir la ley de la cadena alimentaria", "texto": "Hacer cumplir el contrato escrito y la prohibición de comprar al agricultor por debajo de su coste de producción, que ya recoge la ley, con inspecciones de la agencia que vigila la cadena.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-8554" },
-            { "nombre": "Seguro agrario frente al clima", "texto": "Mantener y ampliar el seguro agrario subvencionado contra granizo, sequía y heladas, la primera protección del agricultor frente a un clima cada vez más duro." }
+            {
+              "nombre": "Fondos para comarcas que pierden industria",
+              "texto": "Fondos para los municipios donde cierra una central o una mina, destinados a empleo y servicios, con la lista de proyectos y lo gastado publicados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de comarcas donde cierra la industria"
+                  ],
+                  "indirecto": [
+                    "comercios y servicios locales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los fondos"
+                  ],
+                  "indirecto": [
+                    "comarcas en declive sin cierre industrial que no reciben fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Protección del trabajador que pierde su empleo",
+              "texto": "Prejubilación, recolocación o formación pagada para los trabajadores de las instalaciones que cierran, pactadas con empresas y sindicatos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de instalaciones que cierran"
+                  ],
+                  "indirecto": [
+                    "familias y comercio de la comarca"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cierran y cofinancian el plan",
+                    "contribuyentes que pagan prejubilaciones y formación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cumplir la ley de la cadena alimentaria",
+              "texto": "Hacer cumplir el contrato escrito y la prohibición de comprar al agricultor por debajo de su coste de producción, que ya recoge la ley, con inspecciones de la agencia que vigila la cadena.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-8554",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores y ganaderos que venden a grandes compradores"
+                  ],
+                  "indirecto": [
+                    "pueblos que dependen de la renta agraria"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "industrias y distribuidoras que compran por debajo de coste"
+                  ],
+                  "indirecto": [
+                    "consumidores si sube el precio final"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Seguro agrario frente al clima",
+              "texto": "Mantener y ampliar el seguro agrario subvencionado contra granizo, sequía y heladas, la primera protección del agricultor frente a un clima cada vez más duro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores y ganaderos expuestos a granizo, sequía y helada"
+                  ],
+                  "indirecto": [
+                    "cooperativas y bancos que financian al campo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que subvencionan la prima"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Convenios de transición firmados con cada comarca, normas del campo más simples y relevo generacional en las explotaciones.",
           "medidas": [
-            { "nombre": "Convenios de transición justa", "texto": "Acuerdo entre Estado, comunidad autónoma, ayuntamientos, empresas y sindicatos para cada comarca afectada, con proyectos, empleos y calendario, y seguimiento público cada año." },
-            { "nombre": "Un solo trámite para el agricultor", "texto": "Ventanilla única digital para las ayudas de la política agraria común (los fondos agrarios europeos) y los permisos ambientales, pidiendo cada dato una sola vez." },
-            { "nombre": "Relevo generacional", "texto": "Acceso a la tierra para jóvenes con bancos públicos de tierras, ayudas de instalación y avales para comprar o arrendar explotaciones." },
-            { "nombre": "Observatorio público de costes", "texto": "Publicar los costes de producción de referencia por producto y región, para que la prohibición de vender a pérdidas se pueda comprobar de verdad." }
+            {
+              "nombre": "Convenios de transición justa",
+              "texto": "Acuerdo entre Estado, comunidad autónoma, ayuntamientos, empresas y sindicatos para cada comarca afectada, con proyectos, empleos y calendario, y seguimiento público cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores y vecinos de comarcas en transición"
+                  ],
+                  "indirecto": [
+                    "proveedores locales de los nuevos proyectos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los compromisos",
+                    "empresas que asumen compromisos de empleo en la comarca"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Un solo trámite para el agricultor",
+              "texto": "Ventanilla única digital para las ayudas de la política agraria común (los fondos agrarios europeos) y los permisos ambientales, pidiendo cada dato una sola vez.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores y ganaderos que piden ayudas"
+                  ],
+                  "indirecto": [
+                    "técnicos de cooperativas que tramitan expedientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestorías que viven de tramitar ayudas agrarias"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Relevo generacional",
+              "texto": "Acceso a la tierra para jóvenes con bancos públicos de tierras, ayudas de instalación y avales para comprar o arrendar explotaciones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jóvenes que quieren instalarse en el campo"
+                  ],
+                  "indirecto": [
+                    "pueblos que ganan población",
+                    "agricultores que se jubilan y venden o arriendan"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian ayudas y avales"
+                  ],
+                  "indirecto": [
+                    "compradores de tierra que compiten con los jóvenes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Observatorio público de costes",
+              "texto": "Publicar los costes de producción de referencia por producto y región, para que la prohibición de vender a pérdidas se pueda comprobar de verdad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores que denuncian ventas a pérdidas"
+                  ],
+                  "indirecto": [
+                    "consumidores que ven cómo se forma el precio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "compradores que negociaban sin referencia pública de costes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Que la transición deje más renta en el mundo rural: energía con participación local, pago por cuidar el campo y precios justos.",
           "medidas": [
-            { "nombre": "Vecinos y ayuntamientos como socios", "texto": "Derecho de vecinos y ayuntamientos a entrar como socios en los parques renovables de su término, y fondo local con parte de los ingresos gestionado por el municipio." },
-            { "nombre": "Pagos verdes que compensan", "texto": "Los pagos verdes de la política agraria común retribuyen prácticas como cubierta vegetal, setos o pastoreo extensivo con importes que compensan de verdad el esfuerzo." },
-            { "nombre": "Inspección de oficio en la cadena", "texto": "La agencia que controla la cadena alimentaria inspecciona sin esperar denuncia, publica las sanciones y protege el anonimato de quien denuncia." },
-            { "nombre": "Industria nueva con energía local", "texto": "Prioridad de acceso a la red y a la energía renovable de la zona para las industrias que se instalen en comarcas en transición, a cambio de empleo comprometido." }
+            {
+              "nombre": "Vecinos y ayuntamientos como socios",
+              "texto": "Derecho de vecinos y ayuntamientos a entrar como socios en los parques renovables de su término, y fondo local con parte de los ingresos gestionado por el municipio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos y ayuntamientos de municipios con parques renovables"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores renovables que comparten beneficios"
+                  ],
+                  "indirecto": [
+                    "consumidores si sube el coste de la energía"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pagos verdes que compensan",
+              "texto": "Los pagos verdes de la política agraria común retribuyen prácticas como cubierta vegetal, setos o pastoreo extensivo con importes que compensan de verdad el esfuerzo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores con cubierta vegetal, setos o pastoreo extensivo"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas con menos erosión e incendios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "explotaciones intensivas que reciben menos ayuda"
+                  ],
+                  "indirecto": [
+                    "contribuyentes europeos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inspección de oficio en la cadena",
+              "texto": "La agencia que controla la cadena alimentaria inspecciona sin esperar denuncia, publica las sanciones y protege el anonimato de quien denuncia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores que temen denunciar a su comprador"
+                  ],
+                  "indirecto": [
+                    "consumidores que ven precios más transparentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "compradores que incumplen la ley de la cadena"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las inspecciones"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Industria nueva con energía local",
+              "texto": "Prioridad de acceso a la red y a la energía renovable de la zona para las industrias que se instalen en comarcas en transición, a cambio de empleo comprometido.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de comarcas en transición",
+                    "industrias que se instalan en esas comarcas"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "industrias de otras zonas que esperan acceso a la red"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Renta rural garantizada por ley: pago fijo por la energía producida, empleo firmado antes de cada cierre y cobro por resultados ambientales.",
           "medidas": [
-            { "nombre": "Pago obligatorio por kilovatio hora", "texto": "Ley que obliga a los parques eólicos y solares a pagar al municipio por cada kilovatio hora producido en su término y a dar un bono anual a los vecinos cercanos, a partir de los modelos alemán y danés.", "fuente": "https://ens.dk/en/node/4347" },
-            { "nombre": "Empleo firmado antes de cada cierre", "texto": "Ninguna central, mina o gran industria cierra sin un convenio firmado que asegure empleo o formación pagada a cada trabajador y un calendario de inversiones." },
-            { "nombre": "Pago por resultados medidos en la finca", "texto": "El agricultor cobra por el carbono en el suelo, el agua, la biodiversidad y la prevención de incendios medidos en su finca, además de las ayudas a la producción y con un solo trámite." },
-            { "nombre": "Lo que paga el campo vuelve al campo", "texto": "Si se pone precio a las emisiones agrarias, lo recaudado vuelve al sector para pagar el cambio, con plazos largos, como pactó Dinamarca con agricultores, industria, sindicatos y ecologistas.", "fuente": "https://www.en.kefm.dk/news/news-archive/2024/jul/the-danish-government-and-parties-in-%E2%80%9Cgreen-tripartite%E2%80%9D-agree-on-a-ground-breaking-model-for-a-carbon-tax-on-food-and-agriculture-production" },
-            { "nombre": "Misma exigencia en frontera", "texto": "Defender en la UE que los alimentos importados cumplan las mismas normas ambientales y sanitarias que se exigen al productor europeo." }
+            {
+              "nombre": "Pago obligatorio por kilovatio hora",
+              "texto": "Ley que obliga a los parques eólicos y solares a pagar al municipio por cada kilovatio hora producido en su término y a dar un bono anual a los vecinos cercanos, a partir de los modelos alemán y danés.",
+              "fuente": "https://ens.dk/en/node/4347",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ayuntamientos con parques eólicos o solares",
+                    "vecinos cercanos a los parques"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos locales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores y propietarios de parques renovables"
+                  ],
+                  "indirecto": [
+                    "consumidores de electricidad si se traslada el coste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Empleo firmado antes de cada cierre",
+              "texto": "Ninguna central, mina o gran industria cierra sin un convenio firmado que asegure empleo o formación pagada a cada trabajador y un calendario de inversiones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de centrales, minas y gran industria"
+                  ],
+                  "indirecto": [
+                    "comercio y servicios de la comarca"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que deben financiar el convenio antes de cerrar"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que cofinancian el convenio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pago por resultados medidos en la finca",
+              "texto": "El agricultor cobra por el carbono en el suelo, el agua, la biodiversidad y la prevención de incendios medidos en su finca, además de las ayudas a la producción y con un solo trámite.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores que mejoran suelo, agua y biodiversidad"
+                  ],
+                  "indirecto": [
+                    "vecinos con menos riesgo de incendio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los pagos"
+                  ],
+                  "indirecto": [
+                    "explotaciones sin medios para medir sus resultados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Lo que paga el campo vuelve al campo",
+              "texto": "Si se pone precio a las emisiones agrarias, lo recaudado vuelve al sector para pagar el cambio, con plazos largos, como pactó Dinamarca con agricultores, industria, sindicatos y ecologistas.",
+              "fuente": "https://www.en.kefm.dk/news/news-archive/2024/jul/the-danish-government-and-parties-in-%E2%80%9Cgreen-tripartite%E2%80%9D-agree-on-a-ground-breaking-model-for-a-carbon-tax-on-food-and-agriculture-production",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores y ganaderos que pagan por sus emisiones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "explotaciones con muchas emisiones por unidad producida"
+                  ],
+                  "indirecto": [
+                    "consumidores de carne y lácteos si suben los precios",
+                    "otros sectores que no reciben esa recaudación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Misma exigencia en frontera",
+              "texto": "Defender en la UE que los alimentos importados cumplan las mismas normas ambientales y sanitarias que se exigen al productor europeo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "productores europeos que compiten con importaciones"
+                  ],
+                  "indirecto": [
+                    "consumidores que buscan garantías sanitarias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "exportadores de fuera de la UE con normas más laxas"
+                  ],
+                  "indirecto": [
+                    "consumidores si suben los precios de lo importado"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -172,50 +1088,459 @@
           "nivel": 0,
           "resumen": "Sin plan de respaldo, o abrir y cerrar centrales por consigna, sin informes técnicos ni margen ante una ola de frío o un apagón.",
           "medidas": [
-            { "nombre": "Cierres y prórrogas por consigna", "texto": "Decidir el futuro de nucleares o centrales de gas por principio, a favor o en contra, sin un estudio que diga qué potencia hace falta y qué la sustituye." },
-            { "nombre": "Fiarlo todo al vecino", "texto": "Contar con importar electricidad en las horas críticas sin interconexiones suficientes y sin plan para el caso de que el país vecino tampoco tenga." },
-            { "nombre": "Sin lecciones del apagón", "texto": "No exigir ni publicar las causas de un gran apagón ni aplicar las recomendaciones técnicas, y discutir solo de quién es la culpa." }
+            {
+              "nombre": "Cierres y prórrogas por consigna",
+              "texto": "Decidir el futuro de nucleares o centrales de gas por principio, a favor o en contra, sin un estudio que diga qué potencia hace falta y qué la sustituye.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "titulares de centrales favorecidos por la decisión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores ante riesgo de apagón o factura más cara"
+                  ],
+                  "indirecto": [
+                    "industria que necesita suministro estable",
+                    "trabajadores de centrales cerradas sin estudio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fiarlo todo al vecino",
+              "texto": "Contar con importar electricidad en las horas críticas sin interconexiones suficientes y sin plan para el caso de que el país vecino tampoco tenga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores que se ahorran el respaldo nacional a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares e industria en las horas críticas"
+                  ],
+                  "indirecto": [
+                    "servicios esenciales que se quedan sin red"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sin lecciones del apagón",
+              "texto": "No exigir ni publicar las causas de un gran apagón ni aplicar las recomendaciones técnicas, y discutir solo de quién es la culpa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas y organismos cuyos fallos no se investigan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares y empresas expuestos a otro apagón"
+                  ],
+                  "indirecto": [
+                    "personas que dependen de equipos médicos en casa"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Mantener el respaldo que el operador de la red considere necesario y tener ensayado cómo recuperar la luz tras un apagón.",
           "medidas": [
-            { "nombre": "Respaldo según el operador del sistema", "texto": "Mantener disponibles las centrales que Red Eléctrica, el operador del sistema, considere necesarias para la demanda punta, sin cerrar ninguna que señale como imprescindible." },
-            { "nombre": "Plan de reposición ensayado", "texto": "Simulacros periódicos para recuperar el suministro tras un apagón total, con centrales capaces de arrancar solas y coordinación con comunidades y servicios de emergencia." },
-            { "nombre": "Servicios esenciales con autonomía", "texto": "Hospitales, depuradoras, telecomunicaciones y centros de emergencia con generación propia y combustible para resistir sin red, revisados por inspección." },
-            { "nombre": "Recomendaciones del apagón aplicadas", "texto": "Aplicar las recomendaciones del panel europeo de expertos sobre el apagón ibérico de abril de 2025 y publicar el estado de cada una.", "fuente": "https://www.entsoe.eu/publications/blackout/28-april-2025-iberian-blackout/" }
+            {
+              "nombre": "Respaldo según el operador del sistema",
+              "texto": "Mantener disponibles las centrales que Red Eléctrica, el operador del sistema, considere necesarias para la demanda punta, sin cerrar ninguna que señale como imprescindible.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares e industria con suministro garantizado",
+                    "titulares de centrales de respaldo"
+                  ],
+                  "indirecto": [
+                    "servicios esenciales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan el respaldo en la factura"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plan de reposición ensayado",
+              "texto": "Simulacros periódicos para recuperar el suministro tras un apagón total, con centrales capaces de arrancar solas y coordinación con comunidades y servicios de emergencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas que recuperan antes la luz",
+                    "servicios de emergencia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de centrales que asumen el coste de los ensayos"
+                  ],
+                  "indirecto": [
+                    "consumidores que lo pagan en la factura"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Servicios esenciales con autonomía",
+              "texto": "Hospitales, depuradoras, telecomunicaciones y centros de emergencia con generación propia y combustible para resistir sin red, revisados por inspección.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes de hospitales",
+                    "usuarios de emergencias y telecomunicaciones"
+                  ],
+                  "indirecto": [
+                    "población general durante un apagón"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de servicios esenciales que pagan los generadores"
+                  ],
+                  "indirecto": [
+                    "contribuyentes y abonados que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Recomendaciones del apagón aplicadas",
+              "texto": "Aplicar las recomendaciones del panel europeo de expertos sobre el apagón ibérico de abril de 2025 y publicar el estado de cada una.",
+              "fuente": "https://www.entsoe.eu/publications/blackout/28-april-2025-iberian-blackout/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas expuestos a un nuevo apagón"
+                  ],
+                  "indirecto": [
+                    "industria que necesita suministro estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas eléctricas que deben adaptar sus equipos"
+                  ],
+                  "indirecto": [
+                    "consumidores si se traslada el coste"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Decidir con datos públicos el calendario nuclear y del gas, y avanzar en interconexiones, control de tensión y demanda flexible.",
           "medidas": [
-            { "nombre": "Calendario nuclear con informe técnico", "texto": "Revisar el calendario de cierre nuclear con un estudio público del operador del sistema y del Consejo de Seguridad Nuclear sobre seguridad, coste y qué potencia lo sustituye." },
-            { "nombre": "Interconexiones con Francia", "texto": "Impulsar los cables submarinos y terrestres con Francia (las interconexiones) con calendario público, financiación europea y seguimiento de cada obra." },
-            { "nombre": "Control de tensión obligatorio", "texto": "Exigir que las plantas renovables y las baterías ayuden a regular la tensión de la red, como ya hacen las centrales convencionales, con reglas técnicas actualizadas." },
-            { "nombre": "Demanda que responde", "texto": "Pagar a industrias y grandes consumidores por reducir su consumo cuando la red lo pide, como recurso barato en las horas más críticas." }
+            {
+              "nombre": "Calendario nuclear con informe técnico",
+              "texto": "Revisar el calendario de cierre nuclear con un estudio público del operador del sistema y del Consejo de Seguridad Nuclear sobre seguridad, coste y qué potencia lo sustituye.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que deciden con datos públicos",
+                    "trabajadores de centrales nucleares que ganan un horizonte claro"
+                  ],
+                  "indirecto": [
+                    "industria que planifica su suministro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inversores que planificaron con el calendario actual"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Interconexiones con Francia",
+              "texto": "Impulsar los cables submarinos y terrestres con Francia (las interconexiones) con calendario público, financiación europea y seguimiento de cada obra.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de electricidad en España",
+                    "productores renovables que exportan excedentes"
+                  ],
+                  "indirecto": [
+                    "industria que necesita suministro estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de zonas por donde pasan las nuevas líneas"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan la obra en los peajes",
+                    "centrales nacionales que compiten con la importación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Control de tensión obligatorio",
+              "texto": "Exigir que las plantas renovables y las baterías ayuden a regular la tensión de la red, como ya hacen las centrales convencionales, con reglas técnicas actualizadas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas con una red más estable"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de plantas renovables que deben invertir en equipos"
+                  ],
+                  "indirecto": [
+                    "consumidores si se traslada el coste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Demanda que responde",
+              "texto": "Pagar a industrias y grandes consumidores por reducir su consumo cuando la red lo pide, como recurso barato en las horas más críticas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industrias que cobran por reducir su consumo"
+                  ],
+                  "indirecto": [
+                    "hogares con factura más baja en horas punta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centrales de punta que pierden horas de venta"
+                  ],
+                  "indirecto": [
+                    "consumidores que financian esos pagos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un plan de seguridad con margen en cada escenario, revisado por un organismo independiente, y el respaldo que falte contratado por subasta.",
           "medidas": [
-            { "nombre": "Plan de seguridad por escenarios", "texto": "Un plan que compruebe que hay potencia suficiente en sequía, frío sin viento o fallo de una interconexión, a diez años vista y actualizado cada año.", "meta": true },
-            { "nombre": "Evaluación independiente", "texto": "Que el plan lo revise un organismo distinto del Gobierno y de las empresas, como la Comisión Nacional de los Mercados y la Competencia, con informes públicos." },
-            { "nombre": "Subastas de potencia firme", "texto": "Contratar por subasta la potencia que falte, abierta a baterías, bombeo, gas de respaldo, nuclear o demanda que se desconecta, para que gane la opción más barata." },
-            { "nombre": "Almacenamiento de larga duración", "texto": "Planificar centrales de bombeo y otros almacenes capaces de cubrir varios días seguidos de poca producción renovable, con concursos por zona." }
+            {
+              "nombre": "Plan de seguridad por escenarios",
+              "texto": "Un plan que compruebe que hay potencia suficiente en sequía, frío sin viento o fallo de una interconexión, a diez años vista y actualizado cada año.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares e industria con suministro asegurado"
+                  ],
+                  "indirecto": [
+                    "servicios esenciales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan el margen de seguridad"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación independiente",
+              "texto": "Que el plan lo revise un organismo distinto del Gobierno y de las empresas, como la Comisión Nacional de los Mercados y la Competencia, con informes públicos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos y consumidores que leen informes neutrales"
+                  ],
+                  "indirecto": [
+                    "inversores que necesitan reglas creíbles"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "Gobierno de turno, que pierde margen para decidir solo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Subastas de potencia firme",
+              "texto": "Contratar por subasta la potencia que falte, abierta a baterías, bombeo, gas de respaldo, nuclear o demanda que se desconecta, para que gane la opción más barata.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores de baterías, bombeo y demanda flexible",
+                    "consumidores que pagan la opción más barata"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centrales que hoy cobran por respaldo sin competir"
+                  ],
+                  "indirecto": [
+                    "consumidores que financian los pagos por capacidad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Almacenamiento de larga duración",
+              "texto": "Planificar centrales de bombeo y otros almacenes capaces de cubrir varios días seguidos de poca producción renovable, con concursos por zona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores de bombeo y almacenamiento",
+                    "consumidores en días seguidos sin sol ni viento"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de valles donde se construyen embalses de bombeo"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan la inversión en la factura"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una norma legal de fiabilidad comprobada cada año: ninguna central cierra ni sigue sin ese informe, y la estabilidad de la red se contrata aparte.",
           "medidas": [
-            { "nombre": "Norma de fiabilidad en la ley", "texto": "La ley fija el máximo de horas al año en que la demanda puede superar a la potencia disponible; Gran Bretaña usa tres horas al año para dimensionar sus subastas.", "fuente": "https://www.gov.uk/government/publications/capacity-market-auction-parameters-letter-from-desnz-to-neso-february-2026/final-auction-parameters-t-1-and-t-4-capacity-market-auctions" },
-            { "nombre": "Informe anual vinculante", "texto": "Un organismo independiente comprueba cada año si se cumple la norma en cada escenario, también con la frontera cerrada, y de ese informe salen las subastas y las obras de red." },
-            { "nombre": "Calendario nuclear atado al informe", "texto": "Cada reactor sigue o cierra según su seguridad, su coste frente a sustituirlo y la necesidad del sistema; residuos y desmantelamiento los paga el titular y toda ayuda pública se publica." },
-            { "nombre": "Estabilidad contratada aparte", "texto": "El operador contrata por separado la estabilidad con compensadores síncronos (máquinas que sostienen la red sin producir electricidad) y baterías que forman red, como en Gran Bretaña.", "fuente": "https://www.neso.energy/news/first-phase-stability-pathfinders-delivered" },
-            { "nombre": "Interconexión hasta el objetivo europeo", "texto": "Llegar al objetivo europeo de que cada país pueda importar al menos el 15 % de su potencia instalada, con calendario público de cada obra.", "meta": true, "fuente": "https://energy.ec.europa.eu/infrastructure/electricity-interconnection-targets_en" }
+            {
+              "nombre": "Norma de fiabilidad en la ley",
+              "texto": "La ley fija el máximo de horas al año en que la demanda puede superar a la potencia disponible; Gran Bretaña usa tres horas al año para dimensionar sus subastas.",
+              "fuente": "https://www.gov.uk/government/publications/capacity-market-auction-parameters-letter-from-desnz-to-neso-february-2026/final-auction-parameters-t-1-and-t-4-capacity-market-auctions",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares e industria con un nivel de seguridad garantizado"
+                  ],
+                  "indirecto": [
+                    "inversores que necesitan una regla estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan el respaldo que exige la norma"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Informe anual vinculante",
+              "texto": "Un organismo independiente comprueba cada año si se cumple la norma en cada escenario, también con la frontera cerrada, y de ese informe salen las subastas y las obras de red.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores con un sistema dimensionado con datos"
+                  ],
+                  "indirecto": [
+                    "inversores en potencia firme"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "Gobierno de turno, que no decide solo cierres y prórrogas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Calendario nuclear atado al informe",
+              "texto": "Cada reactor sigue o cierra según su seguridad, su coste frente a sustituirlo y la necesidad del sistema; residuos y desmantelamiento los paga el titular y toda ayuda pública se publica.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores que pagan la opción más barata y segura",
+                    "contribuyentes que dejan de pagar residuos nucleares"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares nucleares que asumen todo el coste de los residuos"
+                  ],
+                  "indirecto": [
+                    "trabajadores de reactores que cierren",
+                    "comarcas que viven de una central"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Estabilidad contratada aparte",
+              "texto": "El operador contrata por separado la estabilidad con compensadores síncronos (máquinas que sostienen la red sin producir electricidad) y baterías que forman red, como en Gran Bretaña.",
+              "fuente": "https://www.neso.energy/news/first-phase-stability-pathfinders-delivered",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas con una red más estable",
+                    "titulares de compensadores y baterías que forman red"
+                  ],
+                  "indirecto": [
+                    "productores renovables que pueden verter más energía"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan el servicio"
+                  ],
+                  "indirecto": [
+                    "centrales convencionales que dejan de cobrar por estabilizar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Interconexión hasta el objetivo europeo",
+              "texto": "Llegar al objetivo europeo de que cada país pueda importar al menos el 15 % de su potencia instalada, con calendario público de cada obra.",
+              "meta": true,
+              "fuente": "https://energy.ec.europa.eu/infrastructure/electricity-interconnection-targets_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de electricidad",
+                    "productores que exportan excedentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de zonas por donde pasan las nuevas líneas"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan la obra en los peajes"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -228,49 +1553,434 @@
           "nivel": 0,
           "resumen": "Sin propuesta para la factura, precios por decreto sin decir quién paga, o cortes de luz a hogares que no pueden pagar.",
           "medidas": [
-            { "nombre": "Precio por decreto sin cuenta", "texto": "Prometer luz o combustible a un precio fijado por ley sin explicar quién paga la diferencia, si el presupuesto, la deuda o las empresas, ni durante cuánto tiempo." },
-            { "nombre": "Cortes a hogares vulnerables", "texto": "Permitir que se corte el suministro a hogares con menores, mayores o enfermos que no pueden pagar, sin aviso previo a los servicios sociales." },
-            { "nombre": "Rebajas para todos y sin final", "texto": "Bajar los impuestos de toda la luz y todos los combustibles sin fecha de fin, lo que da más a quien más consume y frena el cambio a energías limpias." }
+            {
+              "nombre": "Precio por decreto sin cuenta",
+              "texto": "Prometer luz o combustible a un precio fijado por ley sin explicar quién paga la diferencia, si el presupuesto, la deuda o las empresas, ni durante cuánto tiempo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de luz y combustible a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la diferencia",
+                    "empresas energéticas obligadas a vender por debajo de coste"
+                  ],
+                  "indirecto": [
+                    "contribuyentes futuros que heredan la deuda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cortes a hogares vulnerables",
+              "texto": "Permitir que se corte el suministro a hogares con menores, mayores o enfermos que no pueden pagar, sin aviso previo a los servicios sociales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comercializadoras que cortan en vez de esperar el cobro"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares vulnerables con menores, mayores o enfermos"
+                  ],
+                  "indirecto": [
+                    "servicios sociales y sanitarios que atienden las consecuencias"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Rebajas para todos y sin final",
+              "texto": "Bajar los impuestos de toda la luz y todos los combustibles sin fecha de fin, lo que da más a quien más consume y frena el cambio a energías limpias.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grandes consumidores de luz y combustible",
+                    "hogares de rentas altas con más consumo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la rebaja"
+                  ],
+                  "indirecto": [
+                    "empresas de energía limpia frenadas",
+                    "usuarios de servicios públicos que pierden recaudación"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Un bono social que llegue a quien lo necesita, ningún corte a hogares vulnerables y una factura que se entienda.",
           "medidas": [
-            { "nombre": "Bono social", "texto": "Descuento en la factura de luz y gas para hogares con rentas bajas, familias numerosas o pensiones mínimas, con una financiación conocida y estable." },
-            { "nombre": "Ningún corte a hogares vulnerables", "texto": "Prohibir cortar luz, gas o agua a los hogares reconocidos como vulnerables por los servicios sociales, con la deuda gestionada por un fondo y no solo por la comercializadora." },
-            { "nombre": "Factura que se entiende", "texto": "Factura que separe con claridad energía, red, impuestos y otros cargos, y que compare lo pagado con la tarifa regulada." },
-            { "nombre": "Tarifa regulada disponible", "texto": "Mantener una tarifa regulada para el pequeño consumidor, a la que cualquiera pueda acogerse, como referencia frente a las ofertas del mercado libre." }
+            {
+              "nombre": "Bono social",
+              "texto": "Descuento en la factura de luz y gas para hogares con rentas bajas, familias numerosas o pensiones mínimas, con una financiación conocida y estable.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de rentas bajas",
+                    "familias numerosas",
+                    "pensionistas con pensión mínima"
+                  ],
+                  "indirecto": [
+                    "servicios sociales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que financian el descuento"
+                  ],
+                  "indirecto": [
+                    "resto de consumidores si se traslada a su factura"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ningún corte a hogares vulnerables",
+              "texto": "Prohibir cortar luz, gas o agua a los hogares reconocidos como vulnerables por los servicios sociales, con la deuda gestionada por un fondo y no solo por la comercializadora.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares reconocidos como vulnerables"
+                  ],
+                  "indirecto": [
+                    "servicios sociales y sanitarios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras con deuda impagada",
+                    "contribuyentes que financian el fondo"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan la morosidad en su tarifa"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Factura que se entiende",
+              "texto": "Factura que separe con claridad energía, red, impuestos y otros cargos, y que compare lo pagado con la tarifa regulada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de luz y gas"
+                  ],
+                  "indirecto": [
+                    "comercializadoras que compiten en precio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que ganan con la confusión del cliente"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Tarifa regulada disponible",
+              "texto": "Mantener una tarifa regulada para el pequeño consumidor, a la que cualquiera pueda acogerse, como referencia frente a las ofertas del mercado libre.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pequeños consumidores que eligen la tarifa regulada"
+                  ],
+                  "indirecto": [
+                    "clientes del mercado libre, que tienen una referencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras del mercado libre con ofertas caras"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Ayudas de crisis dirigidas y con fecha de fin, ahorro en casa, precios por horas y contratos largos para que la industria pueda planificar.",
           "medidas": [
-            { "nombre": "Ayudas de crisis dirigidas", "texto": "En una crisis de precios, ayudas temporales para hogares de renta baja y sectores muy expuestos, con fecha de fin, en vez de rebajas para todos." },
-            { "nombre": "Contratos a largo plazo para la industria", "texto": "Facilitar que la industria firme contratos de compra de energía renovable a muchos años con un modelo de contrato estándar y un registro público de precios." },
-            { "nombre": "Ahorro y eficiencia en casa", "texto": "Ayudas para aislar viviendas y cambiar a bomba de calor, con prioridad para hogares vulnerables, porque la energía más barata es la que no se gasta." },
-            { "nombre": "Precio por horas que premia la flexibilidad", "texto": "Tarifas con precios distintos según la hora, para que ahorre quien carga el coche o pone la lavadora cuando la energía es más barata." }
+            {
+              "nombre": "Ayudas de crisis dirigidas",
+              "texto": "En una crisis de precios, ayudas temporales para hogares de renta baja y sectores muy expuestos, con fecha de fin, en vez de rebajas para todos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de renta baja en una crisis de precios",
+                    "sectores muy expuestos al precio de la energía"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares de renta media y alta que no reciben ayuda"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian las ayudas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contratos a largo plazo para la industria",
+              "texto": "Facilitar que la industria firme contratos de compra de energía renovable a muchos años con un modelo de contrato estándar y un registro público de precios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industria que necesita un precio estable",
+                    "promotores renovables con ingresos seguros"
+                  ],
+                  "indirecto": [
+                    "trabajadores de industria que consume mucha energía"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "intermediarios que ganaban con contratos opacos"
+                  ],
+                  "indirecto": [
+                    "pequeñas empresas sin tamaño para firmar estos contratos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ahorro y eficiencia en casa",
+              "texto": "Ayudas para aislar viviendas y cambiar a bomba de calor, con prioridad para hogares vulnerables, porque la energía más barata es la que no se gasta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares vulnerables que aíslan su vivienda",
+                    "empresas de rehabilitación e instalación"
+                  ],
+                  "indirecto": [
+                    "consumidores por la menor demanda de energía"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las ayudas"
+                  ],
+                  "indirecto": [
+                    "vendedores de gas y gasóleo de calefacción"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Precio por horas que premia la flexibilidad",
+              "texto": "Tarifas con precios distintos según la hora, para que ahorre quien carga el coche o pone la lavadora cuando la energía es más barata.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que pueden mover su consumo a horas baratas"
+                  ],
+                  "indirecto": [
+                    "consumidores por la menor demanda en punta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares que no pueden cambiar sus horarios de consumo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un mercado que paga cada tecnología según su coste mediante contratos de precio fijo, con ofertas estables para hogares e industria.",
           "medidas": [
-            { "nombre": "Contratos por diferencias de doble sentido", "texto": "Toda nueva planta con apoyo público vende a un precio fijado por subasta: si el mercado paga menos, cobra la diferencia; si paga más, la devuelve.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837" },
-            { "nombre": "Vigilancia de márgenes en el mercado", "texto": "La Comisión Nacional de los Mercados y la Competencia vigila ofertas y márgenes del mercado mayorista y publica informes para detectar abusos de poder de mercado." },
-            { "nombre": "Ofertas de precio fijo para hogares", "texto": "Que las comercializadoras ofrezcan contratos a precio fijo respaldados por energía comprada a largo plazo, para que una familia pueda elegir estabilidad." }
+            {
+              "nombre": "Contratos por diferencias de doble sentido",
+              "texto": "Toda nueva planta con apoyo público vende a un precio fijado por subasta: si el mercado paga menos, cobra la diferencia; si paga más, la devuelve.",
+              "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores protegidos de los picos de precio",
+                    "promotores con ingresos estables"
+                  ],
+                  "indirecto": [
+                    "industria que planifica su coste energético"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "productores que renuncian a ganancias cuando el precio sube"
+                  ],
+                  "indirecto": [
+                    "consumidores si el precio de subasta supera al de mercado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vigilancia de márgenes en el mercado",
+              "texto": "La Comisión Nacional de los Mercados y la Competencia vigila ofertas y márgenes del mercado mayorista y publica informes para detectar abusos de poder de mercado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de electricidad"
+                  ],
+                  "indirecto": [
+                    "pequeños productores que compiten"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con poder de mercado que inflan sus ofertas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ofertas de precio fijo para hogares",
+              "texto": "Que las comercializadoras ofrezcan contratos a precio fijo respaldados por energía comprada a largo plazo, para que una familia pueda elegir estabilidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que prefieren una factura estable"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que asumen el riesgo de fijar el precio"
+                  ],
+                  "indirecto": [
+                    "hogares que pagan una prima por esa estabilidad"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Luz a coste estable: lo que ganan de más las plantas con apoyo público baja la factura, y el bono llega solo, sin solicitud.",
           "medidas": [
-            { "nombre": "Devoluciones que bajan la factura", "texto": "La ley destina lo que devuelven las plantas con precio garantizado a rebajar la factura de hogares y empresas, con la cuenta publicada cada año, como pide la reforma europea.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837" },
-            { "nombre": "Bono social automático", "texto": "Hacienda y Seguridad Social cruzan datos y la comercializadora aplica el descuento sin solicitud ni renovación, como en Portugal, con ventanilla abierta para quien no figure en los registros.", "fuente": "https://www.deco.proteste.pt/casa-energia/eletricidade-gas/dicas/tarifa-social-energia-quem-tem-direito-desconto-eletricidade-gas" },
-            { "nombre": "Garantía pública para contratos largos", "texto": "Un aval público, cobrado a precio de mercado, para que pymes e industria firmen contratos de energía a largo plazo sin que se subvencione el precio." },
-            { "nombre": "Factura limpia", "texto": "Sacar de la luz, poco a poco, los cargos que no son coste eléctrico y pasarlos al presupuesto diciendo qué partida los cubre." },
-            { "nombre": "Protocolo de crisis fijado de antemano", "texto": "Una regla aprobada antes de la crisis dice qué ayudas se activan, a partir de qué precio y cuándo se retiran, para no improvisar." }
+            {
+              "nombre": "Devoluciones que bajan la factura",
+              "texto": "La ley destina lo que devuelven las plantas con precio garantizado a rebajar la factura de hogares y empresas, con la cuenta publicada cada año, como pide la reforma europea.",
+              "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas que consumen electricidad"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "productores con precio garantizado que devuelven excedentes"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, que no reciben ese ingreso en el presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Bono social automático",
+              "texto": "Hacienda y Seguridad Social cruzan datos y la comercializadora aplica el descuento sin solicitud ni renovación, como en Portugal, con ventanilla abierta para quien no figure en los registros.",
+              "fuente": "https://www.deco.proteste.pt/casa-energia/eletricidade-gas/dicas/tarifa-social-energia-quem-tem-direito-desconto-eletricidade-gas",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares con derecho al bono que hoy no lo piden"
+                  ],
+                  "indirecto": [
+                    "servicios sociales con menos trámites"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que financian más descuentos"
+                  ],
+                  "indirecto": [
+                    "resto de consumidores si se traslada el coste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Garantía pública para contratos largos",
+              "texto": "Un aval público, cobrado a precio de mercado, para que pymes e industria firmen contratos de energía a largo plazo sin que se subvencione el precio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pymes e industria que firman contratos largos"
+                  ],
+                  "indirecto": [
+                    "promotores renovables con más compradores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que asumen el riesgo de impago"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Factura limpia",
+              "texto": "Sacar de la luz, poco a poco, los cargos que no son coste eléctrico y pasarlos al presupuesto diciendo qué partida los cubre.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de luz",
+                    "hogares que se pasan a bomba de calor o coche eléctrico"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que asumen esos cargos en el presupuesto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Protocolo de crisis fijado de antemano",
+              "texto": "Una regla aprobada antes de la crisis dice qué ayudas se activan, a partir de qué precio y cuándo se retiran, para no improvisar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas que saben qué ayuda llegará"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que evitan ayudas improvisadas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores que ya no pueden negociar ayudas a medida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -283,50 +1993,452 @@
           "nivel": 0,
           "resumen": "Sin plan para las renovables, o frenarlas todas por principio, o autorizarlas sin red, sin almacenamiento y sin contar con el territorio.",
           "medidas": [
-            { "nombre": "Rechazo por principio", "texto": "Oponerse a toda planta eólica o solar sin distinguir dónde, cómo ni con qué beneficio para el territorio que la acoge." },
-            { "nombre": "Permisos sin red ni territorio", "texto": "Conceder permisos en masa sin red para llevar la energía ni almacenamiento, ocupando suelo agrario valioso y sin hablar con los municipios." },
-            { "nombre": "Acaparar permisos de conexión", "texto": "Permitir que se reserven permisos de acceso a la red sin construir nada, bloqueando a los proyectos que sí están listos." }
+            {
+              "nombre": "Rechazo por principio",
+              "texto": "Oponerse a toda planta eólica o solar sin distinguir dónde, cómo ni con qué beneficio para el territorio que la acoge.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "titulares de centrales fósiles existentes",
+                    "vecinos que no quieren plantas cerca"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios y ayuntamientos que querían arrendar suelo",
+                    "promotores renovables"
+                  ],
+                  "indirecto": [
+                    "consumidores por un precio más alto",
+                    "trabajadores del sector renovable"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Permisos sin red ni territorio",
+              "texto": "Conceder permisos en masa sin red para llevar la energía ni almacenamiento, ocupando suelo agrario valioso y sin hablar con los municipios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores que obtienen permisos rápidos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "agricultores con suelo agrario valioso ocupado",
+                    "vecinos de municipios no consultados"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan energía desperdiciada"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Acaparar permisos de conexión",
+              "texto": "Permitir que se reserven permisos de acceso a la red sin construir nada, bloqueando a los proyectos que sí están listos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien revende permisos de conexión sin construir"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores con proyectos listos y sin acceso a la red"
+                  ],
+                  "indirecto": [
+                    "consumidores por la menor competencia"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Seguir instalando renovables con subastas previsibles, evaluación ambiental en plazo, autoconsumo sin trabas y la red aprobada construida.",
           "medidas": [
-            { "nombre": "Subastas renovables con calendario", "texto": "Calendario público de subastas de energía renovable, para que los inversores sepan qué viene y el precio salga de la competencia." },
-            { "nombre": "Evaluación ambiental en plazo", "texto": "Evaluar cada proyecto por su efecto en fauna, paisaje y suelo, y resolver dentro del plazo legal, sin atascos ni silencios de la administración." },
-            { "nombre": "Autoconsumo sin trabas", "texto": "Que poner placas en el tejado de casa o de la empresa se tramite con una simple comunicación al ayuntamiento y que lo que sobra se descuente de la factura." },
-            { "nombre": "Plan de red cumplido", "texto": "Construir las líneas y subestaciones aprobadas en la planificación de la red de transporte, con seguimiento público de cada obra." }
+            {
+              "nombre": "Subastas renovables con calendario",
+              "texto": "Calendario público de subastas de energía renovable, para que los inversores sepan qué viene y el precio salga de la competencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores e inversores renovables"
+                  ],
+                  "indirecto": [
+                    "consumidores por precios más competitivos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centrales fósiles que pierden horas de producción"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas con nuevas plantas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación ambiental en plazo",
+              "texto": "Evaluar cada proyecto por su efecto en fauna, paisaje y suelo, y resolver dentro del plazo legal, sin atascos ni silencios de la administración.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores que esperan una resolución",
+                    "vecinos que quieren conocer el impacto en su entorno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más técnicos evaluadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Autoconsumo sin trabas",
+              "texto": "Que poner placas en el tejado de casa o de la empresa se tramite con una simple comunicación al ayuntamiento y que lo que sobra se descuente de la factura.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y empresas con tejado propio"
+                  ],
+                  "indirecto": [
+                    "instaladores de placas solares"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que venden menos energía"
+                  ],
+                  "indirecto": [
+                    "consumidores sin tejado que sostienen más costes de red"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan de red cumplido",
+              "texto": "Construir las líneas y subestaciones aprobadas en la planificación de la red de transporte, con seguimiento público de cada obra.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores renovables que necesitan conexión",
+                    "industrias que se electrifican"
+                  ],
+                  "indirecto": [
+                    "consumidores por la menor energía desperdiciada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de zonas con nuevas líneas y subestaciones"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan la red en los peajes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Redes y almacenamiento al ritmo de las plantas, para no desperdiciar energía, y acceso a la red repartido con reglas claras.",
           "medidas": [
-            { "nombre": "Baterías y bombeo donde se tira energía", "texto": "Objetivos de almacenamiento por zona y subastas para baterías y centrales de bombeo allí donde más energía renovable se desperdicia por falta de red." },
-            { "nombre": "Concursos de acceso a la red", "texto": "Repartir la capacidad de conexión que se libera por concurso, valorando empleo local, impacto ambiental y almacenamiento, y no por orden de llegada." },
-            { "nombre": "Red de distribución preparada", "texto": "Inversión de las distribuidoras en la red de pueblos y ciudades para conectar autoconsumo, puntos de recarga y bombas de calor, con mapas públicos de capacidad libre." },
-            { "nombre": "Renovar antes que ocupar", "texto": "Cambiar los aerogeneradores antiguos por máquinas más potentes en el mismo sitio, con trámite simplificado, antes de ocupar suelo nuevo." }
+            {
+              "nombre": "Baterías y bombeo donde se tira energía",
+              "texto": "Objetivos de almacenamiento por zona y subastas para baterías y centrales de bombeo allí donde más energía renovable se desperdicia por falta de red.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores de almacenamiento",
+                    "productores renovables que dejan de tirar energía"
+                  ],
+                  "indirecto": [
+                    "consumidores por precios más estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centrales de gas que cubren las horas sin sol"
+                  ],
+                  "indirecto": [
+                    "consumidores que financian las subastas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Concursos de acceso a la red",
+              "texto": "Repartir la capacidad de conexión que se libera por concurso, valorando empleo local, impacto ambiental y almacenamiento, y no por orden de llegada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "proyectos con empleo local y almacenamiento",
+                    "vecinos de los municipios donde se instalan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que esperaban turno por orden de llegada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Red de distribución preparada",
+              "texto": "Inversión de las distribuidoras en la red de pueblos y ciudades para conectar autoconsumo, puntos de recarga y bombas de calor, con mapas públicos de capacidad libre.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que instalan autoconsumo, cargador o bomba de calor"
+                  ],
+                  "indirecto": [
+                    "instaladores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan la inversión en los peajes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Renovar antes que ocupar",
+              "texto": "Cambiar los aerogeneradores antiguos por máquinas más potentes en el mismo sitio, con trámite simplificado, antes de ocupar suelo nuevo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "titulares de parques eólicos antiguos",
+                    "vecinos de zonas que no pierden suelo nuevo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que esperaban arrendar suelo nuevo",
+                    "vecinos de parques renovados con aerogeneradores más altos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un sistema eléctrico casi sin emisiones, con mucha renovable, almacenamiento suficiente y comunidades energéticas en cada pueblo.",
           "medidas": [
-            { "nombre": "Comunidades energéticas", "texto": "Ley de comunidades energéticas: vecinos, comercios y ayuntamientos producen y comparten su propia energía, con apoyo técnico público y una oficina en cada comarca.", "fuente": "https://energy.ec.europa.eu/topics/markets-and-consumers/energy-consumers-and-prosumers/energy-communities_en" },
-            { "nombre": "Autoconsumo compartido a distancia", "texto": "Permitir compartir la energía de una instalación con vecinos en un radio amplio, para que quien no tiene tejado propio también pueda participar." },
-            { "nombre": "Mapas de menor impacto", "texto": "Mapas públicos que señalen dónde una planta causa menos daño ambiental, para orientar allí los proyectos y acortar su evaluación." },
-            { "nombre": "Energía desperdiciada medida", "texto": "Medir y publicar, zona a zona, cuánta energía renovable se tira por falta de red o de almacenamiento, como indicador para planificar." }
+            {
+              "nombre": "Comunidades energéticas",
+              "texto": "Ley de comunidades energéticas: vecinos, comercios y ayuntamientos producen y comparten su propia energía, con apoyo técnico público y una oficina en cada comarca.",
+              "fuente": "https://energy.ec.europa.eu/topics/markets-and-consumers/energy-consumers-and-prosumers/energy-communities_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos, comercios y ayuntamientos que producen su energía"
+                  ],
+                  "indirecto": [
+                    "instaladores locales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las oficinas comarcales",
+                    "comercializadoras que pierden clientes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Autoconsumo compartido a distancia",
+              "texto": "Permitir compartir la energía de una instalación con vecinos en un radio amplio, para que quien no tiene tejado propio también pueda participar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares sin tejado propio",
+                    "titulares de instalaciones con excedentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercializadoras que venden menos energía"
+                  ],
+                  "indirecto": [
+                    "consumidores no participantes que sostienen la red"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mapas de menor impacto",
+              "texto": "Mapas públicos que señalen dónde una planta causa menos daño ambiental, para orientar allí los proyectos y acortar su evaluación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores con una evaluación más corta",
+                    "vecinos de zonas sensibles que quedan protegidas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios fuera de las zonas que dejan de arrendar suelo",
+                    "vecinos de las zonas señaladas, que concentran plantas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Energía desperdiciada medida",
+              "texto": "Medir y publicar, zona a zona, cuánta energía renovable se tira por falta de red o de almacenamiento, como indicador para planificar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "planificadores y promotores que deciden con datos"
+                  ],
+                  "indirecto": [
+                    "consumidores por una red mejor planificada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Solo publica datos que el operador de la red ya tiene: no obliga a nadie a pagar ni quita ingresos, y publicarlos cuesta muy poco."
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Planificar a la vez plantas, red y almacenamiento, con zonas pactadas con los municipios y derecho de cada vecino a producir y compartir.",
           "medidas": [
-            { "nombre": "Zonas de aceleración pactadas", "texto": "Un mapa único hecho con municipios y comunidades autónomas: dentro, permiso rápido; fuera, protección del suelo agrario valioso y del paisaje.", "fuente": "https://energy.ec.europa.eu/topics/renewable-energy/enabling-framework-renewables_en" },
-            { "nombre": "Red construida antes de que haga falta", "texto": "El plan de red se revisa cada dos años con la previsión de demanda y de renovables, se construye por delante de los proyectos y el permiso de conexión caduca si el proyecto no avanza.", "meta": true },
-            { "nombre": "Almacenamiento ligado a lo que se tira", "texto": "Si la energía renovable desperdiciada supera un umbral fijado por ley, se convoca automáticamente una subasta de baterías o bombeo en esa zona." },
-            { "nombre": "Derecho a producir y compartir", "texto": "Autoconsumo colectivo y comunidades energéticas con un solo trámite digital y un plazo máximo de conexión garantizado por ley." },
-            { "nombre": "Vecinos primero", "texto": "Todo proyecto grande ofrece participación a vecinos y ayuntamiento y aporta a un fondo local, con las mismas reglas de la renta rural garantizada." }
+            {
+              "nombre": "Zonas de aceleración pactadas",
+              "texto": "Un mapa único hecho con municipios y comunidades autónomas: dentro, permiso rápido; fuera, protección del suelo agrario valioso y del paisaje.",
+              "fuente": "https://energy.ec.europa.eu/topics/renewable-energy/enabling-framework-renewables_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores dentro de las zonas pactadas",
+                    "agricultores con suelo agrario valioso protegido"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de zonas de aceleración con evaluación más corta",
+                    "propietarios fuera de zona que no pueden arrendar suelo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Red construida antes de que haga falta",
+              "texto": "El plan de red se revisa cada dos años con la previsión de demanda y de renovables, se construye por delante de los proyectos y el permiso de conexión caduca si el proyecto no avanza.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores e industrias que se conectan sin esperar"
+                  ],
+                  "indirecto": [
+                    "consumidores por la menor energía desperdiciada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulares de permisos que caducan sin avanzar",
+                    "consumidores que pagan red que aún no se usa"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Almacenamiento ligado a lo que se tira",
+              "texto": "Si la energía renovable desperdiciada supera un umbral fijado por ley, se convoca automáticamente una subasta de baterías o bombeo en esa zona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores de almacenamiento",
+                    "productores que pierden menos energía"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que financian las subastas"
+                  ],
+                  "indirecto": [
+                    "centrales de gas que cubren las puntas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Derecho a producir y compartir",
+              "texto": "Autoconsumo colectivo y comunidades energéticas con un solo trámite digital y un plazo máximo de conexión garantizado por ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares y comunidades que quieren producir su energía"
+                  ],
+                  "indirecto": [
+                    "instaladores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "distribuidoras obligadas a conectar en plazo"
+                  ],
+                  "indirecto": [
+                    "comercializadoras que venden menos energía"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vecinos primero",
+              "texto": "Todo proyecto grande ofrece participación a vecinos y ayuntamiento y aporta a un fondo local, con las mismas reglas de la renta rural garantizada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos y ayuntamientos cercanos a grandes proyectos"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que comparten beneficios"
+                  ],
+                  "indirecto": [
+                    "consumidores si se traslada el coste"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -339,50 +2451,449 @@
           "nivel": 0,
           "resumen": "Negar el cambio climático, proponer salir de los acuerdos de clima, incumplir los objetivos europeos o no tener plan para reducir.",
           "medidas": [
-            { "nombre": "Negar el problema", "texto": "Negar que el clima esté cambiando por la actividad humana o que haga falta actuar, frente a lo que concluye la ciencia del clima." },
-            { "nombre": "Salir de los acuerdos", "texto": "Proponer abandonar el Acuerdo de París o dejar de cumplir las normas europeas de clima, con riesgo de sanciones y de perder fondos." },
-            { "nombre": "Metas sin medidas", "texto": "Anunciar fechas de neutralidad climática sin decir qué sector reduce, cuánto, cómo ni con qué dinero." }
+            {
+              "nombre": "Negar el problema",
+              "texto": "Negar que el clima esté cambiando por la actividad humana o que haga falta actuar, frente a lo que concluye la ciencia del clima.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores con muchas emisiones que evitan costes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas expuestas a calor, sequía e inundaciones",
+                    "agricultores afectados por sequías"
+                  ],
+                  "indirecto": [
+                    "jóvenes que heredan el daño acumulado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Salir de los acuerdos",
+              "texto": "Proponer abandonar el Acuerdo de París o dejar de cumplir las normas europeas de clima, con riesgo de sanciones y de perder fondos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industrias que dejan de pagar por emitir"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan sanciones y pierden fondos europeos"
+                  ],
+                  "indirecto": [
+                    "exportadores ante aranceles climáticos",
+                    "empresas de energía limpia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Metas sin medidas",
+              "texto": "Anunciar fechas de neutralidad climática sin decir qué sector reduce, cuánto, cómo ni con qué dinero.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "responsables que anuncian sin asumir costes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que no saben a qué atenerse"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que no pueden comprobar el avance"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir los objetivos europeos con un plan nacional que diga qué hace cada sector y unas emisiones medidas y publicadas.",
           "medidas": [
-            { "nombre": "Plan nacional de energía y clima cumplido", "texto": "Aplicar el plan que España presenta a la UE con sus objetivos de emisiones, renovables y eficiencia, y rendir cuentas públicas de su avance." },
-            { "nombre": "Inventario de emisiones público", "texto": "Publicar cada año las emisiones de cada sector con el método oficial europeo, en formato abierto y explicado para no expertos." },
-            { "nombre": "Mercado europeo de emisiones aplicado", "texto": "Aplicar el comercio europeo de derechos de emisión, por el que industria y electricidad pagan cada tonelada de dióxido de carbono, y su ampliación a edificios y transporte." },
-            { "nombre": "Zonas de bajas emisiones con alternativas", "texto": "Ciudades grandes con zonas que limitan los vehículos más contaminantes, acompañadas de transporte público y de ayudas para quien no puede cambiar de coche." }
+            {
+              "nombre": "Plan nacional de energía y clima cumplido",
+              "texto": "Aplicar el plan que España presenta a la UE con sus objetivos de emisiones, renovables y eficiencia, y rendir cuentas públicas de su avance.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que pueden comprobar el avance",
+                    "empresas de energía limpia y eficiencia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores que deben reducir sus emisiones"
+                  ],
+                  "indirecto": [
+                    "consumidores si suben los costes de la transición"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inventario de emisiones público",
+              "texto": "Publicar cada año las emisiones de cada sector con el método oficial europeo, en formato abierto y explicado para no expertos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos, periodistas e investigadores"
+                  ],
+                  "indirecto": [
+                    "empresas que comparan su huella con la de su sector"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "España ya calcula estas cifras para la UE: publicarlas en formato abierto y explicado cuesta muy poco y no quita nada a nadie."
+              }
+            },
+            {
+              "nombre": "Mercado europeo de emisiones aplicado",
+              "texto": "Aplicar el comercio europeo de derechos de emisión, por el que industria y electricidad pagan cada tonelada de dióxido de carbono, y su ampliación a edificios y transporte.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industrias y eléctricas que emiten poco"
+                  ],
+                  "indirecto": [
+                    "vecinos con menos contaminación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "industrias y centrales con muchas emisiones",
+                    "hogares con calefacción fósil y coche de combustión"
+                  ],
+                  "indirecto": [
+                    "consumidores por la subida de precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Zonas de bajas emisiones con alternativas",
+              "texto": "Ciudades grandes con zonas que limitan los vehículos más contaminantes, acompañadas de transporte público y de ayudas para quien no puede cambiar de coche.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de centros urbanos con menos contaminación",
+                    "usuarios del transporte público"
+                  ],
+                  "indirecto": [
+                    "personas con enfermedades respiratorias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de coches antiguos que no pueden cambiarlo",
+                    "pequeños comercios y repartidores con furgoneta antigua"
+                  ],
+                  "indirecto": [
+                    "residentes de las afueras que viajan al centro"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Planes de reducción sector a sector, un presupuesto de carbono que dice cuánto se puede emitir y seguimiento ante el Congreso cada año.",
           "medidas": [
-            { "nombre": "Presupuesto de carbono", "texto": "Fijar cuántas toneladas de gases de efecto invernadero puede emitir el país en cada periodo, repartidas entre transporte, industria, edificios, campo y residuos." },
-            { "nombre": "Hojas de ruta sectoriales", "texto": "Medidas concretas para cada sector: transporte público y coche eléctrico, rehabilitación de edificios, eficiencia industrial y mejor gestión de purines y abonos." },
-            { "nombre": "Seguimiento anual en el Congreso", "texto": "El Gobierno presenta cada año en el Congreso cómo va cada sector frente a su presupuesto de carbono y qué hará si se desvía." },
-            { "nombre": "Menos metano de residuos y purines", "texto": "Recogida separada de los restos orgánicos, biogás a partir de purines y cierre de los vertederos que no captan sus gases." }
+            {
+              "nombre": "Presupuesto de carbono",
+              "texto": "Fijar cuántas toneladas de gases de efecto invernadero puede emitir el país en cada periodo, repartidas entre transporte, industria, edificios, campo y residuos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que necesitan conocer el ritmo de reducción"
+                  ],
+                  "indirecto": [
+                    "personas expuestas al cambio climático"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores con más emisiones y menos alternativas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Hojas de ruta sectoriales",
+              "texto": "Medidas concretas para cada sector: transporte público y coche eléctrico, rehabilitación de edificios, eficiencia industrial y mejor gestión de purines y abonos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios del transporte público",
+                    "propietarios que rehabilitan su vivienda"
+                  ],
+                  "indirecto": [
+                    "empresas de rehabilitación y eficiencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ganaderías intensivas que deben gestionar purines"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian las ayudas",
+                    "vendedores de combustibles fósiles"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Seguimiento anual en el Congreso",
+              "texto": "El Gobierno presenta cada año en el Congreso cómo va cada sector frente a su presupuesto de carbono y qué hará si se desvía.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos y diputados que controlan al Gobierno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es un informe anual ante el Congreso con datos que ya existen: obliga a explicar, sin cargar costes a hogares ni a empresas."
+              }
+            },
+            {
+              "nombre": "Menos metano de residuos y purines",
+              "texto": "Recogida separada de los restos orgánicos, biogás a partir de purines y cierre de los vertederos que no captan sus gases.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de vertederos y granjas con menos olores",
+                    "ganaderos que venden purines para biogás"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "ayuntamientos que pagan la recogida separada",
+                    "titulares de vertederos que cierran"
+                  ],
+                  "indirecto": [
+                    "hogares que pagan más tasa de basura"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Neutralidad climática antes de 2050 con un presupuesto de carbono vinculante, revisado por un comité científico independiente.",
           "medidas": [
-            { "nombre": "Presupuesto de carbono vinculante", "texto": "El presupuesto de carbono se aprueba por ley y obliga a todos los Gobiernos siguientes, no solo al que lo aprueba." },
-            { "nombre": "Comité científico independiente", "texto": "Un comité de expertos con presupuesto propio revisa cada año el avance, propone el siguiente presupuesto y publica sus informes, como el comité británico de cambio climático.", "fuente": "https://www.theccc.org.uk/climate-action/" },
-            { "nombre": "Clima en cada decisión pública", "texto": "Evaluar el efecto en emisiones de cada ley, presupuesto e infraestructura grande antes de aprobarla, y publicar esa evaluación." },
-            { "nombre": "Absorciones medidas con rigor", "texto": "Contar y certificar lo que absorben bosques y suelos con métodos comprobables, sin usarlo para tapar emisiones que se pueden reducir." }
+            {
+              "nombre": "Presupuesto de carbono vinculante",
+              "texto": "El presupuesto de carbono se aprueba por ley y obliga a todos los Gobiernos siguientes, no solo al que lo aprueba.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inversores que necesitan reglas estables"
+                  ],
+                  "indirecto": [
+                    "personas expuestas al cambio climático"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "Gobiernos futuros con menos margen de decisión",
+                    "sectores con muchas emisiones"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Comité científico independiente",
+              "texto": "Un comité de expertos con presupuesto propio revisa cada año el avance, propone el siguiente presupuesto y publica sus informes, como el comité británico de cambio climático.",
+              "fuente": "https://www.theccc.org.uk/climate-action/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos y Congreso con una evaluación independiente"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el comité"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Clima en cada decisión pública",
+              "texto": "Evaluar el efecto en emisiones de cada ley, presupuesto e infraestructura grande antes de aprobarla, y publicar esa evaluación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que conocen el efecto de cada ley"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores de infraestructuras con muchas emisiones"
+                  ],
+                  "indirecto": [
+                    "administraciones con más trámites"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Absorciones medidas con rigor",
+              "texto": "Contar y certificar lo que absorben bosques y suelos con métodos comprobables, sin usarlo para tapar emisiones que se pueden reducir.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios forestales con absorciones certificadas"
+                  ],
+                  "indirecto": [
+                    "compradores de créditos de carbono fiables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que compensaban con absorciones dudosas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un presupuesto de carbono que se corrige solo y un precio al carbono en todos los sectores, devuelto a los hogares a partes iguales.",
           "medidas": [
-            { "nombre": "Presupuestos con doce años de antelación", "texto": "Presupuestos de carbono de cinco años aprobados por ley con doce años de antelación, como en el Reino Unido, y repartidos además por sectores.", "fuente": "https://www.lse.ac.uk/granthaminstitute/explainers/what-is-the-2008-climate-change-act/" },
-            { "nombre": "Corrección automática del desvío", "texto": "Si el comité certifica un desvío, el Gobierno debe llevar al Congreso medidas que lo cierren en un plazo fijo, y no hacerlo se puede reclamar ante los tribunales." },
-            { "nombre": "Precio al carbono devuelto a partes iguales", "texto": "Precio al carbono en calefacción y transporte con devolución íntegra: un pago igual por persona, más ayudas a hogares vulnerables para cambiar de caldera o de coche.", "fuente": "https://www.bafu.admin.ch/en/co2-levy-private-individuals" },
-            { "nombre": "Meta para 2040 revisada cada cinco años", "texto": "El comité revisa cada cinco años la fecha de neutralidad, con una meta para 2040 nunca menos ambiciosa que la europea.", "meta": true, "fuente": "https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2040-climate-target_en" },
-            { "nombre": "Cuentas de emisiones completas", "texto": "Emisiones publicadas cada año por sector y por comunidad autónoma, y también las que generan los productos que importamos." }
+            {
+              "nombre": "Presupuestos con doce años de antelación",
+              "texto": "Presupuestos de carbono de cinco años aprobados por ley con doce años de antelación, como en el Reino Unido, y repartidos además por sectores.",
+              "fuente": "https://www.lse.ac.uk/granthaminstitute/explainers/what-is-the-2008-climate-change-act/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que planifican inversiones a largo plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores con muchas emisiones"
+                  ],
+                  "indirecto": [
+                    "Gobiernos futuros con menos margen de decisión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Corrección automática del desvío",
+              "texto": "Si el comité certifica un desvío, el Gobierno debe llevar al Congreso medidas que lo cierren en un plazo fijo, y no hacerlo se puede reclamar ante los tribunales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que pueden exigir el cumplimiento"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "Gobierno de turno, obligado a corregir el desvío"
+                  ],
+                  "indirecto": [
+                    "sectores a los que se aplican las medidas correctoras"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Precio al carbono devuelto a partes iguales",
+              "texto": "Precio al carbono en calefacción y transporte con devolución íntegra: un pago igual por persona, más ayudas a hogares vulnerables para cambiar de caldera o de coche.",
+              "fuente": "https://www.bafu.admin.ch/en/co2-levy-private-individuals",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de bajo consumo que reciben más de lo que pagan",
+                    "hogares vulnerables con ayuda para cambiar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares con mucho gasto en calefacción o coche",
+                    "residentes rurales sin alternativa al coche"
+                  ],
+                  "indirecto": [
+                    "empresas de transporte por carretera"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Meta para 2040 revisada cada cinco años",
+              "texto": "El comité revisa cada cinco años la fecha de neutralidad, con una meta para 2040 nunca menos ambiciosa que la europea.",
+              "meta": true,
+              "fuente": "https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2040-climate-target_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas de energía limpia"
+                  ],
+                  "indirecto": [
+                    "jóvenes que vivirán el clima de mitad de siglo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores con muchas emisiones"
+                  ],
+                  "indirecto": [
+                    "consumidores por los costes de la transición"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuentas de emisiones completas",
+              "texto": "Emisiones publicadas cada año por sector y por comunidad autónoma, y también las que generan los productos que importamos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos e investigadores"
+                  ],
+                  "indirecto": [
+                    "productores locales que emiten menos que lo importado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Solo publica cifras: calcularlas cuesta poco y no cambia impuestos, precios ni obligaciones de nadie."
+              }
+            }
           ]
         }
       ]

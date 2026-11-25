@@ -51,50 +51,466 @@
           "nivel": 0,
           "resumen": "No tener política comercial, o proponer cerrarse al comercio o saltarse los acuerdos y normas comerciales ya firmados.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice qué mercados abrir, a qué empresas apoyar ni qué posición llevar a Bruselas en los acuerdos comerciales: la política se reduce a reaccionar a cada crisis." },
-            { "nombre": "Cierre por cuenta propia", "texto": "Proponer aranceles o vetos unilaterales, algo que dentro de la UE un Estado no puede decidir solo y que expone a represalias contra lo que España vende fuera." },
-            { "nombre": "Incumplir lo firmado", "texto": "Plantear desobedecer acuerdos comerciales o normas de la Organización Mundial del Comercio ya ratificados, en lugar de renegociarlos por las vías previstas." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice qué mercados abrir, a qué empresas apoyar ni qué posición llevar a Bruselas en los acuerdos comerciales: la política se reduce a reaccionar a cada crisis.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grandes empresas con acceso propio a Bruselas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pymes que quieren exportar"
+                  ],
+                  "indirecto": [
+                    "trabajadores de sectores exportadores"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cierre por cuenta propia",
+              "texto": "Proponer aranceles o vetos unilaterales, algo que dentro de la UE un Estado no puede decidir solo y que expone a represalias contra lo que España vende fuera.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que compiten con productos importados"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esos sectores protegidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que exportan",
+                    "consumidores que compran productos importados"
+                  ],
+                  "indirecto": [
+                    "trabajadores de sectores exportadores",
+                    "hogares de rentas bajas por la subida de precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Incumplir lo firmado",
+              "texto": "Plantear desobedecer acuerdos comerciales o normas de la Organización Mundial del Comercio ya ratificados, en lugar de renegociarlos por las vías previstas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que pierden con los acuerdos vigentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que exportan a países con acuerdo"
+                  ],
+                  "indirecto": [
+                    "trabajadores de empresas exportadoras",
+                    "contribuyentes si llegan sanciones o multas"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Apoyo práctico a las empresas que venden fuera, sobre todo pymes, y cumplimiento leal de los acuerdos comerciales vigentes.",
           "medidas": [
-            { "nombre": "Apoyo a la exportación que se mide", "texto": "Mantener la red de oficinas comerciales en el exterior, el seguro de crédito y la financiación pública para exportar, y publicar cada año cuántas empresas usan cada servicio." },
-            { "nombre": "Sacar partido a los acuerdos vigentes", "texto": "Aplicar los acuerdos comerciales de la UE ya en vigor e informar a cada sector de las rebajas de aranceles que puede usar, con guías y atención específica para pymes." },
-            { "nombre": "Defensa frente a la competencia desleal", "texto": "Pedir a la Comisión Europea medidas contra la venta a precio de saldo o las importaciones subvencionadas cuando un sector español lo sufre, con un expediente documentado." },
-            { "nombre": "Control de inversiones en sectores críticos", "texto": "Revisar antes de autorizarla la compra extranjera de empresas de sectores críticos, como permite la norma europea, con plazos conocidos y apertura en todo lo demás." }
+            {
+              "nombre": "Apoyo a la exportación que se mide",
+              "texto": "Mantener la red de oficinas comerciales en el exterior, el seguro de crédito y la financiación pública para exportar, y publicar cada año cuántas empresas usan cada servicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pymes que venden o quieren vender fuera"
+                  ],
+                  "indirecto": [
+                    "trabajadores de empresas exportadoras",
+                    "proveedores locales de esas empresas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian seguros y oficinas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sacar partido a los acuerdos vigentes",
+              "texto": "Aplicar los acuerdos comerciales de la UE ya en vigor e informar a cada sector de las rebajas de aranceles que puede usar, con guías y atención específica para pymes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pymes que no conocían las rebajas de aranceles"
+                  ],
+                  "indirecto": [
+                    "consumidores con más oferta importada a menor precio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "productores que compiten con importaciones de los socios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Defensa frente a la competencia desleal",
+              "texto": "Pedir a la Comisión Europea medidas contra la venta a precio de saldo o las importaciones subvencionadas cuando un sector español lo sufre, con un expediente documentado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que sufren importaciones a precio de saldo"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esos sectores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "exportadores extranjeros subvencionados"
+                  ],
+                  "indirecto": [
+                    "empresas que usan esos productos como materia prima",
+                    "consumidores que pagan algo más"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Control de inversiones en sectores críticos",
+              "texto": "Revisar antes de autorizarla la compra extranjera de empresas de sectores críticos, como permite la norma europea, con plazos conocidos y apertura en todo lo demás.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de servicios críticos como energía o telecomunicaciones"
+                  ],
+                  "indirecto": [
+                    "empresas españolas de sectores estratégicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inversores extranjeros en sectores críticos"
+                  ],
+                  "indirecto": [
+                    "accionistas que quieren vender empresas de sectores críticos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Acuerdos con cláusulas sociales y ambientales cuya posición se debate antes, ventanilla única para pymes y ayuda a quien pierde con la apertura.",
           "medidas": [
-            { "nombre": "Cláusulas laborales y ambientales", "texto": "Defender en el Consejo de la UE que cada acuerdo incluya capítulos de derechos laborales básicos y clima, seguidos por un comité con empresas, sindicatos y organizaciones sociales." },
-            { "nombre": "Posición debatida antes de votar en Bruselas", "texto": "El Gobierno presenta en la comisión del Congreso su posición sobre cada gran acuerdo antes de votarlo en el Consejo de la UE, con un estudio de impacto por sectores y regiones." },
-            { "nombre": "Ventanilla única para pymes que exportan", "texto": "Un solo punto, estatal y coordinado con las comunidades, que reúne información, financiación, seguros y ferias para la pyme que quiere vender fuera, con encuestas de satisfacción públicas." },
-            { "nombre": "Ayuda a los sectores que pierden", "texto": "Planes de formación, reconversión e inversión para los sectores y comarcas que salen perdiendo con un acuerdo, apoyados también en el fondo europeo de adaptación a la globalización." }
+            {
+              "nombre": "Cláusulas laborales y ambientales",
+              "texto": "Defender en el Consejo de la UE que cada acuerdo incluya capítulos de derechos laborales básicos y clima, seguidos por un comité con empresas, sindicatos y organizaciones sociales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de países socios con pocos derechos",
+                    "sindicatos y organizaciones que vigilan los acuerdos"
+                  ],
+                  "indirecto": [
+                    "empresas europeas que ya cumplen esas normas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que producen fuera con costes laborales bajos"
+                  ],
+                  "indirecto": [
+                    "consumidores si suben los precios de lo importado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Posición debatida antes de votar en Bruselas",
+              "texto": "El Gobierno presenta en la comisión del Congreso su posición sobre cada gran acuerdo antes de votarlo en el Consejo de la UE, con un estudio de impacto por sectores y regiones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados y grupos del Congreso"
+                  ],
+                  "indirecto": [
+                    "sectores y regiones afectados por un acuerdo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde margen y rapidez para negociar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ventanilla única para pymes que exportan",
+              "texto": "Un solo punto, estatal y coordinado con las comunidades, que reúne información, financiación, seguros y ferias para la pyme que quiere vender fuera, con encuestas de satisfacción públicas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pymes que quieren vender fuera"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esas pymes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el servicio"
+                  ],
+                  "indirecto": [
+                    "consultoras privadas de internacionalización"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda a los sectores que pierden",
+              "texto": "Planes de formación, reconversión e inversión para los sectores y comarcas que salen perdiendo con un acuerdo, apoyados también en el fondo europeo de adaptación a la globalización.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de sectores dañados por la apertura",
+                    "comarcas que dependen de esos sectores"
+                  ],
+                  "indirecto": [
+                    "comercio local de esas comarcas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los planes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Peso real en Europa, Iberoamérica y el Mediterráneo: diplomacia económica coordinada, menos dependencias críticas y cultura como activo.",
           "medidas": [
-            { "nombre": "Un solo plan por país", "texto": "En cada país prioritario, la embajada, la oficina comercial, el Instituto Cervantes y las oficinas de las comunidades trabajan con un plan común y objetivos compartidos." },
-            { "nombre": "Mapa público de dependencias críticas", "texto": "Identificar de qué proveedores depende el país en medicamentos, chips, materias primas y energía, y diversificarlos con proyectos europeos, sin cerrar el mercado al resto." },
-            { "nombre": "Iberoamérica y el Mediterráneo como prioridad", "texto": "Acuerdos de inversión, cooperación técnica y movilidad de estudiantes y profesionales con Iberoamérica y el norte de África, impulsados desde la UE y con seguimiento anual." },
-            { "nombre": "El español y la cultura como activo", "texto": "Financiación estable del Instituto Cervantes y de la acción cultural exterior, ligada a objetivos de alumnos, centros y audiencias que se publican cada año." }
+            {
+              "nombre": "Un solo plan por país",
+              "texto": "En cada país prioritario, la embajada, la oficina comercial, el Instituto Cervantes y las oficinas de las comunidades trabajan con un plan común y objetivos compartidos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que buscan entrar en países prioritarios"
+                  ],
+                  "indirecto": [
+                    "trabajadores de empresas exportadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que pierden autonomía en su promoción exterior"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Mapa público de dependencias críticas",
+              "texto": "Identificar de qué proveedores depende el país en medicamentos, chips, materias primas y energía, y diversificarlos con proyectos europeos, sin cerrar el mercado al resto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que dependen de medicamentos importados",
+                    "industrias que usan chips y materias primas importadas"
+                  ],
+                  "indirecto": [
+                    "hogares expuestos a cortes de suministro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "proveedores dominantes de fuera de Europa"
+                  ],
+                  "indirecto": [
+                    "consumidores si diversificar encarece algunos productos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Iberoamérica y el Mediterráneo como prioridad",
+              "texto": "Acuerdos de inversión, cooperación técnica y movilidad de estudiantes y profesionales con Iberoamérica y el norte de África, impulsados desde la UE y con seguimiento anual.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas con negocio en Iberoamérica y el norte de África",
+                    "estudiantes y profesionales que se desplazan"
+                  ],
+                  "indirecto": [
+                    "universidades que reciben estudiantes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la cooperación técnica"
+                  ],
+                  "indirecto": [
+                    "empresas centradas en otros mercados, con menos apoyo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "El español y la cultura como activo",
+              "texto": "Financiación estable del Instituto Cervantes y de la acción cultural exterior, ligada a objetivos de alumnos, centros y audiencias que se publican cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes de español en el extranjero",
+                    "creadores y editores culturales"
+                  ],
+                  "indirecto": [
+                    "sector turístico y editorial"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la acción cultural exterior"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Mercado abierto con reglas exigibles e iguales para lo importado y lo producido aquí, y una estrategia de influencia votada y medida.",
           "medidas": [
-            { "nombre": "Cláusulas que se pueden hacer cumplir", "texto": "Apoyar en la UE solo acuerdos cuyo capítulo de sostenibilidad permita, como último recurso, suspender rebajas de aranceles si el socio incumple el Acuerdo de París o los derechos laborales básicos." },
-            { "nombre": "Cláusulas espejo", "texto": "Exigir al producto importado las mismas normas sanitarias, ambientales y de bienestar animal que al europeo, con controles en frontera y salvaguardias automáticas para el campo." },
-            { "nombre": "Preferencia europea solo en lo estratégico", "texto": "Mínimo de componentes europeos en defensa, energía y tecnologías críticas, como ya exige el programa europeo de industria de defensa, y mercado abierto en todo lo demás." },
-            { "nombre": "Canal de denuncias con plazo de respuesta", "texto": "Empresas, sindicatos y organizaciones pueden denunciar que un socio incumple un acuerdo; el Gobierno responde en un plazo fijo y, si hay base, lleva el caso a la Comisión Europea." },
-            { "nombre": "Estrategia de influencia votada y coherente", "texto": "Plan a diez años para el español y la cultura votado en el Congreso con metas medibles, e informe anual que cruza qué se exporta y con qué apoyo público con los criterios de derechos humanos." }
+            {
+              "nombre": "Cláusulas que se pueden hacer cumplir",
+              "texto": "Apoyar en la UE solo acuerdos cuyo capítulo de sostenibilidad permita, como último recurso, suspender rebajas de aranceles si el socio incumple el Acuerdo de París o los derechos laborales básicos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de países socios con pocos derechos"
+                  ],
+                  "indirecto": [
+                    "empresas europeas que cumplen normas exigentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "exportadores de países que incumplen lo pactado"
+                  ],
+                  "indirecto": [
+                    "empresas españolas con negocio en esos países"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cláusulas espejo",
+              "texto": "Exigir al producto importado las mismas normas sanitarias, ambientales y de bienestar animal que al europeo, con controles en frontera y salvaguardias automáticas para el campo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agricultores y ganaderos europeos",
+                    "consumidores que quieren garantías sanitarias"
+                  ],
+                  "indirecto": [
+                    "comarcas rurales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "productores de fuera que no cumplen las normas europeas"
+                  ],
+                  "indirecto": [
+                    "consumidores que pagan más por alimentos importados",
+                    "empresas que importan alimentos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Preferencia europea solo en lo estratégico",
+              "texto": "Mínimo de componentes europeos en defensa, energía y tecnologías críticas, como ya exige el programa europeo de industria de defensa, y mercado abierto en todo lo demás.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industria europea de defensa, energía y tecnología"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esa industria"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "proveedores de fuera de Europa"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si el producto europeo sale más caro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Canal de denuncias con plazo de respuesta",
+              "texto": "Empresas, sindicatos y organizaciones pueden denunciar que un socio incumple un acuerdo; el Gobierno responde en un plazo fijo y, si hay base, lleva el caso a la Comisión Europea.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas, sindicatos y organizaciones que detectan incumplimientos"
+                  ],
+                  "indirecto": [
+                    "trabajadores perjudicados por el incumplimiento de un socio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "socios comerciales que incumplen lo pactado"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la tramitación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Estrategia de influencia votada y coherente",
+              "texto": "Plan a diez años para el español y la cultura votado en el Congreso con metas medibles, e informe anual que cruza qué se exporta y con qué apoyo público con los criterios de derechos humanos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sector cultural y de enseñanza del español"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que quieren comprobar la coherencia exterior"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que exportan a países con problemas de derechos"
+                  ],
+                  "indirecto": [
+                    "gobierno de turno, que pierde margen para cambiar el plan"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -107,49 +523,433 @@
           "nivel": 0,
           "resumen": "Sin propuesta de defensa, o proponer desmantelar las fuerzas armadas, incumplir lo firmado con los aliados o usarlas fuera de la ley.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice qué amenazas hay que cubrir, con qué medios ni con qué dinero: la defensa queda a la inercia del presupuesto de cada año." },
-            { "nombre": "Promesas sin financiar", "texto": "Comprometer ante los aliados un nivel de gasto o de capacidades sin decir de dónde sale el dinero ni incluirlo en los presupuestos." },
-            { "nombre": "Fuerzas armadas fuera de la ley", "texto": "Plantear desmantelarlas, abandonar las alianzas firmadas sin el procedimiento previsto o enviarlas a misiones sin la autorización del Congreso que exige la ley." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice qué amenazas hay que cubrir, con qué medios ni con qué dinero: la defensa queda a la inercia del presupuesto de cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "proveedores habituales que cobran por inercia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "militares con material sin mantener ni renovar"
+                  ],
+                  "indirecto": [
+                    "población peor protegida ante una crisis"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Promesas sin financiar",
+              "texto": "Comprometer ante los aliados un nivel de gasto o de capacidades sin decir de dónde sale el dinero ni incluirlo en los presupuestos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobierno de turno, que queda bien ante los aliados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagarán después con deuda",
+                    "militares a quienes se prometen medios que no llegan"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios recortados para cubrir el agujero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fuerzas armadas fuera de la ley",
+              "texto": "Plantear desmantelarlas, abandonar las alianzas firmadas sin el procedimiento previsto o enviarlas a misiones sin la autorización del Congreso que exige la ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, por el ahorro a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "militares y personal civil de defensa",
+                    "población expuesta ante una amenaza real"
+                  ],
+                  "indirecto": [
+                    "aliados que contaban con España",
+                    "industria de defensa y sus trabajadores"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Fuerzas armadas con personal, material y entrenamiento suficientes para sus misiones, autorizadas por el Congreso y fieles a lo firmado.",
           "medidas": [
-            { "nombre": "Plantillas cubiertas y personal que se queda", "texto": "Cubrir las plazas de tropa y marinería con sueldos y carrera que retengan al personal, y publicar cada año cuántas plazas quedan vacantes en cada ejército." },
-            { "nombre": "Mantener antes que comprar", "texto": "Dar prioridad al mantenimiento, los repuestos, la munición y el entrenamiento sobre las compras nuevas, para que el material que ya existe esté listo para usarse." },
-            { "nombre": "Misiones autorizadas por el Congreso", "texto": "Cumplir la Ley Orgánica de la Defensa Nacional: las misiones en el exterior que no son de defensa directa de España necesitan consulta y autorización previa del Congreso." },
-            { "nombre": "Compromisos con los aliados cumplidos", "texto": "Aportar las fuerzas y las contribuciones acordadas en la OTAN y en la UE, y explicar en el Congreso cada nuevo compromiso antes de firmarlo." }
+            {
+              "nombre": "Plantillas cubiertas y personal que se queda",
+              "texto": "Cubrir las plazas de tropa y marinería con sueldos y carrera que retengan al personal, y publicar cada año cuántas plazas quedan vacantes en cada ejército.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "soldados y marineros de tropa"
+                  ],
+                  "indirecto": [
+                    "comarcas con bases militares"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan sueldos más altos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Mantener antes que comprar",
+              "texto": "Dar prioridad al mantenimiento, los repuestos, la munición y el entrenamiento sobre las compras nuevas, para que el material que ya existe esté listo para usarse.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "unidades que usan el material a diario"
+                  ],
+                  "indirecto": [
+                    "talleres y empresas de mantenimiento"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "fabricantes que venden sistemas nuevos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Misiones autorizadas por el Congreso",
+              "texto": "Cumplir la Ley Orgánica de la Defensa Nacional: las misiones en el exterior que no son de defensa directa de España necesitan consulta y autorización previa del Congreso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "militares enviados al exterior",
+                    "diputados que controlan al Gobierno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde rapidez de decisión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Compromisos con los aliados cumplidos",
+              "texto": "Aportar las fuerzas y las contribuciones acordadas en la OTAN y en la UE, y explicar en el Congreso cada nuevo compromiso antes de firmarlo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "aliados de la OTAN y la UE"
+                  ],
+                  "indirecto": [
+                    "población protegida por la defensa colectiva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las contribuciones"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas que compiten por el mismo dinero"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Una ley de programación de la defensa a varios años, debatida en el Congreso, que incluye ciberdefensa, industria y el futuro del personal.",
           "medidas": [
-            { "nombre": "Ley de programación a varios años", "texto": "Fijar por ley las capacidades que se quieren y su calendario de pago, para que los grandes programas figuren en el presupuesto desde el principio y no se paguen con créditos añadidos a mitad de año." },
-            { "nombre": "Ciberdefensa y amenazas nuevas", "texto": "Incluir en la programación la ciberdefensa, la protección de infraestructuras críticas y la respuesta a la desinformación, coordinadas entre Defensa, Interior y las comunidades." },
-            { "nombre": "Industria de defensa en red europea", "texto": "Apoyar a la industria española para que entre en programas europeos, con contratos publicados, control de conflictos de interés y evaluación de lo que aporta en empleo y tecnología." },
-            { "nombre": "Salida laboral tras el servicio", "texto": "Formación y títulos reconocidos para que quien deja las fuerzas armadas acceda a empleo público o privado, con seguimiento público de cuántos lo consiguen." }
+            {
+              "nombre": "Ley de programación a varios años",
+              "texto": "Fijar por ley las capacidades que se quieren y su calendario de pago, para que los grandes programas figuren en el presupuesto desde el principio y no se paguen con créditos añadidos a mitad de año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fuerzas armadas, con dinero previsible",
+                    "industria con contratos a varios años"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos sobrecostes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos futuros, que heredan compromisos de gasto"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios que compiten por el mismo presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ciberdefensa y amenazas nuevas",
+              "texto": "Incluir en la programación la ciberdefensa, la protección de infraestructuras críticas y la respuesta a la desinformación, coordinadas entre Defensa, Interior y las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas y servicios de infraestructuras críticas",
+                    "ciudadanos expuestos a ciberataques y bulos"
+                  ],
+                  "indirecto": [
+                    "empresas de ciberseguridad"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los medios"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Industria de defensa en red europea",
+              "texto": "Apoyar a la industria española para que entre en programas europeos, con contratos publicados, control de conflictos de interés y evaluación de lo que aporta en empleo y tecnología.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas españolas de defensa",
+                    "trabajadores e ingenieros de esa industria"
+                  ],
+                  "indirecto": [
+                    "proveedores y comarcas industriales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el apoyo"
+                  ],
+                  "indirecto": [
+                    "empresas que ganaban contratos sin competencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Salida laboral tras el servicio",
+              "texto": "Formación y títulos reconocidos para que quien deja las fuerzas armadas acceda a empleo público o privado, con seguimiento público de cuántos lo consiguen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "militares que dejan las fuerzas armadas"
+                  ],
+                  "indirecto": [
+                    "empleadores que buscan personal formado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la formación"
+                  ],
+                  "indirecto": [
+                    "otros aspirantes a empleo público"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Defensa suficiente y europea: necesidades pactadas a largo plazo entre los grandes grupos, proyectos conjuntos y control parlamentario real.",
           "medidas": [
-            { "nombre": "Mesa permanente con todos los grupos", "texto": "Una mesa de defensa con todos los grupos parlamentarios prepara la ley de programación y sus revisiones antes de que el Gobierno las presente, para que sobrevivan a los cambios de gobierno." },
-            { "nombre": "Proyectos europeos que cubren carencias", "texto": "Entrar en los proyectos de la cooperación permanente entre ejércitos europeos y en el Fondo Europeo de Defensa cuando cubren carencias propias y abaratan frente a hacerlo solos." },
-            { "nombre": "Informe anual de cada programa", "texto": "Informe anual con los sobrecostes y retrasos de cada gran programa, revisado por el Tribunal de Cuentas y debatido en el Congreso antes de los presupuestos." },
-            { "nombre": "Comisión con acceso y medios", "texto": "La comisión de defensa del Congreso accede a información reservada de programas y operaciones y tiene personal técnico propio para analizarla." }
+            {
+              "nombre": "Mesa permanente con todos los grupos",
+              "texto": "Una mesa de defensa con todos los grupos parlamentarios prepara la ley de programación y sus revisiones antes de que el Gobierno las presente, para que sobrevivan a los cambios de gobierno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grupos parlamentarios de la oposición"
+                  ],
+                  "indirecto": [
+                    "fuerzas armadas con planes estables",
+                    "industria con contratos estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde margen para decidir solo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Proyectos europeos que cubren carencias",
+              "texto": "Entrar en los proyectos de la cooperación permanente entre ejércitos europeos y en el Fondo Europeo de Defensa cuando cubren carencias propias y abaratan frente a hacerlo solos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fuerzas armadas con carencias cubiertas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por compras más baratas",
+                    "industria española que participa en los proyectos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "fabricantes nacionales que pierden contratos exclusivos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Informe anual de cada programa",
+              "texto": "Informe anual con los sobrecostes y retrasos de cada gran programa, revisado por el Tribunal de Cuentas y debatido en el Congreso antes de los presupuestos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que pagan los programas",
+                    "diputados que controlan el gasto"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contratistas con sobrecostes y retrasos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Comisión con acceso y medios",
+              "texto": "La comisión de defensa del Congreso accede a información reservada de programas y operaciones y tiene personal técnico propio para analizarla.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados de la comisión de defensa"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que quieren control del gasto militar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que deja de tener la información en exclusiva"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el personal técnico"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una ley de defensa a diez años con mayoría reforzada, gasto ligado a capacidades comprobables, compra europea por defecto y voto de cada gran contrato.",
           "medidas": [
-            { "nombre": "Ley a diez años con mayoría reforzada", "texto": "Ley de programación a diez años, precedida de una revisión estratégica pública, aprobada por mayoría reforzada del Congreso y actualizada obligatoriamente a mitad de periodo.", "meta": true },
-            { "nombre": "Gasto ligado a capacidades", "texto": "Cada partida responde a un objetivo pactado con la OTAN y la UE, con indicadores públicos de disponibilidad, personal y munición, y no solo a un porcentaje del PIB." },
-            { "nombre": "Voto previo de cada gran contrato", "texto": "La comisión del Congreso aprueba cada contrato de armamento por encima de un umbral fijado en la ley, con trámite de urgencia y sesiones reservadas, como ya se hace en Alemania." },
-            { "nombre": "Compra conjunta europea por defecto", "texto": "Comprar solos o fuera de Europa exige justificar por escrito el plazo o el precio; los grandes programas llevan un mínimo de componentes europeos." }
+            {
+              "nombre": "Ley a diez años con mayoría reforzada",
+              "texto": "Ley de programación a diez años, precedida de una revisión estratégica pública, aprobada por mayoría reforzada del Congreso y actualizada obligatoriamente a mitad de periodo.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fuerzas armadas, con planes estables"
+                  ],
+                  "indirecto": [
+                    "industria con horizonte de contratos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos futuros con menos margen presupuestario"
+                  ],
+                  "indirecto": [
+                    "mayorías futuras que no podrán cambiar el plan solas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gasto ligado a capacidades",
+              "texto": "Cada partida responde a un objetivo pactado con la OTAN y la UE, con indicadores públicos de disponibilidad, personal y munición, y no solo a un porcentaje del PIB.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que pagan el gasto militar"
+                  ],
+                  "indirecto": [
+                    "población mejor protegida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contratistas de programas sin capacidad medible"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Voto previo de cada gran contrato",
+              "texto": "La comisión del Congreso aprueba cada contrato de armamento por encima de un umbral fijado en la ley, con trámite de urgencia y sesiones reservadas, como ya se hace en Alemania.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados que controlan el gasto"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan los contratos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde rapidez"
+                  ],
+                  "indirecto": [
+                    "fuerzas armadas si el trámite retrasa compras"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Compra conjunta europea por defecto",
+              "texto": "Comprar solos o fuera de Europa exige justificar por escrito el plazo o el precio; los grandes programas llevan un mínimo de componentes europeos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "industria europea de defensa"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por compras en mayor volumen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "proveedores de fuera de Europa"
+                  ],
+                  "indirecto": [
+                    "fuerzas armadas si el producto europeo tarda más"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -162,49 +962,427 @@
           "nivel": 0,
           "resumen": "Renunciar a defender el territorio y los intereses del país, o defenderlos saltándose el derecho internacional, los tratados o el Parlamento.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice qué intereses defiende ni cómo: cada crisis con un vecino se improvisa y la posición depende de quién gobierne ese día." },
-            { "nombre": "Giros sin explicar", "texto": "Cambiar posiciones de Estado sobre territorio, fronteras o pesca sin pasar por el Congreso ni explicar qué se obtiene a cambio." },
-            { "nombre": "Defensa fuera de la ley", "texto": "Proponer acciones unilaterales que violan tratados o el derecho internacional, lo que debilita a un país mediano en los tribunales y foros donde se resuelven sus disputas." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice qué intereses defiende ni cómo: cada crisis con un vecino se improvisa y la posición depende de quién gobierne ese día.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobiernos vecinos que aprovechan la improvisación"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pescadores y agricultores afectados por cada crisis"
+                  ],
+                  "indirecto": [
+                    "habitantes de Ceuta y Melilla"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Giros sin explicar",
+              "texto": "Cambiar posiciones de Estado sobre territorio, fronteras o pesca sin pasar por el Congreso ni explicar qué se obtiene a cambio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobierno de turno, que decide sin control"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "ciudadanos y sectores afectados por el cambio"
+                  ],
+                  "indirecto": [
+                    "empresas que necesitan una política exterior estable"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Defensa fuera de la ley",
+              "texto": "Proponer acciones unilaterales que violan tratados o el derecho internacional, lo que debilita a un país mediano en los tribunales y foros donde se resuelven sus disputas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobierno de turno, por el efecto inmediato ante la opinión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "ciudadanos cuyos intereses se resuelven en tribunales internacionales"
+                  ],
+                  "indirecto": [
+                    "empresas con negocio en el país afectado"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Defender con medios y dentro de la ley el territorio, las fronteras, Ceuta y Melilla, Gibraltar, la pesca y a los españoles en el exterior.",
           "medidas": [
-            { "nombre": "Fronteras con medios", "texto": "Personal, tecnología y coordinación entre Policía, Guardia Civil y la agencia europea de fronteras en Ceuta, Melilla y Canarias, con datos públicos de los medios desplegados." },
-            { "nombre": "Ceuta y Melilla con servicios e inversión", "texto": "Plan de inversión y servicios públicos para Ceuta y Melilla, y defensa en cada foro internacional de su pertenencia a España y a la UE." },
-            { "nombre": "Pesca defendida con datos", "texto": "Negociar en la UE cuotas y acuerdos de pesca con otros países apoyados en datos científicos, y ayudar a la flota cuando un acuerdo se suspende." },
-            { "nombre": "Gibraltar por la vía negociada", "texto": "Defender la posición española sobre Gibraltar en la ONU y en las negociaciones entre la UE y el Reino Unido, protegiendo el empleo de quien cruza a trabajar cada día." },
-            { "nombre": "Españoles en el exterior protegidos", "texto": "Consulados con personal suficiente, citas en plazo razonable y un servicio de emergencias consulares que actúa en catástrofes, detenciones y evacuaciones." }
+            {
+              "nombre": "Fronteras con medios",
+              "texto": "Personal, tecnología y coordinación entre Policía, Guardia Civil y la agencia europea de fronteras en Ceuta, Melilla y Canarias, con datos públicos de los medios desplegados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agentes de Policía y Guardia Civil en frontera",
+                    "habitantes de Ceuta, Melilla y Canarias"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "redes de tráfico de personas",
+                    "personas que intentan entrar de forma irregular"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian los medios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ceuta y Melilla con servicios e inversión",
+              "texto": "Plan de inversión y servicios públicos para Ceuta y Melilla, y defensa en cada foro internacional de su pertenencia a España y a la UE.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "habitantes de Ceuta y Melilla"
+                  ],
+                  "indirecto": [
+                    "empresas y comercio de las dos ciudades"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el plan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Pesca defendida con datos",
+              "texto": "Negociar en la UE cuotas y acuerdos de pesca con otros países apoyados en datos científicos, y ayudar a la flota cuando un acuerdo se suspende.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "flota pesquera y sus tripulaciones"
+                  ],
+                  "indirecto": [
+                    "puertos y conserveras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pescadores que capturan por encima de lo sostenible"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las ayudas a la flota"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gibraltar por la vía negociada",
+              "texto": "Defender la posición española sobre Gibraltar en la ONU y en las negociaciones entre la UE y el Reino Unido, protegiendo el empleo de quien cruza a trabajar cada día.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que cruzan a Gibraltar cada día"
+                  ],
+                  "indirecto": [
+                    "comercio del Campo de Gibraltar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "sectores que pierden con las concesiones de un acuerdo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Españoles en el exterior protegidos",
+              "texto": "Consulados con personal suficiente, citas en plazo razonable y un servicio de emergencias consulares que actúa en catástrofes, detenciones y evacuaciones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "españoles que viven o viajan fuera"
+                  ],
+                  "indirecto": [
+                    "familias en España de esos españoles"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los consulados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Las decisiones sobre Marruecos, el Sáhara, Gibraltar, fronteras y pesca se explican en el Congreso y se apoyan en acuerdos escritos.",
           "medidas": [
-            { "nombre": "Explicar antes de decidir", "texto": "El Gobierno comparece en el Congreso antes de cambiar la posición sobre Marruecos, el Sáhara Occidental o Gibraltar, y publica qué se acuerda y qué se obtiene a cambio." },
-            { "nombre": "Acuerdos escritos con Marruecos", "texto": "Acuerdos con Marruecos sobre migración, pesca, comercio y pasos fronterizos de Ceuta y Melilla, escritos y públicos, que no dependan de la sintonía entre dos gobiernos." },
-            { "nombre": "Sáhara Occidental dentro de la ONU", "texto": "Apoyar una solución política negociada en el marco de las resoluciones del Consejo de Seguridad de la ONU, y dar cuenta al Congreso de cada paso." },
-            { "nombre": "Defensa jurídica permanente", "texto": "Un equipo estable de derecho internacional en el Ministerio de Exteriores que prepara la defensa de los intereses del país en tratados, tribunales y organismos internacionales." }
+            {
+              "nombre": "Explicar antes de decidir",
+              "texto": "El Gobierno comparece en el Congreso antes de cambiar la posición sobre Marruecos, el Sáhara Occidental o Gibraltar, y publica qué se acuerda y qué se obtiene a cambio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados que controlan al Gobierno"
+                  ],
+                  "indirecto": [
+                    "sectores afectados por la relación con Marruecos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde margen y discreción"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Acuerdos escritos con Marruecos",
+              "texto": "Acuerdos con Marruecos sobre migración, pesca, comercio y pasos fronterizos de Ceuta y Melilla, escritos y públicos, que no dependan de la sintonía entre dos gobiernos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pescadores, exportadores y transportistas del Estrecho",
+                    "habitantes de Ceuta y Melilla"
+                  ],
+                  "indirecto": [
+                    "trabajadores transfronterizos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que se ata a lo firmado"
+                  ],
+                  "indirecto": [
+                    "agricultores que compiten con productos marroquíes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sáhara Occidental dentro de la ONU",
+              "texto": "Apoyar una solución política negociada en el marco de las resoluciones del Consejo de Seguridad de la ONU, y dar cuenta al Congreso de cada paso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "población saharaui de los campamentos y del territorio"
+                  ],
+                  "indirecto": [
+                    "españoles con vínculos familiares en el Sáhara"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "partes que buscan imponer una solución de hecho"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Defensa jurídica permanente",
+              "texto": "Un equipo estable de derecho internacional en el Ministerio de Exteriores que prepara la defensa de los intereses del país en tratados, tribunales y organismos internacionales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pescadores y empresas con disputas internacionales"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos arbitrajes perdidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "despachos externos que hoy reciben esos encargos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el equipo estable"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes grupos y con indicadores, que no cambia con cada gobierno.",
           "medidas": [
-            { "nombre": "Lista escrita de intereses permanentes", "texto": "Integridad territorial, Ceuta y Melilla, Gibraltar, fronteras, pesca, campo, Mediterráneo e Iberoamérica, cada uno con objetivos e indicadores que se revisan." },
-            { "nombre": "Pacto entre los grandes grupos", "texto": "Acuerdo escrito entre los grandes grupos sobre los intereses permanentes y las líneas que ningún gobierno cruza, revisado al empezar cada legislatura." },
-            { "nombre": "Informe por legislatura con todos los grupos", "texto": "El Gobierno presenta al Parlamento un informe de política exterior por legislatura, preparado con un grupo de seguimiento de todos los partidos, como hace Finlandia." }
+            {
+              "nombre": "Lista escrita de intereses permanentes",
+              "texto": "Integridad territorial, Ceuta y Melilla, Gibraltar, fronteras, pesca, campo, Mediterráneo e Iberoamérica, cada uno con objetivos e indicadores que se revisan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores con intereses en el exterior, como pesca y campo"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que pueden comprobar resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde margen para improvisar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Pacto entre los grandes grupos",
+              "texto": "Acuerdo escrito entre los grandes grupos sobre los intereses permanentes y las líneas que ningún gobierno cruza, revisado al empezar cada legislatura.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que necesitan una política exterior estable"
+                  ],
+                  "indirecto": [
+                    "empresas con inversiones a largo plazo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "grupos parlamentarios pequeños que no entran en el pacto"
+                  ],
+                  "indirecto": [
+                    "votantes que quieren un cambio de rumbo exterior"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe por legislatura con todos los grupos",
+              "texto": "El Gobierno presenta al Parlamento un informe de política exterior por legislatura, preparado con un grupo de seguimiento de todos los partidos, como hace Finlandia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grupos parlamentarios, incluidos los pequeños"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que siguen la política exterior"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que dedica medios a rendir cuentas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Estrategia de intereses permanentes votada por mayoría reforzada, con consulta previa a todos los grupos y ningún giro sin voto, dentro del derecho internacional.",
           "medidas": [
-            { "nombre": "Estrategia votada, no solo comunicada", "texto": "Reformar la ley de acción exterior para que el Congreso vote por mayoría reforzada la Estrategia de Acción Exterior, que hoy aprueba el Gobierno y las Cortes solo debaten." },
-            { "nombre": "Comisión reservada de consulta previa", "texto": "Una comisión con todos los grupos, bajo secreto, a la que el Gobierno consulta antes de toda decisión exterior de gran importancia y de fijar un mandato de negociación." },
-            { "nombre": "Ningún giro sin debate y voto", "texto": "Cambiar la posición sobre un interés permanente exige debate y voto en el Congreso antes de comunicarlo a otro Estado; sin reforma constitucional obliga políticamente, no jurídicamente." },
-            { "nombre": "Rendición de cuentas anual con indicadores", "texto": "El ministro rinde cuentas cada año ante las Cortes de cada interés permanente con sus indicadores, y la comisión publica su propia valoración." }
+            {
+              "nombre": "Estrategia votada, no solo comunicada",
+              "texto": "Reformar la ley de acción exterior para que el Congreso vote por mayoría reforzada la Estrategia de Acción Exterior, que hoy aprueba el Gobierno y las Cortes solo debaten.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados de todos los grupos"
+                  ],
+                  "indirecto": [
+                    "sectores que necesitan estabilidad exterior"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que deja de aprobarla en solitario"
+                  ],
+                  "indirecto": [
+                    "mayorías simples que no podrán cambiarla"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comisión reservada de consulta previa",
+              "texto": "Una comisión con todos los grupos, bajo secreto, a la que el Gobierno consulta antes de toda decisión exterior de gran importancia y de fijar un mandato de negociación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grupos parlamentarios de la oposición"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que quieren control de la política exterior"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde discreción"
+                  ],
+                  "indirecto": [
+                    "negociadores, por el riesgo de filtraciones"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ningún giro sin debate y voto",
+              "texto": "Cambiar la posición sobre un interés permanente exige debate y voto en el Congreso antes de comunicarlo a otro Estado; sin reforma constitucional obliga políticamente, no jurídicamente.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados que controlan al Gobierno"
+                  ],
+                  "indirecto": [
+                    "sectores afectados por los giros exteriores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde rapidez"
+                  ],
+                  "indirecto": [
+                    "negociadores que necesitan discreción y rapidez"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Rendición de cuentas anual con indicadores",
+              "texto": "El ministro rinde cuentas cada año ante las Cortes de cada interés permanente con sus indicadores, y la comisión publica su propia valoración.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados de la comisión de exteriores"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que siguen la política exterior"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ministro de turno, expuesto a una valoración pública"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -217,49 +1395,429 @@
           "nivel": 0,
           "resumen": "No tener posición sobre Europa, o proponer desobedecer sus normas y sentencias mientras se siguen recibiendo sus fondos.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice qué quiere España de la UE ni qué posición lleva a cada Consejo: se acepta o se rechaza lo que proponen otros." },
-            { "nombre": "Fondos sí, normas no", "texto": "Proponer incumplir directivas o sentencias del Tribunal de Justicia de la UE mientras se siguen cobrando sus fondos, lo que expone a multas y a recortes de esos mismos fondos." },
-            { "nombre": "Romper sin contar el coste", "texto": "Plantear salir de la UE o del euro sin explicar qué pasaría con el comercio, la moneda, la libre circulación de personas y los fondos europeos." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice qué quiere España de la UE ni qué posición lleva a cada Consejo: se acepta o se rechaza lo que proponen otros.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "países que imponen su agenda en el Consejo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores españoles afectados por las normas europeas"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que dependen de fondos europeos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fondos sí, normas no",
+              "texto": "Proponer incumplir directivas o sentencias del Tribunal de Justicia de la UE mientras se siguen cobrando sus fondos, lo que expone a multas y a recortes de esos mismos fondos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que se ahorran cumplir una directiva"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las multas"
+                  ],
+                  "indirecto": [
+                    "beneficiarios de fondos europeos recortados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Romper sin contar el coste",
+              "texto": "Plantear salir de la UE o del euro sin explicar qué pasaría con el comercio, la moneda, la libre circulación de personas y los fondos europeos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "sectores que compiten con empresas europeas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que exportan a la UE",
+                    "españoles que viven o trabajan en otros países de la UE"
+                  ],
+                  "indirecto": [
+                    "ahorradores y deudores ante un cambio de moneda",
+                    "beneficiarios de fondos europeos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir las normas europeas en plazo, gastar bien los fondos y defender con datos la posición española en cada negociación.",
           "medidas": [
-            { "nombre": "Directivas en plazo", "texto": "Incorporar las directivas europeas a la ley española dentro de plazo, con un calendario público que siga cada una y evite sanciones del Tribunal de Justicia de la UE." },
-            { "nombre": "Fondos europeos bien ejecutados", "texto": "Gastar los fondos europeos a tiempo y con evaluación pública de resultados, en un portal donde se vea qué recibe cada proyecto y para qué." },
-            { "nombre": "Comunidades en la posición española", "texto": "Las comunidades autónomas participan en las posiciones que afectan a sus competencias a través de la conferencia con el Estado para asuntos europeos." },
-            { "nombre": "Presencia en las instituciones", "texto": "Preparar y apoyar a españoles para las oposiciones y puestos de las instituciones europeas, y llevar a cada negociación estudios propios de impacto." }
+            {
+              "nombre": "Directivas en plazo",
+              "texto": "Incorporar las directivas europeas a la ley española dentro de plazo, con un calendario público que siga cada una y evite sanciones del Tribunal de Justicia de la UE.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos con los derechos que dan las directivas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos multas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores que deben adaptarse antes a normas nuevas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Fondos europeos bien ejecutados",
+              "texto": "Gastar los fondos europeos a tiempo y con evaluación pública de resultados, en un portal donde se vea qué recibe cada proyecto y para qué.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "proyectos y empresas que reciben fondos europeos"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que usan lo financiado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "receptores de fondos sin resultados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Comunidades en la posición española",
+              "texto": "Las comunidades autónomas participan en las posiciones que afectan a sus competencias a través de la conferencia con el Estado para asuntos europeos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobiernos autonómicos"
+                  ],
+                  "indirecto": [
+                    "sectores regionales afectados por normas europeas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "Gobierno central, con negociaciones más lentas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Presencia en las instituciones",
+              "texto": "Preparar y apoyar a españoles para las oposiciones y puestos de las instituciones europeas, y llevar a cada negociación estudios propios de impacto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "españoles que aspiran a puestos europeos"
+                  ],
+                  "indirecto": [
+                    "sectores españoles mejor representados en Bruselas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la preparación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Decidir en común donde un país solo no llega —energía, defensa, migración y fronteras—, con el Congreso informado antes de cada Consejo.",
           "medidas": [
-            { "nombre": "Energía conectada con Europa", "texto": "Más interconexiones eléctricas y de gas con Francia y el resto de la UE, y compras conjuntas de energía en las crisis, para reducir el aislamiento de la Península." },
-            { "nombre": "Migración con reparto y fronteras comunes", "texto": "Aplicar el pacto europeo de migración y asilo con un reparto efectivo de responsabilidades entre países y un control común de las fronteras exteriores." },
-            { "nombre": "Compras de defensa en común", "texto": "Usar los préstamos y programas europeos para comprar material junto a otros países cuando cubre carencias propias y sale más barato que hacerlo solos." },
-            { "nombre": "El Congreso, antes y después de cada Consejo", "texto": "El Gobierno expone en el Congreso su posición antes de cada Consejo Europeo y rinde cuentas después de lo que se votó." }
+            {
+              "nombre": "Energía conectada con Europa",
+              "texto": "Más interconexiones eléctricas y de gas con Francia y el resto de la UE, y compras conjuntas de energía en las crisis, para reducir el aislamiento de la Península.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "consumidores de electricidad y gas",
+                    "industria con alto consumo de energía"
+                  ],
+                  "indirecto": [
+                    "productores de renovables que pueden exportar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "consumidores que pagan las obras en la factura",
+                    "vecinos de zonas por donde pasan las líneas"
+                  ],
+                  "indirecto": [
+                    "productores que ganan con precios aislados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Migración con reparto y fronteras comunes",
+              "texto": "Aplicar el pacto europeo de migración y asilo con un reparto efectivo de responsabilidades entre países y un control común de las fronteras exteriores.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades que reciben más llegadas, como Canarias"
+                  ],
+                  "indirecto": [
+                    "personas que solicitan asilo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que intentan entrar de forma irregular"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el control común"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Compras de defensa en común",
+              "texto": "Usar los préstamos y programas europeos para comprar material junto a otros países cuando cubre carencias propias y sale más barato que hacerlo solos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fuerzas armadas con carencias cubiertas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por compras más baratas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "fabricantes nacionales que pierden exclusividad"
+                  ],
+                  "indirecto": [
+                    "generaciones futuras que devuelven los préstamos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "El Congreso, antes y después de cada Consejo",
+              "texto": "El Gobierno expone en el Congreso su posición antes de cada Consejo Europeo y rinde cuentas después de lo que se votó.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados que controlan al Gobierno"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que siguen lo que se decide en Europa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, con menos margen de negociación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una UE con recursos propios suficientes, una voz exterior común y más decisiones por mayoría, avanzando con los países dispuestos.",
           "medidas": [
-            { "nombre": "Recursos propios nuevos", "texto": "Financiar el presupuesto europeo con ingresos europeos nuevos, por ejemplo sobre emisiones de carbono en frontera o grandes empresas digitales, y no solo con aportaciones nacionales." },
-            { "nombre": "Una sola voz hacia fuera", "texto": "Posiciones comunes, servicio diplomático europeo reforzado y sanciones decididas juntas, para que la UE pese ante las grandes potencias." },
-            { "nombre": "Avanzar con los dispuestos", "texto": "Mientras no haya acuerdo de todos, usar la abstención constructiva y las cooperaciones reforzadas para que los países que quieren avanzar no queden bloqueados." },
-            { "nombre": "Control de lo común", "texto": "Cada fondo o deuda común queda sometido al control presupuestario del Parlamento Europeo y a la auditoría del Tribunal de Cuentas Europeo." }
+            {
+              "nombre": "Recursos propios nuevos",
+              "texto": "Financiar el presupuesto europeo con ingresos europeos nuevos, por ejemplo sobre emisiones de carbono en frontera o grandes empresas digitales, y no solo con aportaciones nacionales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes nacionales, con menos aportación"
+                  ],
+                  "indirecto": [
+                    "beneficiarios del presupuesto europeo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "grandes empresas digitales",
+                    "importadores de productos con muchas emisiones"
+                  ],
+                  "indirecto": [
+                    "consumidores si esas empresas trasladan el coste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Una sola voz hacia fuera",
+              "texto": "Posiciones comunes, servicio diplomático europeo reforzado y sanciones decididas juntas, para que la UE pese ante las grandes potencias.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas europeas ante presiones de grandes potencias"
+                  ],
+                  "indirecto": [
+                    "ciudadanos europeos con más peso exterior común"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que cede margen propio"
+                  ],
+                  "indirecto": [
+                    "sectores con relación especial con un país sancionado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Avanzar con los dispuestos",
+              "texto": "Mientras no haya acuerdo de todos, usar la abstención constructiva y las cooperaciones reforzadas para que los países que quieren avanzar no queden bloqueados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos de los países que avanzan juntos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "países que quedan fuera del grupo"
+                  ],
+                  "indirecto": [
+                    "ciudadanos de esos países, con menos voz"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Control de lo común",
+              "texto": "Cada fondo o deuda común queda sometido al control presupuestario del Parlamento Europeo y a la auditoría del Tribunal de Cuentas Europeo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes europeos"
+                  ],
+                  "indirecto": [
+                    "beneficiarios de fondos bien gestionados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "receptores de fondos comunes sin justificar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "UE que decide su política exterior por mayoría cualificada con freno de emergencia, paga lo común con lo común, y Congreso que fija la posición española.",
           "medidas": [
-            { "nombre": "Pasarela a la mayoría cualificada", "texto": "Activar la pasarela del artículo 31.3 del Tratado de la UE para decidir por mayoría cualificada sanciones, declaraciones y posiciones exteriores, sin reformar los tratados." },
-            { "nombre": "Freno de emergencia y unanimidad militar", "texto": "Un Estado puede oponerse por razones vitales y declaradas de política nacional y el asunto sube al Consejo Europeo; las decisiones militares siguen por unanimidad." },
-            { "nombre": "Deuda común solo para bienes comunes", "texto": "Presupuesto europeo mayor con recursos propios, y deuda común reservada a defensa, energía, fronteras e innovación, no a gasto corriente de cada país." },
-            { "nombre": "Voto previo de las Cortes", "texto": "Cualquier paso a la mayoría cualificada o renuncia al veto exige voto previo de las Cortes, que fijan el mandato del Gobierno en los grandes asuntos europeos." }
+            {
+              "nombre": "Pasarela a la mayoría cualificada",
+              "texto": "Activar la pasarela del artículo 31.3 del Tratado de la UE para decidir por mayoría cualificada sanciones, declaraciones y posiciones exteriores, sin reformar los tratados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "países que hoy quedan bloqueados por un veto"
+                  ],
+                  "indirecto": [
+                    "personas afectadas por crisis en las que la UE actúa antes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que pierden el veto en política exterior"
+                  ],
+                  "indirecto": [
+                    "sectores con intereses en un país sancionado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Freno de emergencia y unanimidad militar",
+              "texto": "Un Estado puede oponerse por razones vitales y declaradas de política nacional y el asunto sube al Consejo Europeo; las decisiones militares siguen por unanimidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "Estados con intereses vitales en juego"
+                  ],
+                  "indirecto": [
+                    "ciudadanos de esos Estados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "mayoría de países, con decisiones más lentas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Deuda común solo para bienes comunes",
+              "texto": "Presupuesto europeo mayor con recursos propios, y deuda común reservada a defensa, energía, fronteras e innovación, no a gasto corriente de cada país.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "regiones con grandes necesidades de inversión"
+                  ],
+                  "indirecto": [
+                    "empresas de energía, defensa e innovación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes futuros que devuelven la deuda"
+                  ],
+                  "indirecto": [
+                    "gobiernos que querían usarla para gasto corriente"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Voto previo de las Cortes",
+              "texto": "Cualquier paso a la mayoría cualificada o renuncia al veto exige voto previo de las Cortes, que fijan el mandato del Gobierno en los grandes asuntos europeos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados y senadores"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que quieren control democrático"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, que pierde margen negociador"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -272,49 +1830,422 @@
           "nivel": 0,
           "resumen": "Sin propuesta de paz, o justificar guerras de agresión, ignorar las resoluciones de la ONU o vender armas sin control.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice qué hará España ante los conflictos ni con qué medios: se limita a sumarse a declaraciones de otros." },
-            { "nombre": "Doble vara ante las agresiones", "texto": "Condenar o justificar una agresión según quién la comete, en lugar de aplicar el mismo derecho internacional a todos." },
-            { "nombre": "Armas sin control", "texto": "Vender armas sin mirar a quién ni para qué, o proponer saltarse los controles que ya fijan la ley española y la posición común europea sobre exportación de armas." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice qué hará España ante los conflictos ni con qué medios: se limita a sumarse a declaraciones de otros.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobierno de turno, que evita comprometerse"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "poblaciones de conflictos cercanos"
+                  ],
+                  "indirecto": [
+                    "españoles afectados por crisis derivadas de esos conflictos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Doble vara ante las agresiones",
+              "texto": "Condenar o justificar una agresión según quién la comete, en lugar de aplicar el mismo derecho internacional a todos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agresores aliados que escapan a la condena"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de agresiones de países aliados"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que dependen de la credibilidad exterior"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Armas sin control",
+              "texto": "Vender armas sin mirar a quién ni para qué, o proponer saltarse los controles que ya fijan la ley española y la posición común europea sobre exportación de armas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas exportadoras de armas"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esa industria"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "civiles en zonas de conflicto"
+                  ],
+                  "indirecto": [
+                    "militares en misiones donde circulan esas armas"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir las resoluciones de la ONU, pagar lo comprometido, aportar a misiones de paz y aplicar con rigor la ley vigente de control de armas.",
           "medidas": [
-            { "nombre": "Resoluciones de la ONU cumplidas", "texto": "Aplicar las sanciones y resoluciones obligatorias del Consejo de Seguridad y explicar cada voto de España en la Asamblea General." },
-            { "nombre": "Cuotas pagadas en plazo", "texto": "Pagar a tiempo las cuotas de la ONU y de sus misiones de paz, y publicar lo aportado a cada organismo." },
-            { "nombre": "Ley de control de armas aplicada", "texto": "Cumplir la ley de 2007 sobre comercio de armas: cada venta pasa por la junta interministerial y se deniega en los supuestos que marca la ley." },
-            { "nombre": "Presencia en misiones de paz", "texto": "Aportar personal a misiones de paz de la ONU y la UE autorizadas por el Congreso, con formación específica en protección de civiles." }
+            {
+              "nombre": "Resoluciones de la ONU cumplidas",
+              "texto": "Aplicar las sanciones y resoluciones obligatorias del Consejo de Seguridad y explicar cada voto de España en la Asamblea General.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones protegidas por las sanciones de la ONU"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con negocio en países sancionados"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esas empresas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuotas pagadas en plazo",
+              "texto": "Pagar a tiempo las cuotas de la ONU y de sus misiones de paz, y publicar lo aportado a cada organismo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones atendidas por la ONU y sus misiones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las cuotas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ley de control de armas aplicada",
+              "texto": "Cumplir la ley de 2007 sobre comercio de armas: cada venta pasa por la junta interministerial y se deniega en los supuestos que marca la ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "civiles en países en conflicto"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que exportan armas"
+                  ],
+                  "indirecto": [
+                    "trabajadores de la industria de armamento"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Presencia en misiones de paz",
+              "texto": "Aportar personal a misiones de paz de la ONU y la UE autorizadas por el Congreso, con formación específica en protección de civiles.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "civiles en zonas de misiones de paz"
+                  ],
+                  "indirecto": [
+                    "militares con formación en protección de civiles"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "militares y policías desplegados, que asumen el riesgo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el despliegue"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Mediación activa en los conflictos cercanos, prevención temprana y una venta de armas más vigilada y más transparente.",
           "medidas": [
-            { "nombre": "Equipo de mediación en Exteriores", "texto": "Un equipo de mediadores formados en el Ministerio de Exteriores que ofrece buenos oficios en Iberoamérica, el Mediterráneo y el Sahel." },
-            { "nombre": "Alerta temprana de conflictos", "texto": "Análisis periódico del riesgo de conflicto en las regiones prioritarias, que activa diplomacia preventiva antes de que estalle la violencia." },
-            { "nombre": "Informes de armas más completos", "texto": "Informes al Congreso con país de destino, tipo de material y uso final declarado, publicados con menos retraso y debatidos cada año en comisión." },
-            { "nombre": "Comprobar el uso final", "texto": "Verificar después de la venta que las armas llegan a quien se dijo y se usan para lo que se dijo, con inspecciones pactadas en el contrato." }
+            {
+              "nombre": "Equipo de mediación en Exteriores",
+              "texto": "Un equipo de mediadores formados en el Ministerio de Exteriores que ofrece buenos oficios en Iberoamérica, el Mediterráneo y el Sahel.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de conflictos en Iberoamérica, Mediterráneo y Sahel"
+                  ],
+                  "indirecto": [
+                    "empresas y españoles con intereses en esas regiones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el equipo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Alerta temprana de conflictos",
+              "texto": "Análisis periódico del riesgo de conflicto en las regiones prioritarias, que activa diplomacia preventiva antes de que estalle la violencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones en riesgo de conflicto"
+                  ],
+                  "indirecto": [
+                    "españoles expuestos a crisis derivadas de conflictos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que financian el análisis"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informes de armas más completos",
+              "texto": "Informes al Congreso con país de destino, tipo de material y uso final declarado, publicados con menos retraso y debatidos cada año en comisión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados y organizaciones que vigilan las ventas"
+                  ],
+                  "indirecto": [
+                    "civiles en países compradores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que prefieren no publicar sus ventas"
+                  ],
+                  "indirecto": [
+                    "gobiernos compradores que prefieren discreción"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comprobar el uso final",
+              "texto": "Verificar después de la venta que las armas llegan a quien se dijo y se usan para lo que se dijo, con inspecciones pactadas en el contrato.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "civiles en países compradores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas exportadoras, con más trámites"
+                  ],
+                  "indirecto": [
+                    "compradores que desvían armas a terceros"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una diplomacia de paz con medios y presupuesto estable, que media, acoge negociaciones y reduce las armas sin dejar indefenso a nadie.",
           "medidas": [
-            { "nombre": "Presupuesto estable para la paz", "texto": "Partida para mediación, prevención y reconstrucción fijada para varios años, que no se recorta a mitad de ejercicio." },
-            { "nombre": "Buenos oficios y sede de negociaciones", "texto": "Representar intereses entre países sin relaciones y acoger negociaciones entre partes enfrentadas, como hacen Suiza y Noruega." },
-            { "nombre": "Escuela de mediadores", "texto": "Formación propia de mediadores con universidades y la Escuela Diplomática, abierta también a profesionales de Iberoamérica y el Mediterráneo." },
-            { "nombre": "Desarme verificable y recíproco", "texto": "Promover tratados de desarme y control de armas que se puedan verificar y obliguen a todas las partes, sin reducir de forma unilateral la defensa propia ni la de los aliados." }
+            {
+              "nombre": "Presupuesto estable para la paz",
+              "texto": "Partida para mediación, prevención y reconstrucción fijada para varios años, que no se recorta a mitad de ejercicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "organizaciones de mediación y reconstrucción",
+                    "poblaciones en posguerra"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la partida"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas que compiten por el mismo dinero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Buenos oficios y sede de negociaciones",
+              "texto": "Representar intereses entre países sin relaciones y acoger negociaciones entre partes enfrentadas, como hacen Suiza y Noruega.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "partes enfrentadas que buscan negociar"
+                  ],
+                  "indirecto": [
+                    "ciudades que acogen negociaciones y su hostelería"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan seguridad y logística"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Escuela de mediadores",
+              "texto": "Formación propia de mediadores con universidades y la Escuela Diplomática, abierta también a profesionales de Iberoamérica y el Mediterráneo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mediadores de España, Iberoamérica y el Mediterráneo"
+                  ],
+                  "indirecto": [
+                    "universidades y la Escuela Diplomática"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la escuela"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Desarme verificable y recíproco",
+              "texto": "Promover tratados de desarme y control de armas que se puedan verificar y obliguen a todas las partes, sin reducir de forma unilateral la defensa propia ni la de los aliados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "civiles expuestos a armas de destrucción masiva"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por una carrera de armamentos más lenta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "industria que fabrica el armamento limitado"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esa industria"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Mediación profesional de Estado, cada licencia de armas a la vista y denegada ante riesgo grave, y justicia internacional aplicada sin excepciones.",
           "medidas": [
-            { "nombre": "Unidad de mediación de Estado", "texto": "Unidad permanente con mediadores de carrera, presupuesto plurianual y mandato respaldado por todos los grupos, dispuesta a hablar con todas las partes de un conflicto." },
-            { "nombre": "Cada licencia de armas publicada", "texto": "Publicar cada licencia de exportación —país, tipo de material, valor y uso final— en un plazo fijo, y no solo estadísticas agregadas cada seis meses." },
-            { "nombre": "Denegación obligatoria ante riesgo grave", "texto": "Denegar la venta si hay riesgo grave de uso contra civiles o en una guerra de agresión, con informe motivado y control previo del Congreso para países en conflicto." },
-            { "nombre": "Justicia internacional sin excepciones", "texto": "Ejecutar las órdenes de la Corte Penal Internacional y las sentencias de la Corte Internacional de Justicia sea quien sea el afectado, aliado o adversario." }
+            {
+              "nombre": "Unidad de mediación de Estado",
+              "texto": "Unidad permanente con mediadores de carrera, presupuesto plurianual y mandato respaldado por todos los grupos, dispuesta a hablar con todas las partes de un conflicto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de conflictos donde se media"
+                  ],
+                  "indirecto": [
+                    "empresas y españoles en esas regiones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la unidad"
+                  ],
+                  "indirecto": [
+                    "aliados molestos por el diálogo con todas las partes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cada licencia de armas publicada",
+              "texto": "Publicar cada licencia de exportación —país, tipo de material, valor y uso final— en un plazo fijo, y no solo estadísticas agregadas cada seis meses.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "periodistas, diputados y organizaciones que vigilan"
+                  ],
+                  "indirecto": [
+                    "civiles en países compradores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas exportadoras de armas, con menos discreción"
+                  ],
+                  "indirecto": [
+                    "países compradores que piden confidencialidad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Denegación obligatoria ante riesgo grave",
+              "texto": "Denegar la venta si hay riesgo grave de uso contra civiles o en una guerra de agresión, con informe motivado y control previo del Congreso para países en conflicto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "civiles en guerras y conflictos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas exportadoras de armas"
+                  ],
+                  "indirecto": [
+                    "trabajadores de la industria de armamento",
+                    "comarcas que dependen de esas fábricas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Justicia internacional sin excepciones",
+              "texto": "Ejecutar las órdenes de la Corte Penal Internacional y las sentencias de la Corte Internacional de Justicia sea quien sea el afectado, aliado o adversario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de crímenes internacionales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "responsables acusados de crímenes internacionales"
+                  ],
+                  "indirecto": [
+                    "empresas españolas con negocio en esos países"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -327,49 +2258,433 @@
           "nivel": 0,
           "resumen": "Sin propuesta de cooperación, o negar la ayuda incluso en emergencias y justificar violaciones de derechos según quién las cometa.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice cuánto se dedica a la ayuda, a qué ni cómo se evalúa: la cooperación queda a lo que sobre en cada presupuesto." },
-            { "nombre": "Ni siquiera en las emergencias", "texto": "Proponer suprimir también la ayuda humanitaria ante terremotos, guerras o hambrunas, cuando la vida de la gente depende de días." },
-            { "nombre": "Derechos humanos según quién", "texto": "Callar ante las violaciones de derechos humanos de los socios y denunciarlas solo cuando las comete un adversario." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice cuánto se dedica a la ayuda, a qué ni cómo se evalúa: la cooperación queda a lo que sobre en cada presupuesto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, por menos gasto a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "poblaciones pobres que reciben ayuda española"
+                  ],
+                  "indirecto": [
+                    "organizaciones de cooperación y su personal"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ni siquiera en las emergencias",
+              "texto": "Proponer suprimir también la ayuda humanitaria ante terremotos, guerras o hambrunas, cuando la vida de la gente depende de días.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, por el ahorro inmediato"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de catástrofes, guerras y hambrunas"
+                  ],
+                  "indirecto": [
+                    "organizaciones humanitarias y su personal"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Derechos humanos según quién",
+              "texto": "Callar ante las violaciones de derechos humanos de los socios y denunciarlas solo cuando las comete un adversario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobiernos socios que violan derechos humanos"
+                  ],
+                  "indirecto": [
+                    "empresas con negocio en esos países"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de violaciones cometidas por socios"
+                  ],
+                  "indirecto": [
+                    "defensores de derechos en esos países"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Ayuda humanitaria rápida, cumplimiento real de la ley de cooperación de 2023 y cuentas públicas de qué se financia y dónde.",
           "medidas": [
-            { "nombre": "Respuesta humanitaria rápida", "texto": "Capacidad de enviar ayuda y equipos en días ante catástrofes y hambrunas, a través de la agencia española de cooperación y organizaciones con experiencia." },
-            { "nombre": "Cumplir la ley de cooperación", "texto": "Aplicar la ley de cooperación de 2023 con sus planes, órganos y objetivos de gasto, en lugar de dejarla en el papel." },
-            { "nombre": "Cuentas abiertas de la ayuda", "texto": "Publicar qué proyectos financia la ayuda española, dónde y con quién, en formato abierto y comparable con el de otros donantes." },
-            { "nombre": "Voz en los foros de derechos humanos", "texto": "Votar en el Consejo de Derechos Humanos de la ONU con criterios explicados, y proteger con visados y apoyo a defensores de derechos perseguidos." }
+            {
+              "nombre": "Respuesta humanitaria rápida",
+              "texto": "Capacidad de enviar ayuda y equipos en días ante catástrofes y hambrunas, a través de la agencia española de cooperación y organizaciones con experiencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de catástrofes y hambrunas"
+                  ],
+                  "indirecto": [
+                    "organizaciones humanitarias con experiencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la respuesta"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cumplir la ley de cooperación",
+              "texto": "Aplicar la ley de cooperación de 2023 con sus planes, órganos y objetivos de gasto, en lugar de dejarla en el papel.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de países donde coopera España"
+                  ],
+                  "indirecto": [
+                    "organizaciones de cooperación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los objetivos de gasto"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas que compiten por el mismo dinero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuentas abiertas de la ayuda",
+              "texto": "Publicar qué proyectos financia la ayuda española, dónde y con quién, en formato abierto y comparable con el de otros donantes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que quieren saber en qué se gasta"
+                  ],
+                  "indirecto": [
+                    "investigadores y otros donantes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de proyectos con malos resultados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Voz en los foros de derechos humanos",
+              "texto": "Votar en el Consejo de Derechos Humanos de la ONU con criterios explicados, y proteger con visados y apoyo a defensores de derechos perseguidos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "defensores de derechos humanos perseguidos"
+                  ],
+                  "indirecto": [
+                    "víctimas de violaciones de derechos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que persiguen a defensores"
+                  ],
+                  "indirecto": [
+                    "empresas con negocio en esos países"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Ayuda al desarrollo que crece cada año camino del 0,7 % de la renta que fija la ley, concentrada donde más aporta y gestionada por profesionales.",
           "medidas": [
-            { "nombre": "Calendario anual hacia el 0,7 %", "texto": "Subir la ayuda cada año con un calendario publicado en los presupuestos hasta llegar al 0,7 % de la renta nacional bruta.", "meta": true },
-            { "nombre": "Menos países, más impacto", "texto": "Concentrar la ayuda en un número limitado de países y sectores —salud, agua, educación, buen gobierno— donde España aporta experiencia, en lugar de dispersarla." },
-            { "nombre": "Agencia de cooperación profesional", "texto": "Personal estable y especializado en la agencia española de cooperación, con carrera propia, para gestionar más dinero sin perder control." },
-            { "nombre": "Estado, comunidades y ayuntamientos coordinados", "texto": "Un registro común de la ayuda del Estado, las comunidades y los ayuntamientos que evite duplicar proyectos en los mismos lugares." }
+            {
+              "nombre": "Calendario anual hacia el 0,7 %",
+              "texto": "Subir la ayuda cada año con un calendario publicado en los presupuestos hasta llegar al 0,7 % de la renta nacional bruta.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de países donde coopera España"
+                  ],
+                  "indirecto": [
+                    "organizaciones de cooperación y su personal"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la subida"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas que compiten por el mismo dinero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Menos países, más impacto",
+              "texto": "Concentrar la ayuda en un número limitado de países y sectores —salud, agua, educación, buen gobierno— donde España aporta experiencia, en lugar de dispersarla.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de los países prioritarios"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por más impacto de cada euro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "poblaciones de países que dejan de recibir ayuda"
+                  ],
+                  "indirecto": [
+                    "organizaciones con proyectos en esos países"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Agencia de cooperación profesional",
+              "texto": "Personal estable y especializado en la agencia española de cooperación, con carrera propia, para gestionar más dinero sin perder control.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personal de la agencia de cooperación"
+                  ],
+                  "indirecto": [
+                    "poblaciones que reciben ayuda mejor gestionada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las plazas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Estado, comunidades y ayuntamientos coordinados",
+              "texto": "Un registro común de la ayuda del Estado, las comunidades y los ayuntamientos que evite duplicar proyectos en los mismos lugares.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones que reciben ayuda sin duplicidades"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos gasto duplicado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ayuntamientos pequeños con carga administrativa nueva"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Comercio, alianzas y ayuda condicionados a los derechos humanos con criterios públicos, fondo de emergencia propio y empresas responsables.",
           "medidas": [
-            { "nombre": "Criterios públicos de derechos humanos", "texto": "Criterios escritos para comercio, ayuda y alianzas, con una escala de respuesta conocida: diálogo, aviso, suspensión de ventajas comerciales y, al final, sanciones." },
-            { "nombre": "Suelo humanitario y fondo de emergencia", "texto": "Una parte mínima de la ayuda reservada a la acción humanitaria y un fondo de emergencia que se puede usar sin esperar a aprobar una partida nueva." },
-            { "nombre": "Empresas que vigilan su cadena", "texto": "Aplicar la directiva europea que obliga a las grandes empresas a vigilar los derechos humanos en su cadena de suministro, con apoyo a las pymes proveedoras para cumplir." },
-            { "nombre": "Canje de deuda por desarrollo", "texto": "Cambiar deuda de países pobres con España por inversión en salud, educación o clima en esos países, con evaluación pública de lo financiado." }
+            {
+              "nombre": "Criterios públicos de derechos humanos",
+              "texto": "Criterios escritos para comercio, ayuda y alianzas, con una escala de respuesta conocida: diálogo, aviso, suspensión de ventajas comerciales y, al final, sanciones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de violaciones de derechos en países socios"
+                  ],
+                  "indirecto": [
+                    "empresas que compiten respetando los derechos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que violan derechos humanos"
+                  ],
+                  "indirecto": [
+                    "empresas con negocio en esos países",
+                    "trabajadores de esas empresas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Suelo humanitario y fondo de emergencia",
+              "texto": "Una parte mínima de la ayuda reservada a la acción humanitaria y un fondo de emergencia que se puede usar sin esperar a aprobar una partida nueva.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de emergencias humanitarias"
+                  ],
+                  "indirecto": [
+                    "organizaciones humanitarias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "poblaciones de programas de desarrollo con menos fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Empresas que vigilan su cadena",
+              "texto": "Aplicar la directiva europea que obliga a las grandes empresas a vigilar los derechos humanos en su cadena de suministro, con apoyo a las pymes proveedoras para cumplir.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de las cadenas de suministro"
+                  ],
+                  "indirecto": [
+                    "empresas que ya cumplen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "grandes empresas, con más costes de control"
+                  ],
+                  "indirecto": [
+                    "pymes proveedoras con nuevas exigencias",
+                    "consumidores si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Canje de deuda por desarrollo",
+              "texto": "Cambiar deuda de países pobres con España por inversión en salud, educación o clima en esos países, con evaluación pública de lo financiado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones de países pobres endeudados"
+                  ],
+                  "indirecto": [
+                    "empresas y organizaciones que ejecutan los proyectos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que renuncian al cobro de la deuda"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "El 0,7 % con senda anual obligatoria, ayuda evaluada por sus resultados y los mismos criterios de derechos para todos, auditados por un órgano independiente.",
           "medidas": [
-            { "nombre": "Senda obligatoria hasta el 0,7 %", "texto": "Si un presupuesto queda por debajo de la senda anual hasta el 0,7 % de la renta nacional bruta, el Gobierno debe explicarlo y someterlo a un voto expreso del Congreso.", "meta": true },
-            { "nombre": "Evaluación independiente de cada programa", "texto": "Evaluación pública e independiente de cada gran programa: se mantiene lo que demuestra resultados y se cierra lo que no, con cuentas claras frente al desvío de fondos." },
-            { "nombre": "La misma vara para todos los países", "texto": "Los criterios de derechos humanos se aplican igual a aliados y adversarios en comercio, alianzas y venta de armas, y cada excepción se explica en el Congreso." },
-            { "nombre": "Informe de coherencia independiente", "texto": "Informe anual sobre la coherencia entre ayuda, comercio, deuda y venta de armas, elaborado por un órgano independiente y debatido en el Congreso." }
+            {
+              "nombre": "Senda obligatoria hasta el 0,7 %",
+              "texto": "Si un presupuesto queda por debajo de la senda anual hasta el 0,7 % de la renta nacional bruta, el Gobierno debe explicarlo y someterlo a un voto expreso del Congreso.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "poblaciones que reciben ayuda española"
+                  ],
+                  "indirecto": [
+                    "organizaciones de cooperación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobierno de turno, con menos margen presupuestario"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la senda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación independiente de cada programa",
+              "texto": "Evaluación pública e independiente de cada gran programa: se mantiene lo que demuestra resultados y se cierra lo que no, con cuentas claras frente al desvío de fondos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que pagan la ayuda"
+                  ],
+                  "indirecto": [
+                    "poblaciones que reciben programas que funcionan"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de programas sin resultados",
+                    "quien desvía fondos de la ayuda"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "La misma vara para todos los países",
+              "texto": "Los criterios de derechos humanos se aplican igual a aliados y adversarios en comercio, alianzas y venta de armas, y cada excepción se explica en el Congreso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de violaciones de derechos de países aliados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos aliados que violan derechos humanos"
+                  ],
+                  "indirecto": [
+                    "empresas con negocio en esos países"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe de coherencia independiente",
+              "texto": "Informe anual sobre la coherencia entre ayuda, comercio, deuda y venta de armas, elaborado por un órgano independiente y debatido en el Congreso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "diputados y ciudadanos que vigilan la coherencia"
+                  ],
+                  "indirecto": [
+                    "poblaciones afectadas por políticas contradictorias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "sectores cuyas ventas contradicen la ayuda"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el órgano"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]

@@ -71,50 +71,458 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre cuánto debe cobrar un jubilado, o con planes que congelan las pensiones o recortan las ya reconocidas.",
           "medidas": [
-            { "nombre": "Sin plan sobre la cuantía", "texto": "No dice cuánto debe cobrar una persona mayor ni cómo se actualiza su pensión; lo deja a lo que decida cada presupuesto anual." },
-            { "nombre": "Congelar o recortar lo reconocido", "texto": "Propone dejar de actualizar las pensiones o rebajar las ya concedidas, y rompe la confianza de quien cotizó con unas reglas conocidas." },
-            { "nombre": "Subidas prometidas sin financiar", "texto": "Promete subir todas las pensiones sin decir de dónde sale el dinero ni cómo afecta a las cuentas de los próximos años." }
+            {
+              "nombre": "Sin plan sobre la cuantía",
+              "texto": "No dice cuánto debe cobrar una persona mayor ni cómo se actualiza su pensión; lo deja a lo que decida cada presupuesto anual.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, mientras no sube el gasto"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pensionistas que no saben cuánto cobrarán"
+                  ],
+                  "indirecto": [
+                    "trabajadores cerca de jubilarse que no pueden planificar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Congelar o recortar lo reconocido",
+              "texto": "Propone dejar de actualizar las pensiones o rebajar las ya concedidas, y rompe la confianza de quien cotizó con unas reglas conocidas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, por el menor gasto público"
+                  ],
+                  "indirecto": [
+                    "jóvenes que heredarían menos deuda pública"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pensionistas actuales",
+                    "trabajadores a punto de jubilarse"
+                  ],
+                  "indirecto": [
+                    "comercios de barrio que viven del gasto de los mayores",
+                    "familias que ayudan a sus mayores"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Subidas prometidas sin financiar",
+              "texto": "Promete subir todas las pensiones sin decir de dónde sale el dinero ni cómo afecta a las cuentas de los próximos años.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas actuales, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "jóvenes que pagarán la deuda acumulada",
+                    "pensionistas futuros, si luego hay que recortar"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Mantener el poder de compra: todas las pensiones suben cada año con el IPC (el índice de precios) por ley, y nadie mayor se queda sin ingresos.",
           "medidas": [
-            { "nombre": "Subida con el IPC fijada por ley", "texto": "Todas las pensiones suben cada enero con la inflación media del año anterior, como fija ya la ley de 2021; ningún presupuesto anual puede saltarse la regla.", "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2025/121225-revalorizacion-pensiones.aspx" },
-            { "nombre": "Complemento hasta la pensión mínima", "texto": "Quien cotizó poco recibe de la Seguridad Social un complemento hasta la pensión mínima, tras comprobar que no tiene otros ingresos suficientes." },
-            { "nombre": "Pensión no contributiva para quien no cotizó", "texto": "Toda persona mayor sin ingresos suficientes, haya trabajado con contrato o no, tiene derecho a una pensión no contributiva que gestionan las comunidades autónomas." },
-            { "nombre": "Aviso anual de la pensión futura", "texto": "La Seguridad Social envía cada año a cada trabajador una estimación de la pensión que cobrará, para que pueda planificar y ahorrar a tiempo." }
+            {
+              "nombre": "Subida con el IPC fijada por ley",
+              "texto": "Todas las pensiones suben cada enero con la inflación media del año anterior, como fija ya la ley de 2021; ningún presupuesto anual puede saltarse la regla.",
+              "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2025/121225-revalorizacion-pensiones.aspx",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas actuales"
+                  ],
+                  "indirecto": [
+                    "comercios que dependen del gasto de los mayores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el aumento del gasto"
+                  ],
+                  "indirecto": [
+                    "trabajadores jóvenes que sostienen el sistema con sus cuotas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Complemento hasta la pensión mínima",
+              "texto": "Quien cotizó poco recibe de la Seguridad Social un complemento hasta la pensión mínima, tras comprobar que no tiene otros ingresos suficientes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jubilados con carreras de cotización cortas"
+                  ],
+                  "indirecto": [
+                    "familias que mantenían a esos mayores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el complemento con impuestos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Pensión no contributiva para quien no cotizó",
+              "texto": "Toda persona mayor sin ingresos suficientes, haya trabajado con contrato o no, tiene derecho a una pensión no contributiva que gestionan las comunidades autónomas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mayores sin ingresos que nunca cotizaron",
+                    "personas mayores que trabajaron sin contrato"
+                  ],
+                  "indirecto": [
+                    "servicios sociales municipales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "cotizantes con pensiones bajas, que ven poca diferencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Aviso anual de la pensión futura",
+              "texto": "La Seguridad Social envía cada año a cada trabajador una estimación de la pensión que cobrará, para que pueda planificar y ahorrar a tiempo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que planifican su jubilación"
+                  ],
+                  "indirecto": [
+                    "familias que ahorran con más información"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Usa datos que la Seguridad Social ya tiene; enviar el aviso cuesta muy poco y nadie pierde un derecho ni ingresos."
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Subir más las pensiones más bajas para acercarlas al umbral de pobreza y corregir lo que pierden en pensión quienes dejaron de trabajar para cuidar.",
           "medidas": [
-            { "nombre": "Mínimas y no contributivas por encima del IPC", "texto": "Subidas adicionales de las pensiones mínimas y no contributivas con un calendario de varios años aprobado por ley, hasta llegar al umbral de pobreza de una persona sola.", "meta": true },
-            { "nombre": "Años de cuidado que cuentan como cotizados", "texto": "Los periodos dedicados a cuidar hijos o familiares dependientes se cotizan a cargo del Estado, para que no abran huecos en la carrera laboral ni rebajen la pensión." },
-            { "nombre": "Complemento contra la brecha de género", "texto": "Complemento por hijo en la pensión de quien vio recortada su carrera por los cuidados, que se mantiene hasta que la diferencia entre pensiones de hombres y mujeres se reduzca a la mitad.", "meta": true },
-            { "nombre": "Huecos de cotización rellenados", "texto": "Los meses sin cotizar dentro del periodo que se usa para calcular la pensión se rellenan con bases mínimas, para que una racha de paro no hunda la pensión de por vida." }
+            {
+              "nombre": "Mínimas y no contributivas por encima del IPC",
+              "texto": "Subidas adicionales de las pensiones mínimas y no contributivas con un calendario de varios años aprobado por ley, hasta llegar al umbral de pobreza de una persona sola.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas con pensión mínima",
+                    "perceptores de pensión no contributiva"
+                  ],
+                  "indirecto": [
+                    "comercios de barrio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "pensionistas medios, que ven estrecharse la diferencia con la mínima"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Años de cuidado que cuentan como cotizados",
+              "texto": "Los periodos dedicados a cuidar hijos o familiares dependientes se cotizan a cargo del Estado, para que no abran huecos en la carrera laboral ni rebajen la pensión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que dejaron el empleo para cuidar",
+                    "madres con carreras laborales interrumpidas"
+                  ],
+                  "indirecto": [
+                    "personas dependientes cuidadas en casa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan esas cotizaciones"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Complemento contra la brecha de género",
+              "texto": "Complemento por hijo en la pensión de quien vio recortada su carrera por los cuidados, que se mantiene hasta que la diferencia entre pensiones de hombres y mujeres se reduzca a la mitad.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "madres jubiladas con carreras recortadas por los cuidados"
+                  ],
+                  "indirecto": [
+                    "hogares de mayores con una sola pensión"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "jubilados sin hijos con pensiones parecidas, que no lo reciben"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Huecos de cotización rellenados",
+              "texto": "Los meses sin cotizar dentro del periodo que se usa para calcular la pensión se rellenan con bases mínimas, para que una racha de paro no hunda la pensión de por vida.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con rachas de paro antes de jubilarse"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que cubren el mayor gasto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Que ninguna persona mayor quede bajo el umbral de pobreza, con un suelo fijado por ley, complementos que llegan solos y un informe anual que lo mide.",
           "medidas": [
-            { "nombre": "Suelo de pensión en el umbral de pobreza", "texto": "La ley fija que la pensión mínima de una persona que vive sola nunca queda por debajo del umbral de pobreza que publica cada año el Instituto Nacional de Estadística." },
-            { "nombre": "Complementos reconocidos de oficio", "texto": "Cruzando datos de Hacienda y de la Seguridad Social, el complemento a mínimos y la no contributiva se conceden a quien le corresponde sin que tenga que pedirlos." },
-            { "nombre": "Informe anual de suficiencia", "texto": "La Seguridad Social publica cada año cuántos mayores viven bajo el umbral de pobreza, por sexo, edad y comunidad, y cuánto supone la pensión media frente al salario medio." },
-            { "nombre": "Ahorro de empresa para sueldos medios y bajos", "texto": "Planes de pensiones por sector con aportación de la empresa y comisiones bajas, abiertos a pymes y autónomos, para completar la pensión pública de quien hoy no ahorra." }
+            {
+              "nombre": "Suelo de pensión en el umbral de pobreza",
+              "texto": "La ley fija que la pensión mínima de una persona que vive sola nunca queda por debajo del umbral de pobreza que publica cada año el Instituto Nacional de Estadística.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mayores que viven solos con pensión baja"
+                  ],
+                  "indirecto": [
+                    "familias que hoy les ayudan a llegar a fin de mes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "cotizantes con pensiones algo superiores al suelo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Complementos reconocidos de oficio",
+              "texto": "Cruzando datos de Hacienda y de la Seguridad Social, el complemento a mínimos y la no contributiva se conceden a quien le corresponde sin que tenga que pedirlos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mayores con derecho que no lo piden por desconocimiento"
+                  ],
+                  "indirecto": [
+                    "servicios sociales, con menos trámites"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes, por el aumento de beneficiarios"
+                  ],
+                  "indirecto": [
+                    "gestorías que tramitan estas solicitudes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe anual de suficiencia",
+              "texto": "La Seguridad Social publica cada año cuántos mayores viven bajo el umbral de pobreza, por sexo, edad y comunidad, y cuánto supone la pensión media frente al salario medio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas con pensiones bajas"
+                  ],
+                  "indirecto": [
+                    "investigadores y prensa que vigilan el sistema"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Reúne datos que ya tienen la Seguridad Social y el Instituto Nacional de Estadística; cuesta poco y no quita nada a nadie."
+              }
+            },
+            {
+              "nombre": "Ahorro de empresa para sueldos medios y bajos",
+              "texto": "Planes de pensiones por sector con aportación de la empresa y comisiones bajas, abiertos a pymes y autónomos, para completar la pensión pública de quien hoy no ahorra.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "asalariados de sueldos medios y bajos",
+                    "trabajadores de pymes sin plan de pensiones"
+                  ],
+                  "indirecto": [
+                    "autónomos que pueden adherirse"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pagan la aportación",
+                    "contribuyentes, por las rebajas fiscales al ahorro"
+                  ],
+                  "indirecto": [
+                    "gestoras de fondos con comisiones altas",
+                    "trabajadores, si la aportación frena subidas de sueldo"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una pensión pública igual para todos los mayores residentes, por encima del umbral de pobreza, ligada al salario mínimo y que nunca sube menos que el IPC.",
           "medidas": [
-            { "nombre": "Pensión básica igual para todos", "texto": "Una cuantía pública única para toda persona en edad de jubilación, completa con una vida de residencia en España y proporcional si se ha residido menos, como en Países Bajos.", "fuente": "https://svb.nl/en/aow-pension/aow-pension-in-brief" },
-            { "nombre": "Cuantía ligada al salario mínimo neto", "texto": "La ley fija la pensión básica como un porcentaje del salario mínimo neto, nunca por debajo del umbral de pobreza, con un importe para quien vive solo y otro para quien convive.", "fuente": "https://svb.nl/en/aow-pension/how-much-will-you-get-in-aow-pension-and-other-pensions/aow-amounts-depending-on-living-situation" },
-            { "nombre": "Doble ancla: salario mínimo e IPC", "texto": "Sube cada año con el salario mínimo y, como poco, con el IPC. Si un año el IPC la deja por encima del porcentaje fijado, las subidas siguientes absorben la diferencia." },
-            { "nombre": "Transición por generaciones", "texto": "Lo ya cotizado se reconoce con las reglas actuales y el nuevo sistema se aplica poco a poco a quien aún está lejos de jubilarse, con una ley pactada en el Pacto de Toledo." },
-            { "nombre": "Lo de encima, con ahorro propio o de empresa", "texto": "Quien quiera cobrar más que la pensión básica lo construye con ahorro de empresa o personal, con cuentas claras y sin cargo al sistema público." }
+            {
+              "nombre": "Pensión básica igual para todos",
+              "texto": "Una cuantía pública única para toda persona en edad de jubilación, completa con una vida de residencia en España y proporcional si se ha residido menos, como en Países Bajos.",
+              "fuente": "https://svb.nl/en/aow-pension/aow-pension-in-brief",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mayores con carreras de cotización cortas o irregulares",
+                    "personas que cuidaron sin contrato"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "futuros jubilados de salarios altos, con menos pensión pública",
+                    "personas con pocos años de residencia en España"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, si la cuantía sube el gasto total"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuantía ligada al salario mínimo neto",
+              "texto": "La ley fija la pensión básica como un porcentaje del salario mínimo neto, nunca por debajo del umbral de pobreza, con un importe para quien vive solo y otro para quien convive.",
+              "fuente": "https://svb.nl/en/aow-pension/how-much-will-you-get-in-aow-pension-and-other-pensions/aow-amounts-depending-on-living-situation",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas con la pensión básica"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "trabajadores de salario mínimo, si su subida se frena por su coste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Doble ancla: salario mínimo e IPC",
+              "texto": "Sube cada año con el salario mínimo y, como poco, con el IPC. Si un año el IPC la deja por encima del porcentaje fijado, las subidas siguientes absorben la diferencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas en años de inflación alta"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "pensionistas en los años en que se absorbe la diferencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Transición por generaciones",
+              "texto": "Lo ya cotizado se reconoce con las reglas actuales y el nuevo sistema se aplica poco a poco a quien aún está lejos de jubilarse, con una ley pactada en el Pacto de Toledo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores cerca de la jubilación",
+                    "pensionistas actuales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores jóvenes que pasan al nuevo sistema"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan dos sistemas a la vez durante años"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Lo de encima, con ahorro propio o de empresa",
+              "texto": "Quien quiera cobrar más que la pensión básica lo construye con ahorro de empresa o personal, con cuentas claras y sin cargo al sistema público.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con capacidad de ahorro",
+                    "gestoras de planes de pensiones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "asalariados de sueldos altos que esperan una pensión pública alta"
+                  ],
+                  "indirecto": [
+                    "trabajadores sin capacidad de ahorro, que se quedan sin complemento"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -127,49 +535,432 @@
           "nivel": 0,
           "resumen": "Negar que el envejecimiento encarece las pensiones, o proponer desmontar el sistema sin decir quién pagará a los que ya cobran.",
           "medidas": [
-            { "nombre": "Negar el envejecimiento", "texto": "Sostiene que el gasto en pensiones no crecerá aunque haya más jubilados por cada trabajador, y por eso no prevé ni ingresos nuevos ni ajustes." },
-            { "nombre": "Desmontar sin sustituto", "texto": "Propone dejar de pagar el sistema público o pasarlo a cuentas privadas sin explicar quién paga, mientras tanto, las pensiones de quienes ya están jubilados." },
-            { "nombre": "Tapar el agujero cada año", "texto": "Cubre lo que falta cada año con préstamos y transferencias del Estado, sin plan ni horizonte, y deja la factura a quienes hoy son jóvenes." }
+            {
+              "nombre": "Negar el envejecimiento",
+              "texto": "Sostiene que el gasto en pensiones no crecerá aunque haya más jubilados por cada trabajador, y por eso no prevé ni ingresos nuevos ni ajustes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas actuales, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "trabajadores jóvenes que cargarán con el ajuste",
+                    "pensionistas futuros"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Desmontar sin sustituto",
+              "texto": "Propone dejar de pagar el sistema público o pasarlo a cuentas privadas sin explicar quién paga, mientras tanto, las pensiones de quienes ya están jubilados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gestoras de fondos privados de pensiones",
+                    "trabajadores de sueldos altos con capacidad de ahorro"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pensionistas actuales",
+                    "trabajadores cerca de la jubilación"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagarían la transición"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tapar el agujero cada año",
+              "texto": "Cubre lo que falta cada año con préstamos y transferencias del Estado, sin plan ni horizonte, y deja la factura a quienes hoy son jóvenes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas actuales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "jóvenes que heredan la deuda",
+                    "contribuyentes futuros"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Reconocer el problema con datos públicos: cuánto crecerá el gasto, cuántos cotizarán por cada jubilado y qué se paga con cotizaciones y qué con impuestos.",
           "medidas": [
-            { "nombre": "Proyecciones públicas a 20 y 40 años", "texto": "La Seguridad Social publica cada año sus previsiones de gasto, ingresos y cotizantes por jubilado a 20 y 40 años, con los supuestos que ha usado, para que cualquiera pueda revisarlas.", "meta": true },
-            { "nombre": "Cuentas separadas por origen del dinero", "texto": "El presupuesto separa las pensiones pagadas con cotizaciones de los gastos que no lo son, como los complementos a mínimos o las rebajas de cuotas, que se pagan con impuestos." },
-            { "nombre": "Fondo de reserva con reglas", "texto": "Un fondo de reserva de la Seguridad Social que se llena en los años buenos y solo se usa según reglas escritas en la ley, publicando cada movimiento." }
+            {
+              "nombre": "Proyecciones públicas a 20 y 40 años",
+              "texto": "La Seguridad Social publica cada año sus previsiones de gasto, ingresos y cotizantes por jubilado a 20 y 40 años, con los supuestos que ha usado, para que cualquiera pueda revisarlas.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que planifican su jubilación"
+                  ],
+                  "indirecto": [
+                    "prensa, universidades y analistas que revisan el sistema"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica previsiones que la Seguridad Social ya calcula; el coste es pequeño y no cambia ninguna pensión ni cuota."
+              }
+            },
+            {
+              "nombre": "Cuentas separadas por origen del dinero",
+              "texto": "El presupuesto separa las pensiones pagadas con cotizaciones de los gastos que no lo son, como los complementos a mínimos o las rebajas de cuotas, que se pagan con impuestos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cotizantes, que ven a qué se destinan sus cuotas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, con un gasto más visible"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "empresas con rebajas de cuotas, que quedan a la vista"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fondo de reserva con reglas",
+              "texto": "Un fondo de reserva de la Seguridad Social que se llena en los años buenos y solo se usa según reglas escritas en la ley, publicando cada movimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas futuros"
+                  ],
+                  "indirecto": [
+                    "trabajadores jóvenes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes de los años buenos, sin ese dinero para otros gastos"
+                  ],
+                  "indirecto": [
+                    "servicios públicos que compiten por ese dinero"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Reglas que obligan a actuar: un organismo independiente examina las cuentas cada pocos años y, si se desvían, se aplica un ajuste escrito de antemano.",
           "medidas": [
-            { "nombre": "Examen de un organismo independiente", "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) comprueba con regularidad si el gasto en pensiones respeta el límite legal y publica su informe completo.", "fuente": "https://www.boe.es/eli/es/rdl/2023/03/16/2/con" },
-            { "nombre": "Ajuste automático si hay desvío", "texto": "Si el examen detecta desvío, se aplica una corrección ya escrita en la ley, en ingresos o en gasto, salvo que el Parlamento apruebe otra que ahorre lo mismo." },
-            { "nombre": "Cada reforma, con su cuenta a 30 años", "texto": "Toda reforma de pensiones llega al Parlamento con su efecto estimado en gasto e ingresos a 30 años, calculado por el organismo independiente y no por el Gobierno.", "meta": true },
-            { "nombre": "Cotizar por todo lo que se cobra", "texto": "La Inspección de Trabajo cruza datos con Hacienda para detectar sueldos no declarados y falsos autónomos, que restan cotizaciones al sistema." }
+            {
+              "nombre": "Examen de un organismo independiente",
+              "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) comprueba con regularidad si el gasto en pensiones respeta el límite legal y publica su informe completo.",
+              "fuente": "https://www.boe.es/eli/es/rdl/2023/03/16/2/con",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cotizantes y pensionistas futuros"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos en ejercicio, con menos margen para maquillar cifras"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ajuste automático si hay desvío",
+              "texto": "Si el examen detecta desvío, se aplica una corrección ya escrita en la ley, en ingresos o en gasto, salvo que el Parlamento apruebe otra que ahorre lo mismo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores jóvenes y pensionistas futuros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pensionistas o cotizantes, según dónde caiga el ajuste"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, si la corrección es en ingresos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cada reforma, con su cuenta a 30 años",
+              "texto": "Toda reforma de pensiones llega al Parlamento con su efecto estimado en gasto e ingresos a 30 años, calculado por el organismo independiente y no por el Gobierno.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores jóvenes"
+                  ],
+                  "indirecto": [
+                    "contribuyentes futuros"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos en ejercicio, con menos margen para reformas sin coste"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cotizar por todo lo que se cobra",
+              "texto": "La Inspección de Trabajo cruza datos con Hacienda para detectar sueldos no declarados y falsos autónomos, que restan cotizaciones al sistema.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con sueldo en negro o falsos autónomos",
+                    "pensionistas futuros"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen y compiten con las que no"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pagan en negro o usan falsos autónomos"
+                  ],
+                  "indirecto": [
+                    "clientes de esos negocios, si suben los precios"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Reglas pactadas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo de mujeres, mayores, jóvenes e inmigrantes.",
           "medidas": [
-            { "nombre": "Reglas blindadas por mayoría amplia", "texto": "Las reglas básicas del sistema solo se cambian con una mayoría reforzada acordada en el Pacto de Toledo, la comisión del Congreso que revisa las pensiones." },
-            { "nombre": "Jubilación flexible y activa", "texto": "Salir antes o después de la edad legal con la pensión ajustada sin premio ni castigo para el sistema, y poder combinar pensión y trabajo a tiempo parcial." },
-            { "nombre": "Más cotizantes con más empleo", "texto": "Planes con objetivos públicos para subir el empleo de mujeres, mayores de 55 y jóvenes, y vías ágiles para que quien llega de fuera trabaje con contrato y cotice.", "meta": true },
-            { "nombre": "Salida antes para trabajos penosos", "texto": "Jubilación anticipada sin recorte para oficios físicamente duros o peligrosos, decidida oficio a oficio con estudios de salud y revisada cada cierto tiempo." }
+            {
+              "nombre": "Reglas blindadas por mayoría amplia",
+              "texto": "Las reglas básicas del sistema solo se cambian con una mayoría reforzada acordada en el Pacto de Toledo, la comisión del Congreso que revisa las pensiones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que planifican a largo plazo",
+                    "pensionistas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos con mayoría simple que quieren reformar solos"
+                  ],
+                  "indirecto": [
+                    "quien necesita un cambio urgente que no logra consenso"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Jubilación flexible y activa",
+              "texto": "Salir antes o después de la edad legal con la pensión ajustada sin premio ni castigo para el sistema, y poder combinar pensión y trabajo a tiempo parcial.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mayores que quieren seguir trabajando a tiempo parcial",
+                    "trabajadores que necesitan salir antes"
+                  ],
+                  "indirecto": [
+                    "empresas que retienen experiencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien se jubila antes, con una pensión más baja"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Más cotizantes con más empleo",
+              "texto": "Planes con objetivos públicos para subir el empleo de mujeres, mayores de 55 y jóvenes, y vías ágiles para que quien llega de fuera trabaje con contrato y cotice.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres sin empleo",
+                    "mayores de 55 en paro",
+                    "jóvenes en paro",
+                    "recién llegados sin permiso de trabajo"
+                  ],
+                  "indirecto": [
+                    "pensionistas, por las cotizaciones nuevas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los planes de empleo"
+                  ],
+                  "indirecto": [
+                    "trabajadores poco cualificados que compiten por los mismos puestos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Salida antes para trabajos penosos",
+              "texto": "Jubilación anticipada sin recorte para oficios físicamente duros o peligrosos, decidida oficio a oficio con estudios de salud y revisada cada cierto tiempo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de oficios físicamente duros o peligrosos"
+                  ],
+                  "indirecto": [
+                    "sus familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas del sector, si se les sube la cotización"
+                  ],
+                  "indirecto": [
+                    "resto de cotizantes, que sostienen el coste"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una edad de jubilación que sigue por fórmula a la esperanza de vida, avisada con años de antelación, y un balance anual que activa ajustes pactados.",
           "medidas": [
-            { "nombre": "Edad ligada a la esperanza de vida", "texto": "La edad legal se recalcula cada cinco años según la esperanza de vida a los 65, se anuncia con 15 de antelación y nunca sube más de un año de una vez, como en Dinamarca.", "meta": true, "fuente": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf" },
-            { "nombre": "Cada año de vida ganado, repartido", "texto": "La ley fija qué parte de cada año de vida ganado se traduce en trabajar más y cuál en más años de jubilación, como hace Países Bajos desde 2025.", "fuente": "https://www.cbs.nl/en-gb/news/2024/26/population-outlook-2050-more-residents-born-outside-the-netherlands/state-pension-age" },
-            { "nombre": "Balance anual del sistema", "texto": "El organismo independiente compara cada año las pensiones prometidas con los cotizantes, los salarios y los ingresos previstos, y publica si salen las cuentas." },
-            { "nombre": "Ajuste pactado si el balance no cuadra", "texto": "Si el balance sale negativo, se activa un ajuste acordado de antemano que reparte el esfuerzo entre ingresos, edad y subidas por encima del IPC; la garantía del IPC no se toca." },
-            { "nombre": "Voto del Congreso en cada revisión", "texto": "La fórmula no se aplica a escondidas: cada subida de edad se vota en el Congreso con el balance delante, como hace el Parlamento danés.", "fuente": "https://via.ritzau.dk/pressemeddelelse/14420769/forhojelse-af-folkepensionsalderen-i-2040-sikrer-velfaerden?lang=da" }
+            {
+              "nombre": "Edad ligada a la esperanza de vida",
+              "texto": "La edad legal se recalcula cada cinco años según la esperanza de vida a los 65, se anuncia con 15 de antelación y nunca sube más de un año de una vez, como en Dinamarca.",
+              "meta": true,
+              "fuente": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores jóvenes",
+                    "contribuyentes futuros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores que tendrán que trabajar más años",
+                    "trabajadores de rentas bajas, con menor esperanza de vida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cada año de vida ganado, repartido",
+              "texto": "La ley fija qué parte de cada año de vida ganado se traduce en trabajar más y cuál en más años de jubilación, como hace Países Bajos desde 2025.",
+              "fuente": "https://www.cbs.nl/en-gb/news/2024/26/population-outlook-2050-more-residents-born-outside-the-netherlands/state-pension-age",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que conocen de antemano su edad de jubilación"
+                  ],
+                  "indirecto": [
+                    "trabajadores jóvenes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores que trabajarán parte de los años ganados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Balance anual del sistema",
+              "texto": "El organismo independiente compara cada año las pensiones prometidas con los cotizantes, los salarios y los ingresos previstos, y publica si salen las cuentas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cotizantes y pensionistas futuros"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es información: compara datos que ya existen y no cambia por sí sola ninguna pensión ni cuota; su coste es pequeño."
+              }
+            },
+            {
+              "nombre": "Ajuste pactado si el balance no cuadra",
+              "texto": "Si el balance sale negativo, se activa un ajuste acordado de antemano que reparte el esfuerzo entre ingresos, edad y subidas por encima del IPC; la garantía del IPC no se toca.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas actuales, que conservan la subida con el IPC",
+                    "trabajadores jóvenes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "cotizantes, si sube lo que pagan",
+                    "trabajadores cerca de jubilarse, si sube la edad"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Voto del Congreso en cada revisión",
+              "texto": "La fórmula no se aplica a escondidas: cada subida de edad se vota en el Congreso con el balance delante, como hace el Parlamento danés.",
+              "fuente": "https://via.ritzau.dk/pressemeddelelse/14420769/forhojelse-af-folkepensionsalderen-i-2040-sikrer-velfaerden?lang=da",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores afectados por cada subida de edad"
+                  ],
+                  "indirecto": [
+                    "votantes, que saben a quién pedir cuentas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "trabajadores jóvenes, si el voto retrasa ajustes necesarios"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -182,50 +973,454 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre contratación, o con despido sin causa ni compensación, o prohibiendo a la empresa ajustar plantilla aunque peligre.",
           "medidas": [
-            { "nombre": "Sin propuesta sobre contratación", "texto": "No dice cómo se contrata, cómo se despide ni qué pasa con quien pierde el empleo; deja intactos los problemas sin nombrarlos." },
-            { "nombre": "Despido libre y sin compensación", "texto": "Defiende despedir sin causa ni indemnización, dejando al trabajador sin ingresos ni posibilidad de reclamar ante un juez." },
-            { "nombre": "Plantilla congelada por ley", "texto": "Impide a la empresa reducir plantilla incluso cuando pierde dinero, lo que la empuja al cierre y hace que todos pierdan el empleo." }
+            {
+              "nombre": "Sin propuesta sobre contratación",
+              "texto": "No dice cómo se contrata, cómo se despide ni qué pasa con quien pierde el empleo; deja intactos los problemas sin nombrarlos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores fijos con contrato antiguo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores temporales",
+                    "personas en paro"
+                  ],
+                  "indirecto": [
+                    "pymes que no saben cómo contratar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Despido libre y sin compensación",
+              "texto": "Defiende despedir sin causa ni indemnización, dejando al trabajador sin ingresos ni posibilidad de reclamar ante un juez.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que ajustan plantilla sin coste"
+                  ],
+                  "indirecto": [
+                    "personas en paro, si se contrata más"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores asalariados"
+                  ],
+                  "indirecto": [
+                    "familias que dependen de un solo sueldo",
+                    "contribuyentes, por más gasto en paro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plantilla congelada por ley",
+              "texto": "Impide a la empresa reducir plantilla incluso cuando pierde dinero, lo que la empuja al cierre y hace que todos pierdan el empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con empleo hoy, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con pérdidas"
+                  ],
+                  "indirecto": [
+                    "esos mismos trabajadores, si la empresa cierra",
+                    "personas en paro, porque se contrata menos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Contratar fácil y con reglas claras: pocos modelos de contrato, un solo trámite digital y ayuda a quien contrata por primera vez.",
           "medidas": [
-            { "nombre": "Pocos modelos de contrato", "texto": "Indefinido, formativo y temporal solo por causas concretas, explicados en una guía pública sencilla; es la base que ya fijó la reforma laboral de 2021.", "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo" },
-            { "nombre": "Alta en un solo trámite digital", "texto": "Dar de alta a un trabajador con un único formulario en línea que sirve a la vez para la Seguridad Social, Hacienda y el servicio de empleo." },
-            { "nombre": "Ayuda para el primer contrato", "texto": "Asesoría pública gratuita, presencial y en línea, para autónomos y microempresas que contratan por primera vez: qué contrato, qué cuesta y qué obligaciones trae." },
-            { "nombre": "Periodo de prueba claro", "texto": "Duración máxima del periodo de prueba fijada por ley y convenio, la misma para todos los contratos, para que ninguna de las partes se lleve sorpresas." }
+            {
+              "nombre": "Pocos modelos de contrato",
+              "texto": "Indefinido, formativo y temporal solo por causas concretas, explicados en una guía pública sencilla; es la base que ya fijó la reforma laboral de 2021.",
+              "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que antes encadenaban contratos temporales"
+                  ],
+                  "indirecto": [
+                    "pymes, con reglas más fáciles de entender"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de actividad estacional o muy variable"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Alta en un solo trámite digital",
+              "texto": "Dar de alta a un trabajador con un único formulario en línea que sirve a la vez para la Seguridad Social, Hacienda y el servicio de empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "autónomos y microempresas que contratan"
+                  ],
+                  "indirecto": [
+                    "trabajadores, dados de alta antes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestorías que cobran por los trámites de alta"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda para el primer contrato",
+              "texto": "Asesoría pública gratuita, presencial y en línea, para autónomos y microempresas que contratan por primera vez: qué contrato, qué cuesta y qué obligaciones trae.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "autónomos que contratan por primera vez",
+                    "microempresas"
+                  ],
+                  "indirecto": [
+                    "trabajadores contratados con las reglas bien aplicadas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la asesoría"
+                  ],
+                  "indirecto": [
+                    "gestorías y asesorías privadas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Periodo de prueba claro",
+              "texto": "Duración máxima del periodo de prueba fijada por ley y convenio, la misma para todos los contratos, para que ninguna de las partes se lleve sorpresas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores recién contratados"
+                  ],
+                  "indirecto": [
+                    "empresas, con menos pleitos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que hoy alargan el periodo de prueba"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Adaptarse sin despedir: cambios de jornada, de funciones y reducciones temporales pactados con la plantilla antes de recurrir al despido.",
           "medidas": [
-            { "nombre": "Reducción temporal de jornada con ayuda", "texto": "Expedientes de regulación temporal de empleo (los ERTE): en una crisis la empresa reduce horas en vez de despedir, el Estado cubre parte del sueldo y el tiempo libre se usa para formarse." },
-            { "nombre": "Bolsa de horas anual", "texto": "Distribución irregular de la jornada a lo largo del año pactada en convenio, con preaviso y límites, para cubrir picos de trabajo sin horas extra ni despidos." },
-            { "nombre": "Cambio de funciones con formación", "texto": "Cambiar de puesto o de centro dentro de la empresa, acordado con los representantes de los trabajadores y acompañado de la formación necesaria." },
-            { "nombre": "Condiciones de crisis por tiempo limitado", "texto": "Una empresa en dificultades puede aplicar condiciones distintas a las del convenio solo con acuerdo o arbitraje, por un tiempo fijado y con compromiso de empleo." }
+            {
+              "nombre": "Reducción temporal de jornada con ayuda",
+              "texto": "Expedientes de regulación temporal de empleo (los ERTE): en una crisis la empresa reduce horas en vez de despedir, el Estado cubre parte del sueldo y el tiempo libre se usa para formarse.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de empresas en crisis temporal",
+                    "empresas con caída temporal de actividad"
+                  ],
+                  "indirecto": [
+                    "comercios de su entorno"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan parte del sueldo"
+                  ],
+                  "indirecto": [
+                    "empresas que compiten con negocios sostenidos con ayudas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Bolsa de horas anual",
+              "texto": "Distribución irregular de la jornada a lo largo del año pactada en convenio, con preaviso y límites, para cubrir picos de trabajo sin horas extra ni despidos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas con picos de trabajo"
+                  ],
+                  "indirecto": [
+                    "clientes, con mejor servicio en temporada alta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores que dejan de cobrar horas extra",
+                    "trabajadores con cuidados a cargo y horarios cambiantes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cambio de funciones con formación",
+              "texto": "Cambiar de puesto o de centro dentro de la empresa, acordado con los representantes de los trabajadores y acompañado de la formación necesaria.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores cuyo puesto desaparece",
+                    "empresas que se reorganizan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores trasladados a otro centro"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Condiciones de crisis por tiempo limitado",
+              "texto": "Una empresa en dificultades puede aplicar condiciones distintas a las del convenio solo con acuerdo o arbitraje, por un tiempo fijado y con compromiso de empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas en dificultades",
+                    "trabajadores cuyo empleo se salva"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores con sueldo rebajado durante ese periodo"
+                  ],
+                  "indirecto": [
+                    "empresas competidoras que aplican el convenio entero"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Seguridad que va con la persona: una cuenta de indemnización que se lleva de empresa en empresa y un servicio de empleo que recoloca y se evalúa.",
           "medidas": [
-            { "nombre": "Mochila de indemnización portátil", "texto": "La empresa ingresa cada mes una parte del sueldo en una cuenta individual del trabajador, que la conserva al cambiar de empleo o al dimitir, como en Austria desde 2003.", "fuente": "https://www.sozialministerium.gv.at/Themen/Arbeit/Arbeitsrecht/Entlohnung/Betriebliche-Mitarbeiter-und-Selbststaendigenvorsorge.html" },
-            { "nombre": "Orientador personal desde el primer mes", "texto": "Cada persona que se queda en paro tiene un orientador del servicio de empleo y un plan de búsqueda escrito antes de que acabe su primer mes sin trabajo.", "meta": true },
-            { "nombre": "Programas de empleo evaluados", "texto": "Cada programa público de empleo tiene una evaluación independiente con resultados publicados; lo que no ayuda a encontrar trabajo deja de financiarse." },
-            { "nombre": "Recolocación en despidos colectivos", "texto": "La empresa que despide a muchos trabajadores paga un plan de recolocación con una entidad externa, y el servicio de empleo publica cuántos encontraron trabajo." }
+            {
+              "nombre": "Mochila de indemnización portátil",
+              "texto": "La empresa ingresa cada mes una parte del sueldo en una cuenta individual del trabajador, que la conserva al cambiar de empleo o al dimitir, como en Austria desde 2003.",
+              "fuente": "https://www.sozialministerium.gv.at/Themen/Arbeit/Arbeitsrecht/Entlohnung/Betriebliche-Mitarbeiter-und-Selbststaendigenvorsorge.html",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que cambian de empleo o dimiten",
+                    "trabajadores jóvenes con poca antigüedad"
+                  ],
+                  "indirecto": [
+                    "empresas que contratan, con más movilidad del personal"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pagan cada mes aunque no despidan",
+                    "trabajadores veteranos, si sustituye a la indemnización actual"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Orientador personal desde el primer mes",
+              "texto": "Cada persona que se queda en paro tiene un orientador del servicio de empleo y un plan de búsqueda escrito antes de que acabe su primer mes sin trabajo.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que acaban de quedarse en paro"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan candidatos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más orientadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Programas de empleo evaluados",
+              "texto": "Cada programa público de empleo tiene una evaluación independiente con resultados publicados; lo que no ayuda a encontrar trabajo deja de financiarse.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en paro, con programas que funcionan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "entidades con programas que no dan resultado"
+                  ],
+                  "indirecto": [
+                    "empleados de esas entidades"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Recolocación en despidos colectivos",
+              "texto": "La empresa que despide a muchos trabajadores paga un plan de recolocación con una entidad externa, y el servicio de empleo publica cuántos encontraron trabajo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores afectados por despidos colectivos"
+                  ],
+                  "indirecto": [
+                    "empresas de recolocación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que despiden a muchos trabajadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un solo contrato indefinido con coste de salida conocido y en parte portátil, a cambio de un seguro de paro alto y una recolocación rápida y evaluada.",
           "medidas": [
-            { "nombre": "Contrato indefinido único", "texto": "Un contrato indefinido como única forma normal de entrada; los temporales quedan para sustituciones y temporadas, para que nadie encadene contratos." },
-            { "nombre": "Indemnización conocida desde el primer día", "texto": "Indemnización por despido fijada por ley según la antigüedad, igual para todos los contratos y exigible desde el primer día, como el pago de transición de Países Bajos.", "fuente": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/" },
-            { "nombre": "Paro alto y ligado a la búsqueda", "texto": "Prestación por desempleo alta al principio, unida a un plan de búsqueda y formación con citas y ofertas; quien lo rechaza sin motivo pierde parte de la ayuda, como en Dinamarca.", "fuente": "https://www.star.dk/en/about-the-danish-agency-for-labour-market-and-recruitment/flexicurity" },
-            { "nombre": "Primero la red, después la salida sencilla", "texto": "La salida solo se simplifica cuando el servicio de empleo demuestra con datos públicos que recoloca; sin esa pata, el modelo no se activa." },
-            { "nombre": "Nulidad intacta ante la discriminación", "texto": "El despido discriminatorio o que vulnera derechos fundamentales sigue siendo nulo, con readmisión y decisión del juez. La sencillez no llega hasta ahí." }
+            {
+              "nombre": "Contrato indefinido único",
+              "texto": "Un contrato indefinido como única forma normal de entrada; los temporales quedan para sustituciones y temporadas, para que nadie encadene contratos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores jóvenes que encadenan temporales"
+                  ],
+                  "indirecto": [
+                    "familias, con más estabilidad para alquilar o formar un hogar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de temporada fuera de las excepciones",
+                    "empresas de trabajo temporal"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Indemnización conocida desde el primer día",
+              "texto": "Indemnización por despido fijada por ley según la antigüedad, igual para todos los contratos y exigible desde el primer día, como el pago de transición de Países Bajos.",
+              "fuente": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con poca antigüedad"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que despiden a recién contratados",
+                    "despedidos improcedentes, si la cuantía fija es menor que la actual"
+                  ],
+                  "indirecto": [
+                    "candidatos, si las empresas contratan con más cautela"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Paro alto y ligado a la búsqueda",
+              "texto": "Prestación por desempleo alta al principio, unida a un plan de búsqueda y formación con citas y ofertas; quien lo rechaza sin motivo pierde parte de la ayuda, como en Dinamarca.",
+              "fuente": "https://www.star.dk/en/about-the-danish-agency-for-labour-market-and-recruitment/flexicurity",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que pierden el empleo"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan candidatos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes",
+                    "quien rechaza ofertas sin motivo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Primero la red, después la salida sencilla",
+              "texto": "La salida solo se simplifica cuando el servicio de empleo demuestra con datos públicos que recoloca; sin esa pata, el modelo no se activa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores, protegidos antes de abaratar la salida"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que esperan la salida sencilla y tardan en tenerla"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el servicio de empleo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Nulidad intacta ante la discriminación",
+              "texto": "El despido discriminatorio o que vulnera derechos fundamentales sigue siendo nulo, con readmisión y decisión del juez. La sencillez no llega hasta ahí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores despedidos por discriminación"
+                  ],
+                  "indirecto": [
+                    "plantillas que conservan su derecho a reclamar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que discriminan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -238,50 +1433,462 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre formación ni productividad, o defendiendo que reciclarse es asunto de cada uno y retirando la formación a quien está en paro.",
           "medidas": [
-            { "nombre": "Sin plan de formación", "texto": "No dice nada sobre cómo aprende un adulto un oficio nuevo ni sobre por qué se produce poco por hora trabajada." },
-            { "nombre": "Reciclarse es cosa de cada uno", "texto": "Retira los cursos públicos a quien está en paro y deja la formación solo a quien puede pagarla, aunque sea quien más la necesita." },
-            { "nombre": "Cursos sin control de resultados", "texto": "Reparte fondos públicos de formación sin medir si alguien encuentra trabajo después, lo que favorece cursos de relleno y fraude." }
+            {
+              "nombre": "Sin plan de formación",
+              "texto": "No dice nada sobre cómo aprende un adulto un oficio nuevo ni sobre por qué se produce poco por hora trabajada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "adultos cuyo oficio desaparece"
+                  ],
+                  "indirecto": [
+                    "empresas que no encuentran personal formado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reciclarse es cosa de cada uno",
+              "texto": "Retira los cursos públicos a quien está en paro y deja la formación solo a quien puede pagarla, aunque sea quien más la necesita.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, por el menor gasto público",
+                    "academias privadas de pago"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas en paro sin dinero para cursos"
+                  ],
+                  "indirecto": [
+                    "empresas que no encuentran personal formado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cursos sin control de resultados",
+              "texto": "Reparte fondos públicos de formación sin medir si alguien encuentra trabajo después, lo que favorece cursos de relleno y fraude.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "entidades que cobran por cursos de relleno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas en paro que pierden tiempo en cursos inútiles",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "centros de formación serios que compiten con los de relleno"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Formación gratuita para quien busca empleo, reconocimiento oficial de lo que ya se sabe hacer y un buscador público de cursos.",
           "medidas": [
-            { "nombre": "Cursos para personas en paro", "texto": "Oferta pública y gratuita de cursos ligados a oficios con demanda, gestionada por las comunidades autónomas, con plazas todo el año." },
-            { "nombre": "Acreditar lo aprendido trabajando", "texto": "Procedimiento abierto todo el año para que la experiencia laboral se reconozca con un certificado oficial, sin tener que repetir lo que ya se sabe hacer." },
-            { "nombre": "Competencias digitales para adultos", "texto": "Cursos gratuitos de manejo digital básico en ayuntamientos, bibliotecas y centros de adultos, pensados para quien nunca los ha necesitado en su trabajo." },
-            { "nombre": "Buscador único de cursos", "texto": "Un portal público que reúne todos los cursos pagados con dinero público, de cualquier administración, con fechas, plazas y requisitos." }
+            {
+              "nombre": "Cursos para personas en paro",
+              "texto": "Oferta pública y gratuita de cursos ligados a oficios con demanda, gestionada por las comunidades autónomas, con plazas todo el año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en paro"
+                  ],
+                  "indirecto": [
+                    "empresas de sectores con falta de personal"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "academias privadas que compiten con la oferta gratuita"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Acreditar lo aprendido trabajando",
+              "texto": "Procedimiento abierto todo el año para que la experiencia laboral se reconozca con un certificado oficial, sin tener que repetir lo que ya se sabe hacer.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con oficio pero sin título oficial"
+                  ],
+                  "indirecto": [
+                    "empresas que necesitan acreditar a su personal"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las evaluaciones"
+                  ],
+                  "indirecto": [
+                    "titulados que pierden esa ventaja al competir"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Competencias digitales para adultos",
+              "texto": "Cursos gratuitos de manejo digital básico en ayuntamientos, bibliotecas y centros de adultos, pensados para quien nunca los ha necesitado en su trabajo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "adultos sin manejo digital",
+                    "trabajadores mayores en activo"
+                  ],
+                  "indirecto": [
+                    "administraciones, con más trámites hechos en línea"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Buscador único de cursos",
+              "texto": "Un portal público que reúne todos los cursos pagados con dinero público, de cualquier administración, con fechas, plazas y requisitos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que buscan formación"
+                  ],
+                  "indirecto": [
+                    "centros que imparten cursos públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Solo reúne en un portal la información que cada administración ya publica; cuesta poco y nadie pierde acceso ni ingresos."
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "FP dual en todo el país, formación continua dentro de la empresa y apoyo a las pymes para trabajar mejor y crecer.",
           "medidas": [
-            { "nombre": "FP dual en cada comarca", "texto": "Formación profesional que se cursa a la vez en el centro y en la empresa, con plazas al alcance de todas las comarcas y contenidos decididos con cada sector." },
-            { "nombre": "Formación continua en horario de trabajo", "texto": "Crédito de formación de las empresas simplificado y permisos para formarse dentro de la jornada, pactados en convenio y con un certificado al final." },
-            { "nombre": "Mejora de gestión para pymes", "texto": "Programas públicos de mejora de la gestión y digitalización de pequeñas empresas, cofinanciados por el Estado, las comunidades y la UE, con resultados evaluados." },
-            { "nombre": "Crecer sin castigo", "texto": "Revisar las obligaciones y costes que saltan de golpe al pasar de cierto número de trabajadores, para que las empresas no se frenen en vez de crecer." }
+            {
+              "nombre": "FP dual en cada comarca",
+              "texto": "Formación profesional que se cursa a la vez en el centro y en la empresa, con plazas al alcance de todas las comarcas y contenidos decididos con cada sector.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jóvenes de comarcas sin oferta de formación profesional"
+                  ],
+                  "indirecto": [
+                    "empresas que forman a su futuro personal"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las plazas",
+                    "empresas que dedican tutores y tiempo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Formación continua en horario de trabajo",
+              "texto": "Crédito de formación de las empresas simplificado y permisos para formarse dentro de la jornada, pactados en convenio y con un certificado al final.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "asalariados que quieren formarse"
+                  ],
+                  "indirecto": [
+                    "empresas, con personal más cualificado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pierden horas de trabajo"
+                  ],
+                  "indirecto": [
+                    "compañeros que cubren las ausencias"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mejora de gestión para pymes",
+              "texto": "Programas públicos de mejora de la gestión y digitalización de pequeñas empresas, cofinanciados por el Estado, las comunidades y la UE, con resultados evaluados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pequeñas empresas"
+                  ],
+                  "indirecto": [
+                    "trabajadores de esas empresas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "empresas competidoras que no reciben la ayuda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Crecer sin castigo",
+              "texto": "Revisar las obligaciones y costes que saltan de golpe al pasar de cierto número de trabajadores, para que las empresas no se frenen en vez de crecer.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pequeñas empresas a punto de crecer"
+                  ],
+                  "indirecto": [
+                    "trabajadores que serían contratados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores, si se rebajan obligaciones que les protegen"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una cuenta personal de formación para toda la vida, resultados de cada curso publicados y un organismo que estudia la productividad cada año.",
           "medidas": [
-            { "nombre": "Cuenta personal de formación", "texto": "Cada persona tiene desde su primer empleo una cuenta con saldo anual para cursos, que conserva al cambiar de empresa o quedarse en paro, como en Francia.", "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705" },
-            { "nombre": "Resultados de cada curso publicados", "texto": "Cada curso, centro y oficina de empleo publica cuántos de sus alumnos trabajan al cabo de un año y en qué, comparando personas de perfil parecido." },
-            { "nombre": "Orientación antes de gastar el saldo", "texto": "Antes de usar la cuenta, una orientación personal ayuda a elegir el curso según los oficios con futuro en la zona y el perfil de cada uno." },
-            { "nombre": "Consejo de productividad independiente", "texto": "Un organismo independiente analiza cada año por qué crece o se estanca la productividad en cada sector y propone medidas, con informe público ante el Congreso." }
+            {
+              "nombre": "Cuenta personal de formación",
+              "texto": "Cada persona tiene desde su primer empleo una cuenta con saldo anual para cursos, que conserva al cambiar de empresa o quedarse en paro, como en Francia.",
+              "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que cambian de empresa",
+                    "personas en paro"
+                  ],
+                  "indirecto": [
+                    "centros de formación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cotizan para financiarla",
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Resultados de cada curso publicados",
+              "texto": "Cada curso, centro y oficina de empleo publica cuántos de sus alumnos trabajan al cabo de un año y en qué, comparando personas de perfil parecido.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnos que eligen curso con datos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con malos resultados de empleo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Orientación antes de gastar el saldo",
+              "texto": "Antes de usar la cuenta, una orientación personal ayuda a elegir el curso según los oficios con futuro en la zona y el perfil de cada uno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que no saben qué curso elegir"
+                  ],
+                  "indirecto": [
+                    "centros con cursos de oficios con futuro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan los orientadores"
+                  ],
+                  "indirecto": [
+                    "centros con cursos de poca salida"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Consejo de productividad independiente",
+              "texto": "Un organismo independiente analiza cada año por qué crece o se estanca la productividad en cada sector y propone medidas, con informe público ante el Congreso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de sectores estancados"
+                  ],
+                  "indirecto": [
+                    "empresas de esos sectores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el organismo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un derecho a formarse toda la vida: más saldo para quien menos estudios tiene, permiso pagado para reciclarse y dinero solo para lo que da resultados.",
           "medidas": [
-            { "nombre": "Más saldo para quien menos tiene", "texto": "La cuenta recibe más saldo si la persona no tiene titulación y una recarga extra a partir de los 40 años para cambiar de oficio, como hace Singapur.", "meta": true, "fuente": "https://www.moe.gov.sg/news/press-releases/20240304-new-skillsfuture-level-up-programme-to-boost-mid-career-upskilling-and-reskilling" },
-            { "nombre": "Permiso pagado para reciclarse", "texto": "Durante un curso largo a tiempo completo se cobra una parte del sueldo, con un máximo de meses a lo largo de la vida, para cambiar de oficio sin quedarse sin ingresos." },
-            { "nombre": "El dinero sigue a los resultados", "texto": "Solo se financian los cursos, centros y oficinas que publican sus resultados de empleo; los que no colocan pierden la financiación pública." },
-            { "nombre": "FP gobernada con los oficios", "texto": "Estado, comunidades y organizaciones de cada oficio deciden juntos qué se enseña y cuántas plazas hay, como en Suiza, donde la mayoría de jóvenes elige la FP.", "fuente": "https://www.sbfi.admin.ch/dam/sbfi/en/dokumente/2024/07/bbch_2024.pdf.download.pdf/BBCH_2024_EN.pdf" },
-            { "nombre": "Copago pequeño contra el fraude", "texto": "Un copago reducido por curso, del que queda exento quien no tiene ingresos, para frenar los cursos de relleno sin cerrar la puerta a nadie, como aplica Francia.", "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705" }
+            {
+              "nombre": "Más saldo para quien menos tiene",
+              "texto": "La cuenta recibe más saldo si la persona no tiene titulación y una recarga extra a partir de los 40 años para cambiar de oficio, como hace Singapur.",
+              "meta": true,
+              "fuente": "https://www.moe.gov.sg/news/press-releases/20240304-new-skillsfuture-level-up-programme-to-boost-mid-career-upskilling-and-reskilling",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "adultos sin titulación",
+                    "trabajadores mayores de 40 que cambian de oficio"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan personal reciclado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "titulados, que reciben menos saldo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Permiso pagado para reciclarse",
+              "texto": "Durante un curso largo a tiempo completo se cobra una parte del sueldo, con un máximo de meses a lo largo de la vida, para cambiar de oficio sin quedarse sin ingresos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que cambian de oficio"
+                  ],
+                  "indirecto": [
+                    "empresas con falta de personal en oficios nuevos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes o empresas que pagan el sueldo parcial",
+                    "empresas que pierden temporalmente al trabajador"
+                  ],
+                  "indirecto": [
+                    "compañeros que cubren la ausencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "El dinero sigue a los resultados",
+              "texto": "Solo se financian los cursos, centros y oficinas que publican sus resultados de empleo; los que no colocan pierden la financiación pública.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnos de centros que colocan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros y oficinas con malos resultados"
+                  ],
+                  "indirecto": [
+                    "centros con alumnos de más dificultad, si no se ajusta por perfil"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "FP gobernada con los oficios",
+              "texto": "Estado, comunidades y organizaciones de cada oficio deciden juntos qué se enseña y cuántas plazas hay, como en Suiza, donde la mayoría de jóvenes elige la FP.",
+              "fuente": "https://www.sbfi.admin.ch/dam/sbfi/en/dokumente/2024/07/bbch_2024.pdf.download.pdf/BBCH_2024_EN.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jóvenes que eligen formación profesional",
+                    "sectores con falta de personal"
+                  ],
+                  "indirecto": [
+                    "empresas de esos sectores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con títulos de poca demanda",
+                    "profesores de especialidades que se reducen"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Copago pequeño contra el fraude",
+              "texto": "Un copago reducido por curso, del que queda exento quien no tiene ingresos, para frenar los cursos de relleno sin cerrar la puerta a nadie, como aplica Francia.",
+              "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "alumnos serios, con menos cursos de relleno"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores con ingresos bajos que no quedan exentos"
+                  ],
+                  "indirecto": [
+                    "centros que vivían de cursos de relleno"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -294,49 +1901,438 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre horarios y cuidados, o justificando jornadas sin registro ni límite, horas extra sin pagar o la retirada de permisos.",
           "medidas": [
-            { "nombre": "Sin propuesta sobre el tiempo de trabajo", "texto": "No dice nada de horas, horarios ni cuidados, como si conciliar fuera un asunto privado de cada familia." },
-            { "nombre": "Jornadas sin registro ni límite", "texto": "Defiende quitar el registro de jornada o dejar sin control las horas extra, lo que en la práctica permite trabajar horas que no se pagan." },
-            { "nombre": "Retirar permisos de cuidado", "texto": "Propone recortar los permisos de nacimiento o de cuidado de familiares ya reconocidos, sin ofrecer nada que los sustituya." }
+            {
+              "nombre": "Sin propuesta sobre el tiempo de trabajo",
+              "texto": "No dice nada de horas, horarios ni cuidados, como si conciliar fuera un asunto privado de cada familia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas, sin obligaciones nuevas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias con hijos o mayores a cargo"
+                  ],
+                  "indirecto": [
+                    "mujeres que reducen jornada para cuidar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Jornadas sin registro ni límite",
+              "texto": "Defiende quitar el registro de jornada o dejar sin control las horas extra, lo que en la práctica permite trabajar horas que no se pagan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que alargan jornadas sin pagarlas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores con horas extra no pagadas"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen y compiten en desventaja",
+                    "cotizantes, por las cuotas que se pierden"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Retirar permisos de cuidado",
+              "texto": "Propone recortar los permisos de nacimiento o de cuidado de familiares ya reconocidos, sin ofrecer nada que los sustituya.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas, por menos ausencias"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por el menor gasto"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "padres y madres recientes",
+                    "trabajadores con familiares enfermos"
+                  ],
+                  "indirecto": [
+                    "hijos pequeños y personas dependientes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Que se cumpla la jornada: registro diario fiable que el trabajador puede consultar, toda hora extra pagada y una Inspección que lo comprueba.",
           "medidas": [
-            { "nombre": "Registro digital de jornada", "texto": "Registro diario de entrada y salida, digital y que no se puede alterar después, que el trabajador consulta y la Inspección comprueba; amplía el registro obligatorio desde 2019.", "fuente": "https://www.mites.gob.es/ficheros/ministerio/GuiaRegistroJornada.pdf" },
-            { "nombre": "Horas extra pagadas o compensadas", "texto": "Toda hora extra se paga con el recargo del convenio o se compensa con descanso en un plazo fijado, y respeta el límite anual de la ley." },
-            { "nombre": "Inspección donde más se incumple", "texto": "La Inspección de Trabajo planifica sus visitas de jornada en los sectores y empresas con más denuncias, y publica cada año qué ha encontrado." },
-            { "nombre": "Descansos y vacaciones efectivos", "texto": "Descanso diario y semanal y vacaciones pagadas que se disfrutan de verdad, sin cambios de turno avisados con horas de antelación." }
+            {
+              "nombre": "Registro digital de jornada",
+              "texto": "Registro diario de entrada y salida, digital y que no se puede alterar después, que el trabajador consulta y la Inspección comprueba; amplía el registro obligatorio desde 2019.",
+              "fuente": "https://www.mites.gob.es/ficheros/ministerio/GuiaRegistroJornada.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que hacen horas sin cobrar"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que no pagan las horas extra",
+                    "microempresas, por el coste de implantarlo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Horas extra pagadas o compensadas",
+              "texto": "Toda hora extra se paga con el recargo del convenio o se compensa con descanso en un plazo fijado, y respeta el límite anual de la ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que hacen horas extra"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que dependen de horas extra"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inspección donde más se incumple",
+              "texto": "La Inspección de Trabajo planifica sus visitas de jornada en los sectores y empresas con más denuncias, y publica cada año qué ha encontrado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de sectores con más abusos"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que incumplen la jornada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Descansos y vacaciones efectivos",
+              "texto": "Descanso diario y semanal y vacaciones pagadas que se disfrutan de verdad, sin cambios de turno avisados con horas de antelación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores a turnos"
+                  ],
+                  "indirecto": [
+                    "sus familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cambian turnos a última hora"
+                  ],
+                  "indirecto": [
+                    "clientes, con menos flexibilidad de servicio"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Permisos de cuidado pagados, escuelas infantiles y atención a la dependencia, para que conciliar no dependa de dejar el trabajo.",
           "medidas": [
-            { "nombre": "Permisos de nacimiento iguales y pagados", "texto": "Mantener y hacer cumplir el permiso por nacimiento igual para cada progenitor, pagado y que no se puede ceder al otro, ya aprobado en España en 2025.", "fuente": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx" },
-            { "nombre": "Permiso pagado para cuidar a un familiar", "texto": "Días retribuidos para atender a un familiar enfermo o en el hospital, y reducción de jornada para cuidados largos con cotización completa." },
-            { "nombre": "Escuela infantil de 0 a 3 años asequible", "texto": "Plazas públicas o concertadas de escuela infantil para quien las pida, con precio según ingresos, gestionadas por comunidades y ayuntamientos." },
-            { "nombre": "Dependencia que libera tiempo", "texto": "Ayuda a domicilio y centros de día con plazos cortos de resolución, para que cuidar a un mayor no obligue a reducir o dejar el empleo." }
+            {
+              "nombre": "Permisos de nacimiento iguales y pagados",
+              "texto": "Mantener y hacer cumplir el permiso por nacimiento igual para cada progenitor, pagado y que no se puede ceder al otro, ya aprobado en España en 2025.",
+              "fuente": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "padres y madres recientes"
+                  ],
+                  "indirecto": [
+                    "mujeres jóvenes, con menos discriminación al contratarlas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan los permisos",
+                    "empresas que cubren las ausencias",
+                    "familias que preferirían ceder el permiso al otro"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Permiso pagado para cuidar a un familiar",
+              "texto": "Días retribuidos para atender a un familiar enfermo o en el hospital, y reducción de jornada para cuidados largos con cotización completa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con un familiar enfermo"
+                  ],
+                  "indirecto": [
+                    "personas enfermas o dependientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cubren las ausencias",
+                    "contribuyentes, por la cotización completa"
+                  ],
+                  "indirecto": [
+                    "compañeros que cubren la ausencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Escuela infantil de 0 a 3 años asequible",
+              "texto": "Plazas públicas o concertadas de escuela infantil para quien las pida, con precio según ingresos, gestionadas por comunidades y ayuntamientos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos pequeños",
+                    "madres que pueden seguir trabajando"
+                  ],
+                  "indirecto": [
+                    "niños de hogares con pocos recursos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "escuelas infantiles privadas sin concierto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dependencia que libera tiempo",
+              "texto": "Ayuda a domicilio y centros de día con plazos cortos de resolución, para que cuidar a un mayor no obligue a reducir o dejar el empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas mayores dependientes",
+                    "familiares que las cuidan"
+                  ],
+                  "indirecto": [
+                    "trabajadoras del sector de cuidados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una jornada más corta pactada por sectores, horarios de trabajo y colegios que terminan antes por la tarde y cuidados repartidos entre hombres y mujeres.",
           "medidas": [
-            { "nombre": "Reducción de jornada por convenio", "texto": "Los convenios de cada sector pactan una semana laboral más corta, por etapas y según lo que permita cada actividad, sin rebaja de sueldo." },
-            { "nombre": "Pruebas piloto evaluadas", "texto": "Antes de generalizar una reducción, pruebas en administraciones y empresas voluntarias con datos públicos de productividad y bienestar, como hizo Islandia.", "fuente": "https://autonomy.work/portfolio/icelandsww/" },
-            { "nombre": "Horarios que terminan antes", "texto": "Administraciones, colegios y comercios acuerdan horarios para acabar antes por la tarde, con comidas más cortas y sin largas pausas a mediodía." },
-            { "nombre": "Desconexión con sanción", "texto": "El derecho a no responder mensajes de trabajo fuera de la jornada, recogido en cada convenio y sancionado por la Inspección si se incumple." }
+            {
+              "nombre": "Reducción de jornada por convenio",
+              "texto": "Los convenios de cada sector pactan una semana laboral más corta, por etapas y según lo que permita cada actividad, sin rebaja de sueldo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "asalariados de sectores que la pactan"
+                  ],
+                  "indirecto": [
+                    "comercio y ocio, con clientes con más tiempo libre"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pagan lo mismo por menos horas"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pruebas piloto evaluadas",
+              "texto": "Antes de generalizar una reducción, pruebas en administraciones y empresas voluntarias con datos públicos de productividad y bienestar, como hizo Islandia.",
+              "fuente": "https://autonomy.work/portfolio/icelandsww/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de las organizaciones voluntarias"
+                  ],
+                  "indirecto": [
+                    "sectores que deciden con datos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes, por el coste de la evaluación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Horarios que terminan antes",
+              "texto": "Administraciones, colegios y comercios acuerdan horarios para acabar antes por la tarde, con comidas más cortas y sin largas pausas a mediodía.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos en edad escolar"
+                  ],
+                  "indirecto": [
+                    "niños, con más tiempo en familia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comercios y hostelería que viven de la tarde-noche",
+                    "trabajadores que prefieren la jornada partida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Desconexión con sanción",
+              "texto": "El derecho a no responder mensajes de trabajo fuera de la jornada, recogido en cada convenio y sancionado por la Inspección si se incumple.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que reciben mensajes fuera de hora"
+                  ],
+                  "indirecto": [
+                    "sus familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que dependen de respuestas inmediatas"
+                  ],
+                  "indirecto": [
+                    "clientes que esperan respuesta fuera de horario"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Menos horas a medida que sube la productividad, sin perder sueldo; permisos iguales usables durante la infancia y derecho a adaptar el horario.",
           "medidas": [
-            { "nombre": "Productividad convertida en tiempo", "texto": "Cláusula en cada convenio sectorial que fija qué parte de la mejora de productividad va a sueldo y cuál a reducir horas; los sectores que más mejoran bajan antes." },
-            { "nombre": "Permisos usables durante la infancia", "texto": "Parte de los días de permiso se guardan y se usan cuando el hijo los necesite, hasta los 12 años, pagados y reservados a cada progenitor, como en Suecia.", "fuente": "https://www.forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit" },
-            { "nombre": "Adaptar el horario salvo causa escrita", "texto": "Derecho a pedir cambio de horario, de jornada o teletrabajo; la empresa responde por escrito en plazo y solo puede negarse por una causa organizativa concreta." },
-            { "nombre": "Encuesta pública del uso del tiempo", "texto": "Una encuesta oficial periódica mide horas de trabajo pagado y de cuidados por sexo y edad, para saber si el reparto mejora de verdad." }
+            {
+              "nombre": "Productividad convertida en tiempo",
+              "texto": "Cláusula en cada convenio sectorial que fija qué parte de la mejora de productividad va a sueldo y cuál a reducir horas; los sectores que más mejoran bajan antes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de sectores que mejoran su productividad"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas, que se quedan menos parte de la mejora",
+                    "trabajadores que preferirían toda la mejora en sueldo"
+                  ],
+                  "indirecto": [
+                    "clientes, si el servicio tiene menos horas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Permisos usables durante la infancia",
+              "texto": "Parte de los días de permiso se guardan y se usan cuando el hijo los necesite, hasta los 12 años, pagados y reservados a cada progenitor, como en Suecia.",
+              "fuente": "https://www.forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "padres y madres de niños hasta los 12 años"
+                  ],
+                  "indirecto": [
+                    "niños"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que reorganizan ausencias imprevistas",
+                    "contribuyentes que pagan los permisos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Adaptar el horario salvo causa escrita",
+              "texto": "Derecho a pedir cambio de horario, de jornada o teletrabajo; la empresa responde por escrito en plazo y solo puede negarse por una causa organizativa concreta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con cuidados a cargo"
+                  ],
+                  "indirecto": [
+                    "sus familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que deben justificar cada negativa"
+                  ],
+                  "indirecto": [
+                    "compañeros que cubren los horarios menos deseados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Encuesta pública del uso del tiempo",
+              "texto": "Una encuesta oficial periódica mide horas de trabajo pagado y de cuidados por sexo y edad, para saber si el reparto mejora de verdad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que cuidan sin cobrar"
+                  ],
+                  "indirecto": [
+                    "investigadores y prensa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es una encuesta estadística como las que ya hace el Instituto Nacional de Estadística; no impone obligaciones y cuesta poco."
+              }
+            }
           ]
         }
       ]
@@ -349,49 +2345,445 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre salarios, o suprimir el salario mínimo, tolerar el trabajo sin contrato o sustituir la negociación por sueldos fijados por el Gobierno.",
           "medidas": [
-            { "nombre": "Suprimir el salario mínimo", "texto": "Elimina el suelo salarial sin poner nada en su lugar, de modo que quien tiene menos poder para negociar puede cobrar lo que se le imponga." },
-            { "nombre": "Tolerar el trabajo sin contrato", "texto": "No propone nada contra el empleo sin dar de alta ni contra los falsos autónomos, que dejan al trabajador sin paro, sin baja y sin pensión." },
-            { "nombre": "Todos los sueldos fijados por el Gobierno", "texto": "Sustituye la negociación entre empresas y trabajadores por sueldos decididos por el Gobierno para cada empleo, más allá del salario mínimo." }
+            {
+              "nombre": "Suprimir el salario mínimo",
+              "texto": "Elimina el suelo salarial sin poner nada en su lugar, de modo que quien tiene menos poder para negociar puede cobrar lo que se le imponga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas intensivas en mano de obra barata"
+                  ],
+                  "indirecto": [
+                    "personas con poca experiencia, si se contrata más"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores de sueldos más bajos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por más ayudas a trabajadores pobres"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tolerar el trabajo sin contrato",
+              "texto": "No propone nada contra el empleo sin dar de alta ni contra los falsos autónomos, que dejan al trabajador sin paro, sin baja y sin pensión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que no dan de alta a su personal"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores sin contrato",
+                    "falsos autónomos"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen",
+                    "cotizantes y pensionistas, por las cuotas perdidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Todos los sueldos fijados por el Gobierno",
+              "texto": "Sustituye la negociación entre empresas y trabajadores por sueldos decididos por el Gobierno para cada empleo, más allá del salario mínimo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con poco poder negociador, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de todos los sectores",
+                    "negociadores de convenios, que pierden su papel"
+                  ],
+                  "indirecto": [
+                    "trabajadores, si hay menos empleo o sueldos que no se ajustan"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Un salario mínimo que se actualiza cada año, el contrato indefinido como norma y control del trabajo sin contrato y de los falsos autónomos.",
           "medidas": [
-            { "nombre": "Salario mínimo actualizado cada año", "texto": "El Gobierno fija el salario mínimo cada año tras consultar a sindicatos y empresas, teniendo en cuenta precios, productividad y empleo." },
-            { "nombre": "Indefinido como norma, de hecho", "texto": "Contrato temporal solo con causa concreta y sanción a quien lo use en fraude; mantener y vigilar la regla que fijó la reforma laboral de 2021.", "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo" },
-            { "nombre": "Inspección contra el trabajo sin contrato", "texto": "Campañas de la Inspección de Trabajo con datos cruzados de Hacienda y Seguridad Social, y alta inmediata del trabajador encontrado sin contrato." },
-            { "nombre": "Contra los falsos autónomos", "texto": "Se presume contrato laboral para quien trabaja bajo las órdenes de una empresa o plataforma digital aunque figure como autónomo; la empresa debe probar lo contrario." }
+            {
+              "nombre": "Salario mínimo actualizado cada año",
+              "texto": "El Gobierno fija el salario mínimo cada año tras consultar a sindicatos y empresas, teniendo en cuenta precios, productividad y empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de salario mínimo"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con muchos sueldos mínimos"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios",
+                    "personas con poca experiencia, si se contrata menos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Indefinido como norma, de hecho",
+              "texto": "Contrato temporal solo con causa concreta y sanción a quien lo use en fraude; mantener y vigilar la regla que fijó la reforma laboral de 2021.",
+              "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores temporales"
+                  ],
+                  "indirecto": [
+                    "familias que planifican con un sueldo estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que usan contratos temporales en fraude"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Inspección contra el trabajo sin contrato",
+              "texto": "Campañas de la Inspección de Trabajo con datos cruzados de Hacienda y Seguridad Social, y alta inmediata del trabajador encontrado sin contrato.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores sin contrato"
+                  ],
+                  "indirecto": [
+                    "empresas que cumplen",
+                    "pensionistas, por más cotizaciones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que no dan de alta a su personal"
+                  ],
+                  "indirecto": [
+                    "trabajadores que pierden el empleo si el negocio cierra"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contra los falsos autónomos",
+              "texto": "Se presume contrato laboral para quien trabaja bajo las órdenes de una empresa o plataforma digital aunque figure como autónomo; la empresa debe probar lo contrario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "repartidores y trabajadores de plataformas digitales",
+                    "falsos autónomos"
+                  ],
+                  "indirecto": [
+                    "empresas que contratan bien"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "plataformas y empresas que usan falsos autónomos"
+                  ],
+                  "indirecto": [
+                    "autónomos que prefieren trabajar por libre",
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Menos temporalidad también en las administraciones, sueldos que no pierden poder de compra y el mismo convenio para quien trabaja en una subcontrata.",
           "medidas": [
-            { "nombre": "Oposiciones con calendario fijo", "texto": "Cada administración convoca sus plazas con un calendario fijo y publicado, para no acumular interinos durante años en puestos que son permanentes." },
-            { "nombre": "Cláusula de revisión salarial", "texto": "Los convenios incluyen una revisión si los precios suben más de lo previsto, para que los sueldos no pierdan poder de compra en el conjunto del convenio." },
-            { "nombre": "Mismo convenio en las subcontratas", "texto": "Quien trabaja para una subcontrata cobra según el convenio del sector de la actividad que realiza, no según uno más bajo elegido por la empresa." },
-            { "nombre": "Sanción por encadenar contratos", "texto": "Quien encadena contratos temporales para el mismo puesto pasa a ser fijo, y la empresa paga una sanción que aumenta si repite." }
+            {
+              "nombre": "Oposiciones con calendario fijo",
+              "texto": "Cada administración convoca sus plazas con un calendario fijo y publicado, para no acumular interinos durante años en puestos que son permanentes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "aspirantes a empleo público"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios con personal estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "interinos que pierden su plaza en la oposición"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por el coste de los procesos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cláusula de revisión salarial",
+              "texto": "Los convenios incluyen una revisión si los precios suben más de lo previsto, para que los sueldos no pierdan poder de compra en el conjunto del convenio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "asalariados con convenio"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con márgenes estrechos"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mismo convenio en las subcontratas",
+              "texto": "Quien trabaja para una subcontrata cobra según el convenio del sector de la actividad que realiza, no según uno más bajo elegido por la empresa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de subcontratas"
+                  ],
+                  "indirecto": [
+                    "empresas que no subcontratan para rebajar sueldos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas multiservicios con convenios más bajos",
+                    "empresas que subcontratan para ahorrar"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sanción por encadenar contratos",
+              "texto": "Quien encadena contratos temporales para el mismo puesto pasa a ser fijo, y la empresa paga una sanción que aumenta si repite.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que encadenan contratos temporales"
+                  ],
+                  "indirecto": [
+                    "empresas que contratan bien"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que encadenan contratos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Salarios que crecen con la productividad, negociados por sectores, con temporalidad y brecha salarial publicadas empresa por empresa.",
           "medidas": [
-            { "nombre": "Cláusula de productividad en convenios", "texto": "Los convenios sectoriales ligan las subidas a la productividad del sector, medida con datos oficiales, además de a los precios." },
-            { "nombre": "Brecha salarial publicada por empresa", "texto": "Las empresas publican la diferencia de sueldo entre hombres y mujeres por categoría, como exige la directiva europea de transparencia salarial desde 2027.", "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" },
-            { "nombre": "Temporalidad publicada por empresa y organismo", "texto": "Cada empresa grande y cada administración publica su porcentaje de contratos temporales, en un registro abierto que cualquiera puede consultar." },
-            { "nombre": "Sueldo visible en las ofertas", "texto": "Las ofertas de empleo indican el sueldo o su banda antes de la entrevista, y no se puede preguntar al candidato cuánto cobraba antes.", "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" }
+            {
+              "nombre": "Cláusula de productividad en convenios",
+              "texto": "Los convenios sectoriales ligan las subidas a la productividad del sector, medida con datos oficiales, además de a los precios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "asalariados de sectores con productividad creciente"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de esos sectores, que reparten la mejora"
+                  ],
+                  "indirecto": [
+                    "trabajadores de sectores con productividad estancada"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Brecha salarial publicada por empresa",
+              "texto": "Las empresas publican la diferencia de sueldo entre hombres y mujeres por categoría, como exige la directiva europea de transparencia salarial desde 2027.",
+              "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres con sueldos inferiores en su categoría"
+                  ],
+                  "indirecto": [
+                    "candidatas a empleo, con más información"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pagan distinto sin justificarlo",
+                    "empresas obligadas, por el coste del informe"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Temporalidad publicada por empresa y organismo",
+              "texto": "Cada empresa grande y cada administración publica su porcentaje de contratos temporales, en un registro abierto que cualquiera puede consultar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "candidatos que eligen dónde trabajar"
+                  ],
+                  "indirecto": [
+                    "trabajadores temporales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas y administraciones con temporalidad alta"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sueldo visible en las ofertas",
+              "texto": "Las ofertas de empleo indican el sueldo o su banda antes de la entrevista, y no se puede preguntar al candidato cuánto cobraba antes.",
+              "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "candidatos a empleo"
+                  ],
+                  "indirecto": [
+                    "mujeres, con menos brecha salarial"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que negocian sueldos a la baja con cada candidato"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un salario mínimo fijado por regla a propuesta de una comisión independiente, salarios ligados a la productividad y planes obligatorios si hay desvíos.",
           "medidas": [
-            { "nombre": "Salario mínimo fijado por regla", "texto": "La ley mantiene el salario mínimo en el 60 % del salario medio, para que su cuantía deje de depender de quién gobierna cada año.", "meta": true },
-            { "nombre": "Comisión independiente del salario mínimo", "texto": "Una comisión de sindicatos, empresas y universidad propone cada otoño la cifra, publica sus datos y calcula el efecto en el empleo y en la pensión ligada a él, como en Reino Unido.", "fuente": "https://www.gov.uk/government/organisations/low-pay-commission/about" },
-            { "nombre": "Plan corrector de la brecha", "texto": "Si la brecha salarial de una empresa llega al 5 % en una categoría y no se justifica, la empresa acuerda con la plantilla un plan corrector con plazo.", "meta": true, "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" },
-            { "nombre": "Plan obligatorio si la temporalidad se desvía", "texto": "La empresa o administración cuya temporalidad supere la meta legal de su sector presenta un plan con plazo para convertir contratos, revisado por la Inspección.", "meta": true }
+            {
+              "nombre": "Salario mínimo fijado por regla",
+              "texto": "La ley mantiene el salario mínimo en el 60 % del salario medio, para que su cuantía deje de depender de quién gobierna cada año.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de salario mínimo"
+                  ],
+                  "indirecto": [
+                    "pensionistas con pensión ligada al salario mínimo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con muchos sueldos bajos",
+                    "empresas de regiones con salarios más bajos",
+                    "personas con poca experiencia, si se contrata menos"
+                  ],
+                  "indirecto": [
+                    "clientes, si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comisión independiente del salario mínimo",
+              "texto": "Una comisión de sindicatos, empresas y universidad propone cada otoño la cifra, publica sus datos y calcula el efecto en el empleo y en la pensión ligada a él, como en Reino Unido.",
+              "fuente": "https://www.gov.uk/government/organisations/low-pay-commission/about",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de salario mínimo"
+                  ],
+                  "indirecto": [
+                    "empresas, con subidas más previsibles"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que fijan el salario mínimo a su criterio"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plan corrector de la brecha",
+              "texto": "Si la brecha salarial de una empresa llega al 5 % en una categoría y no se justifica, la empresa acuerda con la plantilla un plan corrector con plazo.",
+              "meta": true,
+              "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres en categorías con brecha injustificada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con brecha sin justificar"
+                  ],
+                  "indirecto": [
+                    "trabajadores cuya subida se frena para cerrar la brecha"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan obligatorio si la temporalidad se desvía",
+              "texto": "La empresa o administración cuya temporalidad supere la meta legal de su sector presenta un plan con plazo para convertir contratos, revisado por la Inspección.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores temporales de empresas y organismos que se desvían"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos con plantilla estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de actividad estacional por encima de la meta"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]

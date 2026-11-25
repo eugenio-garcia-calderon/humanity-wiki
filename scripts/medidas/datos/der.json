@@ -63,50 +63,467 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o una que impone o persigue creencias, elimina toda elección educativa o deja al ciudadano sin servicio por una objeción.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "Repetir el marco vigente sin decir qué se haría con la financiación de las confesiones, la enseñanza religiosa o la admisión de alumnos." },
-            { "nombre": "Creencia favorecida o perseguida", "texto": "Favorecer por ley o con dinero público una creencia frente a las demás, o tratar como sospechosa a una confesión entera por el origen de sus fieles." },
-            { "nombre": "Ni elección ni relevo", "texto": "Suprimir toda elección de centro o toda objeción de conciencia, o, al revés, permitir objeciones que dejan al ciudadano sin el servicio que la ley le reconoce." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "Repetir el marco vigente sin decir qué se haría con la financiación de las confesiones, la enseñanza religiosa o la admisión de alumnos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "entidades con ventajas en el marco vigente"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que esperan reglas claras de admisión"
+                  ],
+                  "indirecto": [
+                    "confesiones sin acuerdo con el Estado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Creencia favorecida o perseguida",
+              "texto": "Favorecer por ley o con dinero público una creencia frente a las demás, o tratar como sospechosa a una confesión entera por el origen de sus fieles.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "la confesión favorecida por la ley"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "fieles de confesiones minoritarias",
+                    "fieles de la confesión señalada",
+                    "personas sin creencias religiosas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian una sola creencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ni elección ni relevo",
+              "texto": "Suprimir toda elección de centro o toda objeción de conciencia, o, al revés, permitir objeciones que dejan al ciudadano sin el servicio que la ley le reconoce.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "Administración que planifica sin excepciones",
+                    "profesionales que objetan sin límites"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que quieren elegir centro",
+                    "profesionales con objeción de conciencia",
+                    "ciudadanos que se quedan sin el servicio"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Se cumplen de verdad la libertad religiosa y de culto, la aconfesionalidad del Estado y la elección de centro que ya reconoce la Constitución.",
           "medidas": [
-            { "nombre": "Lugares de culto sin vetos", "texto": "Los ayuntamientos conceden licencias para lugares de culto con las mismas reglas urbanísticas que a cualquier local de reunión, sin vetos por la confesión." },
-            { "nombre": "Registro de entidades religiosas ágil", "texto": "El Estado inscribe en plazo a cualquier confesión que cumpla los requisitos legales y motiva por escrito cada negativa, que se puede recurrir." },
-            { "nombre": "Asistencia religiosa libre", "texto": "Hospitales, cárceles y cuarteles permiten la asistencia religiosa de cualquier confesión que la pida, y nadie está obligado a recibirla ni a declarar sus creencias." },
-            { "nombre": "Elección de centro informada", "texto": "Las comunidades publican, antes de la matrícula, la oferta de plazas, el proyecto educativo y los criterios de admisión de cada centro pagado con fondos públicos." }
+            {
+              "nombre": "Lugares de culto sin vetos",
+              "texto": "Los ayuntamientos conceden licencias para lugares de culto con las mismas reglas urbanísticas que a cualquier local de reunión, sin vetos por la confesión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades religiosas que buscan local"
+                  ],
+                  "indirecto": [
+                    "fieles que hoy se reúnen en locales precarios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos que se oponen a un templo en su calle"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos que pierden margen para decidir"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Registro de entidades religiosas ágil",
+              "texto": "El Estado inscribe en plazo a cualquier confesión que cumpla los requisitos legales y motiva por escrito cada negativa, que se puede recurrir.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "confesiones pendientes de inscripción"
+                  ],
+                  "indirecto": [
+                    "fieles de esas confesiones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personal del registro con más carga de trabajo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Asistencia religiosa libre",
+              "texto": "Hospitales, cárceles y cuarteles permiten la asistencia religiosa de cualquier confesión que la pida, y nadie está obligado a recibirla ni a declarar sus creencias.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes, presos y militares creyentes",
+                    "confesiones minoritarias"
+                  ],
+                  "indirecto": [
+                    "familias de personas internadas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hospitales y cárceles que organizan más accesos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Elección de centro informada",
+              "texto": "Las comunidades publican, antes de la matrícula, la oferta de plazas, el proyecto educativo y los criterios de admisión de cada centro pagado con fondos públicos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que eligen colegio"
+                  ],
+                  "indirecto": [
+                    "centros con buen proyecto poco conocido"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que preferían no publicar su admisión"
+                  ],
+                  "indirecto": [
+                    "consejerías de educación con más trabajo"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Objeción de conciencia regulada por ley y elección de centro con las mismas reglas de admisión en la red pública y en la concertada.",
           "medidas": [
-            { "nombre": "Ley general de objeción de conciencia", "texto": "Una ley estatal fija cómo se objeta en cualquier profesión: de forma personal, anticipada y por escrito, y obliga a la Administración a garantizar el servicio." },
-            { "nombre": "Admisión con el mismo baremo", "texto": "Las comunidades aplican un baremo único (cercanía, hermanos, renta) y una oficina común de escolarización para centros públicos y concertados." },
-            { "nombre": "Gratuidad vigilada en la concertada", "texto": "La inspección educativa comprueba que los centros concertados no cobran cuotas obligatorias encubiertas y publica las sanciones que impone." },
-            { "nombre": "Alternativa real a la religión", "texto": "Quien no elige enseñanza religiosa recibe una materia con contenido propio, y ninguna de las dos opciones da ventaja ni castigo en la nota media." }
+            {
+              "nombre": "Ley general de objeción de conciencia",
+              "texto": "Una ley estatal fija cómo se objeta en cualquier profesión: de forma personal, anticipada y por escrito, y obliga a la Administración a garantizar el servicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales con objeción de conciencia",
+                    "ciudadanos que necesitan el servicio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios públicos que reorganizan plantillas"
+                  ],
+                  "indirecto": [
+                    "profesionales no objetores con más carga"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Admisión con el mismo baremo",
+              "texto": "Las comunidades aplican un baremo único (cercanía, hermanos, renta) y una oficina común de escolarización para centros públicos y concertados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de rentas bajas",
+                    "familias que viven cerca de un concertado"
+                  ],
+                  "indirecto": [
+                    "alumnos de centros hoy más segregados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados que hoy eligen su alumnado"
+                  ],
+                  "indirecto": [
+                    "familias que hoy entran por vías propias del centro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gratuidad vigilada en la concertada",
+              "texto": "La inspección educativa comprueba que los centros concertados no cobran cuotas obligatorias encubiertas y publica las sanciones que impone.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de la concertada que pagan cuotas"
+                  ],
+                  "indirecto": [
+                    "familias de rentas bajas que hoy no acceden"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados que cobran cuotas encubiertas"
+                  ],
+                  "indirecto": [
+                    "alumnos con servicios pagados con esas cuotas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Alternativa real a la religión",
+              "texto": "Quien no elige enseñanza religiosa recibe una materia con contenido propio, y ninguna de las dos opciones da ventaja ni castigo en la nota media.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnos que no eligen religión"
+                  ],
+                  "indirecto": [
+                    "profesorado de la materia alternativa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que deben dotar otra materia"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan más horas docentes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Trato igual efectivo a todas las creencias y a quien no tiene ninguna, objeción con relevo organizado y segregación escolar medida.",
           "medidas": [
-            { "nombre": "Acuerdos abiertos a toda confesión", "texto": "Las confesiones con arraigo reconocido pueden firmar con el Estado acuerdos de cooperación de igual contenido, y las convicciones no religiosas tienen un cauce equivalente." },
-            { "nombre": "Relevo organizado por la Administración", "texto": "Cada servicio público planifica sus plantillas con el registro de objetores, de modo que el ciudadano nunca tenga que buscar por su cuenta quién le atienda." },
-            { "nombre": "Segregación escolar medida", "texto": "Las comunidades publican cada año la composición social del alumnado de cada centro con fondos públicos y reparten entre todos al alumnado más vulnerable." },
-            { "nombre": "Actos oficiales neutrales", "texto": "Los actos oficiales del Estado no incluyen ceremonias religiosas; las autoridades pueden asistir a título personal a las de cualquier confesión." }
+            {
+              "nombre": "Acuerdos abiertos a toda confesión",
+              "texto": "Las confesiones con arraigo reconocido pueden firmar con el Estado acuerdos de cooperación de igual contenido, y las convicciones no religiosas tienen un cauce equivalente.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "confesiones con arraigo y sin acuerdo",
+                    "asociaciones de convicciones no religiosas"
+                  ],
+                  "indirecto": [
+                    "fieles de esas confesiones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "confesiones que pierden su trato singular"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian más acuerdos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Relevo organizado por la Administración",
+              "texto": "Cada servicio público planifica sus plantillas con el registro de objetores, de modo que el ciudadano nunca tenga que buscar por su cuenta quién le atienda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que necesitan el servicio",
+                    "profesionales que objetan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores sanitarios con más planificación"
+                  ],
+                  "indirecto": [
+                    "profesionales no objetores con más guardias"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Segregación escolar medida",
+              "texto": "Las comunidades publican cada año la composición social del alumnado de cada centro con fondos públicos y reparten entre todos al alumnado más vulnerable.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado vulnerable",
+                    "centros que hoy concentran alumnado vulnerable"
+                  ],
+                  "indirecto": [
+                    "barrios de rentas bajas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con alumnado hoy muy seleccionado"
+                  ],
+                  "indirecto": [
+                    "familias que buscan un centro socialmente homogéneo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Actos oficiales neutrales",
+              "texto": "Los actos oficiales del Estado no incluyen ceremonias religiosas; las autoridades pueden asistir a título personal a las de cualquier confesión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos de otras creencias o sin ellas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "fieles que valoran la presencia oficial en su culto",
+                    "confesión mayoritaria con presencia en actos oficiales"
+                  ],
+                  "indirecto": [
+                    "hermandades y cofradías con actos oficiales"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un estatuto común para toda creencia y para quien no tiene ninguna, con dinero decidido por cada contribuyente y una sola regla para toda escuela pagada con fondos públicos.",
           "medidas": [
-            { "nombre": "Marco único de cooperación", "texto": "Una ley orgánica de libertad de conciencia sustituye los acuerdos confesión a confesión por requisitos objetivos iguales; el Estado renegocia los vigentes, incluido el tratado con la Santa Sede." },
-            { "nombre": "Casilla del contribuyente para todos", "texto": "En la declaración de la renta cada persona elige si una parte de su impuesto va a una confesión reconocida, a fines sociales o al Estado. Lo no marcado no se reparte y las cuentas se publican.", "fuente": "https://documenti.camera.it/leg19/dossier/testi/BI0117.htm" },
-            { "nombre": "Objeción con servicio garantizado", "texto": "Objeción personal, anticipada y por escrito en cualquier profesión, con plazo máximo de atención: si se incumple, la Administración deriva al ciudadano con todos los gastos pagados." },
-            { "nombre": "Una regla para toda escuela con fondos públicos", "texto": "Toda escuela pagada con dinero público comparte admisión, gratuidad real sin cuotas y reparto del alumnado con más necesidades, y conserva su ideario propio.", "fuente": "https://www.government.nl/themes/education/freedom-of-education/public-authority-and-private-schools" },
-            { "nombre": "Informe anual independiente", "texto": "Un órgano independiente publica cada año las quejas por discriminación religiosa o ideológica, los servicios no prestados por objeción y la composición social de cada centro." }
+            {
+              "nombre": "Marco único de cooperación",
+              "texto": "Una ley orgánica de libertad de conciencia sustituye los acuerdos confesión a confesión por requisitos objetivos iguales; el Estado renegocia los vigentes, incluido el tratado con la Santa Sede.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "confesiones sin acuerdo con el Estado",
+                    "personas con convicciones no religiosas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "confesiones con acuerdos singulares vigentes"
+                  ],
+                  "indirecto": [
+                    "entidades financiadas por esos acuerdos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Casilla del contribuyente para todos",
+              "texto": "En la declaración de la renta cada persona elige si una parte de su impuesto va a una confesión reconocida, a fines sociales o al Estado. Lo no marcado no se reparte y las cuentas se publican.",
+              "fuente": "https://documenti.camera.it/leg19/dossier/testi/BI0117.htm",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que quieren elegir el destino",
+                    "confesiones reconocidas sin casilla propia"
+                  ],
+                  "indirecto": [
+                    "entidades sociales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "confesión que hoy tiene la casilla en exclusiva"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, si crece lo que se aparta del Estado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Objeción con servicio garantizado",
+              "texto": "Objeción personal, anticipada y por escrito en cualquier profesión, con plazo máximo de atención: si se incumple, la Administración deriva al ciudadano con todos los gastos pagados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que necesitan el servicio",
+                    "profesionales que objetan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "Administración que paga las derivaciones"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan los traslados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Una regla para toda escuela con fondos públicos",
+              "texto": "Toda escuela pagada con dinero público comparte admisión, gratuidad real sin cuotas y reparto del alumnado con más necesidades, y conserva su ideario propio.",
+              "fuente": "https://www.government.nl/themes/education/freedom-of-education/public-authority-and-private-schools",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de rentas bajas",
+                    "alumnado con más necesidades"
+                  ],
+                  "indirecto": [
+                    "escuela pública con alumnado concentrado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "concertados que hoy seleccionan o cobran cuotas"
+                  ],
+                  "indirecto": [
+                    "familias que pagaban por un entorno selecto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe anual independiente",
+              "texto": "Un órgano independiente publica cada año las quejas por discriminación religiosa o ideológica, los servicios no prestados por objeción y la composición social de cada centro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de discriminación religiosa o ideológica",
+                    "familias que eligen centro"
+                  ],
+                  "indirecto": [
+                    "investigadores y periodistas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros y servicios con malos resultados expuestos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -119,50 +536,443 @@
           "nivel": 0,
           "resumen": "Sin apoyo a la embarazada ni a la persona enferma o dependiente, o un apoyo usado para presionar, condicionar o engañar a quien decide.",
           "medidas": [
-            { "nombre": "Sin red de apoyo", "texto": "No prever ayuda económica, vivienda ni cuidados para la embarazada en apuros ni para el enfermo grave, y dejar que la falta de medios decida por ellos." },
-            { "nombre": "Ayuda con condiciones", "texto": "Atar la ayuda a una decisión concreta, retrasar con trámites el acceso a una prestación legal o dar información sanitaria falsa o incompleta." },
-            { "nombre": "Presión a la puerta", "texto": "Tolerar la presión o el acoso a quien acude a un centro sanitario, en cualquier sentido, en lugar de proteger su intimidad y su libertad." }
+            {
+              "nombre": "Sin red de apoyo",
+              "texto": "No prever ayuda económica, vivienda ni cuidados para la embarazada en apuros ni para el enfermo grave, y dejar que la falta de medios decida por ellos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que no financian la red"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "embarazadas sin recursos",
+                    "enfermos graves sin medios"
+                  ],
+                  "indirecto": [
+                    "familias que cuidan sin ayuda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda con condiciones",
+              "texto": "Atar la ayuda a una decisión concreta, retrasar con trámites el acceso a una prestación legal o dar información sanitaria falsa o incompleta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "entidades que condicionan su ayuda a una decisión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "mujeres que piden una prestación legal",
+                    "pacientes que reciben información sesgada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Presión a la puerta",
+              "texto": "Tolerar la presión o el acoso a quien acude a un centro sanitario, en cualquier sentido, en lugar de proteger su intimidad y su libertad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "grupos que presionan a la entrada de centros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que acuden a un centro sanitario",
+                    "personal de esos centros"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Información veraz y ayudas fáciles de pedir para la embarazada que quiere seguir adelante y para quien cuida a un enfermo o dependiente.",
           "medidas": [
-            { "nombre": "Información completa por escrito", "texto": "El centro de salud entrega a toda embarazada información escrita de las ayudas, permisos y servicios a los que tiene derecho, sin condicionar su decisión." },
-            { "nombre": "Ayudas de nacimiento en un solo trámite", "texto": "El Estado y las comunidades reúnen en una sola web y un solo trámite las prestaciones por embarazo y nacimiento que hoy se piden en sitios distintos." },
-            { "nombre": "Empleo de la embarazada protegido", "texto": "La Inspección de Trabajo vigila despidos y contratos no renovados a embarazadas y publica cada año cuántas sanciones impone." },
-            { "nombre": "Plan de paliativos en cada comunidad", "texto": "Cada comunidad tiene un plan de cuidados paliativos con equipos en casa y en el hospital, y publica qué zonas cubre y cuáles no." }
+            {
+              "nombre": "Información completa por escrito",
+              "texto": "El centro de salud entrega a toda embarazada información escrita de las ayudas, permisos y servicios a los que tiene derecho, sin condicionar su decisión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas"
+                  ],
+                  "indirecto": [
+                    "recién nacidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personal de centros de salud con más tareas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ayudas de nacimiento en un solo trámite",
+              "texto": "El Estado y las comunidades reúnen en una sola web y un solo trámite las prestaciones por embarazo y nacimiento que hoy se piden en sitios distintos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que esperan un hijo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes, si se cobran más ayudas debidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Empleo de la embarazada protegido",
+              "texto": "La Inspección de Trabajo vigila despidos y contratos no renovados a embarazadas y publica cada año cuántas sanciones impone.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadoras embarazadas"
+                  ],
+                  "indirecto": [
+                    "parejas que planean tener hijos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que despiden a embarazadas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plan de paliativos en cada comunidad",
+              "texto": "Cada comunidad tiene un plan de cuidados paliativos con equipos en casa y en el hospital, y publica qué zonas cubre y cuáles no.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "enfermos graves",
+                    "familias cuidadoras"
+                  ],
+                  "indirecto": [
+                    "hospitales con menos ingresos evitables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Una red estable de apoyo a la maternidad y de cuidados paliativos en toda España, con puertas de entrada claras y apoyo a quien cuida.",
           "medidas": [
-            { "nombre": "Red de apoyo a la maternidad", "texto": "Servicios sociales y entidades concertadas ofrecen acompañamiento, material para el bebé y orientación de empleo a toda embarazada que lo pida, con financiación de varios años." },
-            { "nombre": "Equipo de paliativos en cada área", "texto": "Cada área sanitaria cuenta con un equipo especializado de cuidados paliativos que atiende en casa, en la residencia y en el hospital." },
-            { "nombre": "Teléfono para embarazadas en apuros", "texto": "Un teléfono público, gratuito y confidencial orienta sobre ayudas, vivienda de emergencia y opciones, sin juzgar ni empujar en ningún sentido." },
-            { "nombre": "Apoyo a quien cuida en casa", "texto": "Respiro familiar, formación y cotización a la Seguridad Social para quienes cuidan en casa a un familiar dependiente o enfermo grave." }
+            {
+              "nombre": "Red de apoyo a la maternidad",
+              "texto": "Servicios sociales y entidades concertadas ofrecen acompañamiento, material para el bebé y orientación de empleo a toda embarazada que lo pida, con financiación de varios años.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas sin recursos"
+                  ],
+                  "indirecto": [
+                    "recién nacidos",
+                    "entidades sociales concertadas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Equipo de paliativos en cada área",
+              "texto": "Cada área sanitaria cuenta con un equipo especializado de cuidados paliativos que atiende en casa, en la residencia y en el hospital.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "enfermos graves en casa o en residencia",
+                    "familias cuidadoras"
+                  ],
+                  "indirecto": [
+                    "urgencias hospitalarias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Teléfono para embarazadas en apuros",
+              "texto": "Un teléfono público, gratuito y confidencial orienta sobre ayudas, vivienda de emergencia y opciones, sin juzgar ni empujar en ningún sentido.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas en apuros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Apoyo a quien cuida en casa",
+              "texto": "Respiro familiar, formación y cotización a la Seguridad Social para quienes cuidan en casa a un familiar dependiente o enfermo grave.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cuidadores familiares"
+                  ],
+                  "indirecto": [
+                    "personas dependientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes y cotizantes a la Seguridad Social"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Que nadie decida por falta de recursos: renta, vivienda y cuidados garantizados para la embarazada y para la persona enferma o dependiente.",
           "medidas": [
-            { "nombre": "Fondo para embarazadas en apuros", "texto": "Un fondo estatal que se pide en el centro de salud o de servicios sociales, se paga desde el embarazo y no se descuenta de otras prestaciones, como en Alemania.", "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/bundesstiftung-mutter-und-kind/bundesstiftung-mutter-und-kind-73522" },
-            { "nombre": "Vivienda de acogida", "texto": "Las comunidades reservan pisos de acogida para embarazadas y madres solas sin hogar, con acceso en días y acompañamiento social." },
-            { "nombre": "Dependencia en el plazo legal", "texto": "El Estado y las comunidades financian la ley de dependencia para que la ayuda reconocida llegue en el plazo que marca la ley, y publican la espera real por provincia." },
-            { "nombre": "Especialidad de cuidados paliativos", "texto": "Se reconoce la especialidad médica y de enfermería en cuidados paliativos para que haya profesionales formados en todo el territorio." }
+            {
+              "nombre": "Fondo para embarazadas en apuros",
+              "texto": "Un fondo estatal que se pide en el centro de salud o de servicios sociales, se paga desde el embarazo y no se descuenta de otras prestaciones, como en Alemania.",
+              "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/bundesstiftung-mutter-und-kind/bundesstiftung-mutter-und-kind-73522",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas sin recursos"
+                  ],
+                  "indirecto": [
+                    "hijos de familias con pocos ingresos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vivienda de acogida",
+              "texto": "Las comunidades reservan pisos de acogida para embarazadas y madres solas sin hogar, con acceso en días y acompañamiento social.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas y madres solas sin hogar"
+                  ],
+                  "indirecto": [
+                    "sus hijos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "otros demandantes de vivienda pública en espera"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dependencia en el plazo legal",
+              "texto": "El Estado y las comunidades financian la ley de dependencia para que la ayuda reconocida llegue en el plazo que marca la ley, y publican la espera real por provincia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes en lista de espera",
+                    "cuidadores familiares"
+                  ],
+                  "indirecto": [
+                    "empresas y empleo del sector de cuidados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes del Estado y las comunidades"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Especialidad de cuidados paliativos",
+              "texto": "Se reconoce la especialidad médica y de enfermería en cuidados paliativos para que haya profesionales formados en todo el territorio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "médicos y enfermeras de paliativos",
+                    "enfermos graves"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales sin la especialidad que hoy ejercen en paliativos"
+                  ],
+                  "indirecto": [
+                    "especialidades que compiten por plazas de formación"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un derecho exigible al apoyo, en plazo fijo y antes de decidir: renta, vivienda y cuidados, paliativos incluidos, sin ninguna condición.",
           "medidas": [
-            { "nombre": "Ventanilla única de embarazo", "texto": "En pocos días, un plan personal de renta, vivienda, empleo o estudios y escuela infantil. Es voluntario y no condiciona ni retrasa la decisión de la mujer.", "meta": true },
-            { "nombre": "Ley de cuidados paliativos", "texto": "Equipo especializado en casa o en el hospital en un plazo máximo fijado por ley y reclamable, con una dotación como la de los países europeos mejor cubiertos.", "fuente": "https://www.unav.edu/documents/30448903/31064575/key-insights-esp.pdf" },
-            { "nombre": "Prestación puente en dependencia", "texto": "Si la ayuda reconocida no llega en plazo, se cobra de forma automática una prestación económica hasta que llegue, pagada por la Administración que se retrasa." },
-            { "nombre": "Parto confidencial", "texto": "Dar a luz con atención médica completa sin identificarse públicamente, con los gastos pagados y el derecho del hijo a conocer su origen cuando crezca, como en Alemania.", "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/vertrauliche-geburt" },
-            { "nombre": "Informe anual por provincia", "texto": "Cobertura de paliativos, espera en dependencia y una encuesta voluntaria y anónima sobre si la falta de recursos pesó en la decisión, publicados cada año." }
+            {
+              "nombre": "Ventanilla única de embarazo",
+              "texto": "En pocos días, un plan personal de renta, vivienda, empleo o estudios y escuela infantil. Es voluntario y no condiciona ni retrasa la decisión de la mujer.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas"
+                  ],
+                  "indirecto": [
+                    "recién nacidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ley de cuidados paliativos",
+              "texto": "Equipo especializado en casa o en el hospital en un plazo máximo fijado por ley y reclamable, con una dotación como la de los países europeos mejor cubiertos.",
+              "fuente": "https://www.unav.edu/documents/30448903/31064575/key-insights-esp.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "enfermos graves y terminales",
+                    "familias cuidadoras"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios de salud obligados a cumplir el plazo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Prestación puente en dependencia",
+              "texto": "Si la ayuda reconocida no llega en plazo, se cobra de forma automática una prestación económica hasta que llegue, pagada por la Administración que se retrasa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes en espera"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "Administraciones que se retrasan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Parto confidencial",
+              "texto": "Dar a luz con atención médica completa sin identificarse públicamente, con los gastos pagados y el derecho del hijo a conocer su origen cuando crezca, como en Alemania.",
+              "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/vertrauliche-geburt",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas que necesitan ocultar el parto"
+                  ],
+                  "indirecto": [
+                    "recién nacidos en riesgo de abandono"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "padres biológicos que no llegan a saberlo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan los gastos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe anual por provincia",
+              "texto": "Cobertura de paliativos, espera en dependencia y una encuesta voluntaria y anónima sobre si la falta de recursos pesó en la decisión, publicados cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en espera de dependencia o paliativos"
+                  ],
+                  "indirecto": [
+                    "investigadores y periodistas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con peor cobertura expuesta"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -175,50 +985,452 @@
           "nivel": 0,
           "resumen": "Sin medidas para quien quiere tener hijos, o ayudas que se dan o se niegan según la forma de la familia, su origen o sus ideas.",
           "medidas": [
-            { "nombre": "Lamentos sin política", "texto": "Lamentar la baja natalidad sin proponer permisos, escuela infantil, vivienda ni ayudas, o prometerlos sin decir cómo se pagan." },
-            { "nombre": "Familias de primera y de segunda", "texto": "Excluir de las ayudas a familias monoparentales, del mismo sexo o de origen extranjero con residencia legal, o premiar un solo modelo de familia." },
-            { "nombre": "Cheques que se esfuman", "texto": "Ayudas de un solo año que cambian con cada gobierno y no permiten a nadie planificar con tiempo la decisión de tener un hijo." }
+            {
+              "nombre": "Lamentos sin política",
+              "texto": "Lamentar la baja natalidad sin proponer permisos, escuela infantil, vivienda ni ayudas, o prometerlos sin decir cómo se pagan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que no financian nuevas ayudas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "jóvenes que retrasan tener hijos por falta de medios"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Familias de primera y de segunda",
+              "texto": "Excluir de las ayudas a familias monoparentales, del mismo sexo o de origen extranjero con residencia legal, o premiar un solo modelo de familia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias del modelo premiado"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias monoparentales",
+                    "parejas del mismo sexo con hijos",
+                    "residentes legales excluidos de las ayudas"
+                  ],
+                  "indirecto": [
+                    "hijos de las familias excluidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cheques que se esfuman",
+              "texto": "Ayudas de un solo año que cambian con cada gobierno y no permiten a nadie planificar con tiempo la decisión de tener un hijo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que cobran en el año de la ayuda"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "parejas que planifican tener hijos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Permisos de nacimiento pagados e iguales, ayuda por hijo a las familias con menos renta y protección del empleo de madres y padres.",
           "medidas": [
-            { "nombre": "Permiso propio para cada progenitor", "texto": "Cada progenitor tiene su propio permiso pagado por nacimiento, que no se puede ceder, para repartir el cuidado y que no penalice solo a la madre." },
-            { "nombre": "Ayuda por hijo a rentas bajas", "texto": "La Seguridad Social paga una ayuda mensual por hijo a las familias con menos ingresos, compatible con el empleo y pedida en un solo trámite." },
-            { "nombre": "Despido nulo por cuidar", "texto": "La ley anula el despido de quien está embarazada, de permiso o con jornada reducida por cuidado de hijos, y la Inspección de Trabajo lo vigila." },
-            { "nombre": "Reproducción asistida pública", "texto": "La sanidad pública cubre los tratamientos de fertilidad con los mismos requisitos en todas las comunidades y publica sus listas de espera." }
+            {
+              "nombre": "Permiso propio para cada progenitor",
+              "texto": "Cada progenitor tiene su propio permiso pagado por nacimiento, que no se puede ceder, para repartir el cuidado y que no penalice solo a la madre.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "padres trabajadores",
+                    "madres trabajadoras"
+                  ],
+                  "indirecto": [
+                    "recién nacidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cubren dos ausencias",
+                    "familias que preferirían ceder el permiso"
+                  ],
+                  "indirecto": [
+                    "cotizantes a la Seguridad Social"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda por hijo a rentas bajas",
+              "texto": "La Seguridad Social paga una ayuda mensual por hijo a las familias con menos ingresos, compatible con el empleo y pedida en un solo trámite.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de rentas bajas con hijos"
+                  ],
+                  "indirecto": [
+                    "menores en riesgo de pobreza"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Despido nulo por cuidar",
+              "texto": "La ley anula el despido de quien está embarazada, de permiso o con jornada reducida por cuidado de hijos, y la Inspección de Trabajo lo vigila.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadoras embarazadas",
+                    "trabajadores con jornada reducida por cuidado"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con menos margen para despedir"
+                  ],
+                  "indirecto": [
+                    "candidatas jóvenes, si las empresas temen contratarlas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reproducción asistida pública",
+              "texto": "La sanidad pública cubre los tratamientos de fertilidad con los mismos requisitos en todas las comunidades y publica sus listas de espera.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con problemas de fertilidad",
+                    "mujeres solas y parejas de mujeres"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "clínicas privadas de fertilidad"
+                  ],
+                  "indirecto": [
+                    "contribuyentes",
+                    "pacientes de otras listas de espera"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Escuela infantil gratuita de cero a tres años, ayuda para toda familia en los primeros años, vivienda para familias jóvenes y jornada adaptable.",
           "medidas": [
-            { "nombre": "Escuela infantil gratuita", "texto": "Comunidades y ayuntamientos crean plazas públicas gratuitas de cero a tres años, empezando por los barrios y pueblos con menos oferta." },
-            { "nombre": "Ayuda universal en la primera infancia", "texto": "Una ayuda mensual por cada hijo pequeño para toda familia, sin mirar la renta, que se cobra de forma automática desde el nacimiento." },
-            { "nombre": "Vivienda para familias jóvenes", "texto": "Prioridad de los hogares jóvenes con hijos, o que esperan uno, en el alquiler público y asequible del Estado, las comunidades y los ayuntamientos." },
-            { "nombre": "Jornada adaptable sin castigo", "texto": "Derecho a adaptar horario y lugar de trabajo para cuidar, que la empresa solo puede negar por escrito y con causa, sin perder cotización ni promoción." }
+            {
+              "nombre": "Escuela infantil gratuita",
+              "texto": "Comunidades y ayuntamientos crean plazas públicas gratuitas de cero a tres años, empezando por los barrios y pueblos con menos oferta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos de cero a tres años",
+                    "madres que vuelven al empleo"
+                  ],
+                  "indirecto": [
+                    "niños de hogares vulnerables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "escuelas infantiles privadas que compiten"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda universal en la primera infancia",
+              "texto": "Una ayuda mensual por cada hijo pequeño para toda familia, sin mirar la renta, que se cobra de forma automática desde el nacimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos pequeños"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes, también los hogares sin hijos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vivienda para familias jóvenes",
+              "texto": "Prioridad de los hogares jóvenes con hijos, o que esperan uno, en el alquiler público y asequible del Estado, las comunidades y los ayuntamientos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares jóvenes con hijos o que esperan uno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes de vivienda pública sin hijos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Jornada adaptable sin castigo",
+              "texto": "Derecho a adaptar horario y lugar de trabajo para cuidar, que la empresa solo puede negar por escrito y con causa, sin perder cotización ni promoción.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con hijos o familiares a cargo"
+                  ],
+                  "indirecto": [
+                    "hijos y familiares cuidados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que reorganizan turnos"
+                  ],
+                  "indirecto": [
+                    "compañeros sin cargas que cubren los huecos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una política familiar estable y evaluada, medida por la distancia entre los hijos que la gente quiere tener y los que tiene.",
           "medidas": [
-            { "nombre": "Indicador de hijos deseados y tenidos", "texto": "El Instituto Nacional de Estadística publica con regularidad la distancia entre hijos deseados y tenidos, por edad, renta y territorio, como ya hace su encuesta de fecundidad.", "fuente": "https://ine.es/dyngs/Prensa/pEF2025.htm" },
-            { "nombre": "Ley de familias con presupuesto plurianual", "texto": "Las ayudas a la crianza se fijan en una ley con financiación de varios años y se actualizan cada año con la subida de los precios." },
-            { "nombre": "Evaluación de cada medida", "texto": "Un órgano evaluador independiente estudia qué permisos, plazas y ayudas reducen esa distancia y publica sus conclusiones antes de cada presupuesto." },
-            { "nombre": "Horarios que permiten criar", "texto": "Pacto con empresas y Administraciones para racionalizar horarios: jornadas que acaban antes, reuniones en horario laboral y calendario escolar coordinado." }
+            {
+              "nombre": "Indicador de hijos deseados y tenidos",
+              "texto": "El Instituto Nacional de Estadística publica con regularidad la distancia entre hijos deseados y tenidos, por edad, renta y territorio, como ya hace su encuesta de fecundidad.",
+              "fuente": "https://ine.es/dyngs/Prensa/pEF2025.htm",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "responsables de la política familiar",
+                    "investigadores"
+                  ],
+                  "indirecto": [
+                    "parejas que quieren tener hijos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Amplía una encuesta que el Instituto Nacional de Estadística ya hace: solo da información y no quita nada a nadie."
+              }
+            },
+            {
+              "nombre": "Ley de familias con presupuesto plurianual",
+              "texto": "Las ayudas a la crianza se fijan en una ley con financiación de varios años y se actualizan cada año con la subida de los precios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos futuros con menos margen presupuestario"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación de cada medida",
+              "texto": "Un órgano evaluador independiente estudia qué permisos, plazas y ayudas reducen esa distancia y publica sus conclusiones antes de cada presupuesto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias, con ayudas que funcionan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de ayudas que no superan la evaluación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Horarios que permiten criar",
+              "texto": "Pacto con empresas y Administraciones para racionalizar horarios: jornadas que acaban antes, reuniones en horario laboral y calendario escolar coordinado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con hijos"
+                  ],
+                  "indirecto": [
+                    "hijos en edad escolar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que reorganizan sus horarios"
+                  ],
+                  "indirecto": [
+                    "sectores que viven del horario de tarde"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Prestación universal por hijo hasta la mayoría de edad, plaza infantil garantizada al acabar el permiso y un pacto a veinte años con una meta medible.",
           "medidas": [
-            { "nombre": "Prestación universal por hijo", "texto": "Igual para toda familia hasta los 18 años, actualizada cada año con los precios y revisada cada cinco con el coste real de criar, como el Kindergeld alemán.", "meta": true, "fuente": "https://familienportal.de/bmbfsfj/themen/familie/familienleistungen/kindergeld/kindergeld-73892" },
-            { "nombre": "Plaza infantil garantizada por ley", "texto": "Derecho exigible a una plaza gratuita de escuela infantil desde que acaba el permiso de nacimiento, con horario compatible con el trabajo, como en Dinamarca.", "fuente": "https://lifeindenmark.borger.dk/family-and-children/childcare/family-daycare--nurseries-and-kindergartens" },
-            { "nombre": "Permisos más largos y flexibles", "texto": "Permisos pagados más largos, con una parte intransferible para cada progenitor y días que se pueden pasar a otro cuidador, como un abuelo, al modo sueco.", "fuente": "https://forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit" },
-            { "nombre": "Libertad de modelo de crianza", "texto": "Quien prefiera cuidar en casa los primeros meses puede alargar el permiso en vez de usar la plaza, y ninguna forma de familia queda fuera de las ayudas." },
-            { "nombre": "Pacto de Estado a veinte años", "texto": "Un pacto con una sola meta: cerrar la distancia entre hijos deseados y tenidos. El Instituto Nacional de Estadística la mide cada año y un órgano independiente evalúa.", "meta": true }
+            {
+              "nombre": "Prestación universal por hijo",
+              "texto": "Igual para toda familia hasta los 18 años, actualizada cada año con los precios y revisada cada cinco con el coste real de criar, como el Kindergeld alemán.",
+              "meta": true,
+              "fuente": "https://familienportal.de/bmbfsfj/themen/familie/familienleistungen/kindergeld/kindergeld-73892",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos menores de edad"
+                  ],
+                  "indirecto": [
+                    "menores en riesgo de pobreza"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes, también los hogares sin hijos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plaza infantil garantizada por ley",
+              "texto": "Derecho exigible a una plaza gratuita de escuela infantil desde que acaba el permiso de nacimiento, con horario compatible con el trabajo, como en Dinamarca.",
+              "fuente": "https://lifeindenmark.borger.dk/family-and-children/childcare/family-daycare--nurseries-and-kindergartens",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos al acabar el permiso"
+                  ],
+                  "indirecto": [
+                    "madres que mantienen su empleo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "escuelas infantiles privadas que compiten"
+                  ],
+                  "indirecto": [
+                    "contribuyentes de comunidades y ayuntamientos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Permisos más largos y flexibles",
+              "texto": "Permisos pagados más largos, con una parte intransferible para cada progenitor y días que se pueden pasar a otro cuidador, como un abuelo, al modo sueco.",
+              "fuente": "https://forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "padres y madres trabajadores",
+                    "abuelos que cuidan"
+                  ],
+                  "indirecto": [
+                    "recién nacidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cubren ausencias más largas"
+                  ],
+                  "indirecto": [
+                    "cotizantes a la Seguridad Social"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Libertad de modelo de crianza",
+              "texto": "Quien prefiera cuidar en casa los primeros meses puede alargar el permiso en vez de usar la plaza, y ninguna forma de familia queda fuera de las ayudas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que prefieren cuidar en casa",
+                    "familias de cualquier composición"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que cubren ausencias más largas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el permiso ampliado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pacto de Estado a veinte años",
+              "texto": "Un pacto con una sola meta: cerrar la distancia entre hijos deseados y tenidos. El Instituto Nacional de Estadística la mide cada año y un órgano independiente evalúa.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "parejas que quieren tener hijos"
+                  ],
+                  "indirecto": [
+                    "jóvenes que hoy planifican su familia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos futuros con menos margen de cambio"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -231,50 +1443,447 @@
           "nivel": 0,
           "resumen": "Pedir cárcel o cierre de medios por opiniones, señalar a periodistas o usar el dinero y los medios públicos para premiar y castigar.",
           "medidas": [
-            { "nombre": "Castigar opiniones", "texto": "Proponer penas de prisión o el cierre de medios por opiniones, sátira o crítica que no incitan a la violencia." },
-            { "nombre": "Señalar a periodistas", "texto": "Señalar desde un cargo público a periodistas concretos, vetarlos en comparecencias o vigilarlos sin control judicial." },
-            { "nombre": "Dinero público como premio", "texto": "Repartir la publicidad institucional y los puestos directivos de los medios públicos según la línea editorial de cada medio." }
+            {
+              "nombre": "Castigar opiniones",
+              "texto": "Proponer penas de prisión o el cierre de medios por opiniones, sátira o crítica que no incitan a la violencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cargos e instituciones criticados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "periodistas, humoristas y activistas",
+                    "ciudadanos que opinan en público"
+                  ],
+                  "indirecto": [
+                    "público que pierde información"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Señalar a periodistas",
+              "texto": "Señalar desde un cargo público a periodistas concretos, vetarlos en comparecencias o vigilarlos sin control judicial.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cargos públicos que eluden preguntas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "periodistas señalados o vetados"
+                  ],
+                  "indirecto": [
+                    "lectores y audiencias"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dinero público como premio",
+              "texto": "Repartir la publicidad institucional y los puestos directivos de los medios públicos según la línea editorial de cada medio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "medios afines al gobierno de turno"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "medios críticos con el gobierno"
+                  ],
+                  "indirecto": [
+                    "contribuyentes",
+                    "audiencias"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Respeto real al trabajo periodístico, sin persecución por opiniones y con las reglas europeas de libertad de los medios cumplidas.",
           "medidas": [
-            { "nombre": "Ley del secreto profesional", "texto": "Una ley desarrolla el secreto profesional que ya recoge la Constitución, para que ningún periodista pueda ser obligado a revelar sus fuentes." },
-            { "nombre": "Comparecencias con preguntas", "texto": "Las Administraciones dan acceso a todos los medios acreditados y aceptan preguntas en sus comparecencias, sin listas cerradas ni medios vetados." },
-            { "nombre": "Acceso a la información pública", "texto": "El Consejo de Transparencia resuelve las peticiones de información denegadas y sus resoluciones se cumplen, también por los ministerios y las comunidades." },
-            { "nombre": "Reglamento europeo de medios cumplido", "texto": "El Estado aplica el Reglamento Europeo de Libertad de Medios: protección de fuentes, independencia editorial y transparencia de la propiedad.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783152" }
+            {
+              "nombre": "Ley del secreto profesional",
+              "texto": "Una ley desarrolla el secreto profesional que ya recoge la Constitución, para que ningún periodista pueda ser obligado a revelar sus fuentes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "periodistas",
+                    "fuentes que denuncian irregularidades"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien busca identificar la fuente de una filtración"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Comparecencias con preguntas",
+              "texto": "Las Administraciones dan acceso a todos los medios acreditados y aceptan preguntas en sus comparecencias, sin listas cerradas ni medios vetados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "medios acreditados",
+                    "periodistas hoy vetados"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "cargos públicos que prefieren no responder"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Acceso a la información pública",
+              "texto": "El Consejo de Transparencia resuelve las peticiones de información denegadas y sus resoluciones se cumplen, también por los ministerios y las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que piden información",
+                    "periodistas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "Administraciones que niegan información"
+                  ],
+                  "indirecto": [
+                    "funcionarios con más peticiones que atender"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reglamento europeo de medios cumplido",
+              "texto": "El Estado aplica el Reglamento Europeo de Libertad de Medios: protección de fuentes, independencia editorial y transparencia de la propiedad.",
+              "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783152",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "periodistas",
+                    "medios independientes"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de medios que ocultan su control",
+                    "gobiernos que influyen en medios públicos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Revisar los delitos de opinión, repartir la publicidad institucional con reglas publicadas y frenar las demandas abusivas contra periodistas.",
           "medidas": [
-            { "nombre": "Revisión de los delitos de opinión", "texto": "Las Cortes revisan las injurias a instituciones, las ofensas a sentimientos religiosos y los ultrajes a símbolos a la luz de las condenas del Tribunal Europeo de Derechos Humanos.", "fuente": "https://merlin.obs.coe.int/article/8266" },
-            { "nombre": "Publicidad institucional con criterios", "texto": "Cada Administración publica antes los criterios de reparto (audiencia verificada, territorio, lengua) y después cada euro que ha recibido cada medio." },
-            { "nombre": "Freno a las demandas abusivas", "texto": "Archivo rápido y costas para quien demanda a periodistas o activistas solo para callarlos, extendiendo a todos los casos lo que la directiva europea prevé entre países.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783044" },
-            { "nombre": "Cuentas de los medios públicos", "texto": "Los medios públicos publican cuentas, audiencias, contratos externos y quejas, y su dirección comparece cada año ante el Parlamento o la asamblea autonómica." }
+            {
+              "nombre": "Revisión de los delitos de opinión",
+              "texto": "Las Cortes revisan las injurias a instituciones, las ofensas a sentimientos religiosos y los ultrajes a símbolos a la luz de las condenas del Tribunal Europeo de Derechos Humanos.",
+              "fuente": "https://merlin.obs.coe.int/article/8266",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "humoristas, artistas y activistas",
+                    "ciudadanos que critican a las instituciones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que se sienten ofendidas en sus creencias"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Publicidad institucional con criterios",
+              "texto": "Cada Administración publica antes los criterios de reparto (audiencia verificada, territorio, lengua) y después cada euro que ha recibido cada medio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "medios pequeños o críticos",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "medios que reciben publicidad por afinidad"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Freno a las demandas abusivas",
+              "texto": "Archivo rápido y costas para quien demanda a periodistas o activistas solo para callarlos, extendiendo a todos los casos lo que la directiva europea prevé entre países.",
+              "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783044",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "periodistas y activistas demandados"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "demandantes que usan pleitos para callar"
+                  ],
+                  "indirecto": [
+                    "demandantes legítimos archivados por error"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuentas de los medios públicos",
+              "texto": "Los medios públicos publican cuentas, audiencias, contratos externos y quejas, y su dirección comparece cada año ante el Parlamento o la asamblea autonómica.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "audiencias de medios públicos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "directivos de medios públicos"
+                  ],
+                  "indirecto": [
+                    "productoras con contratos opacos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Medios públicos independientes del Gobierno, propiedad de los medios a la vista y respuestas a los bulos que no hacen de ningún gobierno árbitro de la verdad.",
           "medidas": [
-            { "nombre": "Consejos de medios públicos plurales", "texto": "Los consejos de la radiotelevisión estatal y de las autonómicas se eligen por mayorías amplias, con perfiles profesionales y un mandato distinto al de la legislatura." },
-            { "nombre": "Registro de propietarios reales", "texto": "Un registro público y abierto con los dueños reales de cada medio y todo el dinero público que recibe, mantenido por la autoridad audiovisual." },
-            { "nombre": "Plataformas transparentes", "texto": "Las grandes plataformas digitales explican cómo ordenan y retiran contenidos y dan datos a investigadores, como exige la normativa europea de servicios digitales." },
-            { "nombre": "Aprender a contrastar en la escuela", "texto": "El currículo enseña a contrastar fuentes y detectar bulos, y las comunidades lo evalúan, en lugar de encargar a un gobierno decidir qué es verdad." }
+            {
+              "nombre": "Consejos de medios públicos plurales",
+              "texto": "Los consejos de la radiotelevisión estatal y de las autonómicas se eligen por mayorías amplias, con perfiles profesionales y un mandato distinto al de la legislatura.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "audiencias de medios públicos",
+                    "profesionales de esos medios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que hoy nombran a la dirección"
+                  ],
+                  "indirecto": [
+                    "candidatos elegidos por afinidad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Registro de propietarios reales",
+              "texto": "Un registro público y abierto con los dueños reales de cada medio y todo el dinero público que recibe, mantenido por la autoridad audiovisual.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "audiencias",
+                    "periodistas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que ocultan su control de un medio"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plataformas transparentes",
+              "texto": "Las grandes plataformas digitales explican cómo ordenan y retiran contenidos y dan datos a investigadores, como exige la normativa europea de servicios digitales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de redes sociales",
+                    "investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "grandes plataformas digitales"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Aprender a contrastar en la escuela",
+              "texto": "El currículo enseña a contrastar fuentes y detectar bulos, y las comunidades lo evalúan, en lugar de encargar a un gobierno decidir qué es verdad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnos"
+                  ],
+                  "indirecto": [
+                    "audiencias de medios y redes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "difusores de bulos"
+                  ],
+                  "indirecto": [
+                    "profesorado que integra contenidos nuevos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Sin cárcel por opiniones que no incitan a la violencia, medios públicos dirigidos por concurso, publicidad por reglas fijas y jueces, no gobiernos, ante los bulos.",
           "medidas": [
-            { "nombre": "Sin cárcel por opinar", "texto": "Quitar la pena de prisión a las injurias a instituciones, las ofensas a sentimientos y los ultrajes a símbolos. Las amenazas y la incitación a la violencia siguen siendo delito." },
-            { "nombre": "Dirección por concurso público", "texto": "Como máximo un tercio de consejeros ligados a gobiernos o partidos, dirección elegida por concurso, mandato más largo que la legislatura y cese solo por causa tasada.", "meta": true, "fuente": "https://www.bundesverfassungsgericht.de/SharedDocs/Pressemitteilungen/DE/2014/bvg14-026" },
-            { "nombre": "Publicidad institucional por fórmula", "texto": "El reparto se calcula con una fórmula pública y estable, lo aplica un órgano técnico y no el Gobierno, y cada medio puede recurrir el resultado." },
-            { "nombre": "Jueces, no gobiernos, ante los bulos", "texto": "Ningún órgano del Gobierno decide qué es verdad: la retirada de contenidos solo se hace por orden judicial, con rectificación rápida y plataformas transparentes." },
-            { "nombre": "Periodistas a salvo del espionaje", "texto": "Prohibido vigilar a periodistas o a sus fuentes sin autorización judicial previa y motivada, con aviso posterior al afectado y control parlamentario." }
+            {
+              "nombre": "Sin cárcel por opinar",
+              "texto": "Quitar la pena de prisión a las injurias a instituciones, las ofensas a sentimientos y los ultrajes a símbolos. Las amenazas y la incitación a la violencia siguen siendo delito.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "humoristas, artistas y activistas",
+                    "ciudadanos que critican a las instituciones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que se sienten ofendidas en sus creencias"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Dirección por concurso público",
+              "texto": "Como máximo un tercio de consejeros ligados a gobiernos o partidos, dirección elegida por concurso, mandato más largo que la legislatura y cese solo por causa tasada.",
+              "meta": true,
+              "fuente": "https://www.bundesverfassungsgericht.de/SharedDocs/Pressemitteilungen/DE/2014/bvg14-026",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales de medios públicos",
+                    "audiencias"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos y partidos que nombran consejeros"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Publicidad institucional por fórmula",
+              "texto": "El reparto se calcula con una fórmula pública y estable, lo aplica un órgano técnico y no el Gobierno, y cada medio puede recurrir el resultado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "medios de cualquier línea editorial",
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que usan la publicidad como premio",
+                    "medios favorecidos por afinidad"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Jueces, no gobiernos, ante los bulos",
+              "texto": "Ningún órgano del Gobierno decide qué es verdad: la retirada de contenidos solo se hace por orden judicial, con rectificación rápida y plataformas transparentes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios y medios con contenidos discutidos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de bulos que esperan a un juez"
+                  ],
+                  "indirecto": [
+                    "juzgados con más carga"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Periodistas a salvo del espionaje",
+              "texto": "Prohibido vigilar a periodistas o a sus fuentes sin autorización judicial previa y motivada, con aviso posterior al afectado y control parlamentario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "periodistas",
+                    "fuentes de periodistas"
+                  ],
+                  "indirecto": [
+                    "audiencias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios de inteligencia con menos margen"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -287,50 +1896,432 @@
           "nivel": 0,
           "resumen": "Incumplir o bloquear desde un cargo público las leyes vigentes, o negar la objeción y castigar a quien no quiere participar.",
           "medidas": [
-            { "nombre": "Bloqueo desde la Administración", "texto": "No ofrecer la prestación en la sanidad pública de una comunidad, retrasarla con trámites o negarse a crear el registro de objetores que pide la ley." },
-            { "nombre": "Objeción negada o castigada", "texto": "Obligar a un profesional a participar contra su conciencia, o perjudicar su carrera por objetar o por no objetar." },
-            { "nombre": "Cambios sin datos", "texto": "Prometer derogar o ampliar estas leyes sin datos de cómo se aplican y con mayorías justas que cambian con cada gobierno." }
+            {
+              "nombre": "Bloqueo desde la Administración",
+              "texto": "No ofrecer la prestación en la sanidad pública de una comunidad, retrasarla con trámites o negarse a crear el registro de objetores que pide la ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales que objetan sin registrarse"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "mujeres que piden un aborto legal",
+                    "enfermos que piden la eutanasia"
+                  ],
+                  "indirecto": [
+                    "familias que pagan viajes a otra comunidad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Objeción negada o castigada",
+              "texto": "Obligar a un profesional a participar contra su conciencia, o perjudicar su carrera por objetar o por no objetar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gestores que planifican sin objetores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales con objeción de conciencia",
+                    "profesionales que no objetan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cambios sin datos",
+              "texto": "Prometer derogar o ampliar estas leyes sin datos de cómo se aplican y con mayorías justas que cambian con cada gobierno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gobierno de turno que capta el anuncio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes ante reglas que cambian",
+                    "profesionales sanitarios"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir las leyes vigentes de aborto y eutanasia, con información veraz al paciente, intimidad protegida y la objeción que ya prevén.",
           "medidas": [
-            { "nombre": "La ley vigente, cumplida", "texto": "Cada comunidad presta el aborto y la eutanasia en los términos de la ley estatal, y el Ministerio de Sanidad publica los datos que recibe." },
-            { "nombre": "Información completa al paciente", "texto": "Quien pide la prestación recibe por escrito las alternativas, las ayudas y los cuidados paliativos disponibles, sin que eso añada trámites ni plazos." },
-            { "nombre": "Intimidad protegida", "texto": "Los datos de quien pide estas prestaciones y los del registro de objetores solo sirven para organizar el servicio y nunca se publican de forma individual." },
-            { "nombre": "Comisiones de garantía en marcha", "texto": "Todas las comunidades tienen funcionando la comisión de médicos y juristas que controla cada eutanasia, como exige la ley.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628" }
+            {
+              "nombre": "La ley vigente, cumplida",
+              "texto": "Cada comunidad presta el aborto y la eutanasia en los términos de la ley estatal, y el Ministerio de Sanidad publica los datos que recibe.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres que piden un aborto legal",
+                    "enfermos que piden la eutanasia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios de salud que hoy no la ofrecen"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Información completa al paciente",
+              "texto": "Quien pide la prestación recibe por escrito las alternativas, las ayudas y los cuidados paliativos disponibles, sin que eso añada trámites ni plazos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que piden la prestación"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personal sanitario con más tareas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Intimidad protegida",
+              "texto": "Los datos de quien pide estas prestaciones y los del registro de objetores solo sirven para organizar el servicio y nunca se publican de forma individual.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que piden estas prestaciones",
+                    "profesionales objetores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Solo impide usos de los datos ajenos a organizar el servicio; nadie necesita legítimamente conocer esas identidades."
+              }
+            },
+            {
+              "nombre": "Comisiones de garantía en marcha",
+              "texto": "Todas las comunidades tienen funcionando la comisión de médicos y juristas que controla cada eutanasia, como exige la ley.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "enfermos que piden la eutanasia"
+                  ],
+                  "indirecto": [
+                    "profesionales que la prestan"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "médicos y juristas con más carga"
+                  ],
+                  "indirecto": [
+                    "contribuyentes de las comunidades"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Que las prestaciones se den en la sanidad pública de todas las comunidades, con la objeción registrada y el relevo organizado.",
           "medidas": [
-            { "nombre": "Prestación en hospitales públicos", "texto": "Las comunidades ofrecen la prestación en sus propios hospitales y no solo derivando a clínicas concertadas, para que no dependa de un contrato." },
-            { "nombre": "Registro de objetores en cada comunidad", "texto": "Objeción personal, anticipada y por escrito, en un registro confidencial que solo sirve para planificar plantillas, como manda la ley de aborto reformada.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514" },
-            { "nombre": "Formación de los profesionales", "texto": "Las facultades y la formación sanitaria especializada enseñan estas prestaciones, sin obligar a practicarlas a quien objeta." },
-            { "nombre": "Datos por comunidad", "texto": "El Ministerio de Sanidad publica cada año, por comunidad, cuántas prestaciones se hicieron, dónde, en qué tiempos y cuántas se denegaron." }
+            {
+              "nombre": "Prestación en hospitales públicos",
+              "texto": "Las comunidades ofrecen la prestación en sus propios hospitales y no solo derivando a clínicas concertadas, para que no dependa de un contrato.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres que piden un aborto"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "clínicas concertadas que hoy la prestan"
+                  ],
+                  "indirecto": [
+                    "hospitales públicos que reorganizan plantillas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Registro de objetores en cada comunidad",
+              "texto": "Objeción personal, anticipada y por escrito, en un registro confidencial que solo sirve para planificar plantillas, como manda la ley de aborto reformada.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales objetores",
+                    "pacientes que necesitan el servicio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales que objetan sin querer registrarse"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Formación de los profesionales",
+              "texto": "Las facultades y la formación sanitaria especializada enseñan estas prestaciones, sin obligar a practicarlas a quien objeta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes de medicina y enfermería"
+                  ],
+                  "indirecto": [
+                    "pacientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "docentes que objetan a enseñar la técnica"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Datos por comunidad",
+              "texto": "El Ministerio de Sanidad publica cada año, por comunidad, cuántas prestaciones se hicieron, dónde, en qué tiempos y cuántas se denegaron.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes",
+                    "investigadores y periodistas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con peor acceso expuesto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Acceso garantizado y evaluado en todo el territorio, con paliativos y apoyo disponibles para que nadie elija por falta de alternativa.",
           "medidas": [
-            { "nombre": "Cobertura en cada provincia", "texto": "Las comunidades garantizan un equipo no objetor, propio o desplazado, que presta el servicio sin obligar a viajar lejos de la propia provincia." },
-            { "nombre": "Alternativas ofrecidas, no solo informadas", "texto": "El equipo sanitario, coordinado con servicios sociales, ofrece cuidados paliativos o ayuda a la maternidad ya disponibles, sin retrasar la prestación." },
-            { "nombre": "Evaluación independiente de las leyes", "texto": "La agencia estatal de evaluación de políticas públicas revisa periódicamente la aplicación de ambas leyes y publica sus conclusiones.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677" },
-            { "nombre": "Carrera sin perjuicio", "texto": "Objetar o no objetar no afecta a la promoción, el destino ni el sueldo del profesional, y cada queja se investiga." }
+            {
+              "nombre": "Cobertura en cada provincia",
+              "texto": "Las comunidades garantizan un equipo no objetor, propio o desplazado, que presta el servicio sin obligar a viajar lejos de la propia provincia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes de provincias sin servicio"
+                  ],
+                  "indirecto": [
+                    "familias que evitan viajes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales no objetores desplazados"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Alternativas ofrecidas, no solo informadas",
+              "texto": "El equipo sanitario, coordinado con servicios sociales, ofrece cuidados paliativos o ayuda a la maternidad ya disponibles, sin retrasar la prestación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que dudan",
+                    "enfermos sin cuidados paliativos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que lo viven como presión"
+                  ],
+                  "indirecto": [
+                    "equipos sanitarios con más coordinación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación independiente de las leyes",
+              "texto": "La agencia estatal de evaluación de políticas públicas revisa periódicamente la aplicación de ambas leyes y publica sus conclusiones.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos y legisladores"
+                  ],
+                  "indirecto": [
+                    "pacientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "La hace una agencia que ya existe y solo añade información; no quita derechos ni recursos a nadie."
+              }
+            },
+            {
+              "nombre": "Carrera sin perjuicio",
+              "texto": "Objetar o no objetar no afecta a la promoción, el destino ni el sueldo del profesional, y cada queja se investiga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales objetores",
+                    "profesionales no objetores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "responsables que premiaban o castigaban la objeción"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Mientras la ley las reconozca, prestación pública en cada provincia y en plazo, objeción respetada, apoyo ofrecido antes y evaluación pública cada año.",
           "medidas": [
-            { "nombre": "Equipo no objetor con plazo máximo", "texto": "Propio o desplazado en cada provincia, con plazo máximo de atención. Si no se cumple, derivación inmediata a otro centro con todos los gastos pagados.", "meta": true },
-            { "nombre": "Vía urgente en eutanasia", "texto": "Plazo máximo total de tramitación y vía urgente para enfermos terminales, manteniendo los dos informes médicos y el control previo de la comisión de garantía.", "meta": true },
-            { "nombre": "Revisión posterior de cada caso", "texto": "Además del control previo, la comisión revisa cada eutanasia después y publica un informe anual, como hacen las comisiones regionales de Países Bajos.", "fuente": "https://english.euthanasiecommissie.nl/the-committees" },
-            { "nombre": "Datos abiertos cada año", "texto": "Evaluación independiente anual con datos abiertos por provincia: tiempos, lugar de la prestación, objeción, denegaciones y alternativas que faltaron." },
-            { "nombre": "Reformas con evaluación y consenso", "texto": "Toda reforma de fondo, en un sentido o en otro, va precedida de la evaluación pública y busca una mayoría más amplia que la del gobierno del momento." }
+            {
+              "nombre": "Equipo no objetor con plazo máximo",
+              "texto": "Propio o desplazado en cada provincia, con plazo máximo de atención. Si no se cumple, derivación inmediata a otro centro con todos los gastos pagados.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes de cualquier provincia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios de salud que pagan derivaciones"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vía urgente en eutanasia",
+              "texto": "Plazo máximo total de tramitación y vía urgente para enfermos terminales, manteniendo los dos informes médicos y el control previo de la comisión de garantía.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "enfermos terminales"
+                  ],
+                  "indirecto": [
+                    "sus familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comisiones y médicos con plazos más cortos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Revisión posterior de cada caso",
+              "texto": "Además del control previo, la comisión revisa cada eutanasia después y publica un informe anual, como hacen las comisiones regionales de Países Bajos.",
+              "fuente": "https://english.euthanasiecommissie.nl/the-committees",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes y familias"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que piden garantías"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "médicos que ven revisado cada caso"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Datos abiertos cada año",
+              "texto": "Evaluación independiente anual con datos abiertos por provincia: tiempos, lugar de la prestación, objeción, denegaciones y alternativas que faltaron.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes",
+                    "investigadores y periodistas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con peor acceso expuesto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reformas con evaluación y consenso",
+              "texto": "Toda reforma de fondo, en un sentido o en otro, va precedida de la evaluación pública y busca una mayoría más amplia que la del gobierno del momento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes y profesionales ante reglas estables"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "mayorías de gobierno que quieren reformar pronto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -343,51 +2334,467 @@
           "nivel": 0,
           "resumen": "Negar la discriminación o la violencia contra las mujeres, justificar el odio o saltarse la presunción de inocencia en nombre de la igualdad.",
           "medidas": [
-            { "nombre": "Negar el problema", "texto": "Negar que existan la violencia contra las mujeres o la discriminación por origen, orientación o discapacidad, o suprimir sin sustituto los servicios que las atienden." },
-            { "nombre": "Justificar el odio", "texto": "Justificar o callar ante agresiones o campañas de odio contra un grupo, o dar dinero público a quien las promueve." },
-            { "nombre": "Garantías rotas", "texto": "Suprimir la presunción de inocencia o el derecho de defensa de alguien por su sexo o por su grupo, con el argumento que sea." }
+            {
+              "nombre": "Negar el problema",
+              "texto": "Negar que existan la violencia contra las mujeres o la discriminación por origen, orientación o discapacidad, o suprimir sin sustituto los servicios que las atienden.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "agresores y quien discrimina, con menos control"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de violencia machista",
+                    "personas discriminadas por origen, orientación o discapacidad"
+                  ],
+                  "indirecto": [
+                    "hijos de las víctimas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Justificar el odio",
+              "texto": "Justificar o callar ante agresiones o campañas de odio contra un grupo, o dar dinero público a quien las promueve.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores de campañas de odio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "grupos que sufren agresiones de odio"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que las financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Garantías rotas",
+              "texto": "Suprimir la presunción de inocencia o el derecho de defensa de alguien por su sexo o por su grupo, con el argumento que sea.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "acusadores sin carga de la prueba"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas acusadas"
+                  ],
+                  "indirecto": [
+                    "víctimas, si los juicios pierden credibilidad"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir las leyes de igualdad y no discriminación que ya existen y perseguir los delitos de odio con fiscales especializados.",
           "medidas": [
-            { "nombre": "Fiscales de delitos de odio", "texto": "Cada fiscalía provincial tiene un fiscal especializado en delitos de odio y discriminación, y el Ministerio del Interior publica cada año los casos." },
-            { "nombre": "Planes de igualdad comprobados", "texto": "Las empresas obligadas por ley tienen un plan de igualdad registrado y un registro de salarios por sexo, y la Inspección de Trabajo lo comprueba." },
-            { "nombre": "Atención a víctimas de violencia machista", "texto": "Teléfono gratuito, centros de crisis abiertos todo el día y órdenes de protección con seguimiento en todas las comunidades." },
-            { "nombre": "Accesibilidad que ya exige la ley", "texto": "Las Administraciones cumplen las normas de accesibilidad vigentes en edificios, transporte y webs, y sancionan su incumplimiento." }
+            {
+              "nombre": "Fiscales de delitos de odio",
+              "texto": "Cada fiscalía provincial tiene un fiscal especializado en delitos de odio y discriminación, y el Ministerio del Interior publica cada año los casos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de delitos de odio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "autores de delitos de odio"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Planes de igualdad comprobados",
+              "texto": "Las empresas obligadas por ley tienen un plan de igualdad registrado y un registro de salarios por sexo, y la Inspección de Trabajo lo comprueba.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadoras con brecha salarial"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas obligadas, con más gestión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Atención a víctimas de violencia machista",
+              "texto": "Teléfono gratuito, centros de crisis abiertos todo el día y órdenes de protección con seguimiento en todas las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de violencia machista"
+                  ],
+                  "indirecto": [
+                    "hijos de las víctimas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "agresores con orden de protección"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Accesibilidad que ya exige la ley",
+              "texto": "Las Administraciones cumplen las normas de accesibilidad vigentes en edificios, transporte y webs, y sancionan su incumplimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con discapacidad",
+                    "personas mayores con movilidad reducida"
+                  ],
+                  "indirecto": [
+                    "familias con carritos de bebé"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios y empresas que incumplen"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las obras"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Brecha salarial medida por empresa, protección frente a la violencia machista en todo el territorio, accesibilidad con fechas y discriminación medida.",
           "medidas": [
-            { "nombre": "Transparencia salarial", "texto": "Las empresas informan de su brecha salarial entre mujeres y hombres a la plantilla y a la Administración, como exige la directiva europea de transparencia salarial.", "fuente": "https://www.consilium.europa.eu/en/policies/pay-transparency/" },
-            { "nombre": "Protección de víctimas coordinada", "texto": "Valoración del riesgo, seguimiento policial y dispositivos de control coordinados entre jueces, policía y servicios sociales, con revisión de cada fallo." },
-            { "nombre": "Plan de accesibilidad con fechas", "texto": "Cada Administración aprueba y publica un plan con fechas y presupuesto para hacer accesibles sus edificios, trámites y transportes." },
-            { "nombre": "Discriminación medida por cualquier motivo", "texto": "Encuestas oficiales, voluntarias y anónimas, sobre discriminación por origen, orientación sexual, identidad, edad, religión o discapacidad." }
+            {
+              "nombre": "Transparencia salarial",
+              "texto": "Las empresas informan de su brecha salarial entre mujeres y hombres a la plantilla y a la Administración, como exige la directiva europea de transparencia salarial.",
+              "fuente": "https://www.consilium.europa.eu/en/policies/pay-transparency/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadoras peor pagadas"
+                  ],
+                  "indirecto": [
+                    "trabajadores con salarios opacos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con brecha sin justificar"
+                  ],
+                  "indirecto": [
+                    "trabajadores mejor pagados sin causa objetiva"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Protección de víctimas coordinada",
+              "texto": "Valoración del riesgo, seguimiento policial y dispositivos de control coordinados entre jueces, policía y servicios sociales, con revisión de cada fallo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de violencia machista"
+                  ],
+                  "indirecto": [
+                    "hijos de las víctimas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "agresores con riesgo valorado"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan de accesibilidad con fechas",
+              "texto": "Cada Administración aprueba y publica un plan con fechas y presupuesto para hacer accesibles sus edificios, trámites y transportes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con discapacidad"
+                  ],
+                  "indirecto": [
+                    "personas mayores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "contribuyentes que pagan las obras"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Discriminación medida por cualquier motivo",
+              "texto": "Encuestas oficiales, voluntarias y anónimas, sobre discriminación por origen, orientación sexual, identidad, edad, religión o discapacidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que sufren discriminación"
+                  ],
+                  "indirecto": [
+                    "investigadores y legisladores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Encuesta voluntaria y anónima: solo aporta información y su coste es el de una encuesta oficial más."
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Igualdad real medida con datos públicos y leyes evaluadas, que se corrigen cuando producen efectos que nadie buscaba.",
           "medidas": [
-            { "nombre": "Autoridad de igualdad en funcionamiento", "texto": "La autoridad independiente de igualdad de trato que prevé la Ley 15/2022 funciona con presupuesto propio, atiende quejas y puede llevar casos a los tribunales." },
-            { "nombre": "Panel público de igualdad", "texto": "El Instituto Nacional de Estadística publica cada año salarios, empleo, violencia, accesibilidad y discriminación por sexo, origen, discapacidad y edad." },
-            { "nombre": "Evaluación de las leyes de igualdad", "texto": "La agencia estatal de evaluación revisa cada ley de igualdad tras su entrada en vigor y publica qué funciona y qué efectos no buscados tiene.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677" },
-            { "nombre": "Pacto plurianual contra la violencia machista", "texto": "Pacto de Estado con financiación de varios años y evaluación independiente de qué medidas reducen de verdad las agresiones y los asesinatos." },
-            { "nombre": "Protección para toda víctima en el hogar", "texto": "Protección y alojamiento para cualquier víctima de violencia en el hogar, también hombres, menores y mayores, sin restar medios a la violencia machista." }
+            {
+              "nombre": "Autoridad de igualdad en funcionamiento",
+              "texto": "La autoridad independiente de igualdad de trato que prevé la Ley 15/2022 funciona con presupuesto propio, atiende quejas y puede llevar casos a los tribunales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas discriminadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas y entidades que discriminan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Panel público de igualdad",
+              "texto": "El Instituto Nacional de Estadística publica cada año salarios, empleo, violencia, accesibilidad y discriminación por sexo, origen, discapacidad y edad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "investigadores y legisladores",
+                    "ciudadanos que quieren datos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Reúne datos que el Estado ya recoge; no impone cargas ni quita nada a ningún grupo."
+              }
+            },
+            {
+              "nombre": "Evaluación de las leyes de igualdad",
+              "texto": "La agencia estatal de evaluación revisa cada ley de igualdad tras su entrada en vigor y publica qué funciona y qué efectos no buscados tiene.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "destinatarios de esas leyes"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de medidas que no funcionan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Pacto plurianual contra la violencia machista",
+              "texto": "Pacto de Estado con financiación de varios años y evaluación independiente de qué medidas reducen de verdad las agresiones y los asesinatos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de violencia machista"
+                  ],
+                  "indirecto": [
+                    "hijos de las víctimas",
+                    "entidades de atención a víctimas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "agresores"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Protección para toda víctima en el hogar",
+              "texto": "Protección y alojamiento para cualquier víctima de violencia en el hogar, también hombres, menores y mayores, sin restar medios a la violencia machista.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hombres víctimas de violencia en el hogar",
+                    "menores y mayores maltratados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "agresores en el hogar"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Igualdad que se mide y se corrige: brecha pública empresa a empresa, autoridad independiente para cualquier discriminación, accesibilidad exigible y leyes evaluadas.",
           "medidas": [
-            { "nombre": "Buscador público de brecha salarial", "texto": "Brecha de cada empresa de más de 50 trabajadores en un buscador público. Si pasa del 5 % sin causa objetiva, plan de corrección pactado con la plantilla.", "meta": true, "fuente": "https://www.gov.uk/government/collections/gender-pay-gap-reporting" },
-            { "nombre": "Autoridad de igualdad para todos", "texto": "Elegida por mayoría amplia, atiende gratis cualquier discriminación (sexo, orientación, origen, discapacidad, edad, religión o ideas) y puede sancionar." },
-            { "nombre": "Accesibilidad universal exigible", "texto": "Fecha límite, presupuesto y sanción para edificios, transporte, webs y trámites, y derecho de cualquier persona a reclamar ante la autoridad independiente." },
-            { "nombre": "Leyes con fecha de revisión", "texto": "Cada ley de igualdad nace con indicadores y se evalúa a los dos años. Si hay efectos no buscados, el Parlamento vota su corrección en seis meses.", "meta": true },
-            { "nombre": "Garantías y acción positiva temporal", "texto": "Presunción de inocencia y proceso justo siempre; las medidas de acción positiva son temporales y se retiran cuando se cierra la diferencia que las justificó." }
+            {
+              "nombre": "Buscador público de brecha salarial",
+              "texto": "Brecha de cada empresa de más de 50 trabajadores en un buscador público. Si pasa del 5 % sin causa objetiva, plan de corrección pactado con la plantilla.",
+              "meta": true,
+              "fuente": "https://www.gov.uk/government/collections/gender-pay-gap-reporting",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadoras con brecha sin causa"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas con brecha por encima del umbral"
+                  ],
+                  "indirecto": [
+                    "trabajadores mejor pagados sin causa objetiva"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Autoridad de igualdad para todos",
+              "texto": "Elegida por mayoría amplia, atiende gratis cualquier discriminación (sexo, orientación, origen, discapacidad, edad, religión o ideas) y puede sancionar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas discriminadas por cualquier motivo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas y entidades sancionadas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que lo financian"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Accesibilidad universal exigible",
+              "texto": "Fecha límite, presupuesto y sanción para edificios, transporte, webs y trámites, y derecho de cualquier persona a reclamar ante la autoridad independiente.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con discapacidad",
+                    "personas mayores"
+                  ],
+                  "indirecto": [
+                    "familias con carritos de bebé"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de edificios y webs sin adaptar"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las obras públicas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Leyes con fecha de revisión",
+              "texto": "Cada ley de igualdad nace con indicadores y se evalúa a los dos años. Si hay efectos no buscados, el Parlamento vota su corrección en seis meses.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "destinatarios de las leyes de igualdad"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios de medidas que se corrijan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Garantías y acción positiva temporal",
+              "texto": "Presunción de inocencia y proceso justo siempre; las medidas de acción positiva son temporales y se retiran cuando se cierra la diferencia que las justificó.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas acusadas en cualquier proceso"
+                  ],
+                  "indirecto": [
+                    "quien compite sin cuota tras cerrar la brecha"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios de cuotas que se retiran"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]

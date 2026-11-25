@@ -57,51 +57,476 @@
           "nivel": 0,
           "resumen": "Sin propuesta para quien quiere comprar, o tratar la propiedad de la vivienda como algo ilegítimo que hay que impedir o quitar sin compensación.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No hay ninguna medida para quien quiere comprar su primera vivienda: comprar sigue dependiendo de heredar o de que la familia ponga la entrada." },
-            { "nombre": "Propiedad bajo sospecha", "texto": "Se presenta como ilegítimo ser dueño de la casa en la que se vive y se proponen expropiaciones o limitaciones sin indemnización, algo que la Constitución no permite." },
-            { "nombre": "Promesas sin financiar", "texto": "Se anuncian ayudas a la compra sin decir cuánto cuestan, quién las paga ni con qué partida del presupuesto." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No hay ninguna medida para quien quiere comprar su primera vivienda: comprar sigue dependiendo de heredar o de que la familia ponga la entrada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "herederos de vivienda familiar"
+                  ],
+                  "indirecto": [
+                    "vendedores en mercados con poca oferta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "jóvenes sin patrimonio familiar",
+                    "hogares de rentas medias que quieren comprar"
+                  ],
+                  "indirecto": [
+                    "municipios que pierden población joven"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Propiedad bajo sospecha",
+              "texto": "Se presenta como ilegítimo ser dueño de la casa en la que se vive y se proponen expropiaciones o limitaciones sin indemnización, algo que la Constitución no permite.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que aspiran a viviendas retiradas a sus dueños"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de su vivienda habitual",
+                    "pequeños ahorradores con una segunda vivienda"
+                  ],
+                  "indirecto": [
+                    "futuros compradores ante crédito más caro e inseguro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Promesas sin financiar",
+              "texto": "Se anuncian ayudas a la compra sin decir cuánto cuestan, quién las paga ni con qué partida del presupuesto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores que llegan a cobrar la ayuda anunciada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes que se quedan sin la ayuda prometida"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el desfase presupuestario"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Rebajar los impuestos y gastos de comprar la primera vivienda habitual, hasta un precio máximo y solo para vivir en ella.",
           "medidas": [
-            { "nombre": "Impuesto reducido en la primera vivienda", "texto": "Las comunidades rebajan el impuesto que se paga al comprar (transmisiones patrimoniales o IVA en obra nueva, según el caso) para la primera vivienda habitual, con un precio máximo por zona." },
-            { "nombre": "Gastos de notaría y registro rebajados", "texto": "El Estado, que fija los aranceles de notarios y registradores, los reduce para la primera vivienda habitual de hogares con ingresos por debajo de un umbral." },
-            { "nombre": "La ayuda es para vivir, no para invertir", "texto": "Si la vivienda deja de ser residencia habitual en los años siguientes o se alquila como turística, la rebaja se devuelve. Hacienda lo comprueba con el padrón." },
-            { "nombre": "Asesoría pública antes de firmar", "texto": "Simulador oficial de hipoteca y gastos y asesoría gratuita en las oficinas de vivienda de comunidades y ayuntamientos, para que nadie firme sin saber cuánto pagará cada mes." }
+            {
+              "nombre": "Impuesto reducido en la primera vivienda",
+              "texto": "Las comunidades rebajan el impuesto que se paga al comprar (transmisiones patrimoniales o IVA en obra nueva, según el caso) para la primera vivienda habitual, con un precio máximo por zona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores de primera vivienda habitual"
+                  ],
+                  "indirecto": [
+                    "vendedores de viviendas bajo el precio máximo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades autónomas que recaudan menos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que compensan la recaudación perdida",
+                    "quien compra fuera del umbral si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gastos de notaría y registro rebajados",
+              "texto": "El Estado, que fija los aranceles de notarios y registradores, los reduce para la primera vivienda habitual de hogares con ingresos por debajo de un umbral.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores de primera vivienda con ingresos bajos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "notarios y registradores"
+                  ],
+                  "indirecto": [
+                    "empleados de notarías y registros"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "La ayuda es para vivir, no para invertir",
+              "texto": "Si la vivienda deja de ser residencia habitual en los años siguientes o se alquila como turística, la rebaja se devuelve. Hacienda lo comprueba con el padrón.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que financian la rebaja"
+                  ],
+                  "indirecto": [
+                    "compradores que buscan vivienda para vivir en ella"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "compradores que querían alquilar o revender el piso"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Asesoría pública antes de firmar",
+              "texto": "Simulador oficial de hipoteca y gastos y asesoría gratuita en las oficinas de vivienda de comunidades y ayuntamientos, para que nadie firme sin saber cuánto pagará cada mes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores primerizos con poca formación financiera"
+                  ],
+                  "indirecto": [
+                    "bancos con menos impagos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el servicio"
+                  ],
+                  "indirecto": [
+                    "intermediarios que cobran por asesorar"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Ayudar con la entrada, la barrera principal: aval público por ingresos y primera vivienda, con precio máximo y resultados publicados.",
           "medidas": [
-            { "nombre": "Aval público de la entrada", "texto": "El Instituto de Crédito Oficial (el banco público) avala la parte de la hipoteca que el banco no financia normalmente, solo para la primera vivienda habitual." },
-            { "nombre": "Por ingresos, no solo por edad", "texto": "El aval se concede por ingresos y por ser la primera vivienda, no solo por tener menos de cierta edad: entran familias con hijos y quien empieza de cero tras una separación." },
-            { "nombre": "Precio máximo por zona", "texto": "El aval solo vale para viviendas por debajo de un precio máximo que fija cada comunidad según la zona, para que la ayuda no empuje los precios hacia arriba." },
-            { "nombre": "Hipoteca que se pueda pagar", "texto": "El banco solo concede la hipoteca avalada si la cuota cabe en los ingresos del hogar con margen, para que el aval no fabrique deudas impagables." },
-            { "nombre": "Resultados públicos del programa", "texto": "El banco público publica cada año cuántos avales ha dado, cuántos han fallado y cómo han evolucionado los precios donde más se han usado, para corregir el programa." }
+            {
+              "nombre": "Aval público de la entrada",
+              "texto": "El Instituto de Crédito Oficial (el banco público) avala la parte de la hipoteca que el banco no financia normalmente, solo para la primera vivienda habitual.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores con ingresos pero sin ahorro para la entrada"
+                  ],
+                  "indirecto": [
+                    "bancos que conceden hipotecas avaladas",
+                    "promotores de vivienda asequible"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que cubren los avales fallidos"
+                  ],
+                  "indirecto": [
+                    "compradores sin aval si suben los precios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Por ingresos, no solo por edad",
+              "texto": "El aval se concede por ingresos y por ser la primera vivienda, no solo por tener menos de cierta edad: entran familias con hijos y quien empieza de cero tras una separación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos de rentas medias",
+                    "personas que empiezan de cero tras una separación"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "jóvenes de rentas altas que pierden el aval"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Precio máximo por zona",
+              "texto": "El aval solo vale para viviendas por debajo de un precio máximo que fija cada comunidad según la zona, para que la ayuda no empuje los precios hacia arriba.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores de vivienda modesta"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, al limitarse el riesgo del aval"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "compradores que buscan viviendas caras con aval"
+                  ],
+                  "indirecto": [
+                    "vendedores de viviendas sobre el precio máximo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Hipoteca que se pueda pagar",
+              "texto": "El banco solo concede la hipoteca avalada si la cuota cabe en los ingresos del hogar con margen, para que el aval no fabrique deudas impagables.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que evitan deudas impagables"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que respaldan el aval"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares con ingresos justos que quedan fuera"
+                  ],
+                  "indirecto": [
+                    "bancos que harían más volumen de hipotecas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Resultados públicos del programa",
+              "texto": "El banco público publica cada año cuántos avales ha dado, cuántos han fallado y cómo han evolucionado los precios donde más se han usado, para corregir el programa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que financian el programa"
+                  ],
+                  "indirecto": [
+                    "futuros solicitantes del aval"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publicar datos que el banco público ya recoge apenas cuesta y no quita nada a nadie: solo informa para corregir el programa."
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Fórmulas entre alquilar y comprar —alquiler con opción a compra, cooperativas en cesión de uso, propiedad compartida— para que comprar deje de ser todo o nada.",
           "medidas": [
-            { "nombre": "Alquiler con opción a compra", "texto": "En vivienda protegida, parte de la renta pagada los primeros años se descuenta del precio si el inquilino decide comprar, con ese precio fijado en el contrato desde el inicio." },
-            { "nombre": "Cooperativas en cesión de uso", "texto": "Ayuntamientos y comunidades ceden suelo público por décadas a cooperativas que construyen y gestionan su edificio: los socios pagan una entrada recuperable y una cuota, sin vender con beneficio." },
-            { "nombre": "Propiedad compartida y temporal en todo el país", "texto": "Llevar a la ley estatal la propiedad compartida y la temporal que el Código civil de Cataluña regula desde 2015, y permitir hipotecar solo una parte de la vivienda.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-9678" },
-            { "nombre": "Crédito público para cooperativas", "texto": "Préstamos públicos a largo plazo y avales para cooperativas y entidades sin ánimo de lucro, con plazos y garantías adaptados a quien no busca beneficio." }
+            {
+              "nombre": "Alquiler con opción a compra",
+              "texto": "En vivienda protegida, parte de la renta pagada los primeros años se descuenta del precio si el inquilino decide comprar, con ese precio fijado en el contrato desde el inicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de vivienda protegida que quieren comprar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de vivienda protegida que cobran menos renta neta"
+                  ],
+                  "indirecto": [
+                    "hogares en lista de espera de alquiler protegido"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cooperativas en cesión de uso",
+              "texto": "Ayuntamientos y comunidades ceden suelo público por décadas a cooperativas que construyen y gestionan su edificio: los socios pagan una entrada recuperable y una cuota, sin vender con beneficio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "socios de cooperativas de vivienda"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios con alquiler tensionado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que competían por comprar ese suelo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que renuncian a vender el suelo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Propiedad compartida y temporal en todo el país",
+              "texto": "Llevar a la ley estatal la propiedad compartida y la temporal que el Código civil de Cataluña regula desde 2015, y permitir hipotecar solo una parte de la vivienda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores que no pueden pagar una vivienda entera"
+                  ],
+                  "indirecto": [
+                    "entidades públicas que conservan parte de la vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Añade una forma de propiedad voluntaria: quien no la use sigue comprando, vendiendo e hipotecando como hoy."
+              },
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-9678"
+            },
+            {
+              "nombre": "Crédito público para cooperativas",
+              "texto": "Préstamos públicos a largo plazo y avales para cooperativas y entidades sin ánimo de lucro, con plazos y garantías adaptados a quien no busca beneficio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cooperativas y entidades de vivienda sin ánimo de lucro"
+                  ],
+                  "indirecto": [
+                    "hogares que acceden a vivienda cooperativa"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que asumen el riesgo de los préstamos"
+                  ],
+                  "indirecto": [
+                    "bancos privados que pierden ese negocio"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una escalera de propiedad: comprar la casa por partes, ampliar con los años, ahorro previo bonificado y reventa a precio tasado para que la ayuda pase al siguiente.",
           "medidas": [
-            { "nombre": "Comprar por partes desde el 10 %", "texto": "En toda la vivienda protegida nueva se entra comprando desde el 10 % de la casa, se paga un alquiler asequible por el resto y se compran más partes cuando se pueda, como en el modelo inglés.", "meta": true, "fuente": "https://www.gov.uk/shared-ownership-scheme/how-it-works" },
-            { "nombre": "Cuenta de ahorro bonificada", "texto": "Cuenta para la primera vivienda en la que el Estado añade una cantidad proporcional a lo ahorrado cada año, con un máximo anual, como la cuenta Lifetime ISA británica.", "fuente": "https://www.gov.uk/lifetime-isa" },
-            { "nombre": "Reventa a precio tasado", "texto": "Quien compra vivienda protegida vive en ella unos años mínimos y, si vende, lo hace a precio tasado y actualizado a un comprador del registro público: la ayuda pasa al siguiente." },
-            { "nombre": "Reglas que no atrapan", "texto": "La ley limita el alquiler de la parte aún no comprada, reparte los gastos según la cuota de cada uno y permite vender la parte propia a precio tasado en cualquier momento." },
-            { "nombre": "Casa a coste sobre suelo público", "texto": "Cooperativas y propiedad temporal sobre suelo que sigue siendo público: la vivienda cuesta lo que cuesta construirla y el suelo vuelve a la ciudad al final del plazo." }
+            {
+              "nombre": "Comprar por partes desde el 10 %",
+              "texto": "En toda la vivienda protegida nueva se entra comprando desde el 10 % de la casa, se paga un alquiler asequible por el resto y se compran más partes cuando se pueda, como en el modelo inglés.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares con ingresos estables y poco ahorro"
+                  ],
+                  "indirecto": [
+                    "jóvenes que hoy solo pueden alquilar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la parte no vendida"
+                  ],
+                  "indirecto": [
+                    "hogares en lista de alquiler social si se resta parque"
+                  ]
+                }
+              },
+              "meta": true,
+              "fuente": "https://www.gov.uk/shared-ownership-scheme/how-it-works"
+            },
+            {
+              "nombre": "Cuenta de ahorro bonificada",
+              "texto": "Cuenta para la primera vivienda en la que el Estado añade una cantidad proporcional a lo ahorrado cada año, con un máximo anual, como la cuenta Lifetime ISA británica.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ahorradores para su primera vivienda"
+                  ],
+                  "indirecto": [
+                    "bancos que captan esos depósitos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la bonificación"
+                  ],
+                  "indirecto": [
+                    "compradores sin bonificación si sube la demanda"
+                  ]
+                }
+              },
+              "fuente": "https://www.gov.uk/lifetime-isa"
+            },
+            {
+              "nombre": "Reventa a precio tasado",
+              "texto": "Quien compra vivienda protegida vive en ella unos años mínimos y, si vende, lo hace a precio tasado y actualizado a un comprador del registro público: la ayuda pasa al siguiente.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores del registro de vivienda protegida"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, porque la ayuda se reutiliza"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de protegida que renuncian a la plusvalía"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reglas que no atrapan",
+              "texto": "La ley limita el alquiler de la parte aún no comprada, reparte los gastos según la cuota de cada uno y permite vender la parte propia a precio tasado en cualquier momento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "compradores por partes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "entidades dueñas de la parte aún no comprada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Casa a coste sobre suelo público",
+              "texto": "Cooperativas y propiedad temporal sobre suelo que sigue siendo público: la vivienda cuesta lo que cuesta construirla y el suelo vuelve a la ciudad al final del plazo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de rentas medias y bajas"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos que recuperan el suelo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores privados que pierden ese suelo",
+                    "herederos de quien vive allí, al vencer el plazo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que renuncian a vender el suelo"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -114,51 +539,478 @@
           "nivel": 0,
           "resumen": "Sin propuesta para que haya más vivienda, o saltarse la ley: recalificar a dedo, legalizar lo construido ilegalmente o bloquear toda obra nueva.",
           "medidas": [
-            { "nombre": "Sin plan de oferta", "texto": "No hay ninguna medida para que se construya donde falta vivienda: se habla de precios sin decir cuántas casas hacen falta ni dónde." },
-            { "nombre": "Urbanismo a dedo", "texto": "Se recalifica suelo por acuerdo con un promotor concreto o se legaliza lo construido sin licencia, premiando a quien incumplió la norma." },
-            { "nombre": "Bloqueo de toda obra nueva", "texto": "Se paraliza la construcción o se congela el planeamiento sin alternativa, de modo que los hogares crecen y el número de viviendas no." }
+            {
+              "nombre": "Sin plan de oferta",
+              "texto": "No hay ninguna medida para que se construya donde falta vivienda: se habla de precios sin decir cuántas casas hacen falta ni dónde.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios que ganan con la escasez"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares que buscan vivienda"
+                  ],
+                  "indirecto": [
+                    "empresas que no atraen trabajadores por la vivienda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Urbanismo a dedo",
+              "texto": "Se recalifica suelo por acuerdo con un promotor concreto o se legaliza lo construido sin licencia, premiando a quien incumplió la norma.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores con acuerdos de recalificación",
+                    "quien construyó sin licencia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que cumplen la norma"
+                  ],
+                  "indirecto": [
+                    "vecinos sin servicios planificados",
+                    "contribuyentes que pagan servicios no previstos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Bloqueo de toda obra nueva",
+              "texto": "Se paraliza la construcción o se congela el planeamiento sin alternativa, de modo que los hogares crecen y el número de viviendas no.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos que no quieren cambios en su barrio",
+                    "propietarios que ven subir el valor de su casa"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares que buscan vivienda",
+                    "trabajadores de la construcción"
+                  ],
+                  "indirecto": [
+                    "inquilinos ante alquileres más altos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Saber qué suelo público hay y ponerlo al servicio de la vivienda asequible, cedido por décadas y con plazo para edificar.",
           "medidas": [
-            { "nombre": "Inventario público de suelo", "texto": "Estado, comunidades y ayuntamientos publican un mapa de sus solares y edificios sin uso aptos para vivienda, con su situación urbanística." },
-            { "nombre": "Suelo público para vivienda asequible", "texto": "Los solares públicos residenciales se destinan a vivienda asequible por concurso, cediendo el suelo por décadas en lugar de venderlo al mejor postor." },
-            { "nombre": "Plazo para edificar el suelo cedido", "texto": "Quien recibe suelo público se compromete a empezar la obra en un plazo fijado en el concurso; si no lo hace, el suelo vuelve a la administración." }
+            {
+              "nombre": "Inventario público de suelo",
+              "texto": "Estado, comunidades y ayuntamientos publican un mapa de sus solares y edificios sin uso aptos para vivienda, con su situación urbanística.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores y cooperativas que buscan suelo"
+                  ],
+                  "indirecto": [
+                    "hogares que buscan vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publicar un mapa del suelo público que ya existe solo informa: no quita suelo, dinero ni derechos a nadie."
+              }
+            },
+            {
+              "nombre": "Suelo público para vivienda asequible",
+              "texto": "Los solares públicos residenciales se destinan a vivienda asequible por concurso, cediendo el suelo por décadas en lugar de venderlo al mejor postor.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que necesitan vivienda asequible"
+                  ],
+                  "indirecto": [
+                    "cooperativas y gestores sin ánimo de lucro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que compraban ese suelo para venta libre"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que renuncian al ingreso de la venta"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plazo para edificar el suelo cedido",
+              "texto": "Quien recibe suelo público se compromete a empezar la obra en un plazo fijado en el concurso; si no lo hace, el suelo vuelve a la administración.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares a la espera de esas viviendas"
+                  ],
+                  "indirecto": [
+                    "administraciones que recuperan suelo parado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "adjudicatarios que retrasan la obra"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Licencias en semanas y no en años: declaración responsable, plazos legales que se publican y planes urbanísticos que no caen enteros por un defecto.",
           "medidas": [
-            { "nombre": "Declaración responsable", "texto": "Para obras que cumplen el plan, el promotor presenta una declaración firmada por un técnico y empieza; el ayuntamiento revisa después y sanciona si se faltó a la verdad." },
-            { "nombre": "Plazo máximo y tiempos publicados", "texto": "La ley fija un plazo máximo para resolver las licencias de vivienda y cada ayuntamiento publica cada trimestre cuánto tarda de verdad." },
-            { "nombre": "Entidades colaboradoras acreditadas", "texto": "Entidades técnicas acreditadas por la comunidad revisan los proyectos y emiten informes que el ayuntamiento acepta, para descargar a las oficinas municipales." },
-            { "nombre": "Planes que no se anulan enteros", "texto": "Reformar la ley de suelo para que un defecto de forma en un plan general anule solo la parte afectada y no paralice barrios enteros durante años." },
-            { "nombre": "Técnicos para ayuntamientos pequeños", "texto": "Comunidades y diputaciones prestan arquitectos y técnicos a los ayuntamientos pequeños para que puedan tramitar las licencias en plazo." }
+            {
+              "nombre": "Declaración responsable",
+              "texto": "Para obras que cumplen el plan, el promotor presenta una declaración firmada por un técnico y empieza; el ayuntamiento revisa después y sanciona si se faltó a la verdad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores y particulares que construyen o reforman"
+                  ],
+                  "indirecto": [
+                    "compradores e inquilinos, por más oferta antes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos afectados por obras mal declaradas"
+                  ],
+                  "indirecto": [
+                    "técnicos municipales con más inspección posterior"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plazo máximo y tiempos publicados",
+              "texto": "La ley fija un plazo máximo para resolver las licencias de vivienda y cada ayuntamiento publica cada trimestre cuánto tarda de verdad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores y particulares que piden licencia"
+                  ],
+                  "indirecto": [
+                    "hogares que esperan vivienda nueva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ayuntamientos con oficinas saturadas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Entidades colaboradoras acreditadas",
+              "texto": "Entidades técnicas acreditadas por la comunidad revisan los proyectos y emiten informes que el ayuntamiento acepta, para descargar a las oficinas municipales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ayuntamientos con oficinas saturadas",
+                    "promotores que esperan licencia"
+                  ],
+                  "indirecto": [
+                    "hogares que esperan vivienda nueva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que pagan el informe de la entidad"
+                  ],
+                  "indirecto": [
+                    "vecinos, si el control externo es menos estricto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Planes que no se anulan enteros",
+              "texto": "Reformar la ley de suelo para que un defecto de forma en un plan general anule solo la parte afectada y no paralice barrios enteros durante años.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios y promotores en planes recurridos"
+                  ],
+                  "indirecto": [
+                    "hogares que esperan esas viviendas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos y asociaciones que recurren planes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Técnicos para ayuntamientos pequeños",
+              "texto": "Comunidades y diputaciones prestan arquitectos y técnicos a los ayuntamientos pequeños para que puedan tramitar las licencias en plazo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ayuntamientos pequeños sin técnicos"
+                  ],
+                  "indirecto": [
+                    "vecinos de pueblos que quieren construir o reformar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "diputaciones y comunidades que asumen el coste"
+                  ],
+                  "indirecto": [
+                    "contribuyentes de la provincia"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Suelo con calendario, construcción industrializada, más densidad junto al transporte y barrios nuevos con sus servicios financiados desde el plan.",
           "medidas": [
-            { "nombre": "Suelo con calendario", "texto": "Quien tiene suelo urbanizable con licencia posible edifica en plazo o lo pone a disposición, por venta forzosa o concurso con su valor pagado, de quien sí lo haga." },
-            { "nombre": "Proyectos tipo homologados", "texto": "El Estado homologa una sola vez modelos de edificio industrializado que cualquier ayuntamiento acepta, con las mismas exigencias de calidad, accesibilidad y energía que la obra tradicional." },
-            { "nombre": "Encargos públicos estables", "texto": "Programas públicos de varios años con volumen comprometido, para que las fábricas de construcción industrializada puedan invertir y bajar costes." },
-            { "nombre": "Más altura junto al transporte", "texto": "Más plantas y viviendas permitidas junto a estaciones de tren, metro y tranvía, y fin de la obligación de construir un mínimo de plazas de aparcamiento." },
-            { "nombre": "Barrios con servicios desde el inicio", "texto": "Cada desarrollo nuevo llega con transporte, escuela, centro de salud y zonas verdes previstos y financiados en el propio plan, no años después." }
+            {
+              "nombre": "Suelo con calendario",
+              "texto": "Quien tiene suelo urbanizable con licencia posible edifica en plazo o lo pone a disposición, por venta forzosa o concurso con su valor pagado, de quien sí lo haga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que buscan vivienda",
+                    "promotores dispuestos a edificar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que retienen suelo esperando subidas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Proyectos tipo homologados",
+              "texto": "El Estado homologa una sola vez modelos de edificio industrializado que cualquier ayuntamiento acepta, con las mismas exigencias de calidad, accesibilidad y energía que la obra tradicional.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fabricantes de construcción industrializada"
+                  ],
+                  "indirecto": [
+                    "compradores e inquilinos de vivienda nueva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "constructoras tradicionales que compiten con ellos"
+                  ],
+                  "indirecto": [
+                    "estudios de arquitectura con menos encargos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Encargos públicos estables",
+              "texto": "Programas públicos de varios años con volumen comprometido, para que las fábricas de construcción industrializada puedan invertir y bajar costes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fabricantes de construcción industrializada"
+                  ],
+                  "indirecto": [
+                    "hogares de vivienda pública nueva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que comprometen gasto de varios años"
+                  ],
+                  "indirecto": [
+                    "constructoras sin capacidad industrial"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Más altura junto al transporte",
+              "texto": "Más plantas y viviendas permitidas junto a estaciones de tren, metro y tranvía, y fin de la obligación de construir un mínimo de plazas de aparcamiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que buscan vivienda bien comunicada",
+                    "dueños de suelo junto a estaciones"
+                  ],
+                  "indirecto": [
+                    "usuarios del transporte público"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos que pierden luz o vistas"
+                  ],
+                  "indirecto": [
+                    "conductores que encuentran menos aparcamiento"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Barrios con servicios desde el inicio",
+              "texto": "Cada desarrollo nuevo llega con transporte, escuela, centro de salud y zonas verdes previstos y financiados en el propio plan, no años después.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de los nuevos desarrollos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores que cargan con el coste de los servicios"
+                  ],
+                  "indirecto": [
+                    "compradores si ese coste se suma al precio",
+                    "contribuyentes que financian los equipamientos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Suelo suficiente por obligación legal para la demanda a 30 años más un margen, y licencia por regla en plazo fijo, sin negociar caso a caso.",
           "medidas": [
-            { "nombre": "Capacidad edificable obligatoria", "texto": "Cada área urbana mantiene capacidad para la demanda prevista a 3, 10 y 30 años con un margen extra y publica el cálculo, como exige Nueva Zelanda desde 2020.", "meta": true, "fuente": "https://environment.govt.nz/assets/publications/National-Policy-Statement-Urban-Development-2020-11May2022-v2.pdf" },
-            { "nombre": "Código urbanístico común", "texto": "Pocas categorías de zona, iguales en todo el país, como en Japón: el proyecto que cumple la norma se autoriza y no se negocia uno a uno.", "fuente": "https://www.gdrc.org/uem/observatory/dig-lib/000234477.pdf" },
-            { "nombre": "Licencia concedida si no hay respuesta", "texto": "Si la administración no resuelve en el plazo legal, la licencia se entiende concedida, salvo en suelo protegido; el control se hace durante y después de la obra." },
-            { "nombre": "Previsiones auditadas", "texto": "Un organismo independiente revisa las previsiones de hogares de cada área, para que el suelo responda a la demanda real y no a expectativas de subida de precios." },
-            { "nombre": "Se decide en el plan, no en cada obra", "texto": "Los vecinos participan al aprobar el plan del barrio, con información pública y alegaciones; después, el proyecto que cumple no puede vetarse edificio a edificio." }
+            {
+              "nombre": "Capacidad edificable obligatoria",
+              "texto": "Cada área urbana mantiene capacidad para la demanda prevista a 3, 10 y 30 años con un margen extra y publica el cálculo, como exige Nueva Zelanda desde 2020.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que buscan vivienda"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por alquileres más estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que ganan con la escasez de suelo"
+                  ],
+                  "indirecto": [
+                    "vecinos que prefieren que su zona no crezca"
+                  ]
+                }
+              },
+              "meta": true,
+              "fuente": "https://environment.govt.nz/assets/publications/National-Policy-Statement-Urban-Development-2020-11May2022-v2.pdf"
+            },
+            {
+              "nombre": "Código urbanístico común",
+              "texto": "Pocas categorías de zona, iguales en todo el país, como en Japón: el proyecto que cumple la norma se autoriza y no se negocia uno a uno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores y particulares que construyen"
+                  ],
+                  "indirecto": [
+                    "hogares que buscan vivienda, por más oferta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ayuntamientos que pierden margen de negociación"
+                  ],
+                  "indirecto": [
+                    "vecinos que querían normas propias del barrio"
+                  ]
+                }
+              },
+              "fuente": "https://www.gdrc.org/uem/observatory/dig-lib/000234477.pdf"
+            },
+            {
+              "nombre": "Licencia concedida si no hay respuesta",
+              "texto": "Si la administración no resuelve en el plazo legal, la licencia se entiende concedida, salvo en suelo protegido; el control se hace durante y después de la obra.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores y particulares que piden licencia"
+                  ],
+                  "indirecto": [
+                    "hogares que esperan vivienda nueva"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos afectados por obras sin revisar antes"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos que asumen el control después"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Previsiones auditadas",
+              "texto": "Un organismo independiente revisa las previsiones de hogares de cada área, para que el suelo responda a la demanda real y no a expectativas de subida de precios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que buscan vivienda"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por planificar servicios con datos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de suelo que contaban con previsiones infladas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Se decide en el plan, no en cada obra",
+              "texto": "Los vecinos participan al aprobar el plan del barrio, con información pública y alegaciones; después, el proyecto que cumple no puede vetarse edificio a edificio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "promotores con proyectos que cumplen el plan"
+                  ],
+                  "indirecto": [
+                    "hogares que esperan esas viviendas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos que quieren vetar edificios concretos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -171,50 +1023,453 @@
           "nivel": 0,
           "resumen": "Justificar la ocupación de casas ajenas o no ejecutar desalojos firmes; amparar desalojos por la fuerza sin juez; o no proponer nada.",
           "medidas": [
-            { "nombre": "Sentencias que no se cumplen", "texto": "Se justifica ocupar casas ajenas o se retrasan sin plazo los desalojos ordenados por un juez, de modo que el dueño pierde su vivienda en la práctica." },
-            { "nombre": "Desalojos sin juez", "texto": "Se aprueba o se tolera que empresas o particulares echen por la fuerza a ocupantes o inquilinos sin orden judicial." },
-            { "nombre": "Sin plan propio", "texto": "No hay propuesta ni para el impago ni para la ocupación: el pequeño propietario carga solo con el riesgo y acaba retirando su piso del alquiler." }
+            {
+              "nombre": "Sentencias que no se cumplen",
+              "texto": "Se justifica ocupar casas ajenas o se retrasan sin plazo los desalojos ordenados por un juez, de modo que el dueño pierde su vivienda en la práctica.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ocupantes sin título de viviendas ajenas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de viviendas ocupadas"
+                  ],
+                  "indirecto": [
+                    "inquilinos ante menos oferta y más requisitos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Desalojos sin juez",
+              "texto": "Se aprueba o se tolera que empresas o particulares echen por la fuerza a ocupantes o inquilinos sin orden judicial.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios que quieren recuperar la vivienda ya"
+                  ],
+                  "indirecto": [
+                    "empresas de desocupación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos y ocupantes expulsados sin garantías"
+                  ],
+                  "indirecto": [
+                    "vecinos expuestos a coacciones y violencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No hay propuesta ni para el impago ni para la ocupación: el pequeño propietario carga solo con el riesgo y acaba retirando su piso del alquiler.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien deja de pagar sin consecuencias rápidas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pequeños propietarios que alquilan"
+                  ],
+                  "indirecto": [
+                    "inquilinos solventes ante requisitos más duros"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Que la ley se cumpla en los dos riesgos: la ocupación se desaloja por juicio rápido y el impago tiene un procedimiento simple, siempre con juez.",
           "medidas": [
-            { "nombre": "Juicio rápido para la ocupación", "texto": "La ocupación ilegal de cualquier vivienda, sea habitual, segunda residencia o piso vacío, se tramita por juicio rápido, y la policía actúa de inmediato si es flagrante." },
-            { "nombre": "Procedimiento de impago simple", "texto": "Demanda por impago con formularios oficiales y notificación electrónica, para que el juicio no se alargue porque el inquilino no recoge las cartas." },
-            { "nombre": "Ningún desalojo sin juez", "texto": "Todo desalojo lo ordena un juez; quien coacciona o echa a alguien por la fuerza, incluidas las empresas de «desocupación», responde ante la ley." },
-            { "nombre": "Datos judiciales públicos", "texto": "El Consejo General del Poder Judicial publica por provincia cuántos casos de ocupación e impago entran y cuánto tardan, para saber si las reformas funcionan." }
+            {
+              "nombre": "Juicio rápido para la ocupación",
+              "texto": "La ocupación ilegal de cualquier vivienda, sea habitual, segunda residencia o piso vacío, se tramita por juicio rápido, y la policía actúa de inmediato si es flagrante.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios de viviendas ocupadas"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por más oferta de alquiler"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ocupantes sin título"
+                  ],
+                  "indirecto": [
+                    "familias vulnerables sin alternativa de vivienda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Procedimiento de impago simple",
+              "texto": "Demanda por impago con formularios oficiales y notificación electrónica, para que el juicio no se alargue porque el inquilino no recoge las cartas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios con inquilinos que no pagan"
+                  ],
+                  "indirecto": [
+                    "juzgados con menos retrasos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos que dejan de pagar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ningún desalojo sin juez",
+              "texto": "Todo desalojo lo ordena un juez; quien coacciona o echa a alguien por la fuerza, incluidas las empresas de «desocupación», responde ante la ley.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos y ocupantes frente a coacciones"
+                  ],
+                  "indirecto": [
+                    "vecinos de edificios en conflicto"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de desocupación"
+                  ],
+                  "indirecto": [
+                    "propietarios que querían una vía rápida sin juez"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Datos judiciales públicos",
+              "texto": "El Consejo General del Poder Judicial publica por provincia cuántos casos de ocupación e impago entran y cuánto tardan, para saber si las reformas funcionan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios e inquilinos que litigan"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que evalúan las reformas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "El Poder Judicial ya registra estos casos: publicarlos por provincia no quita derechos ni dinero a nadie."
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Juicios rápidos por impago con juzgados especializados, mediación previa y un registro de contratos y fianzas que da pruebas a las dos partes.",
           "medidas": [
-            { "nombre": "Juzgados especializados en alquiler", "texto": "Secciones judiciales dedicadas a los arrendamientos en las ciudades con más casos, con jueces y funcionarios suficientes para resolver en plazo." },
-            { "nombre": "Registro de contratos y fianzas", "texto": "Registro público obligatorio de los contratos de alquiler y depósito de la fianza en la comunidad, para probar lo pactado y devolver la fianza sin pleitos." },
-            { "nombre": "Mediación antes del juicio", "texto": "Servicio público gratuito de mediación que propone un plan de pagos o una salida pactada en pocas semanas, sin cerrar el camino al juzgado." },
-            { "nombre": "Ventajas fiscales solo con contrato registrado", "texto": "Las deducciones por alquilar solo se aplican a contratos inscritos en el registro, para que salga a la luz el alquiler sin declarar." }
+            {
+              "nombre": "Juzgados especializados en alquiler",
+              "texto": "Secciones judiciales dedicadas a los arrendamientos en las ciudades con más casos, con jueces y funcionarios suficientes para resolver en plazo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios e inquilinos en pleito"
+                  ],
+                  "indirecto": [
+                    "otros litigantes con juzgados menos saturados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan jueces y funcionarios"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Registro de contratos y fianzas",
+              "texto": "Registro público obligatorio de los contratos de alquiler y depósito de la fianza en la comunidad, para probar lo pactado y devolver la fianza sin pleitos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos que recuperan su fianza",
+                    "propietarios que prueban lo pactado"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que declaran sus rentas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que alquilan sin declarar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Mediación antes del juicio",
+              "texto": "Servicio público gratuito de mediación que propone un plan de pagos o una salida pactada en pocas semanas, sin cerrar el camino al juzgado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos con dificultades de pago",
+                    "pequeños propietarios que alquilan"
+                  ],
+                  "indirecto": [
+                    "juzgados con menos casos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el servicio"
+                  ],
+                  "indirecto": [
+                    "propietarios, si la mediación retrasa el juicio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ventajas fiscales solo con contrato registrado",
+              "texto": "Las deducciones por alquilar solo se aplican a contratos inscritos en el registro, para que salga a la luz el alquiler sin declarar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que declaran sus rentas"
+                  ],
+                  "indirecto": [
+                    "inquilinos con contrato que pueden probar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que alquilan sin declarar"
+                  ],
+                  "indirecto": [
+                    "inquilinos si el coste fiscal pasa a la renta"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Seguro de impago barato para el pequeño propietario y procedimientos que protegen a la vez al dueño y a la familia vulnerable, con alternativa de vivienda.",
           "medidas": [
-            { "nombre": "Seguro de impago con respaldo público", "texto": "Seguro de impago reasegurado por las administraciones, barato para el pequeño propietario, que cubre la renta y los desperfectos mientras dura el procedimiento." },
-            { "nombre": "Valoración social en paralelo", "texto": "Si la familia es vulnerable, los servicios sociales la valoran mientras avanza el juicio, no después, para que el desalojo no se suspenda por falta de informe." },
-            { "nombre": "Viviendas de emergencia reservadas", "texto": "Comunidades y ayuntamientos reservan viviendas de emergencia para realojar a las familias vulnerables desalojadas, en lugar de cargar la espera al propietario." },
-            { "nombre": "Compensación por suspensiones", "texto": "Si la ley suspende un desalojo por vulnerabilidad, la administración paga al propietario la renta que deja de cobrar mientras dura la suspensión." }
+            {
+              "nombre": "Seguro de impago con respaldo público",
+              "texto": "Seguro de impago reasegurado por las administraciones, barato para el pequeño propietario, que cubre la renta y los desperfectos mientras dura el procedimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pequeños propietarios que alquilan"
+                  ],
+                  "indirecto": [
+                    "inquilinos sin avalista"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que reaseguran las pérdidas"
+                  ],
+                  "indirecto": [
+                    "aseguradoras privadas de impago"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Valoración social en paralelo",
+              "texto": "Si la familia es vulnerable, los servicios sociales la valoran mientras avanza el juicio, no después, para que el desalojo no se suspenda por falta de informe.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias vulnerables en un desalojo",
+                    "propietarios a la espera del desalojo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios sociales con más carga de trabajo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan más personal"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Viviendas de emergencia reservadas",
+              "texto": "Comunidades y ayuntamientos reservan viviendas de emergencia para realojar a las familias vulnerables desalojadas, en lugar de cargar la espera al propietario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias vulnerables desalojadas",
+                    "propietarios a la espera del desalojo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares en lista de vivienda pública que esperan más"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan esas viviendas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Compensación por suspensiones",
+              "texto": "Si la ley suspende un desalojo por vulnerabilidad, la administración paga al propietario la renta que deja de cobrar mientras dura la suspensión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios con desalojos suspendidos"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por más oferta de alquiler"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las rentas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Plazos máximos garantizados por ley: la casa ocupada se devuelve en días y el impago se resuelve en meses; un fondo paga la renta y se realoja a la familia.",
           "medidas": [
-            { "nombre": "Desalojo en días con juez de guardia", "texto": "Decisión sobre el desalojo en 48 horas desde que el dueño acredita que la vivienda es suya y ejecución en un máximo de 7 días, por un juez de guardia y con audiencia breve al ocupante.", "meta": true },
-            { "nombre": "Plazo máximo para el impago", "texto": "La ley fija un plazo máximo para todo el procedimiento por impago; si el juzgado lo supera, el Estado compensa al propietario por el retraso.", "meta": true },
-            { "nombre": "Garantía pública de rentas", "texto": "Fondo público gratuito para contratos registrados que paga al propietario desde el primer mes de impago y luego reclama la deuda a quien pueda pagarla, como la garantía Visale francesa.", "fuente": "https://www.actionlogement.fr/garantie-visale-proprietaire" },
-            { "nombre": "Realojo a cargo de la administración", "texto": "Los servicios sociales realojan a la familia vulnerable dentro del mismo plazo; si no hay vivienda disponible, la administración paga el alojamiento entretanto." },
-            { "nombre": "Auditoría anual de los plazos", "texto": "Un informe público anual dice qué porcentaje de casos cumple los plazos legales en cada juzgado y provincia, y dónde faltan medios." }
+            {
+              "nombre": "Desalojo en días con juez de guardia",
+              "texto": "Decisión sobre el desalojo en 48 horas desde que el dueño acredita que la vivienda es suya y ejecución en un máximo de 7 días, por un juez de guardia y con audiencia breve al ocupante.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios de viviendas ocupadas"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por más oferta de alquiler"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ocupantes sin título"
+                  ],
+                  "indirecto": [
+                    "juzgados de guardia con más carga",
+                    "familias vulnerables sin realojo preparado"
+                  ]
+                }
+              },
+              "meta": true
+            },
+            {
+              "nombre": "Plazo máximo para el impago",
+              "texto": "La ley fija un plazo máximo para todo el procedimiento por impago; si el juzgado lo supera, el Estado compensa al propietario por el retraso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios con inquilinos que no pagan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos que dejan de pagar",
+                    "contribuyentes que pagan los retrasos"
+                  ],
+                  "indirecto": []
+                }
+              },
+              "meta": true
+            },
+            {
+              "nombre": "Garantía pública de rentas",
+              "texto": "Fondo público gratuito para contratos registrados que paga al propietario desde el primer mes de impago y luego reclama la deuda a quien pueda pagarla, como la garantía Visale francesa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios con contrato registrado",
+                    "inquilinos sin avalista"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que cubren deudas no recuperadas",
+                    "inquilinos morosos a quienes el fondo reclama"
+                  ],
+                  "indirecto": [
+                    "aseguradoras privadas de impago"
+                  ]
+                }
+              },
+              "fuente": "https://www.actionlogement.fr/garantie-visale-proprietaire"
+            },
+            {
+              "nombre": "Realojo a cargo de la administración",
+              "texto": "Los servicios sociales realojan a la familia vulnerable dentro del mismo plazo; si no hay vivienda disponible, la administración paga el alojamiento entretanto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias vulnerables desalojadas"
+                  ],
+                  "indirecto": [
+                    "propietarios que recuperan su vivienda en plazo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el alojamiento"
+                  ],
+                  "indirecto": [
+                    "hogares en lista de vivienda pública"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Auditoría anual de los plazos",
+              "texto": "Un informe público anual dice qué porcentaje de casos cumple los plazos legales en cada juzgado y provincia, y dónde faltan medios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios e inquilinos que litigan"
+                  ],
+                  "indirecto": [
+                    "juzgados con falta de medios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Un informe con datos que ya existen no cambia ningún derecho ni impone cargas a nadie."
+              }
+            }
           ]
         }
       ]
@@ -227,50 +1482,443 @@
           "nivel": 0,
           "resumen": "No querer saber cuántas casas están vacías o son turísticas, tolerar el alquiler turístico ilegal o quitar viviendas a sus dueños sin indemnizar.",
           "medidas": [
-            { "nombre": "Decidir sin datos", "texto": "No se sabe cuántas viviendas están vacías o son turísticas ni dónde, y se legisla sin saber dónde está el problema." },
-            { "nombre": "Turístico ilegal tolerado", "texto": "Se dejan funcionar pisos turísticos sin licencia ni registro y no se inspecciona a las plataformas que los anuncian." },
-            { "nombre": "Quitar sin indemnizar", "texto": "Se propone ocupar, requisar o expropiar viviendas vacías sin procedimiento legal ni compensación a su dueño." }
+            {
+              "nombre": "Decidir sin datos",
+              "texto": "No se sabe cuántas viviendas están vacías o son turísticas ni dónde, y se legisla sin saber dónde está el problema.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien explota pisos turísticos sin declarar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares que buscan vivienda"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan políticas mal dirigidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Turístico ilegal tolerado",
+              "texto": "Se dejan funcionar pisos turísticos sin licencia ni registro y no se inspecciona a las plataformas que los anuncian.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "dueños de pisos turísticos sin licencia",
+                    "plataformas de alquiler turístico"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de barrios con mucho piso turístico",
+                    "alojamientos turísticos con licencia"
+                  ],
+                  "indirecto": [
+                    "inquilinos de esos barrios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Quitar sin indemnizar",
+              "texto": "Se propone ocupar, requisar o expropiar viviendas vacías sin procedimiento legal ni compensación a su dueño.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que recibirían esas viviendas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios de viviendas vacías"
+                  ],
+                  "indirecto": [
+                    "pequeños ahorradores con una segunda vivienda",
+                    "compradores e inquilinos ante menos inversión"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Saber cuántas viviendas vacías y turísticas hay y dónde, con una definición común y datos públicos por municipio.",
           "medidas": [
-            { "nombre": "Estadística de vivienda vacía", "texto": "El Instituto Nacional de Estadística publica con regularidad cuántas viviendas están vacías por municipio, cruzando padrón, catastro y consumos de agua y luz." },
-            { "nombre": "Definición legal común", "texto": "Una definición única de vivienda vacía, segunda residencia y vivienda sin uso por causa justificada (obras, herencia, venta), para no mezclar casos." },
-            { "nombre": "Registro turístico abierto", "texto": "Cada comunidad publica su registro de viviendas turísticas con el número de plazas por barrio, en formato que cualquiera pueda descargar." },
-            { "nombre": "Inspección del turístico sin licencia", "texto": "Las comunidades inspeccionan y sancionan los pisos turísticos que se anuncian sin licencia y publican cada año los resultados." }
+            {
+              "nombre": "Estadística de vivienda vacía",
+              "texto": "El Instituto Nacional de Estadística publica con regularidad cuántas viviendas están vacías por municipio, cruzando padrón, catastro y consumos de agua y luz.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administraciones que planifican vivienda"
+                  ],
+                  "indirecto": [
+                    "hogares que buscan vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es una estadística agregada por municipio con datos que ya existen: no señala a ningún dueño ni le impone nada."
+              }
+            },
+            {
+              "nombre": "Definición legal común",
+              "texto": "Una definición única de vivienda vacía, segunda residencia y vivienda sin uso por causa justificada (obras, herencia, venta), para no mezclar casos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "dueños de vivienda sin uso por obras, herencia o venta"
+                  ],
+                  "indirecto": [
+                    "administraciones que aplican impuestos y ayudas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños que hacen pasar una vacía por segunda residencia"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Registro turístico abierto",
+              "texto": "Cada comunidad publica su registro de viviendas turísticas con el número de plazas por barrio, en formato que cualquiera pueda descargar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos y ayuntamientos que vigilan el turístico"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de pisos turísticos sin registro"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Inspección del turístico sin licencia",
+              "texto": "Las comunidades inspeccionan y sancionan los pisos turísticos que se anuncian sin licencia y publican cada año los resultados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de barrios con mucho piso turístico",
+                    "alojamientos turísticos con licencia"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por pisos que vuelven al alquiler"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de pisos turísticos sin licencia"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan los inspectores"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Un registro único de pisos turísticos conectado con las plataformas y licencias limitadas en las zonas con falta de vivienda.",
           "medidas": [
-            { "nombre": "Número de registro en cada anuncio", "texto": "Cada piso turístico tiene un número único que las plataformas muestran y comprueban; anuncio sin número, anuncio retirado. La regla europea se aplica desde el 20 de mayo de 2026.", "fuente": "https://transition-pathways.europa.eu/construction/news-publications/short-term-rentals-eu-transparency-rules-now-force" },
-            { "nombre": "Datos de reservas a la administración", "texto": "Las plataformas envían cada mes a la administración cuántas noches se ocupa cada piso, para comprobar licencias y límites." },
-            { "nombre": "Licencias limitadas en zonas tensionadas", "texto": "En los barrios con falta de vivienda declarada, el ayuntamiento deja de conceder licencias turísticas nuevas hasta que baje la presión." },
-            { "nombre": "Decisión de la comunidad de vecinos", "texto": "La comunidad de propietarios puede decidir por mayoría cualificada si admite pisos turísticos en su edificio." }
+            {
+              "nombre": "Número de registro en cada anuncio",
+              "texto": "Cada piso turístico tiene un número único que las plataformas muestran y comprueban; anuncio sin número, anuncio retirado. La regla europea se aplica desde el 20 de mayo de 2026.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alojamientos turísticos con licencia",
+                    "vecinos de barrios turísticos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de pisos turísticos sin registro",
+                    "plataformas que deben comprobar cada anuncio"
+                  ],
+                  "indirecto": []
+                }
+              },
+              "fuente": "https://transition-pathways.europa.eu/construction/news-publications/short-term-rentals-eu-transparency-rules-now-force"
+            },
+            {
+              "nombre": "Datos de reservas a la administración",
+              "texto": "Las plataformas envían cada mes a la administración cuántas noches se ocupa cada piso, para comprobar licencias y límites.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administraciones que inspeccionan"
+                  ],
+                  "indirecto": [
+                    "alojamientos con licencia que cumplen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "plataformas de alquiler turístico",
+                    "dueños que superan los límites de noches"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Licencias limitadas en zonas tensionadas",
+              "texto": "En los barrios con falta de vivienda declarada, el ayuntamiento deja de conceder licencias turísticas nuevas hasta que baje la presión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de barrios tensionados",
+                    "vecinos de barrios turísticos"
+                  ],
+                  "indirecto": [
+                    "dueños de licencias turísticas ya concedidas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que querían abrir un piso turístico"
+                  ],
+                  "indirecto": [
+                    "comercios y empleos del turismo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Decisión de la comunidad de vecinos",
+              "texto": "La comunidad de propietarios puede decidir por mayoría cualificada si admite pisos turísticos en su edificio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos que no quieren pisos turísticos en su edificio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que querían alquilar como turístico"
+                  ],
+                  "indirecto": [
+                    "plataformas de alquiler turístico"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Movilizar la vivienda vacía pagando su rehabilitación a cambio de alquiler asequible, e impuestos que distingan vivir de especular.",
           "medidas": [
-            { "nombre": "Rehabilitar a cambio de alquiler asequible", "texto": "Ayuda pública para reformar viviendas vacías con la condición de vivir en ellas o alquilarlas a precio asequible durante un plazo largo; si se incumple, se devuelve." },
-            { "nombre": "Agencia pública de intermediación", "texto": "El dueño cede voluntariamente su piso vacío a una agencia pública que lo reforma, lo alquila a precio asequible y le garantiza el cobro." },
-            { "nombre": "Impuestos según el uso", "texto": "El impuesto municipal de bienes inmuebles (IBI) y el de la renta tratan distinto la vivienda habitual, la alquilada, la segunda residencia y la vacía sin causa en zonas con falta de vivienda." },
-            { "nombre": "Oficinas y locales convertidos en vivienda", "texto": "Permitir convertir oficinas y locales vacíos en viviendas cuando cumplen las condiciones de habitabilidad, con licencia rápida." }
+            {
+              "nombre": "Rehabilitar a cambio de alquiler asequible",
+              "texto": "Ayuda pública para reformar viviendas vacías con la condición de vivir en ellas o alquilarlas a precio asequible durante un plazo largo; si se incumple, se devuelve.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "dueños de viviendas vacías que necesitan reforma",
+                    "inquilinos de rentas bajas y medias"
+                  ],
+                  "indirecto": [
+                    "empresas de reforma"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las ayudas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Agencia pública de intermediación",
+              "texto": "El dueño cede voluntariamente su piso vacío a una agencia pública que lo reforma, lo alquila a precio asequible y le garantiza el cobro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "dueños de pisos vacíos que temen alquilar",
+                    "inquilinos que buscan alquiler asequible"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que cubren reformas e impagos"
+                  ],
+                  "indirecto": [
+                    "agencias inmobiliarias privadas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Impuestos según el uso",
+              "texto": "El impuesto municipal de bienes inmuebles (IBI) y el de la renta tratan distinto la vivienda habitual, la alquilada, la segunda residencia y la vacía sin causa en zonas con falta de vivienda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios de vivienda habitual o alquilada"
+                  ],
+                  "indirecto": [
+                    "inquilinos, por viviendas que vuelven al mercado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de viviendas vacías sin causa",
+                    "dueños de segundas residencias en zonas tensionadas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Oficinas y locales convertidos en vivienda",
+              "texto": "Permitir convertir oficinas y locales vacíos en viviendas cuando cumplen las condiciones de habitabilidad, con licencia rápida.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "dueños de oficinas y locales vacíos",
+                    "hogares que buscan vivienda"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "comercio de barrio con menos locales disponibles"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Cada vivienda con un uso conocido y registrado: la vacía sin causa paga un recargo creciente, la rehabilitada recibe ayuda y el turístico va con cupo.",
           "medidas": [
-            { "nombre": "Censo anual de usos", "texto": "Cada año se conoce el uso de cada vivienda (habitual, alquiler, segunda residencia, turística o vacía), cruzando padrón, catastro y consumos, con derecho del dueño a alegar." },
-            { "nombre": "Recargo creciente a la vacía sin causa", "texto": "Recargo anual en zonas con falta de vivienda, mayor desde el segundo año, como en Francia (17 % y 34 % del valor de alquiler). Exentas las que están en obras, en venta o no son habitables.", "fuente": "https://www.impots.gouv.fr/particulier/questions/taxe-sur-les-logements-vacants-tlv-et-taxe-dhabitation-sur-les-logements" },
-            { "nombre": "El recargo paga la rehabilitación", "texto": "Lo recaudado con el recargo va por ley a la agencia pública que rehabilita y alquila viviendas vacías: quien no usa su casa financia que otras se usen." },
-            { "nombre": "Cupo turístico por barrio", "texto": "Cada ayuntamiento fija un cupo de licencias turísticas por barrio según la tensión del alquiler, con licencias temporales que se renuevan o se extinguen." },
-            { "nombre": "Viviendas recuperadas, contadas", "texto": "Se publica cada año cuántas viviendas vacías y turísticas han vuelto a ser hogares en cada municipio, para saber si el sistema funciona." }
+            {
+              "nombre": "Censo anual de usos",
+              "texto": "Cada año se conoce el uso de cada vivienda (habitual, alquiler, segunda residencia, turística o vacía), cruzando padrón, catastro y consumos, con derecho del dueño a alegar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administraciones que aplican impuestos según el uso"
+                  ],
+                  "indirecto": [
+                    "hogares que buscan vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que deben acreditar el uso de su vivienda"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Recargo creciente a la vacía sin causa",
+              "texto": "Recargo anual en zonas con falta de vivienda, mayor desde el segundo año, como en Francia (17 % y 34 % del valor de alquiler). Exentas las que están en obras, en venta o no son habitables.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que buscan vivienda en zonas tensionadas"
+                  ],
+                  "indirecto": [
+                    "inquilinos de viviendas rehabilitadas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de viviendas vacías sin causa"
+                  ],
+                  "indirecto": [
+                    "herederos que tardan en decidir sobre la vivienda"
+                  ]
+                }
+              },
+              "fuente": "https://www.impots.gouv.fr/particulier/questions/taxe-sur-les-logements-vacants-tlv-et-taxe-dhabitation-sur-les-logements"
+            },
+            {
+              "nombre": "El recargo paga la rehabilitación",
+              "texto": "Lo recaudado con el recargo va por ley a la agencia pública que rehabilita y alquila viviendas vacías: quien no usa su casa financia que otras se usen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de las viviendas rehabilitadas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que no pagan esa rehabilitación"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de viviendas vacías sin causa"
+                  ],
+                  "indirecto": [
+                    "otros servicios que no reciben lo recaudado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cupo turístico por barrio",
+              "texto": "Cada ayuntamiento fija un cupo de licencias turísticas por barrio según la tensión del alquiler, con licencias temporales que se renuevan o se extinguen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos y vecinos de barrios tensionados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de licencias turísticas que no se renuevan",
+                    "propietarios que querían una licencia nueva"
+                  ],
+                  "indirecto": [
+                    "comercios y empleos del turismo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Viviendas recuperadas, contadas",
+              "texto": "Se publica cada año cuántas viviendas vacías y turísticas han vuelto a ser hogares en cada municipio, para saber si el sistema funciona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que evalúan la política de vivienda"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Contar y publicar resultados con los datos del censo de usos no impone cargas ni quita nada a nadie."
+              }
+            }
           ]
         }
       ]
@@ -283,49 +1931,415 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre el alquiler, o romper las reglas: animar a dejar de pagar la renta o permitir subidas y expulsiones sin contrato ni juez.",
           "medidas": [
-            { "nombre": "Sin plan para quien alquila", "texto": "No hay ninguna propuesta para quien alquila: ni ayudas, ni estabilidad del contrato, ni información sobre precios." },
-            { "nombre": "Llamar a no pagar", "texto": "Se anima a dejar de pagar la renta como protesta general, lo que rompe los contratos y saca del alquiler a pequeños propietarios." },
-            { "nombre": "Expulsiones sin reglas", "texto": "Se permiten subidas a mitad de contrato o salidas forzadas sin contrato escrito ni juez." }
+            {
+              "nombre": "Sin plan para quien alquila",
+              "texto": "No hay ninguna propuesta para quien alquila: ni ayudas, ni estabilidad del contrato, ni información sobre precios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "arrendadores que fijan condiciones sin reglas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos de rentas bajas y medias",
+                    "jóvenes que intentan emanciparse"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Llamar a no pagar",
+              "texto": "Se anima a dejar de pagar la renta como protesta general, lo que rompe los contratos y saca del alquiler a pequeños propietarios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos que dejan de pagar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pequeños propietarios que alquilan"
+                  ],
+                  "indirecto": [
+                    "inquilinos solventes ante menos oferta"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Expulsiones sin reglas",
+              "texto": "Se permiten subidas a mitad de contrato o salidas forzadas sin contrato escrito ni juez.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "arrendadores que buscan subir la renta"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos sin contrato escrito"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios con mucha rotación"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Ayudas al alquiler para jóvenes y rentas bajas, calculadas sobre una renta de referencia para que no acaben en el precio, y pagadas a tiempo.",
           "medidas": [
-            { "nombre": "Ayuda por ingresos", "texto": "Ayuda mensual para jóvenes y hogares de rentas bajas que dedican una parte alta de sus ingresos al alquiler, gestionada por las comunidades con fondos del Estado." },
-            { "nombre": "Calculada sobre una renta de referencia", "texto": "El importe se calcula sobre una renta de referencia de la zona y no sobre la pactada, para que subir el precio no aumente la ayuda." },
-            { "nombre": "Una sola solicitud", "texto": "Una solicitud en línea para todas las ayudas al alquiler del Estado, la comunidad y el ayuntamiento, sin repetir papeles en cada ventanilla." },
-            { "nombre": "Pago en plazo conocido", "texto": "La ayuda se resuelve y se paga en un plazo fijado y publicado, no con meses de retraso que obligan al hogar a adelantar el dinero." }
+            {
+              "nombre": "Ayuda por ingresos",
+              "texto": "Ayuda mensual para jóvenes y hogares de rentas bajas que dedican una parte alta de sus ingresos al alquiler, gestionada por las comunidades con fondos del Estado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jóvenes e inquilinos de rentas bajas"
+                  ],
+                  "indirecto": [
+                    "propietarios que cobran con más seguridad"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la ayuda"
+                  ],
+                  "indirecto": [
+                    "inquilinos sin ayuda si la renta sube"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Calculada sobre una renta de referencia",
+              "texto": "El importe se calcula sobre una renta de referencia de la zona y no sobre la pactada, para que subir el precio no aumente la ayuda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes, al no inflarse la ayuda"
+                  ],
+                  "indirecto": [
+                    "inquilinos sin ayuda, al no empujarse la renta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios con renta pactada sobre la referencia"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Una sola solicitud",
+              "texto": "Una solicitud en línea para todas las ayudas al alquiler del Estado, la comunidad y el ayuntamiento, sin repetir papeles en cada ventanilla.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos que piden ayudas al alquiler"
+                  ],
+                  "indirecto": [
+                    "oficinas públicas con menos papeleo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Unificar la ventanilla ahorra trámites al ciudadano y a la administración sin quitar ninguna ayuda ni derecho."
+              }
+            },
+            {
+              "nombre": "Pago en plazo conocido",
+              "texto": "La ayuda se resuelve y se paga en un plazo fijado y publicado, no con meses de retraso que obligan al hogar a adelantar el dinero.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que cobran la ayuda"
+                  ],
+                  "indirecto": [
+                    "propietarios que cobran la renta a tiempo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "administraciones que deben reforzar la gestión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Contratos más largos, subidas conocidas de antemano, un índice público de precios hecho con contratos reales y límite a las garantías extra.",
           "medidas": [
-            { "nombre": "Contratos más largos", "texto": "Duración mínima mayor para el alquiler de vivienda habitual, con prórroga a favor del inquilino que cumple, para que el hogar pueda planificar." },
-            { "nombre": "Subidas conocidas de antemano", "texto": "La renta solo se actualiza una vez al año según un índice público escrito en el contrato, nunca a mitad de año." },
-            { "nombre": "Índice público de precios", "texto": "El Estado publica por barrio un índice de precios del alquiler hecho con contratos y fianzas reales, que sirve de referencia a ayudas, impuestos y contratos." },
-            { "nombre": "Límite a fianzas y garantías extra", "texto": "Se limitan los meses de fianza y garantías adicionales que se pueden pedir, y quien no tiene avalista puede usar la garantía pública de rentas." }
+            {
+              "nombre": "Contratos más largos",
+              "texto": "Duración mínima mayor para el alquiler de vivienda habitual, con prórroga a favor del inquilino que cumple, para que el hogar pueda planificar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de vivienda habitual que cumplen"
+                  ],
+                  "indirecto": [
+                    "comercios y escuelas con vecinos estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que quieren recuperar el piso antes"
+                  ],
+                  "indirecto": [
+                    "quien busca piso, ante menos rotación y oferta"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Subidas conocidas de antemano",
+              "texto": "La renta solo se actualiza una vez al año según un índice público escrito en el contrato, nunca a mitad de año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos con contrato en vigor"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que querían subir a mitad de año"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Índice público de precios",
+              "texto": "El Estado publica por barrio un índice de precios del alquiler hecho con contratos y fianzas reales, que sirve de referencia a ayudas, impuestos y contratos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos y propietarios que negocian la renta"
+                  ],
+                  "indirecto": [
+                    "administraciones que calculan ayudas e impuestos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es información pública hecha con fianzas ya depositadas: ayuda a negociar y no obliga a nadie a nada."
+              }
+            },
+            {
+              "nombre": "Límite a fianzas y garantías extra",
+              "texto": "Se limitan los meses de fianza y garantías adicionales que se pueden pedir, y quien no tiene avalista puede usar la garantía pública de rentas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos sin ahorro ni avalista"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que pedían garantías extra"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que respaldan la garantía pública"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Topes temporales en zonas tensionadas con evaluación pública de su efecto sobre la oferta, ventaja fiscal a quien alquila barato y freno al fraude.",
           "medidas": [
-            { "nombre": "Topes temporales en zonas tensionadas", "texto": "En zonas declaradas con falta de vivienda, la renta de los contratos nuevos no puede superar el índice de referencia durante un periodo fijado y renovable." },
-            { "nombre": "Evaluación pública de los topes", "texto": "Un organismo independiente publica cada año, con datos abiertos, qué ha pasado con precios, número de pisos en alquiler y su estado; si la oferta cae, el tope se retira." },
-            { "nombre": "Ventaja fiscal por alquilar barato", "texto": "Reducción en el impuesto sobre la renta del propietario que alquila por debajo del índice de referencia, mayor cuanto más baja sea la renta." },
-            { "nombre": "Freno al fraude de temporada", "texto": "Inspección de los contratos de temporada o por habitaciones usados para eludir las reglas del alquiler de vivienda habitual, con sanciones." }
+            {
+              "nombre": "Topes temporales en zonas tensionadas",
+              "texto": "En zonas declaradas con falta de vivienda, la renta de los contratos nuevos no puede superar el índice de referencia durante un periodo fijado y renovable.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos que firman contrato en zona tensionada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que alquilan en zonas tensionadas"
+                  ],
+                  "indirecto": [
+                    "quien busca piso, si la oferta de alquiler baja",
+                    "inquilinos empujados a contratos de temporada"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluación pública de los topes",
+              "texto": "Un organismo independiente publica cada año, con datos abiertos, qué ha pasado con precios, número de pisos en alquiler y su estado; si la oferta cae, el tope se retira.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos y propietarios de zonas con tope"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que evalúan la política de vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "inquilinos protegidos, si el tope se retira"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ventaja fiscal por alquilar barato",
+              "texto": "Reducción en el impuesto sobre la renta del propietario que alquila por debajo del índice de referencia, mayor cuanto más baja sea la renta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "propietarios que alquilan bajo el índice",
+                    "inquilinos con rentas más bajas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que compensan la recaudación perdida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Freno al fraude de temporada",
+              "texto": "Inspección de los contratos de temporada o por habitaciones usados para eludir las reglas del alquiler de vivienda habitual, con sanciones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de vivienda habitual con contrato de temporada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios que usan la temporada para eludir la ley"
+                  ],
+                  "indirecto": [
+                    "quien busca un alquiler de temporada real, si baja la oferta"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un alquiler a coste como tercera vía, con contrato indefinido y subidas ligadas a la inflación, y una ayuda como derecho para no pagar más del 30 %.",
           "medidas": [
-            { "nombre": "Sector de alquiler a coste", "texto": "Viviendas públicas o sin ánimo de lucro cuya renta cubre construir, financiar y mantener el edificio, sin beneficio, como el «cost rental» irlandés, que queda al menos un 25 % bajo el mercado.", "fuente": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/" },
-            { "nombre": "Contrato indefinido a coste", "texto": "En el alquiler a coste el contrato no vence mientras se pague y se cumpla, y la renta sube cada año solo con la inflación." },
-            { "nombre": "Ayuda al alquiler como derecho", "texto": "Cubre la diferencia entre el 30 % de los ingresos del hogar y una renta de referencia de la zona, se pida cuando se pida, sin convocatorias que se agoten.", "meta": true },
-            { "nombre": "Crédito barato y suelo para arrancar", "texto": "El banco público y el Banco Europeo de Inversiones financian a muy largo plazo los primeros edificios sobre suelo público cedido, hasta que las rentas sostengan el sector." }
+            {
+              "nombre": "Sector de alquiler a coste",
+              "texto": "Viviendas públicas o sin ánimo de lucro cuya renta cubre construir, financiar y mantener el edificio, sin beneficio, como el «cost rental» irlandés, que queda al menos un 25 % bajo el mercado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de rentas medias que alquilan"
+                  ],
+                  "indirecto": [
+                    "inquilinos del mercado privado, por la competencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "propietarios privados que compiten con ese alquiler"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que aportan suelo y garantías"
+                  ]
+                }
+              },
+              "fuente": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/"
+            },
+            {
+              "nombre": "Contrato indefinido a coste",
+              "texto": "En el alquiler a coste el contrato no vence mientras se pague y se cumpla, y la renta sube cada año solo con la inflación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos del alquiler a coste"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares en espera de una vivienda que no se libera"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda al alquiler como derecho",
+              "texto": "Cubre la diferencia entre el 30 % de los ingresos del hogar y una renta de referencia de la zona, se pida cuando se pida, sin convocatorias que se agoten.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de rentas bajas y medias"
+                  ],
+                  "indirecto": [
+                    "propietarios que cobran con más seguridad"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian un gasto sin tope fijo"
+                  ],
+                  "indirecto": [
+                    "inquilinos sin ayuda, si las rentas suben"
+                  ]
+                }
+              },
+              "meta": true
+            },
+            {
+              "nombre": "Crédito barato y suelo para arrancar",
+              "texto": "El banco público y el Banco Europeo de Inversiones financian a muy largo plazo los primeros edificios sobre suelo público cedido, hasta que las rentas sostengan el sector.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "entidades de alquiler a coste"
+                  ],
+                  "indirecto": [
+                    "hogares que entran en esos edificios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que asumen el riesgo del crédito"
+                  ],
+                  "indirecto": [
+                    "promotores privados que compiten por el suelo"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -338,51 +2352,468 @@
           "nivel": 0,
           "resumen": "Vender la vivienda pública o dejar que se degrade, adjudicarla sin criterios públicos, negar techo a quien está en la calle, o no proponer nada.",
           "medidas": [
-            { "nombre": "Vender el parque público", "texto": "Se venden viviendas públicas de alquiler a inversores o al mercado libre y ese parque asequible se pierde para siempre." },
-            { "nombre": "Adjudicar sin reglas", "texto": "Se reparten viviendas públicas sin lista ni criterios públicos, o se dejan degradar sin mantenimiento." },
-            { "nombre": "Nadie responde por la calle", "texto": "No hay propuesta para las personas sin hogar, o todo se deja en albergues temporales sin salida a una vivienda." }
+            {
+              "nombre": "Vender el parque público",
+              "texto": "Se venden viviendas públicas de alquiler a inversores o al mercado libre y ese parque asequible se pierde para siempre.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inversores que compran vivienda pública"
+                  ],
+                  "indirecto": [
+                    "administraciones que ingresan de golpe"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos del parque público vendido"
+                  ],
+                  "indirecto": [
+                    "hogares en lista de espera de vivienda social"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Adjudicar sin reglas",
+              "texto": "Se reparten viviendas públicas sin lista ni criterios públicos, o se dejan degradar sin mantenimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con contactos en la administración"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares en lista de espera que cumplen requisitos",
+                    "inquilinos de viviendas públicas degradadas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan un parque mal gestionado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Nadie responde por la calle",
+              "texto": "No hay propuesta para las personas sin hogar, o todo se deja en albergues temporales sin salida a una vivienda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que ahorran gasto a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas sin hogar"
+                  ],
+                  "indirecto": [
+                    "urgencias y servicios sanitarios con más casos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Conservar y mantener la vivienda pública que hay, sin venderla, y adjudicarla por una lista pública con criterios conocidos.",
           "medidas": [
-            { "nombre": "No vender lo que hay", "texto": "El Estado, las comunidades y los ayuntamientos no venden su vivienda pública de alquiler al mercado libre ni a inversores." },
-            { "nombre": "Mantenimiento con partida propia", "texto": "Cada administración reserva cada año una partida para mantener y rehabilitar su parque, para que no se degrade." },
-            { "nombre": "Lista pública de adjudicación", "texto": "Adjudicación por lista pública con criterios y puntuación conocidos, que cualquiera puede consultar de forma anónima." },
-            { "nombre": "Inventario del parque", "texto": "Un inventario público de cuántas viviendas públicas hay, dónde están, en qué estado y cuántas siguen vacías." }
+            {
+              "nombre": "No vender lo que hay",
+              "texto": "El Estado, las comunidades y los ayuntamientos no venden su vivienda pública de alquiler al mercado libre ni a inversores.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de vivienda pública"
+                  ],
+                  "indirecto": [
+                    "hogares en lista de espera"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "inversores que querían comprar ese parque"
+                  ],
+                  "indirecto": [
+                    "administraciones que renuncian al ingreso de la venta"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mantenimiento con partida propia",
+              "texto": "Cada administración reserva cada año una partida para mantener y rehabilitar su parque, para que no se degrade.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "inquilinos de vivienda pública"
+                  ],
+                  "indirecto": [
+                    "vecinos de los barrios con parque público"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el mantenimiento"
+                  ],
+                  "indirecto": [
+                    "otras partidas del presupuesto que reciben menos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Lista pública de adjudicación",
+              "texto": "Adjudicación por lista pública con criterios y puntuación conocidos, que cualquiera puede consultar de forma anónima.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de vivienda pública"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien obtenía vivienda por contactos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Inventario del parque",
+              "texto": "Un inventario público de cuántas viviendas públicas hay, dónde están, en qué estado y cuántas siguen vacías.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de vivienda pública"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el parque"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publicar lo que la administración ya debe saber de su propio parque no impone cargas ni quita nada a nadie."
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Construir y comprar vivienda pública de alquiler cada año, con protección para siempre y suelo reservado en cada desarrollo nuevo.",
           "medidas": [
-            { "nombre": "Protección para siempre", "texto": "La vivienda protegida construida con ayuda o suelo público no pierde nunca su protección ni su precio limitado, en lugar de pasar al mercado libre a los pocos años." },
-            { "nombre": "Programa anual de construcción y compra", "texto": "Cada año Estado, comunidades y ayuntamientos construyen y compran viviendas para alquiler asequible, con una cifra comprometida y publicada." },
-            { "nombre": "Derecho preferente de compra", "texto": "En zonas con falta de vivienda, la administración puede comprar antes que nadie los edificios que se venden (tanteo y retracto), al mismo precio." },
-            { "nombre": "Reserva de suelo para vivienda protegida", "texto": "Una parte de cada desarrollo residencial nuevo se destina por ley a vivienda protegida de alquiler." },
-            { "nombre": "Albergue con salida", "texto": "Las plazas de emergencia para personas sin hogar van unidas a un plan individual de salida hacia una vivienda estable." }
+            {
+              "nombre": "Protección para siempre",
+              "texto": "La vivienda protegida construida con ayuda o suelo público no pierde nunca su protección ni su precio limitado, en lugar de pasar al mercado libre a los pocos años.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que acceden a vivienda protegida"
+                  ],
+                  "indirecto": [
+                    "hogares futuros en lista de espera"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "dueños de protegida que no podrán vender a precio libre"
+                  ],
+                  "indirecto": [
+                    "promotores que contaban con la descalificación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Programa anual de construcción y compra",
+              "texto": "Cada año Estado, comunidades y ayuntamientos construyen y compran viviendas para alquiler asequible, con una cifra comprometida y publicada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares en lista de vivienda pública"
+                  ],
+                  "indirecto": [
+                    "inquilinos del mercado libre, por más oferta"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian construcción y compra"
+                  ],
+                  "indirecto": [
+                    "compradores privados que compiten por los mismos pisos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Derecho preferente de compra",
+              "texto": "En zonas con falta de vivienda, la administración puede comprar antes que nadie los edificios que se venden (tanteo y retracto), al mismo precio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares en lista de vivienda pública",
+                    "inquilinos de edificios en venta"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "compradores privados de edificios enteros"
+                  ],
+                  "indirecto": [
+                    "vendedores, ante ventas más lentas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reserva de suelo para vivienda protegida",
+              "texto": "Una parte de cada desarrollo residencial nuevo se destina por ley a vivienda protegida de alquiler.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que necesitan alquiler protegido"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores y dueños de suelo residencial"
+                  ],
+                  "indirecto": [
+                    "compradores de vivienda libre si sube su precio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Albergue con salida",
+              "texto": "Las plazas de emergencia para personas sin hogar van unidas a un plan individual de salida hacia una vivienda estable.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas sin hogar"
+                  ],
+                  "indirecto": [
+                    "servicios sociales y sanitarios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el acompañamiento"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un parque asequible permanente que crece hacia la media europea, con una meta medida y una entidad pública estable que construye y gestiona.",
           "medidas": [
-            { "nombre": "Meta medible", "texto": "Objetivo público: la parte de las viviendas principales en alquiler social o asequible sube cada año hasta la media de la Unión Europea, medida con una estadística comparable entre países.", "meta": true },
-            { "nombre": "Entidad pública estable", "texto": "Una entidad estatal de vivienda con presupuesto de varios años, que construye y compra junto a comunidades y ayuntamientos y no depende del gobierno de turno." },
-            { "nombre": "Gestores sin ánimo de lucro", "texto": "Cooperativas y asociaciones de vivienda acreditadas gestionan parte del parque con financiación pública, controles y reglas de renta." },
-            { "nombre": "Mezcla de rentas", "texto": "En cada edificio conviven hogares de distintos ingresos; quien mejora no pierde la casa, paga una renta mayor." }
+            {
+              "nombre": "Meta medible",
+              "texto": "Objetivo público: la parte de las viviendas principales en alquiler social o asequible sube cada año hasta la media de la Unión Europea, medida con una estadística comparable entre países.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que necesitan alquiler social o asequible"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el crecimiento del parque"
+                  ],
+                  "indirecto": [
+                    "propietarios privados que compiten con ese alquiler"
+                  ]
+                }
+              },
+              "meta": true
+            },
+            {
+              "nombre": "Entidad pública estable",
+              "texto": "Una entidad estatal de vivienda con presupuesto de varios años, que construye y compra junto a comunidades y ayuntamientos y no depende del gobierno de turno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares en lista de vivienda pública"
+                  ],
+                  "indirecto": [
+                    "comunidades y ayuntamientos que construyen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que comprometen presupuesto de varios años"
+                  ],
+                  "indirecto": [
+                    "gobiernos que pierden margen para reasignar fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gestores sin ánimo de lucro",
+              "texto": "Cooperativas y asociaciones de vivienda acreditadas gestionan parte del parque con financiación pública, controles y reglas de renta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "cooperativas y asociaciones de vivienda"
+                  ],
+                  "indirecto": [
+                    "inquilinos del parque que gestionan"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas públicas que dejan de gestionar ese parque"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la gestión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mezcla de rentas",
+              "texto": "En cada edificio conviven hogares de distintos ingresos; quien mejora no pierde la casa, paga una renta mayor.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que mejoran ingresos sin perder la casa"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios menos segregados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares de rentas bajas en lista, que esperan más"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un parque asequible permanente por encima de la media europea, que nunca se vende y crece con sus rentas, con suelo por ley y vivienda primero.",
           "medidas": [
-            { "nombre": "Fondo rotatorio", "texto": "Cuando un edificio termina de pagar su préstamo, la renta no baja de golpe: lo que ya no va al banco entra en un fondo que rehabilita y construye más viviendas." },
-            { "nombre": "La mayor parte del suelo nuevo, asequible", "texto": "En los desarrollos nuevos de ciudades con falta de vivienda, la mayor parte de la superficie residencial es asequible permanente, como los dos tercios que fija Viena desde 2018.", "fuente": "https://socialhousing.wien/tools/urban-development-and-land-policy" },
-            { "nombre": "Para la mayoría, no solo para los más pobres", "texto": "El parque se abre también a rentas medias, como en Viena, donde alrededor de la mitad de los vecinos vive en vivienda municipal o subvencionada.", "fuente": "https://socialhousing.wien/" },
-            { "nombre": "Vivienda primero", "texto": "A la persona sin hogar se le ofrece una vivienda estable con apoyo social desde el primer día, no al final de un recorrido por albergues." },
-            { "nombre": "Auditoría independiente de la meta", "texto": "Un organismo independiente comprueba cada año si se cumple la meta de viviendas por territorio y publica el resultado." }
+            {
+              "nombre": "Fondo rotatorio",
+              "texto": "Cuando un edificio termina de pagar su préstamo, la renta no baja de golpe: lo que ya no va al banco entra en un fondo que rehabilita y construye más viviendas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que esperan las nuevas viviendas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "inquilinos que verían bajar su renta al pagar el préstamo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "La mayor parte del suelo nuevo, asequible",
+              "texto": "En los desarrollos nuevos de ciudades con falta de vivienda, la mayor parte de la superficie residencial es asequible permanente, como los dos tercios que fija Viena desde 2018.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de rentas bajas y medias"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "promotores y dueños de suelo residencial"
+                  ],
+                  "indirecto": [
+                    "compradores de vivienda libre si sube su precio"
+                  ]
+                }
+              },
+              "fuente": "https://socialhousing.wien/tools/urban-development-and-land-policy"
+            },
+            {
+              "nombre": "Para la mayoría, no solo para los más pobres",
+              "texto": "El parque se abre también a rentas medias, como en Viena, donde alrededor de la mitad de los vecinos vive en vivienda municipal o subvencionada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares de rentas medias"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios menos segregados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hogares de rentas bajas, si su espera se alarga"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian un parque mayor",
+                    "propietarios privados que compiten con ese alquiler"
+                  ]
+                }
+              },
+              "fuente": "https://socialhousing.wien/"
+            },
+            {
+              "nombre": "Vivienda primero",
+              "texto": "A la persona sin hogar se le ofrece una vivienda estable con apoyo social desde el primer día, no al final de un recorrido por albergues.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas sin hogar"
+                  ],
+                  "indirecto": [
+                    "urgencias con menos casos repetidos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan vivienda y apoyo"
+                  ],
+                  "indirecto": [
+                    "entidades que gestionan albergues"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Auditoría independiente de la meta",
+              "texto": "Un organismo independiente comprueba cada año si se cumple la meta de viviendas por territorio y publica el resultado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "hogares que esperan vivienda social"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que evalúan la política de vivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Comprobar y publicar si se cumple una meta ya fijada no impone costes relevantes ni quita derechos a nadie."
+              }
+            }
           ]
         }
       ]
