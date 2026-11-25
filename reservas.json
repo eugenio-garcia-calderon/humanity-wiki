@@ -5,6 +5,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Enlaces a /partidos/",
       "desde": "2026-11-25T20:10:26.644Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "/partidos estático + sitemap",
+      "desde": "2026-11-25T20:10:29.879Z"
     }
   ]
 }
