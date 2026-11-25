@@ -23,23 +23,25 @@
 //   exportar.ts   SVG/DXF plans, planting CSV · FichaEspecie, Grafica, Proyecto
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, BookOpen, Box, CheckCircle2, Database, Download, Grid3x3, Lightbulb, Map as MapaIcono, Menu, Pause, Play, Plus, RotateCcw, Share2, SlidersHorizontal, Sprout, Trash2, Upload, X, Image as ImagenIcono, Ruler, LandPlot } from 'lucide-react';
+import { AlertTriangle, BookOpen, Box, CheckCircle2, Database, Download, Grid3x3, Lightbulb, Map as MapaIcono, Menu, Pause, Play, RotateCcw, Share2, SlidersHorizontal, Sprout, Upload, X, Image as ImagenIcono, Ruler, LandPlot, Shapes, Flower2, Sun, Leaf, Snowflake, Wind, Clock } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { Deslizador } from '../components/ui/Deslizador';
 import { cn } from '../utils/cn';
-import Escena3D, { type ObjetivoCamara, type Vista3D } from '../components/agriculturaSintropica/Escena3D';
+import Escena3D, { type Ambiente, type ObjetivoCamara, type Vista3D } from '../components/agriculturaSintropica/Escena3D';
+import { nombreMes, estacionDe } from '../components/agriculturaSintropica/fenologia';
 import EditorModulo from '../components/agriculturaSintropica/EditorModulo';
 import FichaEspecie, { Gotas, MapaZonas } from '../components/agriculturaSintropica/FichaEspecie';
 import Grafica from '../components/agriculturaSintropica/Grafica';
 import Proyecto from '../components/agriculturaSintropica/Proyecto';
+import PanelPatron from '../components/agriculturaSintropica/PanelPatron';
 import { CLAVES, ESPECIE, ESPECIES, ESTRATOS, FUNCIONES, GENERACIONES, ZONAS, type Estrato, type Funcion, type Zona } from '../components/agriculturaSintropica/especies';
 import { DISENOS, NOMBRE_ROL, diseno, etiquetasDe, rol } from '../components/agriculturaSintropica/disenos';
-import { ANOS, ETAPAS, MAQUINAS, MARCO_CONVENCIONAL, cifras, consejos, construirConvencional, construirParcela, etapa, huecosDe, pasos, porDefecto, simular, type Maquina, type Parametros, type Planta } from '../components/agriculturaSintropica/modelo';
+import { ANOS, ETAPAS, MAQUINAS, MARCO_CONVENCIONAL, cifras, consejos, construirConvencional, construirParcela, etapa, huecosDe, huecosBase, aBase, pasos, porDefecto, simular, type Maquina, type Parametros, type Planta } from '../components/agriculturaSintropica/modelo';
 import { COLOR_ROL } from '../components/agriculturaSintropica/paleta';
 import { csvPlantas, descargar, dxfPlano, listaCompra, nombreArchivo, svgModulo, svgPlano } from '../components/agriculturaSintropica/exportar';
 
 const CLAVE_LOCAL = 'agricultura-sintropica:v1';
-type Pestana = 'diseno' | 'parcela' | 'simular' | 'especies' | 'consejos' | 'planos' | 'proyecto';
+type Pestana = 'diseno' | 'patron' | 'parcela' | 'simular' | 'especies' | 'consejos' | 'planos' | 'proyecto';
 type Vista = '3d' | 'plano' | 'modulo';
 
 const num = (v: number, d = 0) => v.toLocaleString('es-ES', { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -47,10 +49,14 @@ const num = (v: number, d = 0) => v.toLocaleString('es-ES', { maximumFractionDig
 function cargar(): Parametros {
   try {
     const h = window.location.hash.replace(/^#/, '');
-    if (h.startsWith('d=')) return { ...porDefecto(), ...JSON.parse(decodeURIComponent(h.slice(2))) };
+    if (h.startsWith('d=')) return completar(JSON.parse(decodeURIComponent(h.slice(2))));
   } catch { /* malformed link */ }
-  try { const s = window.localStorage.getItem(CLAVE_LOCAL); if (s) return { ...porDefecto(), ...JSON.parse(s) }; } catch { /* storage blocked */ }
+  try { const s = window.localStorage.getItem(CLAVE_LOCAL); if (s) return completar(JSON.parse(s)); } catch { /* storage blocked */ }
   return porDefecto();
+}
+/** A saved design may predate a parameter: fill it with the default of ITS design, not of the first one. */
+function completar(x: Partial<Parametros>): Parametros {
+  return { ...porDefecto(x.diseno ?? 'modulo', x.clave ?? 'almendro'), ...x } as Parametros;
 }
 const enlace = (p: Parametros) => `${window.location.origin}/agricultura-sintropica#d=${encodeURIComponent(JSON.stringify(p))}`;
 
@@ -75,6 +81,11 @@ export default function AgriculturaSintropica() {
   const [ficha, setFicha] = useState<string | null>(null);
   const [selHueco, setSelHueco] = useState<number | null>(null);
   const [copas, setCopas] = useState(true);
+  const [rejilla, setRejilla] = useState(0);
+  // The seasons (2026-11-25, Eugenio: «una animación de las 4 estaciones, con flores, hojas caducas, luces del sol, vientos»).
+  const [ambiente, setAmbiente] = useState<Ambiente>(() => ({ mes: 4.4, animarAno: false, hora: 16, animarDia: false, viento: 0.3, sombras: typeof window === 'undefined' || window.innerWidth >= 700 }));
+  const [reloj, setReloj] = useState({ mes: 4.4, hora: 16 });
+  const amb = (x: Partial<Ambiente>) => setAmbiente(a => ({ ...a, ...x }));
   const [camara, setCamara] = useState<ObjetivoCamara>({ vista: 'perspectiva', nonce: 1 });
   const [aviso, setAviso] = useState<string | null>(null);
   const [zoomPlano, setZoomPlano] = useState(1);
@@ -122,17 +133,21 @@ export default function AgriculturaSintropica() {
     setP(prev => { const n = porDefecto(id, prev.clave); return { ...n, ancho: prev.ancho, largo: prev.largo, zona: prev.zona, lluvia: prev.lluvia, pendiente: prev.pendiente, riego: prev.riego, mo0: prev.mo0, maquina: prev.maquina, poda: prev.poda, anuales: prev.anuales, anosAnuales: prev.anosAnuales, hipAgua: prev.hipAgua, hipN: prev.hipN, hipMicro: prev.hipMicro }; });
     setSelHueco(null);
   };
-  const moverHueco = (i: number, u: number, v: number) => setP(prev => { const h = [...huecosDe(prev)]; h[i] = { ...h[i], u, v }; return { ...prev, huecos: h }; });
+  // Dragging in the module view; snapped to the chosen grid in metres (from the module's south-west corner).
+  const moverHueco = (i: number, u: number, v: number) => setP(prev => {
+    const aj = (x: number, L: number) => rejilla ? Math.max(-0.5, Math.min(0.4999, Math.round(((x + 0.5) * L) / rejilla) * rejilla / L - 0.5)) : x;
+    const h = [...huecosBase(prev)]; h[i] = { ...h[i], ...aBase(prev, i, aj(u, prev.modAncho), aj(v, prev.modLargo)) }; return { ...prev, huecos: h };
+  });
   const elegirPlanta = (pl: Planta | null) => setFicha(pl ? pl.esp.id : null);
   const simularDesdeCero = () => { setT(0); setJugando(true); if (vista !== '3d') setVista('3d'); };
   const capturar = () => {
     const c = document.querySelector('canvas'); if (!c) return;
     const a = document.createElement('a'); a.href = (c as HTMLCanvasElement).toDataURL('image/png'); a.download = `${nombreArchivo(p)}-ano-${ano}.png`; a.click();
   };
-  const cargarJson = (f: File) => f.text().then(s => { setP({ ...porDefecto(), ...JSON.parse(s) }); setAviso('Diseño cargado'); }).catch(() => setAviso('Ese archivo no es un diseño válido'));
+  const cargarJson = (f: File) => f.text().then(s => { setP(completar(JSON.parse(s))); setAviso('Diseño cargado'); }).catch(() => setAviso('Ese archivo no es un diseño válido'));
 
   const PESTANAS: { id: Pestana; t: string; I: typeof Box }[] = [
-    { id: 'diseno', t: 'Diseño', I: Grid3x3 }, { id: 'parcela', t: 'Parcela', I: LandPlot }, { id: 'simular', t: 'Simular', I: Sprout },
+    { id: 'diseno', t: 'Diseño', I: Grid3x3 }, { id: 'patron', t: 'Patrón', I: Shapes }, { id: 'parcela', t: 'Parcela', I: LandPlot }, { id: 'simular', t: 'Simular', I: Sprout },
     { id: 'especies', t: 'Especies', I: Database }, { id: 'consejos', t: 'Consejos', I: Lightbulb }, { id: 'planos', t: 'Planos', I: Ruler }, { id: 'proyecto', t: 'Proyecto', I: BookOpen },
   ];
 
@@ -167,7 +182,7 @@ export default function AgriculturaSintropica() {
           <aside className="absolute inset-y-0 left-0 z-20 flex w-[min(25rem,100vw)] border-r border-slate-800 bg-slate-900 md:static">
             <nav className="flex w-16 shrink-0 flex-col border-r border-slate-800 py-1">
               {PESTANAS.map(({ id, t: txt, I }) => (
-                <Button key={id} variant="ghost" onClick={() => setPestana(id)}
+                <Button key={id} variant="ghost" onClick={() => { setPestana(id); if (id === 'patron') setVista('modulo'); }}
                   className={cn('relative flex-col gap-1 rounded-none px-1 py-2.5 text-[9px] tracking-wider', pestana === id ? 'bg-slate-800 text-emerald-300 hover:bg-slate-800' : 'text-slate-400 hover:bg-slate-800')}>
                   <I size={16} />{txt}
                   {id === 'consejos' && alertas > 0 && <span className="absolute right-1.5 top-1 rounded-full bg-amber-500 px-1 text-[8px] text-slate-900">{alertas}</span>}
@@ -190,26 +205,9 @@ export default function AgriculturaSintropica() {
                     <p className="text-[11px] leading-relaxed text-slate-400">{d.descripcion}</p>
                   </Seccion>
 
-                  <Seccion titulo="Módulo" icono={<Ruler size={14} />}>
-                    <Deslizador etiqueta="Ancho (este–oeste)" valor={p.modAncho} min={3} max={20} paso={0.5} unidad="m" onChange={v => fijar('modAncho', v)} />
-                    <Deslizador etiqueta="Largo (norte–sur)" valor={p.modLargo} min={3} max={20} paso={0.5} unidad="m" onChange={v => fijar('modLargo', v)} />
-                    <label className="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={copas} onChange={e => setCopas(e.target.checked)} /> Ver las copas adultas en el módulo</label>
-                    <p className="text-[11px] text-slate-500">En la vista «Módulo» arrastra cada número para moverlo; se repite igual en toda la parcela.</p>
-                    {selHueco != null && huecos[selHueco] && (
-                      <div className="space-y-2 rounded-lg bg-slate-800/60 p-2">
-                        <div className="text-[11px] text-slate-300">Puesto seleccionado: <b>{huecos[selHueco].etiqueta}</b></div>
-                        <label className="block text-[11px] text-slate-400">Cambiar su número
-                          <select className={selectCls} value={huecos[selHueco].etiqueta} onChange={e => setP(prev => { const h = [...huecosDe(prev)]; h[selHueco] = { ...h[selHueco], etiqueta: e.target.value }; const asign = { ...prev.asign }; if (!asign[e.target.value]) asign[e.target.value] = []; return { ...prev, huecos: h, asign }; })}>
-                            {[...new Set([...etiquetas, '1', '2', '2a', '2b', '2c', '2d', '3', '3a', '3b', '3c', '3d', '4', '4a', '4b', '5', '5a', '5b'])].sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).map(x => <option key={x} value={x}>{x}</option>)}
-                          </select>
-                        </label>
-                        <Button variant="outline" className={cn('w-full', btnOscuro)} onClick={() => { setP(prev => ({ ...prev, huecos: huecosDe(prev).filter((_, i) => i !== selHueco) })); setSelHueco(null); }}><Trash2 size={13} className="mr-2" />Quitar este puesto</Button>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <Button variant="outline" className={cn('flex-1 px-2', btnOscuro)} onClick={() => { setP(prev => ({ ...prev, huecos: [...huecosDe(prev), { u: 0.3, v: 0.3, etiqueta: '5' }] })); setSelHueco(huecos.length); setVista('modulo'); }}><Plus size={13} className="mr-1" />Puesto</Button>
-                      <Button variant="outline" className={cn('flex-1 px-2', btnOscuro)} onClick={() => { fijar('huecos', null); setSelHueco(null); }}><RotateCcw size={13} className="mr-1" />Posiciones</Button>
-                    </div>
+                  <Seccion titulo="Patrón base" icono={<Shapes size={14} />}>
+                    <p className="text-[11px] leading-relaxed text-slate-400">{huecos.length} puestos en un módulo de {num(p.modAncho, 1)} × {num(p.modLargo, 1)} m{p.huecos ? ', modificado a mano' : ''}{p.separacion !== 1 ? `, auxiliares al ${Math.round(p.separacion * 100)} %` : ''}.</p>
+                    <Button className="w-full" onClick={() => { setPestana('patron'); setVista('modulo'); }}><Shapes size={14} className="mr-2" />Editar el patrón base</Button>
                   </Seccion>
 
                   <Seccion titulo="Especies de cada número" icono={<Sprout size={14} />}>
@@ -217,6 +215,11 @@ export default function AgriculturaSintropica() {
                     <Button variant="outline" className={cn('w-full', btnOscuro)} onClick={() => { fijar('asign', d.asignar(p.clave)); setAviso('Consorcio recomendado restaurado'); }}><RotateCcw size={13} className="mr-2" />Consorcio recomendado</Button>
                   </Seccion>
                 </div>
+              )}
+
+              {pestana === 'patron' && (
+                <PanelPatron p={p} setP={setP} seleccion={selHueco} setSeleccion={i => { setSelHueco(i); if (vista !== 'modulo') setVista('modulo'); }} copas={copas} setCopas={setCopas}
+                  rejilla={rejilla} setRejilla={setRejilla} onPlantilla={cambiarDiseno} onFicha={setFicha} />
               )}
 
               {pestana === 'parcela' && (
@@ -367,7 +370,30 @@ export default function AgriculturaSintropica() {
         {/* ------------------------------------------------ view */}
         <main className="relative min-w-0 flex-1">
           {vista === '3d' && <>
-            <Escena3D parcela={parcela} convencional={comparar ? conv : null} p={pd} t={t} resaltar={ficha} camara={camara} onElegir={elegirPlanta} />
+            <Escena3D parcela={parcela} convencional={comparar ? conv : null} p={pd} t={t} resaltar={ficha} camara={camara} onElegir={elegirPlanta}
+              ambiente={ambiente} onReloj={(mes, hora) => setReloj({ mes, hora })} />
+            <div className="absolute bottom-3 left-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-1 rounded-xl bg-slate-900/85 p-1.5 text-[11px] text-slate-200 backdrop-blur sm:max-w-[calc(100%-18rem)]">
+              {([['primavera', 'Primavera', 3.9, Flower2], ['verano', 'Verano', 6.9, Sun], ['otono', 'Otoño', 10.1, Leaf], ['invierno', 'Invierno', 0.6, Snowflake]] as const).map(([id, txt, m, I]) => (
+                <Button key={id} variant="ghost" onClick={() => { amb({ mes: m, animarAno: false }); setReloj(r => ({ ...r, mes: m })); }}
+                  className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', estacionDe(reloj.mes) === id ? 'bg-emerald-600 text-white hover:bg-emerald-600' : 'text-slate-300 hover:bg-slate-800')}><I size={13} />{txt}</Button>
+              ))}
+              <Button variant="ghost" className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', ambiente.animarAno ? 'bg-amber-400 text-slate-900 hover:bg-amber-300' : 'text-slate-200 hover:bg-slate-800')}
+                onClick={() => amb(ambiente.animarAno ? { animarAno: false, mes: reloj.mes } : { animarAno: true })}>{ambiente.animarAno ? <Pause size={12} /> : <Play size={12} />}Año</Button>
+              <span className="w-16 text-center font-semibold capitalize text-emerald-300">{nombreMes(reloj.mes)}</span>
+              <span className="mx-1 h-5 w-px bg-slate-700" />
+              <Clock size={13} className="text-slate-400" />
+              <input type="range" min={6} max={21.5} step={0.25} value={ambiente.animarDia ? reloj.hora : ambiente.hora} aria-label="Hora del día"
+                onChange={e => { amb({ hora: Number(e.target.value), animarDia: false }); setReloj(r => ({ ...r, hora: Number(e.target.value) })); }} className="w-20 accent-amber-400" />
+              <span className="w-10 font-mono text-[10px]">{String(Math.floor(reloj.hora)).padStart(2, '0')}:{String(Math.floor((reloj.hora % 1) * 60)).padStart(2, '0')}</span>
+              <Button variant="ghost" className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', ambiente.animarDia ? 'bg-amber-400 text-slate-900 hover:bg-amber-300' : 'text-slate-200 hover:bg-slate-800')}
+                onClick={() => amb(ambiente.animarDia ? { animarDia: false, hora: reloj.hora } : { animarDia: true })}>{ambiente.animarDia ? <Pause size={12} /> : <Play size={12} />}Día</Button>
+              <span className="mx-1 h-5 w-px bg-slate-700" />
+              <Wind size={13} className="text-slate-400" />
+              <select aria-label="Viento" className="rounded-md border border-slate-700 bg-slate-800 px-1 py-0.5 text-[10px]" value={ambiente.viento} onChange={e => amb({ viento: Number(e.target.value) })}>
+                <option value={0}>Calma</option><option value={0.3}>Brisa</option><option value={0.65}>Viento</option><option value={1}>Vendaval</option>
+              </select>
+              <label className="ml-1 flex items-center gap-1 text-[10px] text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={ambiente.sombras} onChange={e => amb({ sombras: e.target.checked })} />Sombras</label>
+            </div>
             <div className="absolute bottom-3 right-3 flex gap-1">
               {([['perspectiva', 'Perspectiva'], ['cenital', 'Cenital'], ['lateral', 'A ras de suelo']] as [Vista3D, string][]).map(([v, txt]) => (
                 <Button key={v} variant="ghost" className="bg-slate-900/80 px-2 py-1 text-[10px] text-slate-200 hover:bg-slate-800" onClick={() => setCamara({ vista: v, nonce: Date.now() })}>{txt}</Button>
@@ -391,7 +417,7 @@ export default function AgriculturaSintropica() {
           {vista === 'modulo' && (
             <div className="absolute inset-0 bg-slate-100 p-2">
               <EditorModulo mediaLuna={!!d.mediaLuna} huecos={huecos} ancho={p.modAncho} largo={p.modLargo} asign={p.asign} copas={copas} seleccion={selHueco}
-                onSeleccion={i => { setSelHueco(i); if (i != null) { setPestana('diseno'); setPanel(true); } }} onMover={moverHueco} />
+                onSeleccion={i => { setSelHueco(i); if (i != null) { setPestana('patron'); setPanel(true); } }} onMover={moverHueco} />
             </div>
           )}
 

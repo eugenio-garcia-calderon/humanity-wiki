@@ -35,7 +35,9 @@ export interface Diseno {
   descripcion: string;
   ancho: number;            // default tile size (m), east–west
   largo: number;            // north–south
-  huecos: (ancho: number, largo: number) => Hueco[];
+  huecos: (ancho: number, largo: number, paso?: number) => Hueco[];
+  /** A design planted on a fine grid lets the user set that grid (2026-11-25, Eugenio: «permite ajustar el espacio entre plantas»). */
+  marco?: { defecto: number; min: number; max: number; etiqueta: string };
   alcorque?: boolean;       // a ring around every key plant that holds water
   mediaLuna?: boolean;      // half-moon water catchment in every tile
   parcela: { bloqueX: number; bloqueY: number; franja: 'zanja' | 'pavimento' };
@@ -102,12 +104,12 @@ export function geometriaSonrisa(W: number, H: number) {
   const r2 = Math.min(W * 0.46, H - 0.3), r1 = r2 * 0.42, cy = -H / 2 + r2 + 0.15;
   return { cx: 0, cy, r1, r2, a0: Math.PI * 1.08, a1: Math.PI * 1.92 };
 }
-function sonrisa(W: number, H: number): Hueco[] {
+function sonrisa(W: number, H: number, paso = 0.5): Hueco[] {
   const g = geometriaSonrisa(W, H);
-  const r = rng(7), paso = 0.5, h: Hueco[] = [];
+  const r = rng(7), h: Hueco[] = [];
   for (let x = -W / 2 + paso / 2; x < W / 2; x += paso) {
     for (let y = -H / 2 + paso / 2; y < H / 2; y += paso) {
-      const jx = x + (r() - 0.5) * 0.2, jy = y + (r() - 0.5) * 0.2;
+      const jx = x + (r() - 0.5) * paso * 0.4, jy = y + (r() - 0.5) * paso * 0.4;
       const dx = jx - g.cx, dy = jy - g.cy;
       const d = Math.hypot(dx, dy), a = Math.atan2(dy, dx) + (dy < 0 ? Math.PI * 2 : 0);
       if (d < g.r1 || d > g.r2 || a < g.a0 || a > g.a1) continue;
@@ -125,7 +127,7 @@ function sonrisa(W: number, H: number): Hueco[] {
 
 // ---------------------------------------------------------------- 4 · tree lines by strata
 // Tile 12 m along the line × alley. The line runs east–west at 1 m from the south edge.
-function lineas(W: number, H: number): Hueco[] {
+function lineas(W: number, H: number, paso = 1): Hueco[] {
   const h: Hueco[] = [];
   const p = (x: number, y: number, etiqueta: string) => h.push({ u: x / W - 0.5, v: y / H - 0.5, etiqueta });
   const y0 = Math.min(1, H * 0.2);
@@ -133,8 +135,8 @@ function lineas(W: number, H: number): Hueco[] {
   p(0, y0 + 0.15, '2');                                                 // emergent/high, every 12 m
   p(W * 0.5, y0 + 0.15, '2b');                                          // medium service tree between keys
   for (const x of [0.125, 0.375, 0.625, 0.875]) p(W * x, y0 - 0.45, '3');   // low, every 3 m (south side)
-  for (let x = 0.5; x < W; x += 1) p(x, y0 + 0.55, '4');               // biomass / aromatics every 1 m (north side)
-  for (let x = 0; x < W; x += 1.5) { p(x + 0.4, y0 + 2.2, '5'); p(x + 1.1, y0 + 3.4, '5'); }   // alley: cover / vegetables
+  for (let x = paso / 2; x < W; x += paso) p(x, y0 + 0.55, '4');       // biomass / aromatics every `paso` m (north side)
+  for (let x = 0; x + paso * 0.4 < W; x += paso * 1.5) { p(x + paso * 0.4, y0 + 2.2, '5'); if (x + paso * 1.1 < W) p(x + paso * 1.1, y0 + 3.4, '5'); }   // alley: cover / vegetables
   return h;
 }
 
@@ -157,6 +159,7 @@ export const DISENOS: Diseno[] = [
     id: 'sonrisa', nombre: 'Sonrisa microhábitat', fuente: 'Dibujo «Combinación de especies y metodologías · Villalbilla 2026»',
     descripcion: 'Media luna de piedras que recoge la escorrentía, plantada muy densa al estilo Miyawaki (3–5 plantas por m²) con distribución aleatoria y muchas especies. Los emergentes en la cara norte; la clave en el fondo de la sonrisa, donde se para el agua.',
     ancho: 5, largo: 4, huecos: sonrisa, mediaLuna: true,
+    marco: { defecto: 0.5, min: 0.3, max: 1.2, etiqueta: 'Marco de plantación (entre plantas)' },
     parcela: { bloqueX: 3, bloqueY: 2, franja: 'zanja' },
     asignar: k => { const c = consorcio(k); return { '1': [k], '2': ['almez', 'morera', 'fresno'], '3': ['retamaolor', 'madrono', 'aladierno', 'espantalobos', 'acerolo'], '4': ['romero', 'espliego', 'salvia', 'santolina'], '5': ['tomillo', 'cardo', 'esparceta'] }; },
   },
@@ -164,6 +167,7 @@ export const DISENOS: Diseno[] = [
     id: 'lineas', nombre: 'Líneas por estratos', fuente: 'Plan de ensayo de agroforestería sucesional (líneas de 2 m)',
     descripcion: 'Líneas de árboles de 2 m de ancho en dirección este–oeste: biomasa cada 1 m, bajo cada 3 m, la clave cada 6 m, un árbol alto cada 12 m. Entre líneas, calles anchas para maquinaria estrecha con cubierta u hortalizas.',
     ancho: 12, largo: 8, huecos: lineas,
+    marco: { defecto: 1, min: 0.5, max: 2.5, etiqueta: 'Biomasa y aromáticas a lo largo de la línea, cada' },
     parcela: { bloqueX: 6, bloqueY: 3, franja: 'zanja' },
     asignar: k => { const c = consorcio(k); return { '1': [k], '2': [c.alto], '2b': [c.arbusto], '3': [c.fijadora, c.sur], '4': [c.aromatica, 'consuelda', c.fijadora2], '5': [c.cubierta2] }; },
   },

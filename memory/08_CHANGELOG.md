@@ -13399,3 +13399,25 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Shown under each measure on the /medidas/ level pages (green/red rows), in «Ver cada medida explicada» on the party pages, and in a folded «¿A quién beneficia y a quién perjudica?» in the test cards and the level side panel.
 - `medidas.json` grows from 280 KB to 497 KB (≈ the gzip figure in the PR); it still loads after the page.
 - These are this site's estimates of effects, not measured impacts.
+## 2026-11-25 — Agricultura sintrópica: spacing between plants, and a menu of its own for the base pattern
+
+> «Permite ajustar el espacio entre plantas, no solo los pasillos y bloques.» Then: «permite modificar el patrón base de manera sencilla con un menú entero solo para ese patrón base.»
+
+- **Spacing**: new parameter `separacion` (40–160 %) moves every auxiliary towards or away from its nearest key without moving the key (`huecosDe` applies it to the drawn positions, `huecosBase`); `marcoDenso` sets the planting grid of the smile (0.3–1.2 m) and the biomass row of the tree lines (0.5–2.5 m). The module range now starts at 2 m in 0.25 m steps. Measured distances shown live: between keys, nearest auxiliary to a key, the two closest plants (`distancias`).
+- **«Patrón» tab** (`PanelPatron.tsx`): opens the module view and gathers everything that edits the module: start from a template or from the key alone, restore; size and spacing; add a position by number; ring of 3–12 plants at 0.75–3.5 m around the key; east–west and north–south symmetry; snap-to-grid while dragging (0.1–1 m); selected position with its metres typed in, distance to the key, duplicate, mirror, remove; list of all positions. The «Diseño» tab keeps the geometry and the species of each number, with a button to the pattern menu.
+- **Saved designs** (browser, links, JSON) that predate these parameters are completed with the defaults of their own design (`completar`), so a saved smile keeps its 0.5 m grid.
+- Checked: `tsc`, build, Playwright on the built page (open the menu, add a ring, select a row, spacing at 130 %) with no JavaScript errors.
+- Not verified: dragging by touch on a phone; the installed app.
+
+## 2026-11-25 — Agricultura sintrópica: more realistic trees and the four seasons
+
+> «Mejora el diseño de los árboles para que sean más realistas… incluso permite una animación de las 4 estaciones, con flores, hojas caducas, luces del sol, vientos, etc.»
+
+- **Trees**: each crown is a cluster of 2–7 irregular lobes shaped by the species' form (round, columnar, spreading, shrub, vine with two cordons, palm with fronds), with a tapered trunk and, for trees, 4 branches plus 2 twigs each that show when a deciduous tree is bare. Real shadows (soft, 2048 map) and an atmospheric sky (drei `Sky`). Still three InstancedMeshes for the whole plot.
+- **Seasons** (`fenologia.ts`, 60 species): bud break and leaf fall of the deciduous ones, autumn colour, flowering window and colour. Bar in the 3D view: Primavera / Verano / Otoño / Invierno, «Año» plays the months (≈ 30 s per year), the month name; the field turns green in winter–spring and straw-coloured in summer.
+- **Sun**: position from month and hour at 40° N (height, day length, sunrise azimuth), warm light when low; hour slider and «Día» plays the day.
+- **Wind**: Calma / Brisa / Viento / Vendaval sways crowns, trunks and branches in the vertex shader; petals fly in flowering time and leaves in autumn (900 points).
+- **Species card**: «Su año», a 12-month strip (leaves, flowers, autumn, bare) with the dates in words.
+- Shadows start off on screens narrower than 700 px (checkbox to turn them on).
+- Checked: `tsc`, build, Playwright screenshots of winter, February (almonds in flower), spring at ground level, summer and autumn, with no JavaScript errors.
+- **Not verified**: frame rate on a real phone (the test browser renders in software); wind and particles were only seen in stills.
