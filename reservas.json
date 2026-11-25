@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "Geometría: cinco niveles",
-      "desde": "2026-11-25T12:12:37.195Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Geometría: cinco niveles",
       "desde": "2026-11-25T12:12:40.607Z"
