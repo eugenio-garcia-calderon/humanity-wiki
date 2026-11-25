@@ -35,6 +35,36 @@ export function raizDe(id: string) {
   return p;
 }
 
+// EUGINI FETTUCCINI (2026-11-25, Eugenio: «un botón arriba a la derecha muy pequeñito y difícil de ver; si lo pulsas
+// se cambia el logo de Luz y Humanidad y, con ese mismo logo, pone Eugini Fettuccini, y debajo, como eslogan, Los
+// inventos locos»). Solo en la barra del escaparate; se recuerda en este navegador y vale en todas sus pestañas.
+const LOCO = 'eugini-fettuccini';
+const NOMBRE_LOCO = 'Eugini Fettuccini', ESLOGAN_LOCO = 'Los inventos locos';
+function leerLoco() { try { return window.localStorage.getItem(LOCO) === '1'; } catch { return false; } }
+function useNombreLoco(): [boolean, () => void] {
+  const [loco, setLoco] = useState(leerLoco);
+  useEffect(() => {
+    const oir = () => setLoco(leerLoco());
+    window.addEventListener(LOCO, oir); window.addEventListener('storage', oir);
+    return () => { window.removeEventListener(LOCO, oir); window.removeEventListener('storage', oir); };
+  }, []);
+  const cambiar = () => {
+    try { window.localStorage.setItem(LOCO, leerLoco() ? '0' : '1'); } catch { /* sin almacenamiento: solo esta vez */ }
+    setLoco(v => !v); window.dispatchEvent(new Event(LOCO));
+  };
+  return [loco, cambiar];
+}
+/** El botón casi invisible: un puntito gris que apenas se ve. */
+function BotonLoco({ loco, cambiar }: { loco: boolean; cambiar: () => void }) {
+  return (
+    <button type="button" onClick={cambiar} data-boton-loco aria-pressed={loco}
+      aria-label={loco ? 'Volver a Luz & Humanidad' : 'Eugini Fettuccini'} title={loco ? 'Luz & Humanidad' : '¿?'}
+      className="grid h-5 w-5 shrink-0 place-items-center rounded-full opacity-25 transition-opacity hover:opacity-70 focus-visible:opacity-100">
+      <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+    </button>
+  );
+}
+
 export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInicial = 'tabla', proyecto }: { raizId: string; ruta?: ReactNode;
   /** A project shown inside the site (2026-11-13, Eugenio, on the socioeconomic model: «Luz & Humanidad en la esquina
    *  superior izquierda, "proyecto impulsado por Luz & Humanidad", y en el centro el nombre del proyecto, que lleve a
@@ -47,6 +77,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
 }) {
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   const sitio = useSitio();
+  const [loco, cambiarLoco] = useNombreLoco();
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
   // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
@@ -65,7 +96,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // arriba y debajo el buscador, Colaborar y los idiomas. `sitio.colaborarEnBarra` pone el botón (lo quita de la portada).
   const colabora = c.sitio?.colaborarEnBarra === true ? enlaceColabora(c.sitio?.colabora, sitio) : null;
   const botonColabora = 'inline-flex h-10 shrink-0 items-center rounded-full bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-700 sm:px-5';
-  if (escaparate && proyecto) return <CabeceraProyecto raiz={raiz} icono={icono} proyecto={proyecto} colabora={colabora} botonColabora={botonColabora} />;
+  if (escaparate && proyecto) return <CabeceraProyecto raiz={raiz && loco ? { ...raiz, titulo: NOMBRE_LOCO } : raiz} icono={icono} proyecto={proyecto} colabora={colabora} botonColabora={botonColabora} />;
   if (escaparate) return (
     <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'marca_marca'_'buscar_acciones'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'buscar_marca_acciones']"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
@@ -78,8 +109,8 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           : <span className="text-[1.6rem] leading-none">{icono}</span>)}
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
-            <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{raiz.titulo}</span>
-            {eslogan && <Eslogan texto={eslogan} />}
+            <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{loco ? NOMBRE_LOCO : raiz.titulo}</span>
+            {(loco || eslogan) && <Eslogan key={loco ? 'loco' : 'luz'} texto={loco ? ESLOGAN_LOCO : eslogan!} />}
           </span>
         )}
       </Link>
@@ -88,6 +119,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
           : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
         <SelectorIdioma />
+        <BotonLoco loco={loco} cambiar={cambiarLoco} />
       </div>
     </header>
   );
