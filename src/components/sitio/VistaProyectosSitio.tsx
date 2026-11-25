@@ -243,11 +243,13 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     const beneficiarias = proyectos.filas.filter(f => conNombre(f) && esBeneficiaria(f)).sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const filas = [...proyectos.filas]
       .filter(f => conNombre(f) && !esBeneficiaria(f))
+      // Uno de dentro de otro proyecto sale también aquí si su «Tipo» dice que es un invento (2026-11-26, Eugenio:
+      // «saca la Plataforma Solar Crowd como invento, y los Productos Solares de la Tienda también»).
+      .filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0 || (!!benef?.columna && f.celdas[benef.columna]?.valor != null && f.celdas[benef.columna]?.valor !== ''))
       // Los que están dentro de otro proyecto (su «Elemento madre») salen en la página de ese
       // proyecto, no aquí (2026-11-12, `SubproyectosSitio.tsx`). En el editor siguen, para editarlos.
       // En el editor, igual (2026-11-12, Eugenio: «tiene que ser igual lo que se ve en el dominio público de lo que
       // hay detrás»): se editan en la página de su madre o en la base de datos («Ver los bloques»).
-      .filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0)
       .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
     return { colNombre, colArea, areas, filas, beneficiarias, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
@@ -500,9 +502,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
-      {escaparate && (sectoresBeneficiarias
-        ? <Apartado titulo="Inventos y modelos" texto="Lo que inventamos: tecnologías y formas nuevas de organizarse que cualquiera puede copiar." />
-        : <h2 className="sr-only">Proyectos</h2>)}
+      {/* Sin título visible arriba (2026-11-26, Eugenio: «el nuevo título quítalo»). */}
+      {escaparate && <h2 className="sr-only">Proyectos</h2>}
       {/* LOS SECTORES DE INNOVACIÓN (2026-11-12, Eugenio: «agrupa los proyectos de la página de inicio en
           sectores: una tarjeta grande donde están esas tarjetas un poco más pequeñas… que se vean varios
           sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
