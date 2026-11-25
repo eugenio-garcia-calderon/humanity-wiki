@@ -216,7 +216,7 @@ footer p{margin:0 0 8px;max-width:80ch}
   <!-- ============ CONSTRUIR ============ -->
   <section id="v-construir" class="vista" aria-labelledby="t-construir" hidden>
     <h1 id="t-construir">Construye tu figura</h1>
-    <p class="lede">Para cada tema hay varios aspectos. En cada aspecto eliges uno de cinco niveles: <b>antisistema</b> (por debajo de lo básico: no hacer nada o romper la base), <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> o <b>ideal</b>. Lee qué dice cada nivel y quédate en el que tú defenderías. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
+    <p class="lede">Para cada tema hay varios aspectos. En cada aspecto eliges uno de cinco niveles: <b>indefinido</b> (por debajo de lo básico: no hacer nada o romper la base), <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> o <b>ideal</b>. Lee qué dice cada nivel y quédate en el que tú defenderías. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
 
     <div class="progreso">
       <span id="prog-texto">0 de 64 aspectos marcados</span>
@@ -256,7 +256,7 @@ footer p{margin:0 0 8px;max-width:80ch}
           </div>
           <p class="parecido" id="parecido" aria-live="polite"></p>
           <p class="leyenda">Línea continua: tu figura. Línea a rayas: el partido elegido.</p>
-          <p class="leyenda">Anillos, de dentro afuera: <b>antisistema</b>, <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> e <b>ideal</b>.</p>
+          <p class="leyenda">Anillos, de dentro afuera: <b>indefinido</b>, <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> e <b>ideal</b>.</p>
         </div>
       </aside>
     </div>
@@ -498,7 +498,7 @@ function radar(tema, valores, o) {
   var ang = function (i) { return -Math.PI / 2 + i * 2 * Math.PI / n; };
   var pt = function (i, r) { return [C + r * Math.cos(ang(i)), C + r * Math.sin(ang(i))]; };
 
-  // Cinco anillos, uno por nivel: el de dentro es antisistema y el de fuera, el ideal
+  // Cinco anillos, uno por nivel: el de dentro es indefinido y el de fuera, el ideal
   var radio = function (x) { return R * (x + 1) / 5; };
   G.UMBRAL.forEach(function (u, k) {
     var pts = []; for (var i = 0; i < n; i++) pts.push(pt(i, radio(u)).join(','));

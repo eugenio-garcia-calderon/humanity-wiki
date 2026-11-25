@@ -7,7 +7,7 @@
  * decir cosas distintas.
  *
  * Son las mismas reglas que la página de la geometría (`observatorio-polarizacion/index.html`):
- *   - CINCO NIVELES por aspecto (2026-11-25): 0 Antisistema, 1 Básico, 2 Intermedio, 3 Avanzado, 4 Ideal.
+ *   - CINCO NIVELES por aspecto (2026-11-25): 0 Indefinido, 1 Básico, 2 Intermedio, 3 Avanzado, 4 Ideal.
  *     El valor de cada aspecto ES su nivel; no hay posiciones intermedias.
  *   - Parecido = 100 − (diferencia media de nivel por aspecto) × 25, redondeado. Cuentan todos los aspectos.
  *   - Lo guardado antes de ese día iba de 0 a 10: se convierte con `aNiveles` (los cortes de entonces).
@@ -22,12 +22,12 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var NOMBRE_NIVEL = ['Antisistema', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
+  var NOMBRE_NIVEL = ['Indefinido', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
   var NMAX = NOMBRE_NIVEL.length - 1;
   // Un umbral por nivel, en la misma escala (se conserva el nombre por quien lo usa para dibujar los anillos)
   var UMBRAL = [0, 1, 2, 3, 4];
 
-  /** El nivel de un valor, de 0 (antisistema) a 4 (ideal). */
+  /** El nivel de un valor, de 0 (indefinido) a 4 (ideal). */
   function nivelDe(x) {
     return Math.max(0, Math.min(NMAX, Math.floor(x + 0.01)));
   }
@@ -42,7 +42,7 @@
     return NOMBRE_NIVEL[nivelDe(x)];
   }
 
-  /** De la escala de antes (0 a 10) al nivel: hasta 3, antisistema; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado. */
+  /** De la escala de antes (0 a 10) al nivel: hasta 3, indefinido; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado. */
   function nivelDeCifra(x) {
     return x >= 10 ? 3 : x >= 7 ? 2 : x >= 4 ? 1 : 0;
   }
@@ -53,7 +53,7 @@
 
   /**
    * Parecido entre la figura `a` y un partido `b`, de 0 a 100. Cuentan todos los aspectos:
-   * el nivel 0 (antisistema) es una posición como las demás.
+   * el nivel 0 (indefinido) es una posición como las demás.
    * Devuelve null si no hay ningún aspecto que comparar.
    */
   function parecido(a, b) {
@@ -103,7 +103,7 @@
         k: t.k,
         n: t.n,
         aspectos: fila.length,
-        antisistema: en[0],
+        indefinido: en[0],
         basico: cuenta[1],
         intermedio: cuenta[2],
         avanzado: cuenta[3],

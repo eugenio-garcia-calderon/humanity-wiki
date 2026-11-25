@@ -2,14 +2,14 @@
 // ============================================================================
 // EL NIVEL «IDEAL» DE LA GEOMETRÍA POLÍTICA: TEXTOS Y PÁGINAS (2026-11-25)
 // ============================================================================
-// Cada aspecto de cada tema tiene cinco niveles: Antisistema, Básico, Intermedio, Avanzado e Ideal.
+// Cada aspecto de cada tema tiene cinco niveles: Indefinido, Básico, Intermedio, Avanzado e Ideal.
 // El texto corto de los cinco vive en la página de la geometría (`TEMAS`, campo `niv` de cada aspecto,
 // en `public/observatorio-polarizacion/index.html`). La ficha larga de cada Ideal (medidas, qué supone,
 // referencias, objeciones y fuentes) vive en `scripts/ideal/datos/<tema>.json`, un fichero por tema.
 //
 //   node scripts/geometria-ideal.mjs             genera public/ideal/<slug>/index.html y public/ideal/index.html
 //   node scripts/geometria-ideal.mjs --aplicar   además escribe en la página de la geometría el texto de
-//                                                Antisistema e Ideal de cada aspecto, y el título y la
+//                                                Indefinido e Ideal de cada aspecto, y el título y la
 //                                                dirección de su ficha (`it`, `is`)
 //   node scripts/geometria-ideal.mjs --verificar falla si las páginas generadas no coinciden con los datos
 //
@@ -24,7 +24,7 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PAGINA = path.join(raiz, 'public/observatorio-polarizacion/index.html');
 const DATOS = path.join(raiz, 'scripts/ideal/datos');
 const SALIDA = path.join(raiz, 'public/ideal');
-const NIVELES = ['Antisistema', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
+const NIVELES = ['Indefinido', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
 
 let html = fs.readFileSync(PAGINA, 'utf8');
 
@@ -194,7 +194,7 @@ ${a.objeciones.map((o) => `<dt>${esc(o.o)}</dt><dd>${esc(o.r)}</dd>`).join('\n')
 </section>` : ''}
 
 <section>
-<h2>De antisistema a ideal: los cinco niveles de este aspecto</h2>
+<h2>De indefinido a ideal: los cinco niveles de este aspecto</h2>
 <p class="nota">${esc(e.d)}</p>
 <ol class="escalera">
 ${escalera}
@@ -234,7 +234,7 @@ ${fichas.filter((f) => f.k === k).map((f) => `<li><a href="/ideal/${f.a.slug}/">
 <main class="indice">
 <p class="ceja">Geometría política · <b>Nivel ideal</b></p>
 <h1>El ideal, aspecto por aspecto</h1>
-<p class="lede">Cada aspecto de cada tema tiene cinco niveles: antisistema, básico, intermedio, avanzado e ideal. El ideal es la aspiración: lo que de verdad habría que hacer, aunque hoy probablemente no llegue ningún partido. Aquí están los ${fichas.length} publicados hasta ahora, cada uno con su página.${claves.some((k) => datos[k]?.pendiente) ? ' Faltan los de ' + claves.filter((k) => datos[k]?.pendiente).map((k) => temasAhora[k].n).join(' y ') + ', en preparación.' : ''}</p>
+<p class="lede">Cada aspecto de cada tema tiene cinco niveles: indefinido, básico, intermedio, avanzado e ideal. El ideal es la aspiración: lo que de verdad habría que hacer, aunque hoy probablemente no llegue ningún partido. Aquí están los ${fichas.length} publicados hasta ahora, cada uno con su página.${claves.some((k) => datos[k]?.pendiente) ? ' Faltan los de ' + claves.filter((k) => datos[k]?.pendiente).map((k) => temasAhora[k].n).join(' y ') + ', en preparación.' : ''}</p>
 ${grupos}
 </main>
 ` + pie;
