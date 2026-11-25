@@ -11,6 +11,12 @@
       "ruta": "public/geometria-figura/index.html",
       "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
       "desde": "2026-11-25T12:00:48.105Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "public/geometria-figura/comun.js",
+      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
+      "desde": "2026-11-25T12:00:50.742Z"
     }
   ]
 }
