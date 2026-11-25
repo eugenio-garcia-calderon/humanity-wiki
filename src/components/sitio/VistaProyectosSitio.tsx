@@ -292,7 +292,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   type Sector = { titulo: string; areas?: string[]; icono?: string; destacado?: boolean };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
-  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose' };
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const sectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
     const usados = new Set<string>();
@@ -474,7 +474,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
             const COLOR: Record<string, { borde: string; icono: string }> = {
               sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
               amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
-              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
+              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
+              slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
             };
             let n = 0;
             return sectores.map(g => {

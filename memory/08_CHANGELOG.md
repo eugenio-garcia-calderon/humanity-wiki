@@ -13369,3 +13369,7 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - «Ver más sobre estas medidas →» under the bullets: in the test it opens a new tab (the test stays open); in the level side panel it replaces the page (`_top`).
 - `src/server/sitios.ts`: `/medidas` goes to the static files like `/ideal` (own-domain 404 otherwise), and the sitemap of luzhumanidad.com (or of whichever site lists `/geometria-politica`) now announces the 385 `/medidas/` pages and the 65 `/ideal/` ones, which were not in any sitemap before. List in `public/geometria-figura/paginas.json`.
 - Not verified: production sitemap (I could not read the live one), installed app.
+### 2026-11-25 — luzhumanidad.com: sector «Innovación en Agricultura»
+- Eugenio: «añade innovación en Agricultura… y añade ahí el proyecto de agricultura sintrópica, que ahora está en informática».
+- Migración `0242_sector_agricultura_luz.sql`: nuevo sector en `sitio.sectores` de `KWMUO4S4V663` (áreas Alimentación, Agricultura, Agroecología; a todo el ancho), entre Vivienda y Cultura. El proyecto tenía el área «Alimentación», que ningún sector recogía.
+- `VistaProyectosSitio`: color lima para el icono «Agricultura».
