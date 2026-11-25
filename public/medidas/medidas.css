@@ -11,6 +11,13 @@
 .mds li p{margin:2px 0 0;color:var(--ink2)}
 .mds .meta{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);font-size:12px;color:var(--muted);vertical-align:2px}
 .mds .fte{font-size:13.5px;color:#1D4ED8;margin-left:4px}
+.cols{display:grid;gap:4px;margin-top:8px;font-size:14px}
+.col{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:6px 10px;border-radius:10px}
+.col b{font-size:13px;min-width:7.5em}
+.col em{font-style:normal;color:var(--muted)}
+.col.mas{background:#ECFDF5}.col.mas b{color:#047857}
+.col.menos{background:#FEF2F2}.col.menos b{color:#B91C1C}
+.col.cero{background:var(--bg2)}.col.cero b{color:var(--ink2)}
 .antes details{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:10px 14px;margin:0 0 8px;background:var(--bg2)}
 .antes summary{cursor:pointer;font-weight:600}
 .antes ul{margin:8px 0 0;padding-left:1.2em;font-size:15px;color:var(--ink2)}

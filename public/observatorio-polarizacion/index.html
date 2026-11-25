@@ -880,6 +880,14 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .mds li b{color:var(--ink);font-weight:700;display:inline}
 .mds-res{display:block;color:var(--ink-2)}
 .mds-c{gap:2px;font-size:13px}
+.mds-col{margin-top:8px;font-size:13.5px}
+.mds-col summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.mds-col ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.mds-col li b{display:block;color:var(--ink)}
+.mds-col .mc{display:block;margin-top:2px;padding:3px 8px;border-radius:8px;line-height:1.4}
+.mds-col .mc b{display:inline;font-weight:700}
+.mds-col .mc.mas{background:color-mix(in srgb,#10B981 12%,transparent)}.mds-col .mc.mas b{color:#047857}
+.mds-col .mc.menos{background:color-mix(in srgb,#EF4444 10%,transparent)}.mds-col .mc.menos b{color:#B91C1C}
 .mds-mas{display:inline-block;margin-top:8px;font-weight:600;font-size:14px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .mds-mas:hover{color:var(--c,var(--ink))}
 .gt-txt b{display:block;margin-bottom:2px;color:var(--ink);font-weight:700}
@@ -3932,7 +3940,10 @@ const ILUS = {
   function htmlMedidas(k, i, n, corto, destino = "_top") {
     const m = medidasDe(k, i, n); if (!m) return corto;
     const r = rutaMedidas(k, i, n);
-    return `<span class="mds-res">${m[0]}</span><ul class="mds">${m[1].map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("")}</ul>`
+    // Who wins and who loses with each measure (first and second degree), folded so the bullets stay short
+    const fila = (cls, tit, d, i) => (d.length || i.length) ? `<span class="mc ${cls}"><b>${tit}</b>${d.length ? ` 1.er grado: ${d.join(", ")}.` : ""}${i.length ? ` 2.º grado: ${i.join(", ")}.` : ""}</span>` : "";
+    const cols = m[1].some((x) => x[2]) ? `<details class="mds-col"><summary>¿A quién beneficia y a quién perjudica?</summary><ul>${m[1].filter((x) => x[2]).map(([a, , [bd, bi, pd, pi], sp]) => `<li><b>${a}</b>${fila("mas", "Se benefician:", bd, bi)}${fila("menos", "Se perjudican:", pd, pi)}${!pd.length && !pi.length && sp ? `<span class="mc"><b>Nadie pierde de forma clara:</b> ${sp}</span>` : ""}</li>`).join("")}</ul></details>` : "";
+    return `<span class="mds-res">${m[0]}</span><ul class="mds">${m[1].map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("")}</ul>` + cols
       + (r ? `<a class="mds-mas" href="${r}" target="${destino}"${destino === "_blank" ? ' rel="noopener"' : ""}>Ver más sobre ${n === 0 ? "este nivel" : "estas medidas"} →</a>` : "");
   }
   function refrescarMedidas() {

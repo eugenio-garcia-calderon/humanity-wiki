@@ -64,6 +64,16 @@ Un único fichero: `scripts/medidas/datos/<tema>.json`. No toques ningún otro.
 - `texto`: de 40 a 300 caracteres. Concreto: el instrumento (ley, agencia, fondo, registro,
   convenio), quién lo hace (Estado, comunidades, ayuntamientos, UE) y, si se puede, cómo se mide.
 - `resumen` de cada nivel: de 40 a 200 caracteres.
+- `colectivos` en cada medida (Eugenio, 2026-11-25: «los colectivos que se benefician y/o se
+  perjudican, en primer grado y segundo grado»):
+  `{"beneficia": {"directo": [], "indirecto": []}, "perjudica": {"directo": [], "indirecto": []}}`.
+  Primer grado (`directo`): a quien la medida toca de lleno. Segundo grado (`indirecto`): a quien le
+  llega a través de otros (precios, impuestos, competencia, servicios). De 0 a 4 por lista, etiquetas
+  de 3 a 70 caracteres que describen una **situación** («inquilinos de rentas bajas», «pequeños
+  propietarios que alquilan», «contribuyentes de rentas altas»), nunca una ideología ni un origen.
+  Al menos un beneficiado directo. Sé honesto con los costes: casi toda medida tiene alguien que paga
+  o pierde (contribuyentes, quien hoy tiene una ventaja, el sector que compite). Si de verdad nadie
+  pierde, deja `perjudica` vacío y explica por qué en `"sin_perjuicio"` (al menos 20 caracteres).
 - `problemas`: al menos 3, los más importantes primero. `aspecto`/`nivel` son índices o `null`
   si el problema es del tema entero.
 

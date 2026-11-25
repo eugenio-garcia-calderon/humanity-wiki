@@ -13390,6 +13390,15 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Reachable from: the party selector («Página de cada partido →»), the level side panel (party names), the party card, the all-topics mosaic, the test side legend (parties shown), the test results (chips), the /medidas/ level and aspect pages, and the header of every static page.
 - `sitios.ts`: `/partidos` served statically and in the sitemap. 11,783 internal links checked, 0 broken.
 - Not verified: production, installed app. A site page named «partidos» on an own domain would now be shadowed by these files.
+
+## 2026-11-25 — Geometría: who wins and who loses with each measure
+
+> «Añadir en cada medida los colectivos que se benefician y/o se perjudican, en primer grado y segundo grado.»
+
+- Every one of the 1,265 measures has `colectivos`: `beneficia`/`perjudica` × `directo` (1.er grado) / `indirecto` (2.º grado), 0–4 short labels describing a situation (never an ideology or an origin), at least one direct beneficiary, and either someone who loses or a `sin_perjuicio` explanation (59 measures, almost all «publish data that already exists»). Written by 10 agents, one per topic; verified programmatically that nothing else in the files changed. Spec added to `evaluador-geometria.md`; `geometria-medidas.mjs` validates it.
+- Shown under each measure on the /medidas/ level pages (green/red rows), in «Ver cada medida explicada» on the party pages, and in a folded «¿A quién beneficia y a quién perjudica?» in the test cards and the level side panel.
+- `medidas.json` grows from 280 KB to 497 KB (≈ the gzip figure in the PR); it still loads after the page.
+- These are this site's estimates of effects, not measured impacts.
 ## 2026-11-25 — Agricultura sintrópica: spacing between plants, and a menu of its own for the base pattern
 
 > «Permite ajustar el espacio entre plantas, no solo los pasillos y bloques.» Then: «permite modificar el patrón base de manera sencilla con un menú entero solo para ese patrón base.»

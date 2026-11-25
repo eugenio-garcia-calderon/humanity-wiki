@@ -51,50 +51,468 @@
           "nivel": 0,
           "resumen": "Sin estrategia con los países de origen, o con acuerdos que pagan por frenar salidas sin mirar derechos ni resultados.",
           "medidas": [
-            { "nombre": "Sin política exterior migratoria", "texto": "No hay acuerdos ni interlocutor estable con los países de donde sale o por donde pasa la gente; cada crisis se gestiona sobre la marcha y con dinero de urgencia." },
-            { "nombre": "Pagar por contener sin condiciones", "texto": "Se da dinero o material a fuerzas de otro país para que frene salidas, sin cláusulas de derechos humanos ni control de si abandonan a personas en el desierto o en el mar." },
-            { "nombre": "Rechazo a toda readmisión", "texto": "Se rechaza cualquier acuerdo para que los países acepten de vuelta a sus nacionales con orden firme de salida, lo que deja sin cumplir las decisiones de la administración y de los jueces." }
+            {
+              "nombre": "Sin política exterior migratoria",
+              "texto": "No hay acuerdos ni interlocutor estable con los países de donde sale o por donde pasa la gente; cada crisis se gestiona sobre la marcha y con dinero de urgencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "redes de tráfico de personas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que se ahorran un gasto estable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "migrantes que arriesgan la vida en rutas irregulares",
+                    "municipios y comunidades de llegada"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan emergencias más caras",
+                    "equipos de rescate y acogida desbordados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pagar por contener sin condiciones",
+              "texto": "Se da dinero o material a fuerzas de otro país para que frene salidas, sin cláusulas de derechos humanos ni control de si abandonan a personas en el desierto o en el mar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "fuerzas de seguridad de países de tránsito",
+                    "zonas de llegada con menos entradas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "migrantes abandonados en el desierto o en el mar",
+                    "personas que huyen de persecución"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian sin control",
+                    "población civil del país socio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Rechazo a toda readmisión",
+              "texto": "Se rechaza cualquier acuerdo para que los países acepten de vuelta a sus nacionales con orden firme de salida, lo que deja sin cumplir las decisiones de la administración y de los jueces.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "empleadores de economía sumergida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas en un limbo legal sin papeles ni salida"
+                  ],
+                  "indirecto": [
+                    "solicitantes de asilo con necesidad real",
+                    "contribuyentes que pagan procedimientos sin efecto"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Ayuda al desarrollo y acuerdos de readmisión con los principales países, gestionados por separado y sin objetivos medibles.",
           "medidas": [
-            { "nombre": "Acuerdos de readmisión vigentes", "texto": "El Ministerio de Asuntos Exteriores mantiene acuerdos para que cada país acepte el regreso de sus nacionales con orden firme, con un procedimiento de identificación a través de sus consulados." },
-            { "nombre": "Ayuda al desarrollo en los países de salida", "texto": "La Agencia Española de Cooperación Internacional para el Desarrollo dedica fondos a empleo, escuela y salud en los países de los que más gente sale, con proyectos públicos y evaluados." },
-            { "nombre": "Interlocutor estable por país", "texto": "Un responsable de migración en cada embajada prioritaria, con reuniones periódicas con el gobierno del país, para que la cooperación no dependa de cada crisis." },
-            { "nombre": "Acuerdos escritos y públicos", "texto": "Todo acuerdo con otro país sobre migración se firma por escrito, se publica y respeta la prohibición de devolver a nadie a donde corra riesgo de tortura o persecución." }
+            {
+              "nombre": "Acuerdos de readmisión vigentes",
+              "texto": "El Ministerio de Asuntos Exteriores mantiene acuerdos para que cada país acepte el regreso de sus nacionales con orden firme, con un procedimiento de identificación a través de sus consulados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que espera que se cumplan las resoluciones"
+                  ],
+                  "indirecto": [
+                    "solicitantes de asilo con necesidad real",
+                    "migrantes que usan las vías legales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "familias en origen que dependen de remesas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ayuda al desarrollo en los países de salida",
+              "texto": "La Agencia Española de Cooperación Internacional para el Desarrollo dedica fondos a empleo, escuela y salud en los países de los que más gente sale, con proyectos públicos y evaluados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "población de las zonas de más emigración",
+                    "jóvenes sin empleo en los países de salida"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la cooperación"
+                  ],
+                  "indirecto": [
+                    "países pobres con poca emigración, que reciben menos ayuda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Interlocutor estable por país",
+              "texto": "Un responsable de migración en cada embajada prioritaria, con reuniones periódicas con el gobierno del país, para que la cooperación no dependa de cada crisis.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en trámite de identificación o retorno",
+                    "comunidades de llegada en momentos de crisis"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan nuevos puestos en embajadas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Acuerdos escritos y públicos",
+              "texto": "Todo acuerdo con otro país sobre migración se firma por escrito, se publica y respeta la prohibición de devolver a nadie a donde corra riesgo de tortura o persecución.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en riesgo de tortura o persecución",
+                    "ciudadanía que quiere controlar los acuerdos"
+                  ],
+                  "indirecto": [
+                    "organizaciones que vigilan los derechos humanos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "negociadores que pierden margen para pactos discretos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Acuerdos con cada país que unen en un mismo paquete la contratación en origen, la inversión y los retornos.",
           "medidas": [
-            { "nombre": "Paquete único negociado", "texto": "Readmisión, visados de trabajo e inversión se negocian en un mismo acuerdo, para que cada parte tenga algo que ganar y un motivo para cumplir lo firmado." },
-            { "nombre": "Contratación en origen ligada al acuerdo", "texto": "Reservar a los nacionales del país firmante parte de las ofertas de contratación en origen que gestiona el Ministerio de Inclusión, con selección allí y viaje organizado." },
-            { "nombre": "Inversión que crea empleo allí", "texto": "Movilizar los instrumentos de financiación del Estado y de la Unión Europea para proyectos que creen empleo en las zonas de más salida, medidos por puestos de trabajo creados." },
-            { "nombre": "Reinserción de quien vuelve", "texto": "Programas en el país de origen con formación, pequeños créditos o empleo para las personas retornadas, gestionados con organizaciones locales y seguidos durante un año.", "meta": true }
+            {
+              "nombre": "Paquete único negociado",
+              "texto": "Readmisión, visados de trabajo e inversión se negocian en un mismo acuerdo, para que cada parte tenga algo que ganar y un motivo para cumplir lo firmado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores del país socio con acceso a visados",
+                    "empresas españolas con vacantes"
+                  ],
+                  "indirecto": [
+                    "inversores en el país socio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "candidatos de países sin acuerdo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contratación en origen ligada al acuerdo",
+              "texto": "Reservar a los nacionales del país firmante parte de las ofertas de contratación en origen que gestiona el Ministerio de Inclusión, con selección allí y viaje organizado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores del país firmante que buscan empleo legal",
+                    "empresas con vacantes difíciles de cubrir"
+                  ],
+                  "indirecto": [
+                    "familias en origen que reciben remesas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "candidatos de países sin acuerdo"
+                  ],
+                  "indirecto": [
+                    "trabajadores locales de baja cualificación del sector"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inversión que crea empleo allí",
+              "texto": "Movilizar los instrumentos de financiación del Estado y de la Unión Europea para proyectos que creen empleo en las zonas de más salida, medidos por puestos de trabajo creados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de zonas de alta emigración",
+                    "empresas que invierten con apoyo público"
+                  ],
+                  "indirecto": [
+                    "exportadores que abren mercado en esas zonas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que asumen el riesgo de la financiación"
+                  ],
+                  "indirecto": [
+                    "proyectos internos que compiten por los mismos fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reinserción de quien vuelve",
+              "texto": "Programas en el país de origen con formación, pequeños créditos o empleo para las personas retornadas, gestionados con organizaciones locales y seguidos durante un año.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas retornadas a su país"
+                  ],
+                  "indirecto": [
+                    "comunidades de origen que las reciben"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los programas"
+                  ],
+                  "indirecto": [
+                    "vecinos en origen sin acceso a esas ayudas"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Alianzas estables con cada país de origen y tránsito, evaluadas con indicadores públicos y por el respeto de los derechos humanos.",
           "medidas": [
-            { "nombre": "Alianzas de varios años con la Unión Europea", "texto": "Integrar los acuerdos españoles en las asociaciones de movilidad de la Unión Europea, con financiación conjunta y un calendario que sobreviva a los cambios de gobierno." },
-            { "nombre": "Indicadores públicos por país", "texto": "Cada alianza fija y publica sus resultados: readmisiones aceptadas, salidas irregulares, visados concedidos y redes de tráfico desarticuladas." },
-            { "nombre": "Cláusula de derechos humanos", "texto": "Cada acuerdo suspende la ayuda o el material si las fuerzas del país socio abandonan o maltratan a migrantes, comprobado por informes de organismos independientes." },
-            { "nombre": "Una sola estrategia por país", "texto": "Una comisión de los ministerios de Exteriores, Interior, Inclusión y Trabajo fija una estrategia por país, para que ayuda, visados y retornos no vayan cada uno por su lado." }
+            {
+              "nombre": "Alianzas de varios años con la Unión Europea",
+              "texto": "Integrar los acuerdos españoles en las asociaciones de movilidad de la Unión Europea, con financiación conjunta y un calendario que sobreviva a los cambios de gobierno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con acceso a movilidad legal",
+                    "comunidades de llegada con menos presión"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, al repartir el coste en la Unión"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian compromisos de varios años"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Indicadores públicos por país",
+              "texto": "Cada alianza fija y publica sus resultados: readmisiones aceptadas, salidas irregulares, visados concedidos y redes de tráfico desarticuladas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que evalúa los acuerdos",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Cláusula de derechos humanos",
+              "texto": "Cada acuerdo suspende la ayuda o el material si las fuerzas del país socio abandonan o maltratan a migrantes, comprobado por informes de organismos independientes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "migrantes en tránsito por países socios",
+                    "personas que huyen de persecución"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "fuerzas de seguridad del país socio que maltratan"
+                  ],
+                  "indirecto": [
+                    "zonas de llegada si la cooperación se interrumpe"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Una sola estrategia por país",
+              "texto": "Una comisión de los ministerios de Exteriores, Interior, Inclusión y Trabajo fija una estrategia por país, para que ayuda, visados y retornos no vayan cada uno por su lado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores del país socio con vías más claras",
+                    "contribuyentes que pagan menos duplicidades"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es coordinación interna entre ministerios: reordena el trabajo sin quitar derechos, ingresos ni ventajas a nadie"
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un tratado de movilidad con cada país: visados de trabajo y formación a cambio de readmisión y lucha contra las mafias, con cupos según resultados y auditoría.",
           "medidas": [
-            { "nombre": "Tratado de movilidad a cinco años", "texto": "Firmar con cada país de origen y tránsito un tratado de cinco años con un cupo anual de visados de trabajo, estudio y formación profesional reservado a sus nacionales.", "meta": true },
-            { "nombre": "Cupo que sube con los resultados", "texto": "El cupo del año siguiente crece si mejoran tres datos públicos: readmisiones aceptadas, salidas irregulares desde su costa y condenas a redes de tráfico; si empeoran, baja.", "meta": true },
-            { "nombre": "Formación en origen para los dos países", "texto": "Centros de formación profesional en origen para oficios con vacantes en España y en el propio país, de modo que parte de los formados se quede y el país no pierda a sus profesionales." },
-            { "nombre": "Migración circular con derechos", "texto": "Permisos de varios años con derecho a volver cada campaña y cotizaciones que se pueden cobrar en el país de origen gracias a convenios de Seguridad Social." },
-            { "nombre": "Auditoría anual y voto en el Congreso", "texto": "Una auditoría independiente de derechos humanos cada año, y cada tratado publicado con su coste y sus resultados y votado en el Congreso antes de renovarse.", "meta": true }
+            {
+              "nombre": "Tratado de movilidad a cinco años",
+              "texto": "Firmar con cada país de origen y tránsito un tratado de cinco años con un cupo anual de visados de trabajo, estudio y formación profesional reservado a sus nacionales.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores y estudiantes del país socio",
+                    "empresas españolas con vacantes"
+                  ],
+                  "indirecto": [
+                    "familias en origen que reciben remesas",
+                    "Seguridad Social, por más cotizantes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "candidatos de países sin tratado",
+                    "trabajadores locales de sectores con más competencia"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian consulados y gestión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cupo que sube con los resultados",
+              "texto": "El cupo del año siguiente crece si mejoran tres datos públicos: readmisiones aceptadas, salidas irregulares desde su costa y condenas a redes de tráfico; si empeoran, baja.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de países que cooperan",
+                    "zonas de llegada con menos salidas irregulares"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "candidatos cuyo gobierno no coopera"
+                  ],
+                  "indirecto": [
+                    "personas con orden firme de salida"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Formación en origen para los dos países",
+              "texto": "Centros de formación profesional en origen para oficios con vacantes en España y en el propio país, de modo que parte de los formados se quede y el país no pierda a sus profesionales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "jóvenes de países socios que aprenden un oficio",
+                    "empresas españolas con vacantes"
+                  ],
+                  "indirecto": [
+                    "economía del país de origen, que retiene profesionales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian los centros"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Migración circular con derechos",
+              "texto": "Permisos de varios años con derecho a volver cada campaña y cotizaciones que se pueden cobrar en el país de origen gracias a convenios de Seguridad Social.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de temporada que vuelven cada campaña",
+                    "empleadores agrícolas y turísticos"
+                  ],
+                  "indirecto": [
+                    "familias en origen que reciben remesas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales de campañas de temporada"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian los convenios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Auditoría anual y voto en el Congreso",
+              "texto": "Una auditoría independiente de derechos humanos cada año, y cada tratado publicado con su coste y sus resultados y votado en el Congreso antes de renovarse.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que controla los tratados",
+                    "migrantes en tránsito por países socios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la auditoría"
+                  ],
+                  "indirecto": [
+                    "trabajadores y empresas si un tratado no se renueva"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -107,50 +525,454 @@
           "nivel": 0,
           "resumen": "Sin plan de control, o propuestas que rompen la base: devolver sin identificar ni escuchar, o renunciar a saber quién entra.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "Se critica la situación de la frontera sin proponer medios, procedimientos ni objetivos para identificar a quien llega o perseguir a quien trafica con personas." },
-            { "nombre": "Devoluciones sin identificar", "texto": "Se pide devolver a la gente en la valla o en el mar sin registrar quién es ni dejarle pedir protección, en contra del Convenio Europeo de Derechos Humanos, y sin tocar a las redes." },
-            { "nombre": "Renunciar a todo control", "texto": "Se defiende que el Estado no controle quién entra, lo que impide saber quién vive en el país, proteger a las víctimas de trata y detectar a quien supone un peligro." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "Se critica la situación de la frontera sin proponer medios, procedimientos ni objetivos para identificar a quien llega o perseguir a quien trafica con personas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "redes de tráfico de personas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que llegan sin identificar ni proteger",
+                    "víctimas de trata sin detectar"
+                  ],
+                  "indirecto": [
+                    "vecinos de las zonas de llegada"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Devoluciones sin identificar",
+              "texto": "Se pide devolver a la gente en la valla o en el mar sin registrar quién es ni dejarle pedir protección, en contra del Convenio Europeo de Derechos Humanos, y sin tocar a las redes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "zonas de llegada, a corto plazo"
+                  ],
+                  "indirecto": [
+                    "redes de tráfico, que siguen intactas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con derecho a pedir asilo",
+                    "menores que llegan solos"
+                  ],
+                  "indirecto": [
+                    "agentes de frontera expuestos a condenas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Renunciar a todo control",
+              "texto": "Se defiende que el Estado no controle quién entra, lo que impide saber quién vive en el país, proteger a las víctimas de trata y detectar a quien supone un peligro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que quieren entrar sin trámites"
+                  ],
+                  "indirecto": [
+                    "redes de trata que operan sin vigilancia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "víctimas de trata sin detectar",
+                    "vecinos que necesitan servicios planificados"
+                  ],
+                  "indirecto": [
+                    "migrantes que entraron por vía legal",
+                    "contribuyentes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Registrar e identificar a quien llega, informarle de sus derechos y atender lo urgente en los puntos de llegada.",
           "medidas": [
-            { "nombre": "Registro en la base de datos europea", "texto": "La Policía Nacional toma huella y foto de toda persona que llega de forma irregular y las inscribe en Eurodac, el registro europeo de huellas de migrantes y solicitantes de asilo." },
-            { "nombre": "Atención humanitaria a la llegada", "texto": "Comida, atención médica y un lugar digno los primeros días, prestados por el Estado con organizaciones humanitarias en puntos de llegada preparados para ello." },
-            { "nombre": "Información de derechos con intérprete", "texto": "Explicar a cada persona, en un idioma que entienda, que puede pedir asilo y qué pasará después, dejando constancia por escrito de que se le informó." },
-            { "nombre": "Detección de víctimas de trata", "texto": "Policía y organizaciones especializadas entrevistan por separado a mujeres y menores para detectar trata con fines de explotación sexual o laboral y derivarlos a protección." }
+            {
+              "nombre": "Registro en la base de datos europea",
+              "texto": "La Policía Nacional toma huella y foto de toda persona que llega de forma irregular y las inscribe en Eurodac, el registro europeo de huellas de migrantes y solicitantes de asilo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que llegan y quedan identificadas para su trámite"
+                  ],
+                  "indirecto": [
+                    "otros países europeos que comparten la información"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que quieren seguir viaje a otro país europeo"
+                  ],
+                  "indirecto": [
+                    "comunidades de primera llegada con más casos asignados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Atención humanitaria a la llegada",
+              "texto": "Comida, atención médica y un lugar digno los primeros días, prestados por el Estado con organizaciones humanitarias en puntos de llegada preparados para ello.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas recién llegadas en mal estado"
+                  ],
+                  "indirecto": [
+                    "vecinos de los puntos de llegada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la atención"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Información de derechos con intérprete",
+              "texto": "Explicar a cada persona, en un idioma que entienda, que puede pedir asilo y qué pasará después, dejando constancia por escrito de que se le informó.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas recién llegadas con derecho a asilo"
+                  ],
+                  "indirecto": [
+                    "jueces y abogados con procedimientos más limpios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan intérpretes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Detección de víctimas de trata",
+              "texto": "Policía y organizaciones especializadas entrevistan por separado a mujeres y menores para detectar trata con fines de explotación sexual o laboral y derivarlos a protección.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres y menores víctimas de trata"
+                  ],
+                  "indirecto": [
+                    "otras víctimas de la misma red"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "redes de trata y explotación"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian los equipos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Una autoridad única coordina la frontera y el salvamento, el rescate en el mar se refuerza y se persigue a las redes de tráfico.",
           "medidas": [
-            { "nombre": "Autoridad única de fronteras", "texto": "Una sola autoridad coordina a Policía, Guardia Civil, Salvamento Marítimo y comunidades autónomas en cada llegada, con un mando claro y protocolos comunes." },
-            { "nombre": "Salvamento Marítimo reforzado", "texto": "Más barcos, aviones y personal para Salvamento Marítimo en las rutas de Canarias, el Estrecho, Alborán y Baleares, con planes de despliegue revisados cada año." },
-            { "nombre": "Fiscalía y policía contra el tráfico", "texto": "Fiscales y unidades policiales dedicados a las redes de tráfico y trata, que investigan a los organizadores y no solo a quien conduce la barca." },
-            { "nombre": "Papeles para quien denuncia a las redes", "texto": "Permiso de residencia y protección para las víctimas y testigos que colaboren contra las redes, ampliando lo que la ley de extranjería ya prevé para las víctimas de trata." }
+            {
+              "nombre": "Autoridad única de fronteras",
+              "texto": "Una sola autoridad coordina a Policía, Guardia Civil, Salvamento Marítimo y comunidades autónomas en cada llegada, con un mando claro y protocolos comunes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que llegan, atendidas con un solo mando",
+                    "agentes y equipos de rescate"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la nueva estructura"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Salvamento Marítimo reforzado",
+              "texto": "Más barcos, aviones y personal para Salvamento Marítimo en las rutas de Canarias, el Estrecho, Alborán y Baleares, con planes de despliegue revisados cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en peligro en el mar",
+                    "tripulaciones de Salvamento Marítimo"
+                  ],
+                  "indirecto": [
+                    "pescadores y navegantes de esas aguas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan barcos y personal"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Fiscalía y policía contra el tráfico",
+              "texto": "Fiscales y unidades policiales dedicados a las redes de tráfico y trata, que investigan a los organizadores y no solo a quien conduce la barca.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de las redes de tráfico y trata"
+                  ],
+                  "indirecto": [
+                    "conductores de barcas forzados por las redes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "organizadores de redes de tráfico"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian fiscales y unidades"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Papeles para quien denuncia a las redes",
+              "texto": "Permiso de residencia y protección para las víctimas y testigos que colaboren contra las redes, ampliando lo que la ley de extranjería ya prevé para las víctimas de trata.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas y testigos que colaboran contra las redes"
+                  ],
+                  "indirecto": [
+                    "otras víctimas de las mismas redes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "redes de tráfico y trata"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la protección"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Control integrado con Europa y los países de tránsito, con un control previo común y datos públicos de llegadas y muertes en las rutas.",
           "medidas": [
-            { "nombre": "Control previo común europeo", "texto": "Aplicar el control previo del Pacto Europeo de Migración y Asilo: identidad, salud y seguridad comprobadas en la frontera, con el mismo procedimiento en toda la Unión." },
-            { "nombre": "Operaciones conjuntas con observadores", "texto": "Operaciones con la Agencia Europea de la Guardia de Fronteras y Costas y con los países de tránsito, con observadores de derechos humanos a bordo y en tierra." },
-            { "nombre": "Datos públicos de llegadas y muertes", "texto": "El Ministerio del Interior publica llegadas, rescates y muertes por ruta, y no solo llegadas, para que se sepa si una ruta se está volviendo más peligrosa." },
-            { "nombre": "Equipos conjuntos de investigación", "texto": "Equipos policiales y judiciales con otros países a través de Europol y Eurojust, las agencias europeas de policía y justicia, para perseguir a las redes en todo su recorrido." }
+            {
+              "nombre": "Control previo común europeo",
+              "texto": "Aplicar el control previo del Pacto Europeo de Migración y Asilo: identidad, salud y seguridad comprobadas en la frontera, con el mismo procedimiento en toda la Unión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes de la Unión que esperan controles de seguridad",
+                    "solicitantes con el mismo trámite en toda la Unión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas retenidas en frontera durante el control"
+                  ],
+                  "indirecto": [
+                    "vecinos de las zonas con centros de control"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Operaciones conjuntas con observadores",
+              "texto": "Operaciones con la Agencia Europea de la Guardia de Fronteras y Costas y con los países de tránsito, con observadores de derechos humanos a bordo y en tierra.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "migrantes en tránsito",
+                    "agentes con respaldo europeo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "redes de tráfico de personas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian las operaciones"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Datos públicos de llegadas y muertes",
+              "texto": "El Ministerio del Interior publica llegadas, rescates y muertes por ruta, y no solo llegadas, para que se sepa si una ruta se está volviendo más peligrosa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de migrantes desaparecidos",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Equipos conjuntos de investigación",
+              "texto": "Equipos policiales y judiciales con otros países a través de Europol y Eurojust, las agencias europeas de policía y justicia, para perseguir a las redes en todo su recorrido.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de redes que cruzan varios países"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "cabecillas de redes de tráfico"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian los equipos"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Todos identificados en 72 horas, rescate sin esperas, las redes sin su dinero, supervisión independiente y datos publicados cada mes.",
           "medidas": [
-            { "nombre": "Identificación completa en 72 horas", "texto": "Registrar huella, foto y documento de toda persona que llega de forma irregular en un máximo de 72 horas, por debajo del tope de siete días del control europeo.", "meta": true },
-            { "nombre": "Rescate sin esperar a aclarar la zona", "texto": "Salvamento Marítimo tiene la orden y los medios de salir ante cualquier aviso, sin esperar a aclarar de quién es la zona de búsqueda, coordinado con los países vecinos." },
-            { "nombre": "Quitar a las redes su dinero", "texto": "Congelar los bienes de los cabecillas, de quien suministra barcas y motores y de quien mueve los pagos, también fuera de España, con cooperación judicial internacional." },
-            { "nombre": "Supervisión independiente sin aviso", "texto": "El Defensor del Pueblo, como mecanismo contra la tortura, visita sin avisar puestos fronterizos y centros, investiga las denuncias y publica sus informes." },
-            { "nombre": "Registro oficial de muertos y desaparecidos", "texto": "Publicar cada mes llegadas, rescates, muertes y desaparecidos por ruta e identificaciones en plazo; identificar a los fallecidos e informar a sus familias.", "meta": true }
+            {
+              "nombre": "Identificación completa en 72 horas",
+              "texto": "Registrar huella, foto y documento de toda persona que llega de forma irregular en un máximo de 72 horas, por debajo del tope de siete días del control europeo.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que llegan, con su caso iniciado antes",
+                    "residentes que esperan saber quién entra"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más personal de identificación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Rescate sin esperar a aclarar la zona",
+              "texto": "Salvamento Marítimo tiene la orden y los medios de salir ante cualquier aviso, sin esperar a aclarar de quién es la zona de búsqueda, coordinado con los países vecinos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en peligro en el mar"
+                  ],
+                  "indirecto": [
+                    "familias de quien viaja"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más salidas de rescate"
+                  ],
+                  "indirecto": [
+                    "zonas de llegada que reciben más rescatados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Quitar a las redes su dinero",
+              "texto": "Congelar los bienes de los cabecillas, de quien suministra barcas y motores y de quien mueve los pagos, también fuera de España, con cooperación judicial internacional.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de las redes de tráfico"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que reciben los bienes decomisados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "cabecillas y financiadores de las redes",
+                    "proveedores de barcas y motores para las redes"
+                  ],
+                  "indirecto": [
+                    "personas que envían dinero por vías informales"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Supervisión independiente sin aviso",
+              "texto": "El Defensor del Pueblo, como mecanismo contra la tortura, visita sin avisar puestos fronterizos y centros, investiga las denuncias y publica sus informes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas retenidas en frontera y en centros"
+                  ],
+                  "indirecto": [
+                    "agentes que cumplen, protegidos de denuncias falsas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "agentes que cometen abusos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la supervisión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Registro oficial de muertos y desaparecidos",
+              "texto": "Publicar cada mes llegadas, rescates, muertes y desaparecidos por ruta e identificaciones en plazo; identificar a los fallecidos e informar a sus familias.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de migrantes muertos o desaparecidos"
+                  ],
+                  "indirecto": [
+                    "periodistas e investigadores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la identificación forense"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -163,49 +985,425 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o propuestas que rompen la base: expulsiones colectivas o sin juez, o que ninguna orden de salida se cumpla nunca.",
           "medidas": [
-            { "nombre": "Expulsiones colectivas o sin juez", "texto": "Se pide expulsar a grupos enteros por su origen, o sin que un juez pueda revisar cada caso, algo que prohíben la Constitución y el Convenio Europeo de Derechos Humanos." },
-            { "nombre": "Órdenes que nunca se cumplen", "texto": "Se acepta o se defiende que las órdenes firmes de salida no se ejecuten nunca, lo que vacía de sentido las decisiones de la administración y de los jueces." },
-            { "nombre": "Delito y origen sin datos", "texto": "Se presenta la inmigración como causa del delito sin datos, o se ocultan los datos por miedo a su uso, en vez de publicarlos completos y con contexto." }
+            {
+              "nombre": "Expulsiones colectivas o sin juez",
+              "texto": "Se pide expulsar a grupos enteros por su origen, o sin que un juez pueda revisar cada caso, algo que prohíben la Constitución y el Convenio Europeo de Derechos Humanos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que ahorran trámites y juicios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "extranjeros con arraigo y sin delitos",
+                    "personas con derecho a asilo"
+                  ],
+                  "indirecto": [
+                    "familias con miembros de nacionalidad española",
+                    "empresas que pierden trabajadores"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Órdenes que nunca se cumplen",
+              "texto": "Se acepta o se defiende que las órdenes firmes de salida no se ejecuten nunca, lo que vacía de sentido las decisiones de la administración y de los jueces.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "empleadores de economía sumergida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes de asilo con necesidad real"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan procedimientos sin efecto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Delito y origen sin datos",
+              "texto": "Se presenta la inmigración como causa del delito sin datos, o se ocultan los datos por miedo a su uso, en vez de publicarlos completos y con contexto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien usa el miedo o el silencio como argumento"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "residentes extranjeros que cumplen la ley",
+                    "víctimas de delitos sin datos para prevenirlos"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios señalados"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Expulsar tras condena, con decisión judicial caso a caso, a quien comete delitos graves, y garantizar el recurso ante un juez.",
           "medidas": [
-            { "nombre": "Expulsión por delito grave", "texto": "Aplicar la expulsión que prevé el Código Penal a extranjeros condenados por delitos graves, decidida por el juez caso a caso y teniendo en cuenta su arraigo en España." },
-            { "nombre": "Prioridad a quien tiene antecedentes", "texto": "La Policía Nacional da prioridad a ejecutar las órdenes firmes de salida de personas con antecedentes por delitos graves, con los medios que ya tiene." },
-            { "nombre": "Recurso ante un juez", "texto": "Toda orden de salida se notifica por escrito en un idioma que la persona entienda y puede recurrirse ante un juez con asistencia jurídica gratuita." }
+            {
+              "nombre": "Expulsión por delito grave",
+              "texto": "Aplicar la expulsión que prevé el Código Penal a extranjeros condenados por delitos graves, decidida por el juez caso a caso y teniendo en cuenta su arraigo en España.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de delitos graves",
+                    "vecinos de los condenados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "extranjeros condenados por delitos graves"
+                  ],
+                  "indirecto": [
+                    "familias en España de los expulsados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Prioridad a quien tiene antecedentes",
+              "texto": "La Policía Nacional da prioridad a ejecutar las órdenes firmes de salida de personas con antecedentes por delitos graves, con los medios que ya tiene.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de zonas con reincidentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con orden firme y antecedentes graves"
+                  ],
+                  "indirecto": [
+                    "familias en España de los expulsados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Recurso ante un juez",
+              "texto": "Toda orden de salida se notifica por escrito en un idioma que la persona entienda y puede recurrirse ante un juez con asistencia jurídica gratuita.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con orden de salida"
+                  ],
+                  "indirecto": [
+                    "abogados del turno de oficio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la asistencia jurídica"
+                  ],
+                  "indirecto": [
+                    "quien espera en juzgados con más carga"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Retornos efectivos tras cada decisión firme, con el retorno voluntario como primera opción, y juicios rápidos para delitos menos graves.",
           "medidas": [
-            { "nombre": "Orden de salida junto a la denegación", "texto": "Dictar la orden de salida en la misma resolución que deniega de forma firme la estancia o el asilo, sin abrir después otro procedimiento distinto." },
-            { "nombre": "Retorno voluntario asistido", "texto": "Ofrecer billete, ayuda de viaje y apoyo para reinstalarse a quien acepte volver, gestionado por el Ministerio de Inclusión con organizaciones especializadas." },
-            { "nombre": "Juicios rápidos para todos", "texto": "Tramitar por juicio rápido los delitos menos graves, sea quien sea el autor, para que la respuesta llegue en semanas y no en años.", "meta": true },
-            { "nombre": "Internamiento como último recurso", "texto": "Los centros de internamiento de extranjeros, solo para quien tiene una salida real próxima, dentro del plazo máximo legal, con control judicial y condiciones dignas." }
+            {
+              "nombre": "Orden de salida junto a la denegación",
+              "texto": "Dictar la orden de salida en la misma resolución que deniega de forma firme la estancia o el asilo, sin abrir después otro procedimiento distinto.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes que reciben una respuesta clara",
+                    "contribuyentes que pagan un solo procedimiento"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con estancia o asilo denegados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Retorno voluntario asistido",
+              "texto": "Ofrecer billete, ayuda de viaje y apoyo para reinstalarse a quien acepte volver, gestionado por el Ministerio de Inclusión con organizaciones especializadas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que quieren volver y no pueden pagarlo"
+                  ],
+                  "indirecto": [
+                    "comunidades de origen que reciben a los retornados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan billetes y ayudas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Juicios rápidos para todos",
+              "texto": "Tramitar por juicio rápido los delitos menos graves, sea quien sea el autor, para que la respuesta llegue en semanas y no en años.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de delitos menos graves",
+                    "acusados que esperan menos su juicio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "acusados con menos tiempo para preparar la defensa"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian juzgados de guardia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Internamiento como último recurso",
+              "texto": "Los centros de internamiento de extranjeros, solo para quien tiene una salida real próxima, dentro del plazo máximo legal, con control judicial y condiciones dignas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas internables sin salida real próxima"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el control judicial"
+                  ],
+                  "indirecto": [
+                    "ciudadanía que espera que se cumplan las órdenes de salida"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un retorno con garantías, acuerdos de readmisión que funcionan y datos públicos con contexto para responder a los bulos.",
           "medidas": [
-            { "nombre": "Readmisión que funciona", "texto": "Usar los acuerdos con cada país para que sus consulados identifiquen y documenten a tiempo a sus nacionales, midiendo qué parte de las peticiones atiende cada uno." },
-            { "nombre": "Nunca devolver al peligro", "texto": "Nadie vuelve a un país donde corra riesgo de tortura o persecución: el recurso ante un juez suspende la salida hasta que se resuelve." },
-            { "nombre": "Alternativas al internamiento", "texto": "Presentarse ante la policía cada cierto tiempo, entregar el pasaporte o fijar domicilio, en vez de internar, cuando no hay riesgo de fuga." },
-            { "nombre": "Respuesta pública a los bulos", "texto": "Un servicio público de datos responde con cifras oficiales y fuentes a las afirmaciones falsas sobre migración y delito, vengan de donde vengan." }
+            {
+              "nombre": "Readmisión que funciona",
+              "texto": "Usar los acuerdos con cada país para que sus consulados identifiquen y documenten a tiempo a sus nacionales, midiendo qué parte de las peticiones atiende cada uno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que espera que se cumplan las órdenes"
+                  ],
+                  "indirecto": [
+                    "solicitantes de asilo con necesidad real"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "familias en origen que dependen de remesas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Nunca devolver al peligro",
+              "texto": "Nadie vuelve a un país donde corra riesgo de tortura o persecución: el recurso ante un juez suspende la salida hasta que se resuelve.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en riesgo de tortura o persecución"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la estancia durante el recurso"
+                  ],
+                  "indirecto": [
+                    "ciudadanía que espera salidas rápidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Alternativas al internamiento",
+              "texto": "Presentarse ante la policía cada cierto tiempo, entregar el pasaporte o fijar domicilio, en vez de internar, cuando no hay riesgo de fuga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con orden de salida sin riesgo de fuga"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan menos plazas de internamiento"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos si alguien se fuga antes de la salida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Respuesta pública a los bulos",
+              "texto": "Un servicio público de datos responde con cifras oficiales y fuentes a las afirmaciones falsas sobre migración y delito, vengan de donde vengan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes extranjeros señalados por bulos",
+                    "ciudadanía que busca datos fiables"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien difunde afirmaciones falsas sobre migración"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian el servicio"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Toda orden firme se cumple en un plazo fijado, primero voluntaria y luego forzosa con observador, y los datos se publican con su contexto.",
           "medidas": [
-            { "nombre": "Plazo fijo de salida", "texto": "Cada orden firme lleva un plazo de salida voluntaria; si no se cumple, retorno forzoso. El tiempo medio entre la orden y la salida se publica.", "meta": true },
-            { "nombre": "Observador en cada retorno forzoso", "texto": "Un observador independiente acompaña cada operación de retorno forzoso y publica un informe, como pide la directiva europea de retorno." },
-            { "nombre": "Datos de retorno cada trimestre", "texto": "Publicar cada trimestre las órdenes dictadas, los retornos cumplidos, cuántos fueron voluntarios y el tiempo medio, por nacionalidad.", "meta": true },
-            { "nombre": "Serie oficial de delincuencia con contexto", "texto": "El Instituto Nacional de Estadística publica cada año la delincuencia por origen ajustada por edad, sexo y situación socioeconómica, con los datos brutos al lado.", "meta": true },
-            { "nombre": "Expulsión de reincidentes tras la condena", "texto": "Quien acumula condenas firmes por delitos graves es expulsado al cumplirlas, con control judicial caso a caso y la readmisión pactada con su país." }
+            {
+              "nombre": "Plazo fijo de salida",
+              "texto": "Cada orden firme lleva un plazo de salida voluntaria; si no se cumple, retorno forzoso. El tiempo medio entre la orden y la salida se publica.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que espera que se cumplan las órdenes",
+                    "personas que eligen salir por su cuenta"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con orden firme de salida"
+                  ],
+                  "indirecto": [
+                    "empleadores que dependen de trabajo sin papeles"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Observador en cada retorno forzoso",
+              "texto": "Un observador independiente acompaña cada operación de retorno forzoso y publica un informe, como pide la directiva europea de retorno.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en un retorno forzoso"
+                  ],
+                  "indirecto": [
+                    "agentes protegidos frente a denuncias falsas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan los observadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Datos de retorno cada trimestre",
+              "texto": "Publicar cada trimestre las órdenes dictadas, los retornos cumplidos, cuántos fueron voluntarios y el tiempo medio, por nacionalidad.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que evalúa la política de retorno",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Serie oficial de delincuencia con contexto",
+              "texto": "El Instituto Nacional de Estadística publica cada año la delincuencia por origen ajustada por edad, sexo y situación socioeconómica, con los datos brutos al lado.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes extranjeros que cumplen la ley",
+                    "ciudadanía que busca datos fiables"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Ordena datos que el Estado ya tiene y publica el ajuste junto al dato bruto: no quita a nadie derechos, ingresos ni ventajas"
+              }
+            },
+            {
+              "nombre": "Expulsión de reincidentes tras la condena",
+              "texto": "Quien acumula condenas firmes por delitos graves es expulsado al cumplirlas, con control judicial caso a caso y la readmisión pactada con su país.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de delitos graves reiterados",
+                    "vecinos de los condenados"
+                  ],
+                  "indirecto": [
+                    "residentes extranjeros que cumplen la ley, menos señalados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "extranjeros reincidentes en delitos graves"
+                  ],
+                  "indirecto": [
+                    "familias en España de los expulsados"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -218,49 +1416,441 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o propuestas que rompen la igualdad ante la ley: normas distintas según el origen o la religión, o excusas culturales.",
           "medidas": [
-            { "nombre": "Leyes según el origen", "texto": "Se piden derechos, servicios o castigos distintos según la nacionalidad o la religión, en contra de la igualdad ante la ley que garantiza la Constitución." },
-            { "nombre": "La excusa cultural", "texto": "Se justifica el racismo, o el incumplimiento de la ley —matrimonio forzado, mutilación genital, sacar a las niñas de la escuela— por motivos culturales." },
-            { "nombre": "Barrios abandonados", "texto": "Se deja que los problemas de los barrios con más concentración se acumulen sin inversión ni presencia pública, y solo se habla de ellos tras un suceso." }
+            {
+              "nombre": "Leyes según el origen",
+              "texto": "Se piden derechos, servicios o castigos distintos según la nacionalidad o la religión, en contra de la igualdad ante la ley que garantiza la Constitución.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien obtendría trato preferente por su nacionalidad"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas tratadas peor por su nacionalidad o religión"
+                  ],
+                  "indirecto": [
+                    "empresas con plantillas diversas",
+                    "vecinos de barrios diversos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "La excusa cultural",
+              "texto": "Se justifica el racismo, o el incumplimiento de la ley —matrimonio forzado, mutilación genital, sacar a las niñas de la escuela— por motivos culturales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien impone prácticas prohibidas en su familia",
+                    "quien discrimina sin consecuencias"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "niñas y mujeres expuestas a matrimonio forzado o mutilación",
+                    "víctimas de racismo"
+                  ],
+                  "indirecto": [
+                    "familias que cumplen la ley y quedan estigmatizadas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Barrios abandonados",
+              "texto": "Se deja que los problemas de los barrios con más concentración se acumulen sin inversión ni presencia pública, y solo se habla de ellos tras un suceso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "barrios que reciben la inversión que no llega a otros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de barrios con alta concentración",
+                    "niños de escuelas con muchas necesidades"
+                  ],
+                  "indirecto": [
+                    "resto de la ciudad cuando estalla el conflicto"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Las mismas leyes aplicadas igual a todos, con persecución de los delitos de odio y de las prácticas contrarias a los derechos.",
           "medidas": [
-            { "nombre": "Igualdad ante la ley sin excepciones", "texto": "Las normas de convivencia, la igualdad entre mujeres y hombres y la escuela obligatoria se aplican a todos, sin excepciones por origen, cultura o religión." },
-            { "nombre": "Persecución de los delitos de odio", "texto": "Fiscalías de delitos de odio y unidades policiales que registran y persiguen las agresiones racistas, con datos anuales del Ministerio del Interior." },
-            { "nombre": "Protocolos contra prácticas prohibidas", "texto": "Centros de salud, escuelas y servicios sociales aplican protocolos para prevenir y denunciar matrimonios forzados y mutilación genital." },
-            { "nombre": "Policía de proximidad", "texto": "Policía local de barrio que conoce a los vecinos y atiende las quejas de convivencia: ruido, uso del espacio público y pequeños delitos." }
+            {
+              "nombre": "Igualdad ante la ley sin excepciones",
+              "texto": "Las normas de convivencia, la igualdad entre mujeres y hombres y la escuela obligatoria se aplican a todos, sin excepciones por origen, cultura o religión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "mujeres y niñas en familias con prácticas prohibidas",
+                    "vecinos que esperan las mismas normas para todos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien pedía excepciones por cultura o religión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Persecución de los delitos de odio",
+              "texto": "Fiscalías de delitos de odio y unidades policiales que registran y persiguen las agresiones racistas, con datos anuales del Ministerio del Interior.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "víctimas de agresiones racistas"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios diversos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "autores de delitos de odio"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian fiscalías y unidades"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Protocolos contra prácticas prohibidas",
+              "texto": "Centros de salud, escuelas y servicios sociales aplican protocolos para prevenir y denunciar matrimonios forzados y mutilación genital.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "niñas en riesgo de mutilación genital",
+                    "jóvenes en riesgo de matrimonio forzado"
+                  ],
+                  "indirecto": [
+                    "profesionales con pautas claras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que imponen esas prácticas"
+                  ],
+                  "indirecto": [
+                    "familias investigadas sin motivo por un error"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Policía de proximidad",
+              "texto": "Policía local de barrio que conoce a los vecinos y atiende las quejas de convivencia: ruido, uso del espacio público y pequeños delitos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos con problemas de convivencia"
+                  ],
+                  "indirecto": [
+                    "comercios del barrio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "autores de pequeños delitos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes municipales"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Mediación vecinal e inversión pública en los barrios con más concentración de población recién llegada y menos renta.",
           "medidas": [
-            { "nombre": "Mediación vecinal", "texto": "Equipos municipales de mediación que resuelven conflictos de comunidad de vecinos, ruido o uso del espacio público antes de que escalen." },
-            { "nombre": "Plan de barrio con presupuesto propio", "texto": "Planes municipales y autonómicos con inversión en escuelas, centros de salud, limpieza e iluminación en los barrios con más presión, con presupuesto asignado." },
-            { "nombre": "Red contra los rumores", "texto": "Vecinos y entidades formados para responder a los rumores con datos locales, siguiendo las estrategias antirrumores que ya aplican varias ciudades españolas." },
-            { "nombre": "Actividades que juntan", "texto": "Financiar deporte, cultura y asociaciones de vecinos que reúnan a personas de distinto origen, dando prioridad a las que ya lo consiguen." }
+            {
+              "nombre": "Mediación vecinal",
+              "texto": "Equipos municipales de mediación que resuelven conflictos de comunidad de vecinos, ruido o uso del espacio público antes de que escalen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos en conflicto de comunidad o de calle"
+                  ],
+                  "indirecto": [
+                    "quien espera en juzgados menos cargados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes municipales"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Plan de barrio con presupuesto propio",
+              "texto": "Planes municipales y autonómicos con inversión en escuelas, centros de salud, limpieza e iluminación en los barrios con más presión, con presupuesto asignado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de barrios con más presión",
+                    "alumnos y pacientes de esos barrios"
+                  ],
+                  "indirecto": [
+                    "comercio local"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes municipales y autonómicos"
+                  ],
+                  "indirecto": [
+                    "barrios que reciben menos inversión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Red contra los rumores",
+              "texto": "Vecinos y entidades formados para responder a los rumores con datos locales, siguiendo las estrategias antirrumores que ya aplican varias ciudades españolas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos señalados por rumores"
+                  ],
+                  "indirecto": [
+                    "comunidades de vecinos con mejor convivencia"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "quien difunde rumores falsos en el barrio"
+                  ],
+                  "indirecto": [
+                    "contribuyentes municipales"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Actividades que juntan",
+              "texto": "Financiar deporte, cultura y asociaciones de vecinos que reúnan a personas de distinto origen, dando prioridad a las que ya lo consiguen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos que comparten actividades con gente nueva",
+                    "asociaciones deportivas y culturales de barrio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las actividades"
+                  ],
+                  "indirecto": [
+                    "asociaciones que no reciben esa prioridad"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito y la discriminación sancionada.",
           "medidas": [
-            { "nombre": "Autoridad de igualdad que sanciona", "texto": "La autoridad independiente de igualdad de trato investiga y sanciona la discriminación en el alquiler y el empleo, con pruebas de dos candidatos iguales salvo en el origen." },
-            { "nombre": "Una sola vara de medir", "texto": "Policía y fiscalía publican con el mismo detalle y los mismos plazos de respuesta los delitos en los barrios y las agresiones racistas." },
-            { "nombre": "Escuelas sin concentración", "texto": "Las comunidades corrigen la concentración de alumnado vulnerable en pocos centros con reserva de plazas y oficinas de escolarización comunes." },
-            { "nombre": "Vivienda pública repartida", "texto": "La vivienda pública y social se construye en pequeñas promociones por toda la ciudad, y no en grandes bloques en un solo barrio." }
+            {
+              "nombre": "Autoridad de igualdad que sanciona",
+              "texto": "La autoridad independiente de igualdad de trato investiga y sanciona la discriminación en el alquiler y el empleo, con pruebas de dos candidatos iguales salvo en el origen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas discriminadas al buscar piso o empleo"
+                  ],
+                  "indirecto": [
+                    "propietarios y empresas que no discriminan"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "arrendadores y empresas que discriminan"
+                  ],
+                  "indirecto": [
+                    "inmobiliarias sometidas a pruebas de control"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Una sola vara de medir",
+              "texto": "Policía y fiscalía publican con el mismo detalle y los mismos plazos de respuesta los delitos en los barrios y las agresiones racistas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de barrios con delitos",
+                    "víctimas de agresiones racistas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el refuerzo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Escuelas sin concentración",
+              "texto": "Las comunidades corrigen la concentración de alumnado vulnerable en pocos centros con reserva de plazas y oficinas de escolarización comunes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado vulnerable hoy concentrado",
+                    "centros con mucha concentración"
+                  ],
+                  "indirecto": [
+                    "familias de los barrios afectados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que pierden la plaza de su primera elección"
+                  ],
+                  "indirecto": [
+                    "centros que hoy seleccionan a su alumnado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vivienda pública repartida",
+              "texto": "La vivienda pública y social se construye en pequeñas promociones por toda la ciudad, y no en grandes bloques en un solo barrio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que acceden a vivienda pública"
+                  ],
+                  "indirecto": [
+                    "barrios que hoy concentran la vivienda social"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de zonas caras que reciben promociones"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan suelo más caro"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Ningún barrio ni escuela segregado: vivienda asequible por ley en todos los municipios, contratos de barrio y una sola vara de medir.",
           "medidas": [
-            { "nombre": "Cuota de vivienda asequible en cada municipio", "texto": "Cada municipio urbano debe tener una cuota de vivienda asequible, con sanción económica si no avanza, como hace la ley francesa de solidaridad urbana." },
-            { "nombre": "Alumnado repartido entre todos los centros", "texto": "El alumnado recién llegado se reparte entre todos los centros de la zona sostenidos con fondos públicos, públicos o concertados, con apoyo para quien lo recibe." },
-            { "nombre": "Contrato de barrio a diez años", "texto": "Cada barrio de alta concentración firma un contrato a diez años con metas de empleo, escuela, seguridad y limpieza, evaluado cada año.", "meta": true },
-            { "nombre": "Índice anual de segregación", "texto": "Publicar cada año un índice de segregación residencial y escolar por municipio y ligar parte de la financiación autonómica a que baje.", "meta": true }
+            {
+              "nombre": "Cuota de vivienda asequible en cada municipio",
+              "texto": "Cada municipio urbano debe tener una cuota de vivienda asequible, con sanción económica si no avanza, como hace la ley francesa de solidaridad urbana.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias de rentas bajas que buscan vivienda"
+                  ],
+                  "indirecto": [
+                    "municipios que hoy cargan con la vivienda social"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes de municipios que pagan la sanción",
+                    "promotores con menos margen en vivienda libre"
+                  ],
+                  "indirecto": [
+                    "compradores de vivienda libre si sube su precio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Alumnado repartido entre todos los centros",
+              "texto": "El alumnado recién llegado se reparte entre todos los centros de la zona sostenidos con fondos públicos, públicos o concertados, con apoyo para quien lo recibe.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado recién llegado",
+                    "centros públicos hoy saturados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados que hoy reciben pocos casos",
+                    "familias que pierden su centro elegido"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el apoyo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contrato de barrio a diez años",
+              "texto": "Cada barrio de alta concentración firma un contrato a diez años con metas de empleo, escuela, seguridad y limpieza, evaluado cada año.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de barrios de alta concentración"
+                  ],
+                  "indirecto": [
+                    "comercio y empleo locales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el contrato"
+                  ],
+                  "indirecto": [
+                    "barrios que quedan fuera del contrato"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Índice anual de segregación",
+              "texto": "Publicar cada año un índice de segregación residencial y escolar por municipio y ligar parte de la financiación autonómica a que baje.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado y vecinos de zonas segregadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "municipios con segregación que pierden financiación"
+                  ],
+                  "indirecto": [
+                    "vecinos de municipios penalizados"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -273,49 +1863,421 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o una visión que reduce la inmigración a mano de obra barata o a un coste, o que niega los datos.",
           "medidas": [
-            { "nombre": "Solo mano de obra barata", "texto": "Se ve a quien llega solo como trabajo barato para sectores de salarios bajos, sin igualdad de condiciones ni plan para que progrese." },
-            { "nombre": "Solo un coste", "texto": "Se presenta la inmigración solo como gasto en servicios, sin contar lo que aporta en impuestos, cotizaciones y trabajo." },
-            { "nombre": "Debate sin datos", "texto": "Se habla de pensiones y natalidad sin cifras oficiales ni previsiones, o se descartan los estudios disponibles cuando no dan la razón." }
+            {
+              "nombre": "Solo mano de obra barata",
+              "texto": "Se ve a quien llega solo como trabajo barato para sectores de salarios bajos, sin igualdad de condiciones ni plan para que progrese.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empleadores de sectores de salarios bajos"
+                  ],
+                  "indirecto": [
+                    "consumidores con precios más bajos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores recién llegados sin progreso",
+                    "trabajadores locales de salarios bajos"
+                  ],
+                  "indirecto": [
+                    "futuros pensionistas, por cotizaciones bajas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Solo un coste",
+              "texto": "Se presenta la inmigración solo como gasto en servicios, sin contar lo que aporta en impuestos, cotizaciones y trabajo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores locales que temen la competencia"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "residentes extranjeros que trabajan y cotizan",
+                    "empresas con vacantes sin cubrir"
+                  ],
+                  "indirecto": [
+                    "pensionistas, si faltan cotizantes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Debate sin datos",
+              "texto": "Se habla de pensiones y natalidad sin cifras oficiales ni previsiones, o se descartan los estudios disponibles cuando no dan la razón.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "quien defiende posturas que los datos no apoyan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pensionistas y futuros pensionistas",
+                    "ciudadanía que vota sin información"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Medir con datos oficiales el peso de la inmigración en el empleo y la Seguridad Social, y vigilar que no se use para pagar menos.",
           "medidas": [
-            { "nombre": "Datos de afiliación por origen", "texto": "La Seguridad Social publica cada mes los trabajadores extranjeros afiliados por sector y comunidad, para que el debate parta de datos." },
-            { "nombre": "Lista de oficios con falta de trabajadores", "texto": "El Servicio Público de Empleo actualiza la lista de oficios difíciles de cubrir, que permite contratar fuera cuando no hay candidatos aquí." },
-            { "nombre": "Inspección contra la explotación", "texto": "La Inspección de Trabajo sanciona a quien paga menos o contrata sin alta a trabajadores extranjeros, y protege al trabajador que denuncia aunque no tenga papeles." }
+            {
+              "nombre": "Datos de afiliación por origen",
+              "texto": "La Seguridad Social publica cada mes los trabajadores extranjeros afiliados por sector y comunidad, para que el debate parta de datos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que debate sobre empleo",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Lista de oficios con falta de trabajadores",
+              "texto": "El Servicio Público de Empleo actualiza la lista de oficios difíciles de cubrir, que permite contratar fuera cuando no hay candidatos aquí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas con vacantes difíciles de cubrir",
+                    "trabajadores extranjeros en oficios de la lista"
+                  ],
+                  "indirecto": [
+                    "clientes de esos servicios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales en paro de esos oficios"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Inspección contra la explotación",
+              "texto": "La Inspección de Trabajo sanciona a quien paga menos o contrata sin alta a trabajadores extranjeros, y protege al trabajador que denuncia aunque no tenga papeles.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores extranjeros explotados"
+                  ],
+                  "indirecto": [
+                    "trabajadores locales que compiten con salarios rebajados",
+                    "empresas que cumplen la ley"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empleadores que pagan por debajo de lo legal"
+                  ],
+                  "indirecto": [
+                    "consumidores si suben algunos precios"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Un plan de necesidades de mano de obra pactado con empresas y sindicatos, por sector y provincia, revisado cada año.",
           "medidas": [
-            { "nombre": "Mesa anual de necesidades", "texto": "Gobierno, empresas y sindicatos pactan cada año las necesidades de trabajadores por sector y provincia, con datos del servicio público de empleo.", "meta": true },
-            { "nombre": "Contratación en origen más allá del campo", "texto": "Ampliar la contratación colectiva en origen del trabajo de temporada agrícola a sectores como la construcción, los cuidados y la hostelería." },
-            { "nombre": "Sacar a la luz el empleo sumergido", "texto": "Campañas de la Inspección de Trabajo en los sectores con más empleo sin contrato, con sanción al empleador y vía para que el trabajador cotice." },
-            { "nombre": "Formación para las vacantes", "texto": "Formación profesional para personas extranjeras y nacionales en paro en los oficios de la lista de difícil cobertura, para cubrir primero con quien ya está aquí." }
+            {
+              "nombre": "Mesa anual de necesidades",
+              "texto": "Gobierno, empresas y sindicatos pactan cada año las necesidades de trabajadores por sector y provincia, con datos del servicio público de empleo.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas con vacantes",
+                    "trabajadores representados por los sindicatos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores no representados en la mesa",
+                    "autónomos y pequeñas empresas sin voz en la mesa"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Contratación en origen más allá del campo",
+              "texto": "Ampliar la contratación colectiva en origen del trabajo de temporada agrícola a sectores como la construcción, los cuidados y la hostelería.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores que quieren venir con contrato",
+                    "empresas de construcción, cuidados y hostelería"
+                  ],
+                  "indirecto": [
+                    "familias que necesitan cuidados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales de esos sectores con salarios bajos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sacar a la luz el empleo sumergido",
+              "texto": "Campañas de la Inspección de Trabajo en los sectores con más empleo sin contrato, con sanción al empleador y vía para que el trabajador cotice.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores sin contrato"
+                  ],
+                  "indirecto": [
+                    "Seguridad Social y pensionistas",
+                    "empresas que compiten cumpliendo la ley"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empleadores que contratan sin alta"
+                  ],
+                  "indirecto": [
+                    "familias que pagan servicio doméstico sin contrato"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Formación para las vacantes",
+              "texto": "Formación profesional para personas extranjeras y nacionales en paro en los oficios de la lista de difícil cobertura, para cubrir primero con quien ya está aquí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en paro, de aquí o de fuera",
+                    "empresas con vacantes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la formación"
+                  ],
+                  "indirecto": [
+                    "aspirantes a venir para esos oficios"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Natalidad, empleo e inmigración planificados juntos a diez años, con proyecciones públicas y la cuenta fiscal de cada vía de entrada.",
           "medidas": [
-            { "nombre": "Estrategia demográfica a diez años", "texto": "El Gobierno aprueba con las comunidades una estrategia a diez años que une previsiones de población, empleo, pensiones e inmigración.", "meta": true },
-            { "nombre": "Proyecciones con varios escenarios", "texto": "El Instituto Nacional de Estadística publica proyecciones de población y pensiones con distintos escenarios de inmigración, para debatir con números." },
-            { "nombre": "Cuenta fiscal por vía de entrada", "texto": "La Autoridad Independiente de Responsabilidad Fiscal calcula lo que aportan y reciben los inmigrantes a lo largo de su vida, según la vía por la que entraron." },
-            { "nombre": "Servicios que crecen con la población", "texto": "Plazas de escuela, salud y vivienda planificadas según la población prevista en cada provincia, antes de que lleguen las personas y no después." }
+            {
+              "nombre": "Estrategia demográfica a diez años",
+              "texto": "El Gobierno aprueba con las comunidades una estrategia a diez años que une previsiones de población, empleo, pensiones e inmigración.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pensionistas y futuros pensionistas",
+                    "comunidades que planifican servicios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es un plan que ordena decisiones: por sí solo no quita derechos ni ingresos a nadie; los costes llegan con cada medida concreta"
+              }
+            },
+            {
+              "nombre": "Proyecciones con varios escenarios",
+              "texto": "El Instituto Nacional de Estadística publica proyecciones de población y pensiones con distintos escenarios de inmigración, para debatir con números.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que debate sobre pensiones",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Cuenta fiscal por vía de entrada",
+              "texto": "La Autoridad Independiente de Responsabilidad Fiscal calcula lo que aportan y reciben los inmigrantes a lo largo de su vida, según la vía por la que entraron.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que quieren saber el saldo real",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "personas de vías de entrada con saldo negativo, más señaladas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Servicios que crecen con la población",
+              "texto": "Plazas de escuela, salud y vivienda planificadas según la población prevista en cada provincia, antes de que lleguen las personas y no después.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de provincias que ganan población",
+                    "alumnos y pacientes de esas provincias"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que adelantan la inversión"
+                  ],
+                  "indirecto": [
+                    "provincias que pierden población y prioridad"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un plan a diez años votado cada año en el Congreso, con objetivos por vía de entrada calculados por un comité independiente y ligados a empleo, vivienda y natalidad.",
           "medidas": [
-            { "nombre": "Plan votado cada año en el Congreso", "texto": "Cada año el Congreso vota objetivos de entrada por vía —trabajo, estudio, familia y protección— para los tres años siguientes, con horquillas.", "meta": true },
-            { "nombre": "Comité independiente de vacantes", "texto": "Un comité de expertos independiente calcula las vacantes por sector y provincia y publica su informe antes de la votación." },
-            { "nombre": "Objetivos ligados a la capacidad de acogida", "texto": "Los objetivos se atan a datos públicos: paro y salarios del sector, vivienda disponible y plazas en escuelas y centros de salud del territorio que acoge." },
-            { "nombre": "Política propia de natalidad y empleo", "texto": "El mismo plan fija metas de natalidad y de empleo de jóvenes, mujeres y mayores de 55 años, con vivienda y conciliación, para no fiarlo todo a la inmigración.", "meta": true },
-            { "nombre": "Mismas condiciones con inspección reforzada", "texto": "Mismo salario y condiciones por el mismo trabajo, con más inspectores en los sectores de más contratación extranjera, para que contratar fuera no abarate salarios." }
+            {
+              "nombre": "Plan votado cada año en el Congreso",
+              "texto": "Cada año el Congreso vota objetivos de entrada por vía —trabajo, estudio, familia y protección— para los tres años siguientes, con horquillas.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que planifican su contratación",
+                    "personas que quieren venir por vía legal"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "candidatos que quedan fuera de la horquilla del año"
+                  ],
+                  "indirecto": [
+                    "empresas con necesidades que no caben en el plan"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comité independiente de vacantes",
+              "texto": "Un comité de expertos independiente calcula las vacantes por sector y provincia y publica su informe antes de la votación.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas con vacantes",
+                    "trabajadores locales con datos sobre su sector"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es un informe técnico previo a la votación: no reparte ni quita nada, la decisión sigue en el Congreso"
+              }
+            },
+            {
+              "nombre": "Objetivos ligados a la capacidad de acogida",
+              "texto": "Los objetivos se atan a datos públicos: paro y salarios del sector, vivienda disponible y plazas en escuelas y centros de salud del territorio que acoge.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de zonas con poca vivienda o plazas",
+                    "trabajadores locales de sectores con paro"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de zonas saturadas que no podrán contratar fuera",
+                    "personas que quieren venir a esas zonas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Política propia de natalidad y empleo",
+              "texto": "El mismo plan fija metas de natalidad y de empleo de jóvenes, mujeres y mayores de 55 años, con vivienda y conciliación, para no fiarlo todo a la inmigración.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias jóvenes con hijos",
+                    "jóvenes, mujeres y mayores de 55 años en paro"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian vivienda y conciliación"
+                  ],
+                  "indirecto": [
+                    "empresas con más costes de conciliación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mismas condiciones con inspección reforzada",
+              "texto": "Mismo salario y condiciones por el mismo trabajo, con más inspectores en los sectores de más contratación extranjera, para que contratar fuera no abarate salarios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores extranjeros",
+                    "trabajadores locales de esos sectores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "empleadores que abaratan con contratación exterior"
+                  ],
+                  "indirecto": [
+                    "consumidores si suben los precios"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -328,50 +2290,456 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o propuestas que rompen la base: dejar sin escuela a menores sin papeles, o no pedir ni el idioma ni las normas comunes.",
           "medidas": [
-            { "nombre": "Menores sin escuela", "texto": "Se propone negar la escuela o la sanidad básica a menores por no tener papeles, en contra de la Constitución y de la Convención sobre los Derechos del Niño." },
-            { "nombre": "Integración sin exigencias", "texto": "Se rechaza pedir que se aprendan el idioma y las normas comunes, como si integrarse no fuera también un deber de quien llega." },
-            { "nombre": "Acogida sin salida", "texto": "Se acoge durante meses sin idioma, sin posibilidad de trabajar y sin plan, lo que deja a la persona dependiente de ayudas o de la economía sumergida." }
+            {
+              "nombre": "Menores sin escuela",
+              "texto": "Se propone negar la escuela o la sanidad básica a menores por no tener papeles, en contra de la Constitución y de la Convención sobre los Derechos del Niño.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que ahorran plazas a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "menores sin papeles"
+                  ],
+                  "indirecto": [
+                    "vecinos, por menores sin escuela en la calle",
+                    "sanidad pública, por enfermedades sin tratar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Integración sin exigencias",
+              "texto": "Se rechaza pedir que se aprendan el idioma y las normas comunes, como si integrarse no fuera también un deber de quien llega.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "recién llegados que no quieren cursos obligatorios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "recién llegados sin idioma para trabajar",
+                    "mujeres aisladas en el hogar"
+                  ],
+                  "indirecto": [
+                    "vecinos y servicios públicos que no pueden comunicarse"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Acogida sin salida",
+              "texto": "Se acoge durante meses sin idioma, sin posibilidad de trabajar y sin plan, lo que deja a la persona dependiente de ayudas o de la economía sumergida.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "entidades que gestionan plazas de acogida"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas acogidas sin plan"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan acogidas más largas",
+                    "trabajadores locales que compiten con empleo sumergido"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Escolarizar a todos los menores, empadronar a todo el que vive en el municipio y ofrecer clases de idioma gratuitas.",
           "medidas": [
-            { "nombre": "Escolarización inmediata", "texto": "Todo menor se escolariza al llegar, tenga o no papeles, con plaza asignada por la oficina de escolarización de su comunidad." },
-            { "nombre": "Empadronamiento sin trabas", "texto": "Los ayuntamientos empadronan a todo el que vive en el municipio, como manda la ley: el padrón abre la escuela y la sanidad y permite saber cuánta gente vive allí." },
-            { "nombre": "Clases de idioma gratuitas", "texto": "Ayuntamientos, comunidades y escuelas oficiales de idiomas ofrecen castellano y la lengua cooficial gratis, en horarios compatibles con el trabajo." },
-            { "nombre": "Atención sanitaria básica", "texto": "Acceso a la sanidad pública con tarjeta sanitaria para quien está empadronado, y urgencias, embarazo y menores siempre cubiertos." }
+            {
+              "nombre": "Escolarización inmediata",
+              "texto": "Todo menor se escolariza al llegar, tenga o no papeles, con plaza asignada por la oficina de escolarización de su comunidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores recién llegados"
+                  ],
+                  "indirecto": [
+                    "vecinos y familias del barrio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las plazas"
+                  ],
+                  "indirecto": [
+                    "alumnos de aulas que crecen a mitad de curso"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Empadronamiento sin trabas",
+              "texto": "Los ayuntamientos empadronan a todo el que vive en el municipio, como manda la ley: el padrón abre la escuela y la sanidad y permite saber cuánta gente vive allí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que viven en el municipio sin papeles"
+                  ],
+                  "indirecto": [
+                    "vecinos con servicios bien dimensionados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan los servicios que abre"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Clases de idioma gratuitas",
+              "texto": "Ayuntamientos, comunidades y escuelas oficiales de idiomas ofrecen castellano y la lengua cooficial gratis, en horarios compatibles con el trabajo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "adultos recién llegados"
+                  ],
+                  "indirecto": [
+                    "empresas que los contratan",
+                    "servicios públicos que los atienden"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las clases"
+                  ],
+                  "indirecto": [
+                    "academias privadas de idiomas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Atención sanitaria básica",
+              "texto": "Acceso a la sanidad pública con tarjeta sanitaria para quien está empadronado, y urgencias, embarazo y menores siempre cubiertos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas empadronadas sin papeles",
+                    "embarazadas y menores"
+                  ],
+                  "indirecto": [
+                    "población general, por la salud pública"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la sanidad"
+                  ],
+                  "indirecto": [
+                    "pacientes de centros de salud con más demanda"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Un itinerario de acogida que une idioma, empleo y vivienda desde los primeros meses, con un profesional de referencia.",
           "medidas": [
-            { "nombre": "Itinerario con profesional de referencia", "texto": "Cada persona acogida recibe un plan con clases de idioma, orientación laboral y búsqueda de vivienda, coordinado por un profesional de servicios sociales." },
-            { "nombre": "Reconocer la experiencia sin título", "texto": "Acreditar de forma oficial la experiencia laboral y las competencias aunque no haya título, a través del sistema de formación profesional." },
-            { "nombre": "Puente a la vivienda", "texto": "Pisos de transición y avales públicos para el primer alquiler, para salir de la acogida sin caer en la infravivienda ni el hacinamiento." },
-            { "nombre": "Aulas de acogida en las escuelas", "texto": "Profesores de refuerzo y aulas de acogida para el alumnado que llega a mitad de curso sin dominar el idioma." }
+            {
+              "nombre": "Itinerario con profesional de referencia",
+              "texto": "Cada persona acogida recibe un plan con clases de idioma, orientación laboral y búsqueda de vivienda, coordinado por un profesional de servicios sociales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en acogida"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan trabajadores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el itinerario"
+                  ],
+                  "indirecto": [
+                    "otros usuarios de servicios sociales con menos atención"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reconocer la experiencia sin título",
+              "texto": "Acreditar de forma oficial la experiencia laboral y las competencias aunque no haya título, a través del sistema de formación profesional.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con experiencia y sin título"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan perfiles acreditados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores con título que pierden esa ventaja"
+                  ],
+                  "indirecto": [
+                    "centros de formación con menos alumnos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Puente a la vivienda",
+              "texto": "Pisos de transición y avales públicos para el primer alquiler, para salir de la acogida sin caer en la infravivienda ni el hacinamiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que salen de la acogida"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas con infravivienda"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan pisos y avales"
+                  ],
+                  "indirecto": [
+                    "otros inquilinos de rentas bajas que buscan piso"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Aulas de acogida en las escuelas",
+              "texto": "Profesores de refuerzo y aulas de acogida para el alumnado que llega a mitad de curso sin dominar el idioma.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado recién llegado sin el idioma",
+                    "compañeros de su clase"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el refuerzo"
+                  ],
+                  "indirecto": [
+                    "alumnos que pasan horas separados de su clase"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Integración medida por resultados —empleo, escuela, convivencia— y acogida repartida por el territorio para evitar guetos.",
           "medidas": [
-            { "nombre": "Indicadores de integración", "texto": "Medir cada año el empleo, el nivel de idioma, el abandono escolar y la vivienda de quienes llegaron, comparados con la población nacida aquí." },
-            { "nombre": "Reparto de la acogida por fórmula", "texto": "Una fórmula fija según población y recursos reparte la acogida entre comunidades y municipios, con el dinero siguiendo a la persona." },
-            { "nombre": "Cuidado de niños para participar", "texto": "Guardería durante las clases y las prácticas, para que las madres no se queden fuera del idioma y del empleo." },
-            { "nombre": "Mediadores en escuela y salud", "texto": "Mediadores que hablan los idiomas de las familias en escuelas y centros de salud, para que padres y profesionales se entiendan." }
+            {
+              "nombre": "Indicadores de integración",
+              "texto": "Medir cada año el empleo, el nivel de idioma, el abandono escolar y la vivienda de quienes llegaron, comparados con la población nacida aquí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que evalúa la integración",
+                    "servicios que ajustan sus programas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            },
+            {
+              "nombre": "Reparto de la acogida por fórmula",
+              "texto": "Una fórmula fija según población y recursos reparte la acogida entre comunidades y municipios, con el dinero siguiendo a la persona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de territorios que hoy reciben más de lo que pueden",
+                    "personas acogidas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de territorios que hoy acogen poco"
+                  ],
+                  "indirecto": [
+                    "contribuyentes de esos territorios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cuidado de niños para participar",
+              "texto": "Guardería durante las clases y las prácticas, para que las madres no se queden fuera del idioma y del empleo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "madres recién llegadas",
+                    "sus hijos pequeños"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian las guarderías"
+                  ],
+                  "indirecto": [
+                    "familias en lista de espera de guardería"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mediadores en escuela y salud",
+              "texto": "Mediadores que hablan los idiomas de las familias en escuelas y centros de salud, para que padres y profesionales se entiendan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que no dominan el idioma",
+                    "profesores y sanitarios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian a los mediadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un derecho y un deber de integración: itinerario gratuito de idioma, normas y empleo antes de tres meses, con plan individual, prueba final y resultados por municipio.",
           "medidas": [
-            { "nombre": "Itinerario en tres meses con plan firmado", "texto": "El itinerario empieza antes de tres meses desde la llegada, con un plan individual firmado por la persona y por su municipio.", "meta": true },
-            { "nombre": "Horas garantizadas de idioma y normas", "texto": "Un mínimo de horas de castellano y lengua cooficial y un curso sobre la Constitución y las normas comunes, con prueba final, como los cursos de integración alemanes." },
-            { "nombre": "Idioma unido al trabajo", "texto": "Prácticas en empresas y formación profesional desde los primeros meses, combinadas con las clases, para aprender el idioma trabajando." },
-            { "nombre": "Más dinero a quien mejor integra", "texto": "Publicar cada año por municipio los indicadores de integración y dar más financiación a los que obtienen mejores resultados.", "meta": true },
-            { "nombre": "Camino claro a la nacionalidad", "texto": "Requisitos de nacionalidad públicos e iguales para todos, con examen de idioma y de la Constitución y un plazo de resolución garantizado, como final del itinerario." }
+            {
+              "nombre": "Itinerario en tres meses con plan firmado",
+              "texto": "El itinerario empieza antes de tres meses desde la llegada, con un plan individual firmado por la persona y por su municipio.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas recién llegadas"
+                  ],
+                  "indirecto": [
+                    "municipios de acogida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el itinerario"
+                  ],
+                  "indirecto": [
+                    "recién llegados que no quieren comprometerse"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Horas garantizadas de idioma y normas",
+              "texto": "Un mínimo de horas de castellano y lengua cooficial y un curso sobre la Constitución y las normas comunes, con prueba final, como los cursos de integración alemanes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "recién llegados que necesitan el idioma"
+                  ],
+                  "indirecto": [
+                    "vecinos y empleadores"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "recién llegados con jornadas largas que deben asistir",
+                    "quien no supera la prueba final"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian los cursos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Idioma unido al trabajo",
+              "texto": "Prácticas en empresas y formación profesional desde los primeros meses, combinadas con las clases, para aprender el idioma trabajando.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "recién llegados",
+                    "empresas que acogen prácticas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales en prácticas que compiten"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la formación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Más dinero a quien mejor integra",
+              "texto": "Publicar cada año por municipio los indicadores de integración y dar más financiación a los que obtienen mejores resultados.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de municipios con buenos resultados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de municipios con peores resultados"
+                  ],
+                  "indirecto": [
+                    "recién llegados en municipios con menos fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Camino claro a la nacionalidad",
+              "texto": "Requisitos de nacionalidad públicos e iguales para todos, con examen de idioma y de la Constitución y un plazo de resolución garantizado, como final del itinerario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes que cumplen los requisitos"
+                  ],
+                  "indirecto": [
+                    "familias de los nuevos nacionales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "residentes que no superan los exámenes",
+                    "mayores o personas sin estudios, con más dificultad"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -384,50 +2752,447 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o propuestas que rompen la base: salir del sistema de asilo, devolver sin examinar, o no cumplir nunca una denegación.",
           "medidas": [
-            { "nombre": "Salir del sistema de asilo", "texto": "Se propone abandonar la Convención de Ginebra sobre los refugiados o dejar de examinar solicitudes, lo que deja sin protección a quien huye de una guerra o persecución." },
-            { "nombre": "Devolver sin examinar", "texto": "Se devuelve a personas, también a menores, sin estudiar su caso, sin entrevista y sin posibilidad de recurso ante un juez." },
-            { "nombre": "Denegaciones sin consecuencias", "texto": "Se acepta que una denegación firme no tenga efecto, lo que convierte el asilo en una vía de entrada para quien no lo necesita y retrasa a quien sí." }
+            {
+              "nombre": "Salir del sistema de asilo",
+              "texto": "Se propone abandonar la Convención de Ginebra sobre los refugiados o dejar de examinar solicitudes, lo que deja sin protección a quien huye de una guerra o persecución.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que ahorran en acogida"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que huyen de guerra o persecución"
+                  ],
+                  "indirecto": [
+                    "residentes de otros países europeos con más solicitudes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Devolver sin examinar",
+              "texto": "Se devuelve a personas, también a menores, sin estudiar su caso, sin entrevista y sin posibilidad de recurso ante un juez.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "zonas de llegada, a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con derecho a protección",
+                    "menores que llegan solos"
+                  ],
+                  "indirecto": [
+                    "agentes de frontera expuestos a condenas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Denegaciones sin consecuencias",
+              "texto": "Se acepta que una denegación firme no tenga efecto, lo que convierte el asilo en una vía de entrada para quien no lo necesita y retrasa a quien sí.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes sin necesidad de protección"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes con necesidad real que esperan más"
+                  ],
+                  "indirecto": [
+                    "contribuyentes",
+                    "refugiados reconocidos, más señalados por el abuso"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cumplir el derecho de asilo con estudio individual de cada caso y tutela pública de los menores que llegan solos.",
           "medidas": [
-            { "nombre": "Entrevista individual con intérprete", "texto": "Cada solicitante tiene una entrevista individual con intérprete y su caso se estudia según la situación de su país, con decisión escrita y motivada." },
-            { "nombre": "Acogida durante el trámite", "texto": "Plaza en el sistema estatal de acogida para los solicitantes sin recursos mientras se resuelve su caso." },
-            { "nombre": "Tutela de los menores que llegan solos", "texto": "La comunidad autónoma asume la tutela del menor que llega solo, con plaza en un centro o una familia de acogida y escolarización." },
-            { "nombre": "Determinar la edad con garantías", "texto": "Pruebas de edad solo si hay duda razonable, combinando varios métodos y con control del fiscal, tratando a la persona como menor mientras se decide." }
+            {
+              "nombre": "Entrevista individual con intérprete",
+              "texto": "Cada solicitante tiene una entrevista individual con intérprete y su caso se estudia según la situación de su país, con decisión escrita y motivada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan intérpretes e instructores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Acogida durante el trámite",
+              "texto": "Plaza en el sistema estatal de acogida para los solicitantes sin recursos mientras se resuelve su caso.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo sin recursos"
+                  ],
+                  "indirecto": [
+                    "vecinos, por menos personas en la calle"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian la acogida"
+                  ],
+                  "indirecto": [
+                    "vecinos de los centros de acogida"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tutela de los menores que llegan solos",
+              "texto": "La comunidad autónoma asume la tutela del menor que llega solo, con plaza en un centro o una familia de acogida y escolarización.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores que llegan solos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes autonómicos"
+                  ],
+                  "indirecto": [
+                    "comunidades de llegada con más menores tutelados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Determinar la edad con garantías",
+              "texto": "Pruebas de edad solo si hay duda razonable, combinando varios métodos y con control del fiscal, tratando a la persona como menor mientras se decide.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores sin documentos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más pruebas"
+                  ],
+                  "indirecto": [
+                    "menores tutelados que conviven con adultos no detectados"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Resolver el asilo en meses, con garantías, y repartir de forma estable entre comunidades a los menores que llegan solos.",
           "medidas": [
-            { "nombre": "Oficina de asilo con personal suficiente", "texto": "Reforzar la Oficina de Asilo y Refugio con instructores e intérpretes para resolver en meses, y publicar el tiempo medio real de resolución." },
-            { "nombre": "Vía rápida para casos claros", "texto": "Resolver en semanas, con las mismas garantías y recurso, las solicitudes de países donde casi siempre se concede o casi nunca.", "meta": true },
-            { "nombre": "Reparto estable de menores", "texto": "Un mecanismo permanente, no de urgencia, reparte entre comunidades a los menores que llegan solos cuando un territorio supera su capacidad." },
-            { "nombre": "Trabajar durante el trámite", "texto": "Permitir trabajar a los solicitantes pronto en el trámite, para que no dependan de la acogida y empiecen a integrarse." }
+            {
+              "nombre": "Oficina de asilo con personal suficiente",
+              "texto": "Reforzar la Oficina de Asilo y Refugio con instructores e intérpretes para resolver en meses, y publicar el tiempo medio real de resolución.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes que esperan resolución"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan menos meses de acogida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más plantilla"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Vía rápida para casos claros",
+              "texto": "Resolver en semanas, con las mismas garantías y recurso, las solicitudes de países donde casi siempre se concede o casi nunca.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes con casos claros"
+                  ],
+                  "indirecto": [
+                    "resto de solicitantes, con menos espera"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes de países de baja concesión con caso singular"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reparto estable de menores",
+              "texto": "Un mecanismo permanente, no de urgencia, reparte entre comunidades a los menores que llegan solos cuando un territorio supera su capacidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores que llegan solos",
+                    "vecinos de comunidades de llegada saturadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes de comunidades que hoy acogen poco"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Trabajar durante el trámite",
+              "texto": "Permitir trabajar a los solicitantes pronto en el trámite, para que no dependan de la acogida y empiecen a integrarse.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos gasto en acogida",
+                    "empresas con vacantes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales de baja cualificación"
+                  ],
+                  "indirecto": [
+                    "solicitantes con necesidad real, si llegan más sin base"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos.",
           "medidas": [
-            { "nombre": "Solidaridad europea que funcione", "texto": "Aplicar el Pacto Europeo de Migración y Asilo exigiendo que el reparto de solicitantes, o de su coste, entre países funcione cuando España recibe más llegadas." },
-            { "nombre": "La decisión se cumple en los dos sentidos", "texto": "Papeles, idioma y empleo inmediatos para quien obtiene protección; retorno con garantías para quien recibe un no firme." },
-            { "nombre": "Reasentamiento cada año", "texto": "Un cupo anual de reasentamiento de refugiados desde campos de otros países, con la Agencia de las Naciones Unidas para los Refugiados.", "meta": true },
-            { "nombre": "Calidad de las decisiones", "texto": "Revisión independiente de una muestra de resoluciones cada año e informes actualizados sobre cada país de origen para los instructores.", "meta": true }
+            {
+              "nombre": "Solidaridad europea que funcione",
+              "texto": "Aplicar el Pacto Europeo de Migración y Asilo exigiendo que el reparto de solicitantes, o de su coste, entre países funcione cuando España recibe más llegadas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de las zonas españolas de llegada",
+                    "solicitantes en centros saturados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes de otros países de la Unión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "La decisión se cumple en los dos sentidos",
+              "texto": "Papeles, idioma y empleo inmediatos para quien obtiene protección; retorno con garantías para quien recibe un no firme.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "refugiados reconocidos",
+                    "ciudadanía que espera decisiones que se cumplan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "solicitantes con denegación firme"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la integración y el retorno"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reasentamiento cada año",
+              "texto": "Un cupo anual de reasentamiento de refugiados desde campos de otros países, con la Agencia de las Naciones Unidas para los Refugiados.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "refugiados en campos de otros países"
+                  ],
+                  "indirecto": [
+                    "población de los países que acogen los campos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que financian el reasentamiento"
+                  ],
+                  "indirecto": [
+                    "inquilinos de rentas bajas en municipios de reasentamiento"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Calidad de las decisiones",
+              "texto": "Revisión independiente de una muestra de resoluciones cada año e informes actualizados sobre cada país de origen para los instructores.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo",
+                    "instructores con mejor información"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la revisión"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Asilo resuelto en 140 días con abogado gratuito desde el primer día, vías seguras sin cruzar el mar y menores repartidos en 14 días con tutor.",
           "medidas": [
-            { "nombre": "Resolución en un máximo de 140 días", "texto": "Resolver cada solicitud en un máximo de 140 días, con plantilla e intérpretes suficientes, y publicar cada trimestre el tiempo medio real.", "meta": true },
-            { "nombre": "Abogado gratuito desde el primer día", "texto": "Asistencia jurídica gratuita e independiente desde el primer día y un recurso ante un juez que suspende la salida mientras se decide." },
-            { "nombre": "Vías seguras y patrocinio ciudadano", "texto": "Visados humanitarios y patrocinio por asociaciones y grupos de ciudadanos que cubren el primer año, como el modelo de Canadá, para pedir protección sin cruzar el mar." },
-            { "nombre": "Menores repartidos en 14 días con tutor", "texto": "Repartir a los menores no acompañados entre comunidades en 14 días, con una fórmula fija según población y recursos pagada por el Estado y un tutor nombrado.", "meta": true },
-            { "nombre": "Buscar a la familia del menor", "texto": "Buscar a la familia del menor desde el primer día y reunificarlo cuando sea seguro y en su interés, en España o en su país." }
+            {
+              "nombre": "Resolución en un máximo de 140 días",
+              "texto": "Resolver cada solicitud en un máximo de 140 días, con plantilla e intérpretes suficientes, y publicar cada trimestre el tiempo medio real.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes, por menos meses de acogida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más plantilla"
+                  ],
+                  "indirecto": [
+                    "solicitantes con casos complejos y menos tiempo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Abogado gratuito desde el primer día",
+              "texto": "Asistencia jurídica gratuita e independiente desde el primer día y un recurso ante un juez que suspende la salida mientras se decide.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de asilo"
+                  ],
+                  "indirecto": [
+                    "abogados del turno de oficio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la asistencia jurídica"
+                  ],
+                  "indirecto": [
+                    "ciudadanía que espera salidas rápidas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vías seguras y patrocinio ciudadano",
+              "texto": "Visados humanitarios y patrocinio por asociaciones y grupos de ciudadanos que cubren el primer año, como el modelo de Canadá, para pedir protección sin cruzar el mar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "refugiados que evitan cruzar el mar",
+                    "asociaciones y ciudadanos que quieren patrocinar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "redes de tráfico de personas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que gestionan los visados humanitarios"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Menores repartidos en 14 días con tutor",
+              "texto": "Repartir a los menores no acompañados entre comunidades en 14 días, con una fórmula fija según población y recursos pagada por el Estado y un tutor nombrado.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores que llegan solos",
+                    "vecinos de comunidades de llegada saturadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la fórmula estatal"
+                  ],
+                  "indirecto": [
+                    "menores que pierden la red que hicieron al llegar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Buscar a la familia del menor",
+              "texto": "Buscar a la familia del menor desde el primer día y reunificarlo cuando sea seguro y en su interés, en España o en su país.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores que llegan solos",
+                    "familias que buscan a sus hijos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "menores reunificados en origen contra su deseo"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que financian la búsqueda"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -440,50 +3205,456 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o cerrar toda vía legal de entrada, o fiarlo todo a regularizaciones periódicas de quien entró sin papeles.",
           "medidas": [
-            { "nombre": "Cierre de las vías legales", "texto": "Se propone cerrar los visados de trabajo y estudio, lo que no elimina la falta de trabajadores y empuja a la gente a entrar por vías irregulares." },
-            { "nombre": "Regularizar cada pocos años", "texto": "Se confía en regularizaciones extraordinarias periódicas en lugar de vías ordinarias, lo que premia esperar años en la irregularidad." },
-            { "nombre": "Vía legal solo en el papel", "texto": "Se mantienen visados sin citas disponibles, plazos sin límite y requisitos que ningún empleador puede cumplir, de modo que la vía legal no se usa." }
+            {
+              "nombre": "Cierre de las vías legales",
+              "texto": "Se propone cerrar los visados de trabajo y estudio, lo que no elimina la falta de trabajadores y empuja a la gente a entrar por vías irregulares.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores locales que temen la competencia"
+                  ],
+                  "indirecto": [
+                    "redes de tráfico de personas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que quieren venir a trabajar o estudiar",
+                    "empresas con vacantes",
+                    "universidades con alumnado extranjero"
+                  ],
+                  "indirecto": [
+                    "pensionistas, por menos cotizantes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Regularizar cada pocos años",
+              "texto": "Se confía en regularizaciones extraordinarias periódicas en lugar de vías ordinarias, lo que premia esperar años en la irregularidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas en situación irregular"
+                  ],
+                  "indirecto": [
+                    "empleadores de economía sumergida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que esperan por la vía legal"
+                  ],
+                  "indirecto": [
+                    "trabajadores locales que compiten con empleo sumergido"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Vía legal solo en el papel",
+              "texto": "Se mantienen visados sin citas disponibles, plazos sin límite y requisitos que ningún empleador puede cumplir, de modo que la vía legal no se usa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "intermediarios que revenden citas"
+                  ],
+                  "indirecto": [
+                    "empleadores de economía sumergida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que intentan venir legalmente",
+                    "empresas con vacantes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Mantener el arraigo, la reagrupación familiar y los visados ordinarios de trabajo y estudio, con citas realmente disponibles.",
           "medidas": [
-            { "nombre": "Arraigo como vía ordinaria", "texto": "Mantener el arraigo por trabajo, formación, familia o vida social, que regulariza caso a caso a quien ya vive aquí y cumple los requisitos." },
-            { "nombre": "Citas de extranjería sin reventa", "texto": "Las oficinas de extranjería dan cita en línea sin reventa ni intermediarios de pago, con atención presencial para quien no puede hacerlo por internet." },
-            { "nombre": "Reagrupación familiar", "texto": "Mantener el derecho a traer a la pareja y los hijos con requisitos claros de tiempo de residencia, medios económicos y vivienda." },
-            { "nombre": "Visados de estudio", "texto": "Visados para estudiar en la universidad o en formación profesional, con permiso para trabajar unas horas a la semana." }
+            {
+              "nombre": "Arraigo como vía ordinaria",
+              "texto": "Mantener el arraigo por trabajo, formación, familia o vida social, que regulariza caso a caso a quien ya vive aquí y cumple los requisitos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que ya viven aquí sin papeles",
+                    "empleadores que quieren contratar en regla"
+                  ],
+                  "indirecto": [
+                    "Seguridad Social, por nuevas cotizaciones"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales de baja cualificación"
+                  ],
+                  "indirecto": [
+                    "candidatos que esperan en origen por la vía ordinaria"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Citas de extranjería sin reventa",
+              "texto": "Las oficinas de extranjería dan cita en línea sin reventa ni intermediarios de pago, con atención presencial para quien no puede hacerlo por internet.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que tramitan papeles de extranjería"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "intermediarios que revenden citas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la atención presencial"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reagrupación familiar",
+              "texto": "Mantener el derecho a traer a la pareja y los hijos con requisitos claros de tiempo de residencia, medios económicos y vivienda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes con familia en el extranjero",
+                    "parejas e hijos que vienen"
+                  ],
+                  "indirecto": [
+                    "empleadores, por plantillas más estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan escuela y sanidad"
+                  ],
+                  "indirecto": [
+                    "inquilinos de rentas bajas, por más demanda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Visados de estudio",
+              "texto": "Visados para estudiar en la universidad o en formación profesional, con permiso para trabajar unas horas a la semana.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes extranjeros",
+                    "universidades y centros de formación"
+                  ],
+                  "indirecto": [
+                    "comercio de las ciudades universitarias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "estudiantes locales que compiten por plazas"
+                  ],
+                  "indirecto": [
+                    "inquilinos jóvenes de ciudades universitarias"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Visados para buscar empleo, cupos por sector y títulos reconocidos en meses, para entrar con papeles desde el principio.",
           "medidas": [
-            { "nombre": "Visado para buscar empleo", "texto": "Un visado temporal para venir a buscar trabajo en los oficios con vacantes, con medios propios acreditados para mantenerse mientras se busca." },
-            { "nombre": "Cupos por sector con permisos de varios años", "texto": "Cupos de contratación en origen por sector, con permisos de varios años para el trabajo de temporada en lugar de renovar cada campaña." },
-            { "nombre": "Títulos reconocidos en meses", "texto": "Los ministerios de Universidades y de Educación reconocen títulos extranjeros en meses, con prueba de aptitud si faltan contenidos." },
-            { "nombre": "Tarjeta azul europea ágil", "texto": "Permiso único de residencia y trabajo para profesionales cualificados según la tarjeta azul de la Unión Europea, con trámite prioritario." }
+            {
+              "nombre": "Visado para buscar empleo",
+              "texto": "Un visado temporal para venir a buscar trabajo en los oficios con vacantes, con medios propios acreditados para mantenerse mientras se busca.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que quieren venir a trabajar",
+                    "empresas con vacantes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales en paro de esos oficios"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si hay estancias sin empleo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cupos por sector con permisos de varios años",
+              "texto": "Cupos de contratación en origen por sector, con permisos de varios años para el trabajo de temporada en lugar de renovar cada campaña.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores de temporada",
+                    "empleadores agrícolas y de servicios"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores locales de temporada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Títulos reconocidos en meses",
+              "texto": "Los ministerios de Universidades y de Educación reconocen títulos extranjeros en meses, con prueba de aptitud si faltan contenidos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales con título extranjero",
+                    "sanidad y empresas sin profesionales suficientes"
+                  ],
+                  "indirecto": [
+                    "pacientes y clientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales locales con más competencia"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Tarjeta azul europea ágil",
+              "texto": "Permiso único de residencia y trabajo para profesionales cualificados según la tarjeta azul de la Unión Europea, con trámite prioritario.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales cualificados",
+                    "empresas tecnológicas e industriales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales locales del mismo campo"
+                  ],
+                  "indirecto": [
+                    "población de países que pierden profesionales"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Una entrada legal ágil y previsible, con plazos que se cumplen, que haga innecesarias las regularizaciones extraordinarias.",
           "medidas": [
-            { "nombre": "Plazos máximos que se cumplen", "texto": "Plazos máximos para cada trámite, publicados y medidos por oficina y consulado, con refuerzo de personal donde se acumulan retrasos." },
-            { "nombre": "Permiso que no ata a un empleador", "texto": "El permiso de trabajo permite cambiar de empleo y de sector, para no depender de un solo empleador que pueda abusar." },
-            { "nombre": "Visado para emprender", "texto": "Visado para quien crea una empresa con un proyecto evaluado por un organismo público, como prevé la ley de apoyo a los emprendedores." },
-            { "nombre": "Datos anuales de cada vía", "texto": "Publicar cada año cuántos visados y permisos se piden, se conceden y en cuánto tiempo, por vía y por consulado.", "meta": true }
+            {
+              "nombre": "Plazos máximos que se cumplen",
+              "texto": "Plazos máximos para cada trámite, publicados y medidos por oficina y consulado, con refuerzo de personal donde se acumulan retrasos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de visados y permisos",
+                    "empresas que esperan a un trabajador"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más personal"
+                  ],
+                  "indirecto": [
+                    "intermediarios que cobran por agilizar trámites"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Permiso que no ata a un empleador",
+              "texto": "El permiso de trabajo permite cambiar de empleo y de sector, para no depender de un solo empleador que pueda abusar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "trabajadores con permiso de trabajo"
+                  ],
+                  "indirecto": [
+                    "trabajadores locales del mismo sector"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empleadores que pierden al trabajador que trajeron"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Visado para emprender",
+              "texto": "Visado para quien crea una empresa con un proyecto evaluado por un organismo público, como prevé la ley de apoyo a los emprendedores.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que vienen a crear una empresa"
+                  ],
+                  "indirecto": [
+                    "trabajadores contratados por esas empresas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas locales con nueva competencia"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Datos anuales de cada vía",
+              "texto": "Publicar cada año cuántos visados y permisos se piden, se conceden y en cuánto tiempo, por vía y por consulado.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanía que evalúa las vías legales",
+                    "periodistas e investigadores"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publica datos que la administración ya recoge: nadie pierde un derecho, un ingreso ni una ventaja, solo se gana información"
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Una ventanilla digital única con plazos garantizados: visado de búsqueda por puntos, cupos por sector, títulos en tres meses y arraigo permanente.",
           "medidas": [
-            { "nombre": "Visado de búsqueda de empleo por puntos", "texto": "Visado de un año por puntos —idioma, formación, experiencia, edad— con medios propios y permiso para trabajar a tiempo parcial, como la tarjeta de oportunidades alemana.", "meta": true },
-            { "nombre": "Ventanilla digital única", "texto": "Todo el trámite en línea, en una sola ventanilla para la empresa y el trabajador, con consulados reforzados y sin intermediarios de pago." },
-            { "nombre": "Plazos garantizados o permiso provisional", "texto": "Visados y permisos de trabajo en 30 días y títulos en tres meses; pasado el plazo sin respuesta, permiso provisional automático.", "meta": true },
-            { "nombre": "Arraigo permanente con requisitos fijos", "texto": "El arraigo por trabajo o formación queda como vía ordinaria e individual, con requisitos fijos de tiempo de estancia, contrato y ausencia de antecedentes." },
-            { "nombre": "Estudiar y quedarse", "texto": "Visado de estudios que permite trabajar a tiempo parcial y quedarse un año a buscar empleo después de titularse.", "meta": true }
+            {
+              "nombre": "Visado de búsqueda de empleo por puntos",
+              "texto": "Visado de un año por puntos —idioma, formación, experiencia, edad— con medios propios y permiso para trabajar a tiempo parcial, como la tarjeta de oportunidades alemana.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "candidatos con idioma, formación y experiencia",
+                    "empresas con vacantes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "candidatos mayores o sin estudios",
+                    "trabajadores locales a tiempo parcial"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ventanilla digital única",
+              "texto": "Todo el trámite en línea, en una sola ventanilla para la empresa y el trabajador, con consulados reforzados y sin intermediarios de pago.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas y trabajadores que tramitan permisos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestorías e intermediarios de pago"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el sistema"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plazos garantizados o permiso provisional",
+              "texto": "Visados y permisos de trabajo en 30 días y títulos en tres meses; pasado el plazo sin respuesta, permiso provisional automático.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "solicitantes de visados, permisos y títulos",
+                    "empresas que esperan a un trabajador"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan más personal"
+                  ],
+                  "indirecto": [
+                    "clientes y pacientes si un permiso se da sin revisar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Arraigo permanente con requisitos fijos",
+              "texto": "El arraigo por trabajo o formación queda como vía ordinaria e individual, con requisitos fijos de tiempo de estancia, contrato y ausencia de antecedentes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas sin papeles con contrato o formación",
+                    "empleadores que quieren contratar en regla"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas con antecedentes, que no acceden"
+                  ],
+                  "indirecto": [
+                    "trabajadores locales de baja cualificación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Estudiar y quedarse",
+              "texto": "Visado de estudios que permite trabajar a tiempo parcial y quedarse un año a buscar empleo después de titularse.",
+              "meta": true,
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes extranjeros que se titulan",
+                    "universidades"
+                  ],
+                  "indirecto": [
+                    "empresas que buscan titulados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "titulados locales que buscan su primer empleo"
+                  ],
+                  "indirecto": [
+                    "inquilinos jóvenes de ciudades universitarias"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
