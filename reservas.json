@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/politica/VisualesHerramientas.tsx",
-      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
-      "desde": "2026-11-25T12:01:03.587Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Geometría: cinco niveles",
       "desde": "2026-11-25T12:12:37.195Z"
