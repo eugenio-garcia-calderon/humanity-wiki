@@ -40,6 +40,7 @@ const PoliticaHerramientas = lazy(() => import('./PoliticaHerramientas'));
 const VISTAS_DOC = new Set(['geometria', 'observatorio', 'perfiles', 'decidir']);
 const SolSolidario = lazy(() => import('./SolSolidario'));
 const CadenaSolar = lazy(() => import('./CadenaSolar'));
+const AgriculturaSintropica = lazy(() => import('./AgriculturaSintropica'));
 const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
@@ -56,6 +57,9 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagi
   // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
   // Also the page of «Optimización del sistema de energía» (0208: «fusiónalo»).
   'cadena-solar': () => <CadenaSolar />,
+  // 2026-11-25 (Eugenio): «vamos a crear dentro de Luz de Humanidad una nueva página… agricultura sintrópica».
+  // The designer and simulator, full screen (it has its own header with a link to luzhumanidad.com).
+  'agricultura-sintropica': () => <AgriculturaSintropica />,
 };
 // Apps that sit under the site's own top bar, like any other page of the site
 // (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
