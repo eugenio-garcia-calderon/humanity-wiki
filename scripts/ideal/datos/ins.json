@@ -1,0 +1,455 @@
+{
+  "clave": "ins",
+  "anti_tema": "No proponer nada sobre los contrapesos, o justificar que se incumplan leyes y sentencias, se perdone a los afines o se señale a jueces por sus resoluciones.",
+  "ideal_tema": "Contrapesos que no dependen de quién gobierne: jueces elegidos por jueces, justicia con plazos garantizados, perdón sin autoindulto, cada contacto con el poder publicado y ciudadanos por sorteo con voz reglada.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada, o justificar delitos o el incumplimiento de sentencias cuando el condenado es de los propios, sea del lado que sea.",
+      "ideal": "Las mismas reglas para todos: fuero especial solo por actos del cargo, indultos solo con informe favorable de un órgano independiente y nunca por corrupción, y gracia colectiva solo por dos tercios.",
+      "titulo": "Ley igual para todos: sin fueros y sin autoindulto",
+      "slug": "ley-igual-sin-aforamientos-ni-autoindulto",
+      "resumen": "Una reforma que quita al Gobierno la última palabra sobre el perdón y reduce al mínimo los fueros especiales de los cargos públicos. El nivel avanzado prohíbe indultar la corrupción y pide un aval independiente; el ideal añade que ese aval sea necesario para indultar, que la gracia colectiva exija dos tercios y que un político responda ante el mismo juez que cualquier vecino.",
+      "medidas": [
+        "Limitar el aforamiento (ser juzgado por un tribunal superior) a los actos propios del cargo; por delitos cometidos como particular, el juez ordinario, como cualquier ciudadano.",
+        "Comisión de gracia independiente, con mayoría de jueces elegidos por sorteo y juristas: sin su informe favorable y el del tribunal que condenó, el Gobierno no puede indultar.",
+        "Prohibir por ley el indulto por corrupción, malversación y delitos cometidos desde un cargo público, y el que beneficie a miembros del Gobierno o de las fuerzas que lo sostienen.",
+        "Cada indulto, motivado y publicado con sus informes; registro público consultable con el delito, la pena perdonada y la razón.",
+        "Toda medida de gracia colectiva, solo por ley aprobada por dos tercios del Congreso, sin trámite de urgencia y aplicada caso por caso por los jueces.",
+        "Las condenas firmes se ejecutan en plazo: informe anual público de las sentencias que las administraciones tienen pendientes de cumplir."
+      ],
+      "supone": {
+        "personas": "Quien roba dinero público o delinque desde un cargo sabe que no habrá perdón político ni tribunal especial. El ciudadano corriente conserva el indulto para casos de justicia o de humanidad, decidido con criterios conocidos y no por cercanía al poder.",
+        "cuentas": "Coste pequeño: una comisión de pocos miembros y un registro público. No hay cifra oficial verificada de su coste. El efecto buscado no es presupuestario, sino de confianza en que la ley obliga a todos por igual.",
+        "puesta_en_marcha": "Nueva ley del indulto que sustituya a la vigente (ley ordinaria). Reducir los aforamientos de diputados, senadores y Gobierno exige reformar la Constitución; los autonómicos, cada Estatuto, como ya han hecho varias comunidades. Los dos tercios para la gracia colectiva piden reforma constitucional o, mientras tanto, un pacto escrito entre grupos."
+      },
+      "integra": "Recoge la exigencia de que nadie esté por encima de la ley y las condenas se cumplan, y la de que el perdón siga existiendo para casos humanos y no sea un privilegio de poderosos. El mismo límite vale para cualquier gobierno, sea del color que sea.",
+      "referencias": [
+        {
+          "lugar": "Italia",
+          "que": "La Constitución (art. 79) exige que la amnistía y el indulto general se aprueben por ley con dos tercios de los miembros de cada cámara, artículo por artículo y en la votación final.",
+          "url": "https://www.senato.it/sites/default/files/repository/Costituzione_ITALIANO.pdf"
+        },
+        {
+          "lugar": "Suiza",
+          "que": "Según un estudio comparado del Senado francés de 2007, los indultos federales no los decide el Gobierno: una comisión parlamentaria de gracia propone la decisión y la votan las dos cámaras reunidas.",
+          "url": "https://www.senat.fr/lc/lc177/lc177.pdf"
+        },
+        {
+          "lugar": "Canarias, Murcia, Cantabria, Baleares y Aragón",
+          "que": "Han suprimido en sus Estatutos el fuero especial de sus cargos, según el informe de la Comisión Europea de 2024, que añade que a nivel estatal no se había tomado ninguna medida.",
+          "url": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es"
+        },
+        {
+          "lugar": "Consejo de Europa (GRECO)",
+          "que": "En junio de 2025 seguía dando por no cumplida su recomendación a España de reformar el aforamiento de los miembros del Gobierno para que no entorpezca la justicia penal.",
+          "url": "https://rm.coe.int/grecorc5-2025-17-final-eng-add-to-2nd-compliance-report-spain-public/1680b6ce89"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "El aforamiento protege a los cargos de querellas con intención política; quitarlo los expone a un goteo de denuncias ante cualquier juzgado.",
+          "r": "Por eso se mantiene para los actos del cargo. Para lo demás, el filtro es el de todos: el juez rechaza la querella sin base. El riesgo de uso político de las querellas existe y no desaparece."
+        },
+        {
+          "o": "El derecho de gracia lo ejerce el Rey a propuesta del Gobierno: un informe de otro órgano que pueda impedir el indulto podría vaciar esa competencia.",
+          "r": "La ley ya fija condiciones e informes previos. Si el Tribunal Constitucional viera exceso en el veto, el informe quedaría como obligatorio y público, con deber de motivar por escrito cuando el Gobierno se aparte de él."
+        },
+        {
+          "o": "Exigir dos tercios puede hacer imposible cualquier medida de gracia colectiva, incluso una que ayudara a cerrar un conflicto.",
+          "r": "Una medida así solo cierra heridas si la apoyan los dos lados. Italia exige dos tercios desde 1992 y aun así aprobó un indulto general en 2006: es difícil, no imposible."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Constitución de la República Italiana, art. 79 (Senado de Italia)",
+          "url": "https://www.senato.it/sites/default/files/repository/Costituzione_ITALIANO.pdf"
+        },
+        {
+          "t": "Senado de Francia: «L'amnistie et la grâce», estudio de legislación comparada n.º 177 (octubre de 2007)",
+          "url": "https://www.senat.fr/lc/lc177/lc177.pdf"
+        },
+        {
+          "t": "GRECO, quinta ronda: adenda al segundo informe de cumplimiento de España, GrecoRC5(2025)17",
+          "url": "https://rm.coe.int/grecorc5-2025-17-final-eng-add-to-2nd-compliance-report-spain-public/1680b6ce89"
+        },
+        {
+          "t": "Comisión Europea: Informe sobre el Estado de Derecho en 2024, capítulo de España",
+          "url": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es"
+        },
+        {
+          "t": "Comisión de Venecia: dictamen sobre los requisitos de las amnistías, CDL-AD(2024)003 (traducción al español)",
+          "url": "https://cepc.gob.es/sites/default/files/2024-04/Amnist%C3%ADa%20espa%C3%B1ol.pdf"
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada sobre los retrasos, o defender que, como la justicia es lenta, es legítimo saltársela o tomársela por la mano.",
+      "ideal": "Un plazo máximo legal por tipo de pleito con consecuencias si se incumple: refuerzo automático del juzgado y compensación al ciudadano. Plantilla de jueces ligada por ley a la mediana europea y a la carga de trabajo.",
+      "titulo": "Justicia con plazo garantizado y compensación",
+      "slug": "justicia-con-plazo-garantizado-y-compensacion",
+      "resumen": "El nivel avanzado fija plazos máximos, publica datos por juzgado y lleva los jueces a la media europea. El ideal convierte el plazo en un derecho exigible: si se supera, el juzgado recibe refuerzo de forma automática y el ciudadano una compensación sin tener que pleitear otra vez. La plantilla deja de depender del presupuesto de cada año y se liga a un indicador objetivo.",
+      "medidas": [
+        "Plazo máximo fijado por ley para cada tipo de procedimiento y cada instancia, revisado cada cuatro años con los datos reales de duración.",
+        "Alerta automática: el juzgado que supere el plazo en una parte fijada de sus asuntos recibe jueces y personal de refuerzo sin esperar a una decisión política.",
+        "Compensación tasada por cada año de retraso no causado por las partes, pagada por la Administración tras una simple queja previa ante el propio tribunal.",
+        "Plantilla ligada por ley a la mediana europea de jueces por habitante que publica el Consejo de Europa y a la carga de trabajo, con calendario de convocatorias a diez años.",
+        "Datos abiertos y comparables de duración, asuntos pendientes y resoluciones por juzgado, actualizados cada trimestre.",
+        "Expediente digital único y compatible en todo el país, y mediación previa que se evalúa: si en un tipo de asunto no reduce pleitos, se retira de ese tipo."
+      ],
+      "supone": {
+        "personas": "Quien reclama un despido, una herencia o una deuda sabe de antemano cuánto puede tardar como máximo su asunto. Si el plazo se incumple, no depende de la suerte del juzgado que le toque: recibe una compensación y su juzgado, refuerzos.",
+        "cuentas": "Es la medida más cara del tema: más jueces, fiscales y personal. España tenía 11,92 jueces por 100.000 habitantes frente a una mediana europea de 17,43 (datos de 2022, Consejo de Europa), aunque su presupuesto de justicia por habitante ya superaba la mediana. No hay cifra oficial verificada de lo que costaría cerrar esa distancia.",
+        "puesta_en_marcha": "Reforma de la Ley Orgánica del Poder Judicial y de las leyes procesales para fijar los plazos y la compensación; ley de plantilla con calendario plurianual; acuerdo con las comunidades que gestionan los medios de la justicia. Formar a un juez lleva años: el objetivo de plantilla es a una década."
+      },
+      "integra": "Atiende a quien pide seguridad jurídica, cobro rápido de deudas y eficiencia en el gasto, y a quien pide que el trabajador, el inquilino o la víctima sin recursos no pierdan su derecho por agotamiento. Un plazo cierto sirve a los dos.",
+      "referencias": [
+        {
+          "lugar": "Consejo de Europa (CEPEJ)",
+          "que": "Su evaluación con datos de 2022 da a España 11,92 jueces profesionales por 100.000 habitantes, frente a una mediana europea de 17,43, y una duración estimada de 359 días para los asuntos civiles en primera instancia.",
+          "url": "https://rm.coe.int/spain/1680b1df89"
+        },
+        {
+          "lugar": "Comisión Europea",
+          "que": "Su informe de 2024 sobre España señala que el número de jueces por habitante es de los más bajos de la UE y que el Tribunal Supremo tardaba 691 días en los asuntos civiles y mercantiles en 2022.",
+          "url": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Compensar los retrasos puede acabar siendo un gasto más que no acorta los pleitos, y los plazos rígidos pueden empujar a resolver deprisa y peor.",
+          "r": "La compensación es la señal, no la solución: lo que acorta los pleitos es el refuerzo automático. El plazo es un máximo, no un objetivo, y la calidad se vigila con la proporción de sentencias revocadas en recurso."
+        },
+        {
+          "o": "Más jueces no garantiza más rapidez: España ya gasta en justicia por habitante más que la mediana europea, según el Consejo de Europa.",
+          "r": "Cierto, y por eso la plantilla se liga también a la carga de trabajo y a datos por juzgado. Si la organización y el expediente digital no mejoran, añadir plazas no bastará; el límite se reconoce."
+        },
+        {
+          "o": "Los medios de la justicia están repartidos entre el Estado y las comunidades autónomas; un plazo estatal obliga a quien no controla todos los recursos.",
+          "r": "Requiere un acuerdo de financiación entre administraciones. Sin él, la garantía solo sería exigible donde el Estado gestiona los medios, y habría que decirlo así."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "CEPEJ (Consejo de Europa): ficha de España, informe de evaluación de 2024 con datos de 2022",
+          "url": "https://rm.coe.int/spain/1680b1df89"
+        },
+        {
+          "t": "Comisión Europea: Informe sobre el Estado de Derecho en 2024, capítulo de España",
+          "url": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es"
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "No proponer nada, o justificar los delitos cometidos por una causa política propia y negar las sentencias, valga para la causa que valga.",
+      "ideal": "Un marco estable para cerrar conflictos: gracia solo por dos tercios y sin urgencia, condicionada a verdad, reparación a las víctimas y compromiso de actuar dentro de la ley, aplicada por jueces y revocable si se incumple.",
+      "titulo": "Reconciliación con reglas: verdad, reparación y pacto",
+      "slug": "reconciliacion-con-verdad-reparacion-y-dos-tercios",
+      "resumen": "El nivel avanzado pide una reconciliación con verdad y reparación, pactada por mayorías amplias. El ideal lo convierte en una ley marco, anterior a cualquier caso concreto, que fija mayoría, procedimiento y condiciones: quién decide, qué debe contar y reparar quien se acoge, qué papel tienen las víctimas y qué pasa si se rompe el compromiso. Así el perdón deja de negociarse a cambio de votos.",
+      "medidas": [
+        "Ley marco de medidas de gracia por conflictos políticos, aprobada antes de cualquier caso: fija reglas iguales para todos los conflictos futuros.",
+        "Aprobación por dos tercios del Congreso, por el procedimiento ordinario y con audiencia pública a víctimas, juristas y órganos consultivos; nunca por vía de urgencia.",
+        "Ámbito acotado: hechos y fechas definidos, con relación directa con el conflicto. Quedan fuera las violaciones graves de derechos humanos y la corrupción para lucro propio.",
+        "Quien se acoge reconoce los hechos ante un órgano independiente, repara el daño y asume por escrito actuar solo por vías legales.",
+        "Los jueces deciden caso por caso quién cumple los requisitos; las víctimas pueden recurrir y conservan su derecho a ser indemnizadas.",
+        "Beneficio condicional: si la persona vuelve a delinquir por la misma causa en el plazo fijado, un tribunal revoca la medida y la pena se cumple."
+      ],
+      "supone": {
+        "personas": "Las víctimas son oídas, conocen la verdad y reciben reparación. Quien cometió delitos en un conflicto político tiene una salida, pero con condiciones públicas e iguales para todos. El resto sabe que el perdón no se ha cambiado por apoyos parlamentarios.",
+        "cuentas": "Coste bajo para el Estado: un órgano temporal que recoge los reconocimientos y un fondo de reparación a las víctimas, cuya cuantía depende de cada caso. No hay cifras verificadas que dar.",
+        "puesta_en_marcha": "Ley orgánica marco. Para que los dos tercios obliguen de verdad hace falta llevar la regla a la Constitución, vía que la Comisión de Venecia consideró preferible para regular la amnistía cuando llegue el momento; hasta entonces, un compromiso público de los grupos de no aprobar medidas de gracia con menos apoyo."
+      },
+      "integra": "Recoge la demanda de que la ley se cumpla, nadie quede impune por interés de parte y las víctimas cuenten, y la de que los conflictos políticos se resuelvan con política y no solo con cárcel. Ningún bando puede aprobarla solo.",
+      "referencias": [
+        {
+          "lugar": "Comisión de Venecia (Consejo de Europa)",
+          "que": "Su dictamen de marzo de 2024 pide que las amnistías se aprueben por una mayoría cualificada amplia y sin procedimiento de urgencia, con un vínculo causal estricto con los hechos y con jueces que decidan cada caso.",
+          "url": "https://cepc.gob.es/sites/default/files/2024-04/Amnist%C3%ADa%20espa%C3%B1ol.pdf"
+        },
+        {
+          "lugar": "Irlanda del Norte (Reino Unido)",
+          "que": "La ley de 1998 permite excarcelar antes de tiempo solo a presos que no apoyen a organizaciones sin un alto el fuego completo; salen con una licencia que se suspende y puede revocarse si incumplen.",
+          "url": "https://www.legislation.gov.uk/ukpga/1998/35/enacted"
+        },
+        {
+          "lugar": "Sudáfrica",
+          "que": "La Comisión de la Verdad y la Reconciliación solo daba amnistía por actos con objetivo político a quien ofrecía un relato completo y veraz; las violaciones graves se veían en audiencia pública, con las víctimas avisadas y con derecho a declarar.",
+          "url": "https://sabctrc.saha.org.za/reports/volume6/section1/chapter1/subsection5.htm"
+        },
+        {
+          "lugar": "Italia",
+          "que": "La Constitución (art. 79) solo permite la amnistía por ley aprobada con dos tercios de los miembros de cada cámara.",
+          "url": "https://www.senato.it/sites/default/files/repository/Costituzione_ITALIANO.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Con dos tercios, la minoría tiene veto y un conflicto puede quedar enquistado durante años aunque la mayoría quiera cerrarlo.",
+          "r": "Es un límite real. A cambio, lo que se aprueba no queda en cuestión con el siguiente cambio de gobierno. Los indultos individuales, motivados y con informe independiente, siguen disponibles entretanto."
+        },
+        {
+          "o": "Condicionar el perdón a reconocer los hechos puede chocar con el derecho a no declarar contra uno mismo y con la libertad ideológica.",
+          "r": "No se exige renunciar a ninguna idea, solo a los medios ilegales, y acogerse es voluntario. Sudáfrica condicionó la amnistía a contar la verdad; quien no quiere hacerlo conserva sus garantías en el proceso ordinario."
+        },
+        {
+          "o": "Una ley marco no ata al legislador futuro: otra mayoría puede saltársela con una ley posterior.",
+          "r": "Cierto mientras la regla no esté en la Constitución. La ley marco eleva el coste político de saltársela y ofrece un criterio a los tribunales, pero la garantía plena exige reforma constitucional."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Comisión de Venecia: dictamen sobre los requisitos de las amnistías, CDL-AD(2024)003 (traducción al español)",
+          "url": "https://cepc.gob.es/sites/default/files/2024-04/Amnist%C3%ADa%20espa%C3%B1ol.pdf"
+        },
+        {
+          "t": "Consejo de Europa: nota sobre la adopción del dictamen de la Comisión de Venecia sobre amnistías (marzo de 2024)",
+          "url": "https://www.coe.int/en/web/portal/-/venice-commission-adopts-opinion-on-the-rule-of-law-requirements-of-amnesties-with-particular-reference-to-the-amnesty-bill-in-spain"
+        },
+        {
+          "t": "Northern Ireland (Sentences) Act 1998 (legislation.gov.uk)",
+          "url": "https://www.legislation.gov.uk/ukpga/1998/35/enacted"
+        },
+        {
+          "t": "Sentence Review Commissioners: el marco legal",
+          "url": "https://www.sentencereview.org.uk/node/5"
+        },
+        {
+          "t": "Informe de la Comisión de la Verdad y la Reconciliación de Sudáfrica, volumen 6, sección 1, capítulo 1",
+          "url": "https://sabctrc.saha.org.za/reports/volume6/section1/chapter1/subsection5.htm"
+        },
+        {
+          "t": "Constitución de la República Italiana, art. 79 (Senado de Italia)",
+          "url": "https://www.senato.it/sites/default/files/repository/Costituzione_ITALIANO.pdf"
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No proponer nada, o defender que el Gobierno o la mayoría controlen a jueces y fiscales, o señalar a jueces por sus sentencias.",
+      "ideal": "Vocales judiciales del CGPJ elegidos por todos los jueces con un voto que asegure pluralidad; vocales juristas por mayoría reforzada y sorteo si hay bloqueo; Fiscal General con mandato único, largo y sin órdenes del Gobierno.",
+      "titulo": "Un poder judicial que no depende de ninguna mayoría",
+      "slug": "jueces-elegidos-por-jueces-y-fiscalia-autonoma",
+      "resumen": "El nivel avanzado pide un sistema de elección que no dependa de ninguna mayoría y una Fiscalía autónoma. El ideal dice cómo: los jueces eligen directamente a sus vocales, con cautelas para que las asociaciones no reproduzcan los bloques de los partidos; el Parlamento conserva la elección de los juristas, pero con un desbloqueo automático; y nombramientos y Fiscalía quedan sujetos a reglas públicas.",
+      "medidas": [
+        "Los vocales judiciales los eligen todos los jueces en activo, por voto directo y secreto, con candidaturas avaladas por un número pequeño de compañeros y no solo por asociaciones.",
+        "Sistema de voto que impida que una sola asociación o corriente ocupe todos los puestos: voto limitado o proporcional y presencia de todas las categorías de la carrera.",
+        "Los vocales juristas los elige el Parlamento por tres quintos tras comparecencia pública; si pasan seis meses sin acuerdo, se sortean entre los candidatos declarados idóneos.",
+        "Altos cargos judiciales nombrados por concurso con baremo público y resolución motivada y recurrible; periodo de espera entre un cargo político y la vuelta al juzgado.",
+        "Fiscal General con un mandato único y largo que no coincida con la legislatura y sin cargo político reciente; toda comunicación del Gobierno con la Fiscalía, por escrito y pública.",
+        "Presupuesto y plantilla propios para la Fiscalía, gestionados por ella y sometidos al control ordinario de las cuentas públicas."
+      ],
+      "supone": {
+        "personas": "Quien pleitea contra una administración o ve juzgar a un político puede confiar en que quien asciende, sanciona o inspecciona a ese juez no debe el puesto a un partido. Y en que el fiscal del caso no recibe indicaciones del Gobierno de turno.",
+        "cuentas": "Sin coste relevante: son reglas de elección y de nombramiento. La autonomía presupuestaria de la Fiscalía reordena partidas que ya existen. No hay cifras verificadas que dar.",
+        "puesta_en_marcha": "Reforma de la Ley Orgánica del Poder Judicial para la elección de los vocales judiciales, sobre la que el propio Consejo ya presentó dos opciones; reforma del Estatuto del Ministerio Fiscal. El nombramiento del Fiscal General a propuesta del Gobierno está en la Constitución: desligarlo del todo exige reformarla."
+      },
+      "integra": "Responde a quien teme que una mayoría política ocupe la justicia y a quien teme una judicatura cerrada sobre sí misma y sin control democrático: los jueces eligen a los suyos, el Parlamento a los juristas, y las reglas de voto impiden que mande un solo bloque, político o asociativo.",
+      "referencias": [
+        {
+          "lugar": "Consejo de Europa",
+          "que": "La Recomendación CM/Rec(2010)12 fija que al menos la mitad de los miembros de un consejo judicial sean jueces elegidos por sus compañeros, de todos los niveles y con pluralidad interna.",
+          "url": "https://rm.coe.int/16807096c1"
+        },
+        {
+          "lugar": "Italia",
+          "que": "Dos tercios de los miembros electivos del Consejo Superior de la Magistratura los eligen los propios magistrados y un tercio el Parlamento, entre catedráticos de Derecho y abogados con quince años de ejercicio; cuatro años, sin reelección inmediata.",
+          "url": "https://www.quirinale.it/page/csm_en"
+        },
+        {
+          "lugar": "Comisión de Venecia (Consejo de Europa)",
+          "que": "Su dictamen sobre España, publicado en octubre de 2025, concluye que la elección directa de los vocales judiciales por los jueces cumple el estándar europeo, y pide medidas añadidas contra la politización interna.",
+          "url": "https://www.coe.int/en/web/portal/-/venice-commission-opinion-on-election-of-judicial-members-of-the-general-council-of-the-judiciary-of-spain"
+        },
+        {
+          "lugar": "Portugal",
+          "que": "El Procurador General de la República tiene un mandato de seis años. Lo nombra y lo cesa el Presidente de la República a propuesta del Gobierno, de modo que el nombramiento sigue siendo político.",
+          "url": "https://en.ministeriopublico.pt/node/4084"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Si los jueces eligen a quienes gobiernan a los jueces, el poder judicial se vuelve corporativo y las asociaciones judiciales sustituyen a los partidos.",
+          "r": "El riesgo lo señala la propia Comisión de Venecia. Por eso hay vocales juristas de elección parlamentaria, avales individuales y un voto que reparte los puestos. Reduce el riesgo; no lo elimina."
+        },
+        {
+          "o": "La justicia emana del pueblo: quitar al Parlamento la elección de los vocales judiciales resta legitimidad democrática al gobierno de los jueces.",
+          "r": "El Parlamento sigue eligiendo a los vocales juristas y hace las leyes que los jueces aplican. El estándar del Consejo de Europa pide que al menos la mitad sean jueces elegidos por jueces precisamente para separar poderes."
+        },
+        {
+          "o": "Un sorteo de desbloqueo puede sentar en el Consejo a personas sin apoyo de nadie, y un Fiscal General con mandato blindado no responde ante nadie.",
+          "r": "El sorteo es solo entre candidatos ya declarados idóneos y existe para no tener que usarse. El Fiscal General rinde cuentas ante el Parlamento con informes y comparecencias, y puede ser cesado por causas fijadas en la ley."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Consejo de Europa: Recomendación CM/Rec(2010)12 sobre los jueces: independencia, eficiencia y responsabilidades",
+          "url": "https://rm.coe.int/16807096c1"
+        },
+        {
+          "t": "Consejo de Europa: dictamen de la Comisión de Venecia sobre la elección de los vocales judiciales del CGPJ (octubre de 2025)",
+          "url": "https://www.coe.int/en/web/portal/-/venice-commission-opinion-on-election-of-judicial-members-of-the-general-council-of-the-judiciary-of-spain"
+        },
+        {
+          "t": "GRECO, cuarta ronda: segunda adenda al segundo informe de cumplimiento de España, GrecoRC4(2024)10",
+          "url": "https://rm.coe.int/grecorc4-2024-10-final-eng-2nd-add-to-the-2nd-compliance-report-spain-/1680b5482c"
+        },
+        {
+          "t": "Presidencia de la República Italiana: el Consejo Superior de la Magistratura",
+          "url": "https://www.quirinale.it/page/csm_en"
+        },
+        {
+          "t": "Ministerio Público de Portugal: el Procurador General de la República",
+          "url": "https://en.ministeriopublico.pt/node/4084"
+        },
+        {
+          "t": "EFE: la Comisión Europea urge a España a desvincular la Fiscalía del Gobierno (17 de julio de 2026)",
+          "url": "https://www.menorca.info/actualidad/nacional/2026/07/17/2672137/comision-urge-espana-desvincular-fiscalia-gobierno-lamenta-pocos-avances-anticorrupcion.html"
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada, o restar importancia a la corrupción de los propios, atacar a quien la investiga o defender la opacidad de reuniones y cuentas.",
+      "ideal": "Todo contacto para influir en una norma, un contrato o una subvención queda publicado junto a la decisión; una autoridad independiente, con presupuesto propio, investiga y sanciona; quien denuncia queda protegido y resarcido.",
+      "titulo": "Poder a la vista: huella pública y autoridad propia",
+      "slug": "huella-publica-y-autoridad-anticorrupcion-independiente",
+      "resumen": "El nivel avanzado crea una autoridad anticorrupción con poder de investigar y publica quién influyó en cada ley. El ideal lo extiende a toda decisión con dinero público (contratos, subvenciones, nombramientos), incluye a los asesores, da a la autoridad presupuesto y capacidad de sanción propios, y pone las puertas giratorias bajo un control independiente. La transparencia pasa a ser automática, no a petición.",
+      "medidas": [
+        "Registro obligatorio y gratuito de grupos de interés, con declaración periódica de a quién se contactó, sobre qué asunto y con qué resultado buscado; sanción a quien no declare.",
+        "Huella de cada norma: lista pública de reuniones, documentos recibidos y cambios introducidos desde el primer borrador, publicada junto al texto oficial.",
+        "Agendas completas de ministros, altos cargos, diputados y asesores, publicadas en formato abierto en un plazo de días, no de meses.",
+        "Autoridad de integridad independiente del Gobierno, con presupuesto propio y dirección elegida por mayoría reforzada: investiga, revisa las declaraciones de bienes y sanciona.",
+        "Periodo de espera tras dejar el cargo, autorizado y vigilado por esa autoridad y no por un ministerio; contratos y subvenciones publicados íntegros, con el dueño real de la empresa.",
+        "Protección plena de quien denuncia: canal seguro, defensa jurídica y compensación por represalias; medios estables para la fiscalía y los juzgados que llevan corrupción."
+      ],
+      "supone": {
+        "personas": "Cualquiera puede ver quién se reunió con quién antes de una ley o un contrato, y comprobar si lo aprobado coincide con lo que pedía una empresa, un sindicato o una asociación. El funcionario que ve algo irregular puede contarlo sin jugarse el puesto.",
+        "cuentas": "Coste moderado: una autoridad con personal propio y sistemas de publicación. No hay cifra oficial verificada. El retorno esperado es el dinero público que deja de perderse en contratos irregulares, que tampoco está cuantificado de forma fiable.",
+        "puesta_en_marcha": "Aprobar la ley de grupos de interés, que el Consejo de Ministros aprobó en enero de 2025 y que en julio de 2026 seguía sin salir del Congreso, ampliándola a agendas y asesores; ley que saque del ministerio el control de los conflictos de intereses; reforma procesal para acortar las causas de corrupción."
+      },
+      "integra": "Sirve a quien desconfía de que las grandes empresas escriban las leyes y a quien desconfía del gasto público, las subvenciones y los nombramientos a dedo: la misma luz cae sobre empresas, sindicatos, asociaciones y administraciones. Defender intereses sigue siendo legítimo; hacerlo a escondidas, no.",
+      "referencias": [
+        {
+          "lugar": "Irlanda",
+          "que": "Desde septiembre de 2015, quien hace lobby debe inscribirse y declarar tres veces al año sus contactos con cargos públicos. El registro es gratuito y de consulta pública, y lo lleva una comisión de ética pública.",
+          "url": "https://lobbying.ie/help-resources/information-for-lobbyists/quick-guide-to-the-act"
+        },
+        {
+          "lugar": "Consejo de Europa (GRECO)",
+          "que": "En junio de 2025 no daba por cumplida del todo ninguna de sus 19 recomendaciones a España de la quinta ronda; entre las pendientes, las reglas para asesores y la independencia de la Oficina de Conflictos de Intereses.",
+          "url": "https://rm.coe.int/grecorc5-2025-17-final-eng-add-to-2nd-compliance-report-spain-public/1680b6ce89"
+        },
+        {
+          "lugar": "Comisión Europea",
+          "que": "Según la agencia EFE, su informe de 2026 pide a España aprobar la ley de grupos de interés con un registro público obligatorio y garantizar un órgano supervisor independiente y con capacidad real de detectar y sancionar.",
+          "url": "https://www.menorca.info/actualidad/nacional/2026/07/17/2672137/comision-urge-espana-desvincular-fiscalia-gobierno-lamenta-pocos-avances-anticorrupcion.html"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Publicar cada reunión puede enfriar el diálogo: quien tiene algo útil que contar a un ministerio dejará de hacerlo o lo hará por canales informales.",
+          "r": "El riesgo existe. Irlanda funciona desde 2015 con registro público y declaraciones periódicas. Se publica quién, con quién y sobre qué, no el secreto comercial. El contacto informal no declarado pasa a ser sancionable."
+        },
+        {
+          "o": "Una autoridad con poder de investigar y sancionar, fuera del Gobierno, puede convertirse en un arma política o duplicar el trabajo de fiscales y jueces.",
+          "r": "Sanciona faltas administrativas y pasa los delitos a la Fiscalía; sus actos se recurren ante los tribunales. Elegir su dirección por mayoría reforzada busca que no sea de nadie; no lo garantiza del todo."
+        },
+        {
+          "o": "Más obligaciones de publicación cargan de burocracia a empresas pequeñas, asociaciones modestas y ayuntamientos.",
+          "r": "Las obligaciones se gradúan por tamaño. En Irlanda, entre quienes actúan por cuenta propia, se registran los empleadores de más de diez empleados y ciertas entidades representativas, y el trámite es gratuito."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Lobbying.ie (Irlanda): resumen de las principales disposiciones de la ley de regulación del lobby",
+          "url": "https://lobbying.ie/help-resources/information-for-lobbyists/quick-guide-to-the-act"
+        },
+        {
+          "t": "Regulation of Lobbying Act 2015 (Irish Statute Book)",
+          "url": "https://www.irishstatutebook.ie/eli/2015/act/5/enacted/en/html"
+        },
+        {
+          "t": "GRECO, quinta ronda: adenda al segundo informe de cumplimiento de España, GrecoRC5(2025)17",
+          "url": "https://rm.coe.int/grecorc5-2025-17-final-eng-add-to-2nd-compliance-report-spain-public/1680b6ce89"
+        },
+        {
+          "t": "EFE: la Comisión Europea lamenta los pocos avances anticorrupción de España (17 de julio de 2026)",
+          "url": "https://www.menorca.info/actualidad/nacional/2026/07/17/2672137/comision-urge-espana-desvincular-fiscalia-gobierno-lamenta-pocos-avances-anticorrupcion.html"
+        },
+        {
+          "t": "Comisión Europea: Informe sobre el Estado de Derecho en 2024, capítulo de España",
+          "url": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es"
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "No proponer nada, o poner en duda sin pruebas la limpieza de las elecciones, o defender saltarse las instituciones representativas.",
+      "ideal": "Una asamblea ciudadana permanente por sorteo que fija temas y obliga al Congreso a responder y votar; iniciativas populares con debate garantizado; listas desbloqueadas y una ley electoral que solo cambia por consenso amplio.",
+      "titulo": "Democracia de tres voces: urna, sorteo y firma",
+      "slug": "asamblea-ciudadana-permanente-e-iniciativa-con-voto",
+      "resumen": "El nivel avanzado prevé asambleas por sorteo para los grandes temas, consultas regladas y una reforma electoral pactada. El ideal las hace permanentes y con consecuencias: un consejo ciudadano sorteado decide qué se delibera, el Congreso queda obligado a contestar y votar en plazo, y las iniciativas con firmas suficientes no pueden caducar en un cajón. La última palabra sigue siendo del Parlamento o de las urnas.",
+      "medidas": [
+        "Consejo ciudadano permanente, elegido por sorteo y renovado por partes, que decide cada año qué temas se llevan a una asamblea ciudadana.",
+        "Asambleas por sorteo equilibrado en edad, sexo, territorio y estudios, con dieta, permiso laboral, expertos de posiciones opuestas y sesiones públicas.",
+        "Respuesta obligada: el Congreso estudia cada recomendación en comisión, el Gobierno contesta por escrito cuál acepta y por qué, y el Pleno vota en un plazo máximo de un año.",
+        "Iniciativa legislativa popular con mínimo de firmas ligado al censo, firma digital, y debate y votación garantizados en plazo, con sus promotores defendiéndola en el Pleno.",
+        "Listas desbloqueadas: el votante puede marcar u ordenar candidatos dentro de la lista que elige.",
+        "Reglas del juego protegidas: cambios en la ley electoral y en las consultas solo por dos tercios; debates electorales obligatorios y administración electoral independiente."
+      ],
+      "supone": {
+        "personas": "Cualquier vecino puede salir sorteado para deliberar unos fines de semana sobre un gran tema, con los gastos cubiertos, y saber que el Congreso tendrá que contestar. Quien reúne firmas sabe que su propuesta se votará. Y al votar se elige también a la persona, no solo la lista.",
+        "cuentas": "Coste pequeño frente al presupuesto del Estado: sorteo, dietas, secretaría y expertos de unas pocas asambleas al año. En la Comunidad germanófona de Bélgica el presupuesto anual lo propone el propio consejo ciudadano y lo fija el parlamento. No hay cifra verificada para España.",
+        "puesta_en_marcha": "Ley orgánica o reforma del Reglamento del Congreso para crear el consejo y obligar a responder; reforma de la ley de iniciativa popular y de la ley electoral. Bajar el mínimo de firmas que fija la Constitución, o hacer vinculante alguna consulta, exige reformarla. Primer ciclo completo en dos años."
+      },
+      "integra": "Recoge la demanda de más voz directa entre elecciones y la de preservar la democracia representativa y la estabilidad: el sorteo y las firmas proponen, el Parlamento o las urnas deciden. El sorteo da sitio a quien no milita en nada, piense como piense.",
+      "referencias": [
+        {
+          "lugar": "Bélgica (Comunidad germanófona)",
+          "que": "Desde septiembre de 2019 tiene un Consejo Ciudadano permanente de 24 personas sorteadas que elige los temas, y asambleas sorteadas de hasta 50. El parlamento lo aprobó por unanimidad y está obligado a responder a sus recomendaciones.",
+          "url": "https://www.futuregenerations.be/files/documents/news/20190226_dgpermanentcitizensassembly_pressrelease.pdf"
+        },
+        {
+          "lugar": "Irlanda (Asamblea Ciudadana)",
+          "que": "Sus miembros salen de un sorteo estratificado entre hogares invitados al azar. Una comisión del Parlamento examina el informe y el Gobierno responde qué recomendaciones acepta y cómo las aplicará; no son vinculantes.",
+          "url": "https://citizensassembly.ie/faq"
+        },
+        {
+          "lugar": "Irlanda (asamblea de 2016-2018)",
+          "que": "Una asamblea de 99 ciudadanos elegidos al azar trató cinco temas y entregó sus informes al Parlamento. Uno de ellos dio paso, tras el informe de una comisión parlamentaria, a un referéndum celebrado el 25 de mayo de 2018.",
+          "url": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Unas decenas de personas sorteadas no representan a nadie ni rinden cuentas, y puede dirigirlas quien elige a los expertos y redacta las preguntas.",
+          "r": "Por eso no deciden: recomiendan, y vota el Parlamento. La selección de expertos debe ser plural y pública. El riesgo de dirigir el debate existe; lo reduce que un consejo sorteado, y no el Gobierno, fije los temas."
+        },
+        {
+          "o": "Obligar al Congreso a votar cada recomendación o iniciativa puede saturar la agenda y generar frustración si casi todo se rechaza.",
+          "r": "El número de asambleas al año es limitado y el mínimo de firmas filtra. El rechazo motivado también es una respuesta; lo que se evita es el silencio. Si se rechaza casi todo, la frustración será real."
+        },
+        {
+          "o": "Las listas desbloqueadas encarecen las campañas personales y pueden debilitar la cohesión de los grupos parlamentarios.",
+          "r": "Es un coste conocido de ese sistema. Se limita con topes de gasto por candidato y manteniendo la lista como base: el votante puede alterar el orden, pero no está obligado a hacerlo."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Nota de prensa sobre el diálogo ciudadano permanente de la Comunidad germanófona de Bélgica (febrero de 2019)",
+          "url": "https://www.futuregenerations.be/files/documents/news/20190226_dgpermanentcitizensassembly_pressrelease.pdf"
+        },
+        {
+          "t": "The Citizens' Assembly (Irlanda): preguntas frecuentes",
+          "url": "https://citizensassembly.ie/faq"
+        },
+        {
+          "t": "OCDE, Observatorio de Innovación en el Sector Público: The Irish Citizens' Assembly",
+          "url": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/"
+        }
+      ]
+    }
+  ]
+}

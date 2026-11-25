@@ -1,0 +1,377 @@
+{
+  "clave": "tra",
+  "anti_tema": "No proponer nada sobre empleo o pensiones, o romper la base: prometer sin decir cómo se paga, amparar el trabajo sin contrato o no cumplir la ley laboral.",
+  "ideal_tema": "Trabajo estable y bien pagado, con libertad para contratar y cambiar; una pensión pública igual para todos, ligada al IPC y al salario mínimo, y una edad de jubilación que sigue por fórmula a la esperanza de vida.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada sobre la cuantía de las pensiones, o plantear dejar de actualizarlas o de pagar las ya reconocidas.",
+      "ideal": "Una pensión pública igual para todos los mayores residentes, por encima del umbral de pobreza, fijada como porcentaje del salario mínimo neto y con la garantía de no subir nunca menos que el IPC.",
+      "titulo": "Pensión básica igual para todos, ligada a IPC y SMI",
+      "slug": "pension-basica-igual-ligada-ipc-y-salario-minimo",
+      "resumen": "Hoy la pensión pública repite las diferencias de la vida laboral: quien cobró más, cobra más. El ideal es una sola pensión pública, igual para todos, que se gana por años de residencia y no por lo cotizado. Va más lejos que lo avanzado porque no solo evita la pobreza: deja de trasladar la desigualdad a la vejez y ata la suerte de los jubilados a la de quienes trabajan.",
+      "medidas": [
+        "Una cuantía única para toda persona en edad de jubilación, completa con una vida de residencia en España y proporcional si se ha residido menos, como en Países Bajos o Dinamarca.",
+        "Cuantía fijada por ley como un porcentaje del salario mínimo neto, nunca por debajo del umbral de pobreza, con un importe para quien vive solo y otro para quien convive.",
+        "Doble ancla: sube cada año con el salario mínimo y, como mínimo, con el IPC. Si un año el IPC la deja por encima del porcentaje fijado, las subidas siguientes absorben la diferencia.",
+        "Igual para hombres y mujeres por diseño: al no depender de la carrera laboral, los años dedicados a cuidar no reducen la pensión.",
+        "Lo que cada uno quiera por encima se construye con ahorro complementario, de empresa o personal, con cuentas claras y sin cargo al sistema público.",
+        "Informe anual público: cuántos mayores quedan bajo el umbral de pobreza y qué relación guarda la pensión con el salario mínimo y con el salario medio."
+      ],
+      "supone": {
+        "personas": "Quien hoy cobra la mínima o una no contributiva cobraría más. Quien tiene una pensión alta recibiría del sistema público lo mismo que los demás y completaría con su ahorro. Las pensiones ya reconocidas se respetan: el cambio se aplica poco a poco a quienes aún están lejos de jubilarse.",
+        "cuentas": "No hay un cálculo oficial para España y no damos cifra: el coste depende del porcentaje del salario mínimo que se elija. Según la AIReF, con las reglas actuales el gasto en pensiones ya pasará del 12,7 % del PIB en 2022 al 16,1 % en 2050. Una pensión igual solo cuadra si la cuantía se fija mirando a esa senda y la transición dura décadas.",
+        "puesta_en_marcha": "Cambiar la Ley General de la Seguridad Social con un acuerdo amplio en el Pacto de Toledo. Transición por generaciones, de varias décadas: lo ya cotizado se reconoce con las reglas actuales y lo nuevo con las del ideal. Hace falta además un ahorro complementario al alcance de los sueldos medios y bajos."
+      },
+      "integra": "Recoge la demanda de igualdad y de que nadie sea pobre en la vejez, y también la de un sistema público acotado y previsible: el Estado garantiza una base y cada persona decide cuánto ahorrar por encima. Y une a jubilados y trabajadores: suben juntos.",
+      "referencias": [
+        {
+          "lugar": "Países Bajos (SVB, pensión AOW)",
+          "que": "La pensión pública (AOW) se gana a razón de un 2 % por cada año vivido o trabajado en el país durante los 50 anteriores a la edad de jubilación. La cuantía depende de esos años y de si se vive solo o con otro adulto.",
+          "url": "https://svb.nl/en/aow-pension/aow-pension-in-brief"
+        },
+        {
+          "lugar": "Países Bajos (ligada al salario mínimo)",
+          "que": "Las cuantías de la AOW se fijan como un porcentaje del salario mínimo neto neerlandés, de modo que la pensión pública se mueve con el suelo salarial de quienes trabajan.",
+          "url": "https://svb.nl/en/aow-pension/how-much-will-you-get-in-aow-pension-and-other-pensions/aow-amounts-depending-on-living-situation"
+        },
+        {
+          "lugar": "Nueva Zelanda (NZ Super)",
+          "que": "La pensión pública se paga a los residentes desde los 65 años con independencia de lo que ganen, ahorren o posean. Para una pareja, la cuantía neta se basa en el 66 % del salario medio después de impuestos.",
+          "url": "https://sorted.org.nz/about-nz-super/"
+        },
+        {
+          "lugar": "Dinamarca (folkepension)",
+          "que": "La pensión pública tiene un importe básico igual para todos y un suplemento que baja según los demás ingresos. Se cobra entera con 40 años de residencia y se actualiza con los salarios del sector privado.",
+          "url": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "El sistema español es contributivo: se cobra según lo cotizado. Una pensión igual rompe ese vínculo y afecta a derechos y expectativas de millones de personas.",
+          "r": "Es el límite más serio. Solo es viable con una transición de décadas que respete lo ya cotizado y con un ahorro complementario al alcance de los sueldos medios y bajos. Sin esas dos piezas no debe hacerse."
+        },
+        {
+          "o": "Coste: subir las pensiones bajas hasta una cuantía común y atarla al salario mínimo encarece un gasto que ya crece con el envejecimiento.",
+          "r": "Cierto. Por eso la doble ancla no es un «lo que más suba» permanente: lo que el IPC adelanta un año se absorbe después. Aun así, exige más ingresos públicos o aceptar una cuantía modesta."
+        },
+        {
+          "o": "Si cotizar más no da más pensión pública, hay menos incentivo para declarar todo el sueldo o para trabajar más años.",
+          "r": "El riesgo existe. Se reduce si la pensión básica se paga con impuestos generales y el ahorro complementario sí depende de lo aportado. Países Bajos y Nueva Zelanda la ligan a la residencia, no al sueldo."
+        }
+      ],
+      "fuentes": [
+        { "t": "SVB (Países Bajos): la pensión AOW en breve", "url": "https://svb.nl/en/aow-pension/aow-pension-in-brief" },
+        { "t": "SVB: cuantías de la AOW, basadas en un porcentaje del salario mínimo neto", "url": "https://svb.nl/en/aow-pension/how-much-will-you-get-in-aow-pension-and-other-pensions/aow-amounts-depending-on-living-situation" },
+        { "t": "CBS (Estadística de Países Bajos): la AOW se actualiza con el salario mínimo legal", "url": "https://www.cbs.nl/en-gb/news/2018/37/raised-state-pension-age-curbs-spending-on-benefits/indexation" },
+        { "t": "Work and Income (Gobierno de Nueva Zelanda): cuánto se cobra de NZ Super", "url": "https://www.workandincome.govt.nz/eligibility/seniors/superannuation/how-much-you-can-get" },
+        { "t": "Comisión Europea: ficha de pensiones de Dinamarca para el Ageing Report 2021", "url": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf" },
+        { "t": "La Moncloa: revalorización de las pensiones contributivas en 2026 (Ley 21/2021)", "url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2025/121225-revalorizacion-pensiones.aspx" }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "Negar que el envejecimiento encarece las pensiones, o proponer dejar de pagarlas o desmontar el sistema sin decir qué lo sustituye.",
+      "ideal": "Una edad de jubilación que se mueve por fórmula con la esperanza de vida, revisada cada cinco años y avisada con 15 de antelación, y un balance público que activa ajustes pactados si cotizantes e ingresos no alcanzan.",
+      "titulo": "Edad de jubilación ligada a la demografía, por fórmula",
+      "slug": "edad-jubilacion-ligada-esperanza-de-vida-y-balance",
+      "resumen": "Lo avanzado es pactar reglas para varias legislaturas. El ideal fija por fórmula las dos cosas que deciden si el sistema se sostiene: cuántos años se cobra y cuánta gente cotiza. La edad sigue a la esperanza de vida con una regla conocida y un balance anual dice si lo prometido se puede pagar. El Parlamento conserva la última palabra, pero decide con la regla delante.",
+      "medidas": [
+        "Edad legal ligada a la esperanza de vida a los 65 años según las tablas oficiales: se recalcula cada cinco años, se anuncia con 15 de antelación y nunca sube más de un año de una vez.",
+        "Reparto fijado en la ley de cada año de vida ganado entre trabajo y jubilación, para que no todo el aumento se convierta en más años de trabajo.",
+        "Balance anual del sistema, hecho por la AIReF: compara las pensiones prometidas con los cotizantes, los salarios y los ingresos previstos. Así entran en la cuenta la población activa y el empleo.",
+        "Si el balance sale negativo, se activa un ajuste pactado de antemano que reparte el esfuerzo entre ingresos, edad y subidas por encima del IPC. La garantía del IPC no se toca.",
+        "Jubilación flexible: salir antes o después de la edad legal con la pensión ajustada, combinar pensión y trabajo, y salida anticipada para oficios penosos y carreras muy largas.",
+        "Reglas aprobadas en el Pacto de Toledo por una mayoría amplia, con un voto del Congreso en cada revisión, como hace el Parlamento danés."
+      ],
+      "supone": {
+        "personas": "Cada generación sabe con 15 años de margen a qué edad podrá jubilarse, en vez de enterarse con cada reforma. Los jóvenes saben que la regla que pagan hoy seguirá cuando les toque. Quien tiene un trabajo físico duro o empezó muy joven conserva una salida antes.",
+        "cuentas": "La AIReF calcula que el gasto en pensiones pasará del 12,7 % del PIB en 2022 al 16,1 % en 2050. En su examen de 2025 la regla de gasto se cumplió por una décima (13,2 % frente a un límite del 13,3 %), y avisó de que cumplirla no garantiza la sostenibilidad. Dinamarca calcula que subir la edad de 69 a 70 años mejora sus cuentas en unos 15.000 millones de coronas desde 2040.",
+        "puesta_en_marcha": "Ley acordada en el Pacto de Toledo que fije la fórmula, el calendario de revisiones y el reparto del ajuste. La primera subida ligada a la fórmula no llegaría antes de 15 años. Encaja con el examen que la AIReF ya hace cada tres años: se amplía a un balance anual y la respuesta queda escrita antes de que haga falta."
+      },
+      "integra": "Recoge la exigencia de cuentas claras y de no pasar la factura a los jóvenes, y también la de proteger a quien tiene trabajos duros y no dejar la pensión expuesta a recortes por sorpresa. La regla es automática; la decisión sigue siendo democrática.",
+      "referencias": [
+        {
+          "lugar": "Dinamarca (regla de 2006)",
+          "que": "Liga la edad de la pensión pública a la esperanza de vida a los 60 años, no a la población activa. El Parlamento la revisa cada cinco años, con 15 de aviso y un año de subida como máximo, para que la pensión dure unos 14,5 años. Es de 67 desde 2022.",
+          "url": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf"
+        },
+        {
+          "lugar": "Dinamarca (ley de mayo de 2025)",
+          "que": "El Parlamento aprobó subir la edad de pensión de 69 a 70 años en 2040, en aplicación de esa regla. No es automático: cada subida necesita un voto. El Gobierno planteó pactar una regla distinta para las siguientes.",
+          "url": "https://via.ritzau.dk/pressemeddelelse/14420769/forhojelse-af-folkepensionsalderen-i-2040-sikrer-velfaerden?lang=da"
+        },
+        {
+          "lugar": "Países Bajos",
+          "que": "Desde 2025 la edad de la pensión pública sube ocho meses por cada año que aumenta la esperanza de vida a los 65, y se fija con cinco años de antelación. Cada año ganado se reparte así entre trabajo y jubilación.",
+          "url": "https://www.cbs.nl/en-gb/news/2024/26/population-outlook-2050-more-residents-born-outside-the-netherlands/state-pension-age"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "Cada trabajador acumula su cotización (18,5 % de la base). Al jubilarse, el saldo se divide entre un factor que refleja la esperanza de vida de su generación. Si las obligaciones superan a los activos, las subidas se frenan de forma automática.",
+          "url": "https://www.pensionsmyndigheten.se/statistik/publikationer/orange-report-2020/4-how-the-national-pension-system-works.html"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "La esperanza de vida no es igual para todos: quien tiene menos renta o un trabajo duro vive menos y pagaría con su jubilación la longevidad de otros.",
+          "r": "Es cierto y la fórmula sola no lo arregla. Por eso hay salida anticipada para oficios penosos y carreras largas. Dinamarca debate lo mismo: una comisión propuso en 2022 que solo el 80 % de cada año ganado alargue la vida laboral."
+        },
+        {
+          "o": "Ninguna ley ata a los futuros gobiernos: una mayoría puede suspender la fórmula cuando toque una subida impopular.",
+          "r": "Así es. En Dinamarca el Parlamento vota cada subida, y en 2025 la aprobó. La regla no impide cambiarla: obliga a hacerlo a la vista de todos y explicando quién paga la diferencia."
+        },
+        {
+          "o": "Subir la edad no basta para cuadrar las cuentas en España y, unida a una pensión igual para todos, obliga a rehacer un sistema contributivo entero.",
+          "r": "Se reconoce. La edad es solo una pieza: el balance obliga a mirar también ingresos y empleo. Y el encaje con el sistema contributivo pide una transición larga, generación a generación."
+        }
+      ],
+      "fuentes": [
+        { "t": "Comisión Europea: ficha de pensiones de Dinamarca para el Ageing Report 2021", "url": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf" },
+        { "t": "Ministerio de Empleo de Dinamarca: la subida de la edad de pensión en 2040 (nota de prensa, 22-5-2025)", "url": "https://via.ritzau.dk/pressemeddelelse/14420769/forhojelse-af-folkepensionsalderen-i-2040-sikrer-velfaerden?lang=da" },
+        { "t": "Ministerio de Empleo de Dinamarca: ficha sobre una indexación más suave de la edad de pensión (mayo de 2022)", "url": "https://bm.dk/media/20705/1-faktaark-om-lempeligere-indeksering.pdf" },
+        { "t": "CBS (Estadística de Países Bajos): la edad de la pensión pública", "url": "https://www.cbs.nl/en-gb/news/2024/26/population-outlook-2050-more-residents-born-outside-the-netherlands/state-pension-age" },
+        { "t": "CaixaBank Research: evaluación de la AIReF a la reforma de las pensiones (abril de 2025)", "url": "https://www.caixabankresearch.com/es/economia-y-mercados/mercado-laboral-y-demografia/evaluacion-airef-reforma-pensiones-primer-match" },
+        { "t": "La Moncloa: informe de la AIReF sobre la regla de gasto en pensiones (31-3-2025)", "url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/paginas/2025/310325-saiz-reforma-sistema-pensiones.aspx" }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "No proponer nada sobre contratación, o defender el despido sin causa ni compensación, o impedir a la empresa ajustar plantilla aunque peligre.",
+      "ideal": "Un solo contrato indefinido con un coste de salida conocido desde el primer día, parte de él en una cuenta que el trabajador se lleva de empresa en empresa. A cambio, un seguro de paro alto y una recolocación rápida y evaluada.",
+      "titulo": "Contrato único con cuenta portátil y red de seguridad",
+      "slug": "contrato-unico-cuenta-portatil-y-seguro-de-recolocacion",
+      "resumen": "Lo avanzado propone una mochila que acompaña al trabajador. El ideal la convierte en un sistema completo de tres patas, como el danés: contratar y ajustar plantilla es sencillo y de coste previsible; quien pierde el empleo mantiene buena parte de su renta; y el servicio de empleo le acompaña hasta otro trabajo. La seguridad deja de estar en el puesto y pasa a estar en la persona.",
+      "medidas": [
+        "Un contrato indefinido como única forma normal de entrada, con los temporales limitados a causas tasadas (sustituciones, temporada), para que nadie encadene contratos.",
+        "Cuenta individual: la empresa aporta cada mes un porcentaje del sueldo bruto, como el 1,53 % de Austria. El saldo es del trabajador y no se pierde al cambiar de empresa ni al dimitir.",
+        "Indemnización adicional por despido fijada por ley según la antigüedad, igual para todos los contratos y exigible desde el primer día, como el pago de transición neerlandés.",
+        "Flexibilidad interna pactada antes que el despido: bolsas de horas, cambio de funciones y reducción temporal de jornada acordados con la plantilla.",
+        "Prestación de paro alta al principio y unida a un plan de búsqueda y formación con citas, ofertas y seguimiento; quien lo rechaza sin motivo pierde parte de la ayuda.",
+        "El despido discriminatorio o que vulnera derechos fundamentales sigue siendo nulo, con readmisión. La sencillez no llega hasta ahí."
+      ],
+      "supone": {
+        "personas": "Cambiar de trabajo deja de ser perder lo acumulado: la cuenta va con uno. Perder el empleo sigue siendo duro, pero con ingresos altos durante un tiempo y alguien que ayuda a encontrar otro. Para una pequeña empresa, hacer su primer contrato indefinido ya no es una apuesta de coste desconocido.",
+        "cuentas": "En Austria la empresa paga el 1,53 % del sueldo bruto cada mes desde el segundo mes de contrato. En Dinamarca el seguro de paro cubre hasta el 90 % del sueldo previo de los salarios bajos durante un máximo de dos años, y el Estado gastó 12.700 millones de coronas en medidas activas de empleo en 2019. Para España no hay estimación oficial y no damos cifra.",
+        "puesta_en_marcha": "Reforma del Estatuto de los Trabajadores pactada con sindicatos y patronal. La cuenta se aplica a los contratos nuevos y es voluntaria para los vigentes, como en Austria desde 2003. Antes de simplificar la salida, el servicio de empleo tiene que demostrar con datos que recoloca: sin esa pata el modelo no se sostiene."
+      },
+      "integra": "Recoge la demanda de las empresas de poder contratar y adaptarse sin miedo, y la de los trabajadores de no quedar desprotegidos. En vez de elegir entre empleo rígido o despido barato, protege a la persona y no al puesto.",
+      "referencias": [
+        {
+          "lugar": "Austria (Abfertigung neu)",
+          "que": "En los contratos iniciados desde 2003, la empresa ingresa cada mes el 1,53 % del sueldo bruto en una cuenta individual del trabajador, gestionada por una caja independiente. El derecho se conserva termine como termine el contrato.",
+          "url": "https://www.sozialministerium.gv.at/Themen/Arbeit/Arbeitsrecht/Entlohnung/Betriebliche-Mitarbeiter-und-Selbststaendigenvorsorge.html"
+        },
+        {
+          "lugar": "Dinamarca (flexiguridad)",
+          "que": "Une tres piezas: poca rigidez legal para contratar y despedir, un seguro de paro de hasta dos años que cubre hasta el 90 % del sueldo de los salarios más bajos, y políticas activas de empleo.",
+          "url": "https://www.star.dk/en/about-the-danish-agency-for-labour-market-and-recruitment/flexicurity"
+        },
+        {
+          "lugar": "Países Bajos (pago de transición)",
+          "que": "El trabajador despedido tiene derecho a un pago de transición desde el primer día de contrato, sea fijo o temporal: un tercio del sueldo mensual bruto por año trabajado, con un tope máximo.",
+          "url": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "El modelo danés es caro y descansa en un servicio de empleo que funciona. Copiar solo el despido fácil dejaría al trabajador español con menos protección y nada a cambio.",
+          "r": "Es el riesgo principal. Por eso importa el orden: primero la cuenta, la prestación y un servicio de empleo evaluado; solo después se simplifica la salida. Si la red no existe, el ideal no se cumple."
+        },
+        {
+          "o": "Un coste de despido conocido y pagado por adelantado puede abaratar el despido injusto y dejar sin reparar el daño real en los casos graves.",
+          "r": "Se mantiene la nulidad con readmisión cuando hay discriminación o se vulneran derechos, y ahí el juez conserva su papel. El límite se reconoce: en el resto de casos se cambia reparación a medida por certeza."
+        },
+        {
+          "o": "La aportación mensual a la cuenta es un coste laboral nuevo para todas las empresas, despidan o no.",
+          "r": "Sí. A cambio, la empresa no afronta un pago grande de golpe cuando peor le va. Qué parte de la indemnización actual pasa a la cuenta es justo lo que hay que pactar con sindicatos y patronal."
+        }
+      ],
+      "fuentes": [
+        { "t": "Ministerio de Asuntos Sociales de Austria: la previsión de empresa para trabajadores (Abfertigung neu)", "url": "https://www.sozialministerium.gv.at/Themen/Arbeit/Arbeitsrecht/Entlohnung/Betriebliche-Mitarbeiter-und-Selbststaendigenvorsorge.html" },
+        { "t": "Agencia danesa del mercado de trabajo (STAR): el modelo de flexiguridad", "url": "https://www.star.dk/en/about-the-danish-agency-for-labour-market-and-recruitment/flexicurity" },
+        { "t": "Gobierno de Países Bajos (business.gov.nl): el pago de transición tras el despido", "url": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/" }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No proponer nada sobre formación, o defender que reciclarse es asunto de cada uno y retirar la formación a quien está en paro.",
+      "ideal": "Un derecho a formarse toda la vida: cuenta personal con saldo anual, mayor para quien tiene menos estudios, y un permiso pagado para reciclarse a mitad de carrera. Solo se financia lo que publica sus resultados de empleo.",
+      "titulo": "Formarse toda la vida, con resultados públicos",
+      "slug": "derecho-formacion-toda-la-vida-con-resultados-publicos",
+      "resumen": "Lo avanzado da una cuenta de formación y evalúa las oficinas de empleo. El ideal añade lo que falta para que se use: tiempo pagado para estudiar cuando el oficio cambia, más saldo para quien menos tiene y una regla sencilla para el dinero público. Cada curso, centro y oficina publica cuánta gente coloca, y lo que no funciona deja de financiarse.",
+      "medidas": [
+        "Cuenta personal desde el primer empleo hasta la jubilación, con un saldo anual en euros que no se pierde al cambiar de empresa ni al quedarse en paro, como en Francia.",
+        "Saldo mayor para quien no tiene titulación y una recarga a partir de los 40 años para cambiar de oficio, como hace Singapur.",
+        "Permiso de formación retribuido: una parte del sueldo durante los meses de un curso largo a tiempo completo, con un máximo de meses a lo largo de la vida.",
+        "FP dual al alcance de todas las comarcas, con plazas en empresas y contenidos decididos junto a las organizaciones de cada oficio, como en Suiza.",
+        "Portal público con resultados por curso, centro y oficina de empleo: cuántos alumnos trabajan al cabo de un año y en qué. La financiación sigue a esos datos.",
+        "Orientación personal antes de gastar el saldo y un copago pequeño por curso, para frenar el fraude y los cursos sin valor."
+      ],
+      "supone": {
+        "personas": "Cualquiera puede aprender un oficio nuevo a los 45 sin quedarse sin ingresos. Quien dejó pronto los estudios recibe más, no menos. Y antes de apuntarse a un curso se puede ver cuánta gente encontró trabajo después de hacerlo.",
+        "cuentas": "Francia abona 500 euros al año por trabajador hasta 5.000 (800 y 8.000 para los menos cualificados) y pide al alumno 150 euros por curso. Singapur da 4.000 dólares de Singapur a los mayores de 40 y una ayuda del 50 % del sueldo, con tope de 3.000 al mes, hasta 24 meses. En Suiza, a la mayoría de las empresas formar aprendices les compensa. Para España no damos cifra.",
+        "puesta_en_marcha": "Ley estatal que cree la cuenta y el permiso, con acuerdo de las comunidades autónomas, que gestionan empleo y FP, y de sindicatos y patronal. Antes de repartir saldo hacen falta el portal de resultados y un registro fiable de cursos. Despliegue por fases, empezando por quienes no tienen titulación."
+      },
+      "integra": "Recoge la idea de que formarse es un derecho y una segunda oportunidad, y la de que el dinero público se gasta según resultados y con la empresa dentro. Más productividad es lo que permite a la vez salarios más altos y jornadas más cortas.",
+      "referencias": [
+        {
+          "lugar": "Francia (compte personnel de formation)",
+          "que": "Toda persona tiene una cuenta de formación desde que empieza a trabajar hasta que se jubila: 500 € al año hasta 5.000 € (800 y 8.000 para los menos cualificados). Los derechos se conservan al cambiar de empresa o perder el empleo.",
+          "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705"
+        },
+        {
+          "lugar": "Singapur (SkillsFuture Level-Up)",
+          "que": "Desde mayo de 2024 da 4.000 dólares de Singapur de crédito formativo a los mayores de 40 y, desde 2025, una ayuda del 50 % del sueldo medio (máximo 3.000 al mes, hasta 24 meses en la vida) para cursos largos a tiempo completo.",
+          "url": "https://www.moe.gov.sg/news/press-releases/20240304-new-skillsfuture-level-up-programme-to-boost-mid-career-upskilling-and-reskilling"
+        },
+        {
+          "lugar": "Suiza (formación profesional)",
+          "que": "Unos dos tercios de los jóvenes entran en la FP al acabar la enseñanza obligatoria, con unas 250 profesiones a elegir. La gobiernan juntos la Confederación, los cantones y las organizaciones profesionales.",
+          "url": "https://www.sbfi.admin.ch/dam/sbfi/en/dokumente/2024/07/bbch_2024.pdf.download.pdf/BBCH_2024_EN.pdf"
+        },
+        {
+          "lugar": "Dinamarca (jobindsats.dk)",
+          "que": "Un portal público de la agencia de empleo publica los datos y resultados de las políticas de empleo y permite comparar el rendimiento entre municipios y entre cajas de paro. Está abierto a cualquiera.",
+          "url": "https://star.dk/en/labour-market-monitoring/jobindsats-dk"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Las cuentas de formación atraen fraude y cursos de poco valor, y las aprovechan más quienes ya tienen estudios.",
+          "r": "Ocurre. Por eso el ideal exige resultados publicados, orientación previa, copago y más saldo para quien menos titulación tiene. Francia aplica hoy un copago de 150 euros por curso."
+        },
+        {
+          "o": "Medir oficinas y cursos por colocación invita a atender solo a los parados más fáciles de colocar.",
+          "r": "El riesgo es real. Se corrige comparando resultados entre personas de perfil parecido y publicando aparte los de parados de larga duración. Ningún indicador lo elimina del todo."
+        },
+        {
+          "o": "Empleo y FP los gestionan las comunidades autónomas: una cuenta estatal puede chocar con ellas o duplicar lo que ya existe.",
+          "r": "Sin acuerdo con las comunidades no funciona. La cuenta es de la persona y vale en todo el país; la oferta y la gestión siguen siendo autonómicas. Suiza reparte así los papeles entre Confederación y cantones."
+        }
+      ],
+      "fuentes": [
+        { "t": "Service-Public (Gobierno de Francia): compte personnel de formation de un asalariado", "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705" },
+        { "t": "Ministerio de Educación de Singapur: nuevo programa SkillsFuture Level-Up (4-3-2024)", "url": "https://www.moe.gov.sg/news/press-releases/20240304-new-skillsfuture-level-up-programme-to-boost-mid-career-upskilling-and-reskilling" },
+        { "t": "SEFRI (Gobierno de Suiza): la formación profesional en Suiza, hechos y cifras 2024", "url": "https://www.sbfi.admin.ch/dam/sbfi/en/dokumente/2024/07/bbch_2024.pdf.download.pdf/BBCH_2024_EN.pdf" },
+        { "t": "Agencia danesa del mercado de trabajo (STAR): el portal jobindsats.dk", "url": "https://star.dk/en/labour-market-monitoring/jobindsats-dk" }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada sobre horarios y cuidados, o justificar jornadas sin registro ni límite, horas extra sin pagar o la retirada de permisos.",
+      "ideal": "Menos horas a medida que sube la productividad, pactadas sector a sector y sin perder sueldo; permisos de cuidado iguales, pagados e intransferibles; y derecho a adaptar el horario salvo causa escrita de la empresa.",
+      "titulo": "Tiempo ganado con productividad y cuidados repartidos",
+      "slug": "jornada-ligada-a-productividad-y-cuidados-repartidos",
+      "resumen": "Lo avanzado es una jornada más corta por sectores y cuidados compartidos. El ideal le pone regla: cada convenio reparte por escrito las mejoras de productividad entre sueldo y tiempo libre; los días de cuidado son de cada progenitor, se pueden usar durante años y no se ceden; y el horario se adapta a la vida salvo que la empresa demuestre que no puede.",
+      "medidas": [
+        "Registro digital de jornada en todas las empresas, que el trabajador puede consultar y la Inspección comprobar, con las horas extra pagadas o compensadas.",
+        "Cláusula en cada convenio sectorial: qué parte de la mejora de productividad va a sueldo y cuál a reducir horas. Los sectores que más mejoran bajan antes, sin rebaja salarial.",
+        "Pruebas piloto evaluadas con datos públicos antes de generalizar una reducción, empezando por las administraciones, como se hizo en Islandia entre 2015 y 2019.",
+        "Permisos de nacimiento y cuidado iguales para ambos progenitores, pagados al 100 % e intransferibles, con días que se pueden guardar y usar durante la infancia, como en Suecia.",
+        "Derecho a pedir cambio de horario, de jornada o teletrabajo: la empresa responde por escrito en plazo y solo puede negarse por una causa organizativa concreta.",
+        "Horarios de administraciones, colegios y comercios acordados para terminar antes la jornada, y derecho a no atender mensajes de trabajo fuera de ella."
+      ],
+      "supone": {
+        "personas": "Más tardes libres sin cobrar menos, allí donde el sector puede pagarlo. Padres y madres con el mismo tiempo de cuidado, de modo que tener hijos deja de pesar más en la carrera de ellas. Y poder ajustar el horario para cuidar de un hijo o de un padre mayor sin tener que dejar el trabajo.",
+        "cuentas": "En las pruebas de Islandia, con 35-36 horas semanales y el mismo sueldo, la productividad se mantuvo o mejoró en la mayoría de los centros, según el informe de Autonomy y Alda. En España el permiso de 19 semanas se paga al 100 % de la base de cotización y lo asume la Seguridad Social. Ampliarlo cuesta dinero público; no damos cifra.",
+        "puesta_en_marcha": "La jornada se reduce por negociación colectiva: la ley fija el máximo y la cláusula obligatoria de reparto. Los permisos y el derecho a adaptar el horario requieren cambiar el Estatuto de los Trabajadores y la ley de Seguridad Social. Calendario gradual, con atención a las pequeñas empresas y a los servicios que no pueden parar."
+      },
+      "integra": "Recoge la demanda de tiempo para vivir y de igualdad entre hombres y mujeres, y la de no imponer por ley la misma jornada a un taller y a una gran empresa. Las horas bajan donde la productividad lo paga, y lo decide quien conoce el sector.",
+      "referencias": [
+        {
+          "lugar": "Suecia (prestación parental)",
+          "que": "Cada hijo da derecho a 480 días de prestación parental, 240 por progenitor. De ellos, 90 están reservados a cada uno y no se pueden ceder al otro. Se pueden usar hasta que el menor cumple 12 años.",
+          "url": "https://www.forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit"
+        },
+        {
+          "lugar": "Islandia (pruebas 2015-2019)",
+          "que": "Dos grandes pruebas del ayuntamiento y del Gobierno redujeron la semana a 35-36 horas, sin bajar el sueldo, a 2.500 trabajadores. Según el informe, el 86 % de los trabajadores del país tiene después menos horas o derecho a pedirlas.",
+          "url": "https://autonomy.work/portfolio/icelandsww/"
+        },
+        {
+          "lugar": "España (permiso por nacimiento y cuidado)",
+          "que": "Un real decreto-ley aprobado en julio de 2025 amplió el permiso por nacimiento y cuidado a 19 semanas por progenitor (32 en familias monoparentales), pagadas al 100 % de la base de cotización e intransferibles.",
+          "url": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Reducir horas sin bajar sueldo sube el coste por hora. Muchas pequeñas empresas y servicios de atención continua no pueden compensarlo con productividad.",
+          "r": "Por eso la reducción no es igual para todos ni llega por decreto: va unida a la productividad de cada sector y se pacta. El límite se reconoce: donde la productividad no mejora, la jornada baja más despacio."
+        },
+        {
+          "o": "Las pruebas de Islandia las organizaron administraciones públicas y su informe lo firman dos centros de estudios, no un evaluador oficial. No prueban que funcione en toda la economía.",
+          "r": "Es una objeción justa. Por eso el ideal pide pilotos propios, evaluados con datos públicos y por alguien independiente, antes de generalizar nada."
+        },
+        {
+          "o": "Permisos largos e intransferibles suponen más gasto público y ausencias difíciles de cubrir en plantillas pequeñas.",
+          "r": "Sí. La prestación la paga la Seguridad Social y no la empresa, y el uso flexible permite planificar. Aun así, sustituir a alguien en una empresa de cinco personas sigue siendo un coste real."
+        }
+      ],
+      "fuentes": [
+        { "t": "Försäkringskassan (Seguridad Social de Suecia): prestación parental", "url": "https://www.forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit" },
+        { "t": "Autonomy y Alda: informe sobre las pruebas de semana laboral más corta en Islandia (2021)", "url": "https://autonomy.work/portfolio/icelandsww/" },
+        { "t": "La Moncloa: Consejo de Ministros del 29-7-2025, ampliación del permiso por nacimiento y cuidado", "url": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx" }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "No proponer nada sobre salarios, o defender suprimir el salario mínimo, tolerar el trabajo sin contrato o fijar los sueldos por decreto.",
+      "ideal": "Un salario mínimo fijado por regla, a propuesta de una comisión independiente; salarios pactados por sector con la productividad; y temporalidad y brecha salarial publicadas por empresa y administración, con plan si se desvían.",
+      "titulo": "Salarios por regla y transparencia empresa a empresa",
+      "slug": "salario-minimo-por-regla-y-transparencia-por-empresa",
+      "resumen": "Lo avanzado liga salarios y productividad y publica datos. El ideal reduce la discrecionalidad: el salario mínimo se mueve con una regla y una comisión de sindicatos, empresas y expertos; cada convenio dice cómo reparte la productividad; y los datos de cada empresa y administración tienen consecuencias. Como la pensión básica se ata al salario mínimo, esa regla protege a la vez a quien trabaja y a quien se jubila.",
+      "medidas": [
+        "Salario mínimo mantenido por ley en el 60 % del salario medio, con una comisión independiente de sindicatos, empresas y expertos que propone la cifra cada otoño y publica sus datos.",
+        "La comisión informa también del efecto de cada subida en el empleo y en la pensión básica ligada al salario mínimo, para que se decida con la cuenta entera delante.",
+        "Convenios sectoriales con cláusula de productividad y de precios: los sueldos suben con lo que produce el sector y no pierden poder de compra a medio plazo.",
+        "Contrato indefinido como norma también en las administraciones: tasa de temporalidad publicada por organismo y oposiciones con calendario fijo para no acumular interinos.",
+        "Cada empresa de 100 o más trabajadores publica su brecha salarial y su temporalidad; si la brecha llega al 5 % sin justificación, plan corrector acordado con la plantilla.",
+        "Las ofertas de empleo indican el sueldo o su banda, y no se puede preguntar al candidato cuánto cobraba antes."
+      ],
+      "supone": {
+        "personas": "El sueldo más bajo deja de depender del año político y sube con una regla que todos conocen. Quien busca trabajo ve el salario antes de la entrevista. Y un interino de la administración tiene las mismas garantías de estabilidad que se exigen a la empresa privada.",
+        "cuentas": "Subir el salario mínimo lo pagan las empresas, y también el Estado como empleador. Al ligar la pensión básica al salario mínimo, cada subida tiene además un coste en pensiones que la comisión debe calcular y publicar. Reducir la temporalidad pública exige convocar plazas con regularidad. No hay una cifra oficial conjunta y no la damos.",
+        "puesta_en_marcha": "Ley que fije la regla del salario mínimo y cree la comisión, pactada con sindicatos y patronal. La transparencia salarial llega en parte por la directiva europea de 2023, con primeros informes en junio de 2027 para las empresas de 150 o más trabajadores. La temporalidad pública requiere acuerdo con comunidades y ayuntamientos."
+      },
+      "integra": "Recoge la demanda de sueldos dignos y empleo estable, y la de que los salarios no se separen de lo que la economía produce ni se fijen a golpe de decreto. Regla conocida, negociación entre las partes y datos a la vista de todos.",
+      "referencias": [
+        {
+          "lugar": "Reino Unido (Low Pay Commission)",
+          "que": "Una comisión de nueve miembros, procedentes del mundo de los trabajadores, de la empresa y de la universidad, recomienda cada otoño al Gobierno el salario mínimo. Las nuevas cuantías entran en vigor cada 1 de abril.",
+          "url": "https://www.gov.uk/government/organisations/low-pay-commission/about"
+        },
+        {
+          "lugar": "Unión Europea (Directiva 2023/970)",
+          "que": "Obliga a las empresas de 250 o más trabajadores a informar cada año de su brecha salarial desde junio de 2027. Si la brecha llega al 5 % en una categoría, no se justifica y no se corrige en seis meses, hay evaluación conjunta con la plantilla.",
+          "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970"
+        },
+        {
+          "lugar": "Países Bajos (pago de transición)",
+          "que": "La indemnización por despido (pago de transición) se aplica por igual a contratos fijos y temporales desde el primer día: un tercio del sueldo mensual bruto por año trabajado.",
+          "url": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un salario mínimo alto y automático puede destruir empleo en las zonas y sectores con sueldos más bajos, donde el 60 % de la media nacional pesa más.",
+          "r": "El riesgo existe. Por eso la cifra la propone una comisión con los datos de empleo delante, no una fórmula ciega: puede pedir un ritmo más lento si ve daño. El límite se reconoce: un mínimo único nacional no encaja igual en todas partes."
+        },
+        {
+          "o": "Atar la pensión básica al salario mínimo convierte cada subida salarial en gasto público automático, y eso puede frenar las subidas.",
+          "r": "Es el precio de unir la suerte de trabajadores y jubilados. Se gestiona enseñando la cuenta entera antes de decidir. Si resulta inasumible, lo que se revisa es el porcentaje que liga ambas cosas."
+        },
+        {
+          "o": "Publicar datos por empresa añade burocracia y puede exponer información sensible, sobre todo en empresas medianas.",
+          "r": "Por eso la obligación empieza por las grandes y los datos se dan por categorías, no por persona. La directiva europea lo exige con calendario gradual y deja fuera de la obligación a las de menos de 100 trabajadores."
+        }
+      ],
+      "fuentes": [
+        { "t": "Gobierno del Reino Unido: qué es y qué hace la Low Pay Commission", "url": "https://www.gov.uk/government/organisations/low-pay-commission/about" },
+        { "t": "EUR-Lex: Directiva (UE) 2023/970 de transparencia retributiva", "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" },
+        { "t": "Gobierno de Países Bajos (business.gov.nl): el pago de transición tras el despido", "url": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/" }
+      ]
+    }
+  ]
+}

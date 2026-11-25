@@ -84,8 +84,8 @@ details.circulos b{color:var(--ink)}
 .asp-cab output.sin{color:var(--muted);font-weight:500;font-size:14px}
 .ayuda{margin:4px 0 10px;color:var(--muted);font-size:14px}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:0;cursor:pointer}
-input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#2A3447 0 40%,#2F5C5A 40% 70%,#2D4B7A 70% 100%)}
-input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#2A3447 0 40%,#2F5C5A 40% 70%,#2D4B7A 70% 100%)}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#6B2A2E 0 12.5%,#2F5C5A 12.5% 37.5%,#2D4B7A 37.5% 62.5%,#4A3F7A 62.5% 87.5%,#8A6A14 87.5% 100%)}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#6B2A2E 0 12.5%,#2F5C5A 12.5% 37.5%,#2D4B7A 37.5% 62.5%,#4A3F7A 62.5% 87.5%,#8A6A14 87.5% 100%)}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);margin-top:-8px;box-shadow:0 0 0 1px var(--line2)}
 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
 input[type=range].sin::-webkit-slider-thumb{opacity:.55}
@@ -94,9 +94,15 @@ input[type=range].sin::-moz-range-thumb{opacity:.55}
 .escala span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .escala span:first-child{transform:none}
 .escala span:last-child{transform:translateX(-100%)}
+.escala.cinco{height:30px;margin-top:2px}
+.escala.cinco button{position:absolute;transform:translateX(-50%);white-space:nowrap;appearance:none;border:0;background:none;padding:4px 2px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer}
+.escala.cinco button:first-child{transform:none}
+.escala.cinco button:last-child{transform:translateX(-100%)}
+.escala.cinco button[aria-pressed="true"]{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.escala.cinco button:hover{color:var(--ink)}
 .nivel{margin:6px 0 0;color:var(--ink2);font-size:15px;min-height:1.5em}
 .chip{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.02em;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);margin-right:6px;color:var(--ink);vertical-align:1px}
-.chip.b{border-color:#3E7F7B}.chip.i{border-color:#3E6AA6}.chip.a{border-color:var(--acc);color:var(--acc)}.chip.p{border-color:#6B7385;color:var(--muted)}
+.chip.b{border-color:#3E7F7B}.chip.i{border-color:#3E6AA6}.chip.a{border-color:var(--acc);color:var(--acc)}.chip.p{border-color:#E5484D;color:#E5484D}.chip.d{border-color:#F6BE3B;background:#F6BE3B;color:#1B1400}
 
 .lateral{position:sticky;top:16px;display:grid;gap:12px}
 .figura-caja{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:14px}
@@ -110,7 +116,8 @@ input[type=range].sin::-moz-range-thumb{opacity:.55}
 
 /* Radar */
 svg.radar .anillo{fill:none;stroke:var(--line2);stroke-width:1}
-svg.radar .anillo.ext{stroke:#4A5670}
+svg.radar .anillo.ext{stroke:#B98A1B;stroke-width:1.6}
+svg.radar .anillo.anti{stroke:#E5484D;stroke-dasharray:3 3}
 svg.radar .eje{stroke:var(--line);stroke-width:1}
 svg.radar .figura{stroke-width:2.2;fill-opacity:.22}
 svg.radar .partido{fill:none;stroke-width:2;stroke-dasharray:6 5;opacity:.95}
@@ -209,7 +216,7 @@ footer p{margin:0 0 8px;max-width:80ch}
   <!-- ============ CONSTRUIR ============ -->
   <section id="v-construir" class="vista" aria-labelledby="t-construir" hidden>
     <h1 id="t-construir">Construye tu figura</h1>
-    <p class="lede">Para cada tema hay varios aspectos. Mueve cada deslizador hasta donde tú quieras: en 0, lo ignoras y ese aspecto no cuenta en el parecido; cuanto más a la derecha, más llega tu propuesta. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
+    <p class="lede">Para cada tema hay varios aspectos. En cada aspecto eliges uno de cinco niveles: <b>antisistema</b> (por debajo de lo básico: no hacer nada o romper la base), <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> o <b>ideal</b>. Lee qué dice cada nivel y quédate en el que tú defenderías. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
 
     <div class="progreso">
       <span id="prog-texto">0 de 64 aspectos marcados</span>
@@ -249,7 +256,7 @@ footer p{margin:0 0 8px;max-width:80ch}
           </div>
           <p class="parecido" id="parecido" aria-live="polite"></p>
           <p class="leyenda">Línea continua: tu figura. Línea a rayas: el partido elegido.</p>
-          <p class="leyenda">Anillos, de dentro afuera: <b>básico</b>, <b>intermedio</b> y <b>avanzado</b>.</p>
+          <p class="leyenda">Anillos, de dentro afuera: <b>antisistema</b>, <b>básico</b>, <b>intermedio</b>, <b>avanzado</b> e <b>ideal</b>.</p>
         </div>
       </aside>
     </div>
@@ -380,7 +387,8 @@ footer p{margin:0 0 8px;max-width:80ch}
 (function () {
 'use strict';
 
-var CLAVE_LOCAL = 'geometria-figura-v2';
+var CLAVE_LOCAL = 'geometria-figura-v3';   // cinco niveles por aspecto (2026-11-25)
+var CLAVE_LOCAL_V2 = 'geometria-figura-v2';  // borrador con cifras de 0 a 10
 var CLAVE_LOCAL_V1 = 'geometria-figura-v1';  // borrador con el orden antiguo de los aspectos (antes del 2026-11-19)
 var NS = 'http://www.w3.org/2000/svg';
 var D = null;   // datos.json: temas y partidos
@@ -433,17 +441,23 @@ function estadoValido(o) {
   if (!o || typeof o !== 'object' || typeof o.t !== 'number' || !Array.isArray(o.v) || !Array.isArray(o.m)) return false;
   if (o.v.length !== D.temas.length || o.m.length !== D.temas.length) return false;
   return D.temas.every(function (t, i) {
-    return Array.isArray(o.v[i]) && Array.isArray(o.m[i]) && o.v[i].length === t.ejes.length && o.m[i].length === t.ejes.length;
+    return Array.isArray(o.v[i]) && Array.isArray(o.m[i]) && o.v[i].length === t.ejes.length && o.m[i].length === t.ejes.length
+      && o.v[i].every(function (x) { return Number.isInteger(x) && x >= 0 && x <= G.NMAX; });
   });
 }
 // Convierte el borrador guardado con el orden antiguo. Si algo no encaja, se empieza de cero (como antes).
 function migrarLocal() {
   try {
     if (localStorage.getItem(CLAVE_LOCAL)) return;
-    var viejo = JSON.parse(localStorage.getItem(CLAVE_LOCAL_V1) || 'null');
-    if (!viejo || !Array.isArray(viejo.v) || !Array.isArray(viejo.m)) return;
-    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(Object.assign({}, viejo, { v: G.aOrdenNuevo(viejo.v), m: G.aOrdenNuevo(viejo.m) })));
-    localStorage.removeItem(CLAVE_LOCAL_V1);
+    // De la versión 1 (orden antiguo) a la 2, y de la 2 (cifras de 0 a 10) a los cinco niveles
+    var v2 = JSON.parse(localStorage.getItem(CLAVE_LOCAL_V2) || 'null');
+    if (!v2) {
+      var viejo = JSON.parse(localStorage.getItem(CLAVE_LOCAL_V1) || 'null');
+      if (viejo && Array.isArray(viejo.v) && Array.isArray(viejo.m)) v2 = Object.assign({}, viejo, { v: G.aOrdenNuevo(viejo.v), m: G.aOrdenNuevo(viejo.m) });
+    }
+    if (!v2 || !Array.isArray(v2.v) || !Array.isArray(v2.m)) return;
+    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(Object.assign({}, v2, { v: G.aNiveles(v2.v) })));
+    localStorage.removeItem(CLAVE_LOCAL_V1); localStorage.removeItem(CLAVE_LOCAL_V2);
   } catch (e) { /* sin almacenamiento o dato roto: no se migra y se empieza de cero */ }
 }
 function guardar() { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(st)); } catch (e) { /* sin almacenamiento: se pierde al cerrar */ } }
@@ -484,17 +498,19 @@ function radar(tema, valores, o) {
   var ang = function (i) { return -Math.PI / 2 + i * 2 * Math.PI / n; };
   var pt = function (i, r) { return [C + r * Math.cos(ang(i)), C + r * Math.sin(ang(i))]; };
 
+  // Cinco anillos, uno por nivel: el de dentro es antisistema y el de fuera, el ideal
+  var radio = function (x) { return R * (x + 1) / 5; };
   G.UMBRAL.forEach(function (u, k) {
-    var pts = []; for (var i = 0; i < n; i++) pts.push(pt(i, R * u / 10).join(','));
-    se('polygon', { points: pts.join(' '), class: 'anillo' + (k === 2 ? ' ext' : '') }, svg);
+    var pts = []; for (var i = 0; i < n; i++) pts.push(pt(i, radio(u)).join(','));
+    se('polygon', { points: pts.join(' '), class: 'anillo' + (k === G.NMAX ? ' ext' : k === 0 ? ' anti' : '') }, svg);
   });
   for (var j = 0; j < n; j++) { var e = pt(j, R); se('line', { x1: C, y1: C, x2: e[0], y2: e[1], class: 'eje' }, svg); }
 
   if (o.partido) {
-    var pv = []; for (var q = 0; q < n; q++) pv.push(pt(q, R * (o.partido.valores[q] || 0) / 10).join(','));
+    var pv = []; for (var q = 0; q < n; q++) pv.push(pt(q, radio(o.partido.valores[q] || 0)).join(','));
     se('polygon', { points: pv.join(' '), class: 'partido', stroke: o.partido.color, fill: 'none' }, svg);
   }
-  var pts2 = valores.map(function (x, i) { return pt(i, R * x / 10); });
+  var pts2 = valores.map(function (x, i) { return pt(i, radio(x)); });
   se('polygon', {
     points: pts2.map(function (p) { return p.join(','); }).join(' '),
     class: 'figura', fill: tema.c, stroke: tema.c
@@ -561,12 +577,12 @@ function pintarParecido() {
   if (!st.partido) { p.textContent = ''; return; }
   if (!temaCompleto(st.t)) { p.textContent = 'Marca los ' + tema.ejes.length + ' aspectos de este tema para ver el parecido con ' + nombreParte(st.partido) + '.'; return; }
   var pa = G.parecido(figuraDe(st.t), tema.v[st.partido]);
-  if (pa === null) { p.textContent = 'Tu figura todavía no tiene aspectos que comparar en este tema: deja alguno distinto de 0.'; return; }
+  if (pa === null) { p.textContent = ''; return; }
   p.textContent = 'En este tema, tu figura se parece un ' + pa + ' % a ' + nombreParte(st.partido) + '.';
 }
 function claseNivel(x) {
   var n = G.nivelDe(x);
-  return n === 2 ? 'a' : n === 1 ? 'i' : n === 0 ? 'b' : 'p';
+  return n === 4 ? 'd' : n === 3 ? 'a' : n === 2 ? 'i' : n === 1 ? 'b' : 'p';
 }
 /* Cada aspecto se crea UNA vez y luego se actualiza en su sitio. Si se reemplazara la fila
    mientras se arrastra el deslizador, el navegador perdería el control y el arrastre se cortaría. */
@@ -577,25 +593,19 @@ function crearAspecto(i) {
   var refs = {};
   refs.salida = el('output', { id: 'out-' + st.t + '-' + i, for: id });
   refs.rango = el('input', {
-    type: 'range', min: 0, max: 10, step: 1, id: id,
+    type: 'range', min: 0, max: G.NMAX, step: 1, id: id,
     ev: { input: function () { fijarAspecto(i, Number(refs.rango.value)); } }
-  });
-  refs.ignorar = el('button', {
-    type: 'button', class: 'boton pequeno', text: 'Lo ignoro (0)',
-    ev: { click: function () { fijarAspecto(i, 0); refs.rango.focus(); } }
   });
   refs.nivel = el('p', { class: 'nivel' });
   refs.fila = el('div', { class: 'aspecto', 'data-i': i }, [
     el('div', { class: 'asp-cab' }, [el('label', { for: id, text: eje.n }), refs.salida]),
     el('p', { class: 'ayuda', text: eje.d }),
     refs.rango,
-    el('div', { class: 'asp-acc' }, [refs.ignorar]),
-    el('div', { class: 'escala', 'aria-hidden': 'true' }, [
-      el('span', { style: 'left:0%', text: '0' }),
-      el('span', { style: 'left:40%', text: '4 básico' }),
-      el('span', { style: 'left:70%', text: '7 intermedio' }),
-      el('span', { style: 'left:100%', text: '10 avanzado' })
-    ]),
+    // Cinco posiciones, una por nivel: se puede pulsar el nombre o mover el deslizador
+    el('div', { class: 'escala cinco' }, G.NOMBRE_NIVEL.map(function (nombre, k) {
+      return el('button', { type: 'button', style: 'left:' + (k * 25) + '%', text: nombre, 'data-k': k,
+        ev: { click: function () { fijarAspecto(i, k); refs.rango.focus(); } } });
+    })),
     refs.nivel
   ]);
   filas[i] = refs;
@@ -614,18 +624,21 @@ function actualizarAspecto(i) {
   r.fila.classList.toggle('sin', !marcado);
   r.rango.value = x;
   r.rango.classList.toggle('sin', !marcado);
-  r.rango.setAttribute('aria-valuetext', marcado ? x + ' de 10. ' + G.etiquetaDe(x) : 'Sin marcar');
-  r.salida.textContent = marcado ? x + ' de 10' : 'Sin marcar';
+  r.rango.setAttribute('aria-valuetext', marcado ? G.etiquetaDe(x) : 'Sin marcar');
+  r.salida.textContent = marcado ? G.etiquetaDe(x) : 'Sin marcar';
   r.salida.className = marcado ? '' : 'sin';
-  var nivel = marcado ? G.nivelDe(x) : -1;
+  Array.prototype.forEach.call(r.fila.querySelectorAll('.escala.cinco button'), function (bt) {
+    bt.setAttribute('aria-pressed', String(marcado && Number(bt.getAttribute('data-k')) === x));
+  });
   r.nivel.textContent = '';
-  if (!marcado) r.nivel.appendChild(el('span', { class: 'nota', text: 'Mueve el deslizador para marcar este aspecto.' }));
-  else if (x === 0) r.nivel.appendChild(el('span', { class: 'chip p', text: 'Lo ignora' }));
-  else if (nivel < 0) r.nivel.appendChild(el('span', { class: 'chip p', text: 'No llega a lo básico' }));
-  if (marcado && nivel < 0) r.nivel.appendChild(document.createTextNode(x === 0 ? ' En la comparación cuenta como 0, igual que cualquier otra cifra.' : ' Por debajo de lo básico: también cuenta en la comparación, con su cifra.'));
-  if (marcado && nivel >= 0) {
-    r.nivel.appendChild(el('span', { class: 'chip ' + claseNivel(x), text: G.NOMBRE_NIVEL[nivel] }));
-    r.nivel.appendChild(document.createTextNode(eje.niv[nivel]));
+  if (!marcado) { r.nivel.appendChild(el('span', { class: 'nota', text: 'Elige uno de los cinco niveles para marcar este aspecto.' })); return; }
+  var nivel = G.nivelDe(x);
+  r.nivel.appendChild(el('span', { class: 'chip ' + claseNivel(x), text: G.NOMBRE_NIVEL[nivel] }));
+  r.nivel.appendChild(document.createTextNode(eje.niv[nivel]));
+  // El ideal de cada aspecto tiene su propia página, con lo que supondría
+  if (nivel === G.NMAX && eje.is) {
+    r.nivel.appendChild(document.createTextNode(' '));
+    r.nivel.appendChild(el('a', { href: '/ideal/' + eje.is + '/', target: '_blank', rel: 'noopener', text: 'Más: ' + eje.it + ' →' }));
   }
 }
 function pintarTema() {
@@ -714,7 +727,7 @@ function pintarResultado() {
       el('tbody', null, filas)
     ])
   ]));
-  caja.appendChild(el('p', { class: 'nota', style: 'margin-top:10px', text: 'El parecido compara cifra a cifra, aspecto por aspecto, con las posiciones de la página. Los aspectos que dejas en 0 no cuentan. Es una forma de leer el mapa, no un veredicto.' }));
+  caja.appendChild(el('p', { class: 'nota', style: 'margin-top:10px', text: 'El parecido compara nivel a nivel, aspecto por aspecto, con las posiciones de la página. Cuentan todos los aspectos. Es una forma de leer el mapa, no un veredicto.' }));
 }
 
 /* ---------- Publicar ---------- */
@@ -781,6 +794,7 @@ function publicarFigura(e) {
   var cuerpo = {
     nombre: nombre,
     puntuaciones: st.v,
+    escala: 'niveles',
     correo: correo || undefined,
     novedades: !!correo && $('#f-novedades').checked,
     tiempo: Date.now() - st.inicio,

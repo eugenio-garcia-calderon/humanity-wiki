@@ -12,7 +12,7 @@ import { CAMPO_TRAMPA, textoConsentimiento, normalizarCorreo } from '../componen
 // ============================================================================
 // LAS FIGURAS DEL TEST DE GEOMETRÍA POLÍTICA (2026-11-19)
 // ============================================================================
-// Quien quiere construye su figura con 64 deslizadores (10 temas), la publica con
+// Quien quiere construye su figura con 64 deslizadores (10 temas, cinco niveles por aspecto), la publica con
 // un nombre y, si deja su correo, recibe sus resultados. Sin registrarse.
 // La página es `public/geometria-figura/index.html`; la cuenta (parecido y niveles)
 // es `public/geometria-figura/comun.js`, la misma en el navegador y aquí.
@@ -21,7 +21,7 @@ import { CAMPO_TRAMPA, textoConsentimiento, normalizarCorreo } from '../componen
 //
 // LAS RUTAS
 //   Públicas (sin cuenta, con el guardián de envíos por IP):
-//     POST   /api/figuras                  publicar una figura { nombre, puntuaciones, correo?, novedades?, tiempo }
+//     POST   /api/figuras                  publicar una figura { nombre, puntuaciones, escala: 'niveles', correo?, novedades?, tiempo }
 //     GET    /api/figuras?pagina=N         la galería: sólo las publicadas, sin correos
 //     GET    /api/figuras/:id              una figura publicada
 //     DELETE /api/figuras/:id              borrarla. Cabecera `x-clave-figura`: la clave que se dio al publicar
@@ -72,18 +72,24 @@ const idValido = (v: unknown) => typeof v === 'string' && /^[A-Za-z0-9_-]{8,20}$
 
 /** Lo que una figura pública enseña: nunca el correo, ni la clave, ni la casilla.
  *  Las figuras con `orden` 1 se publicaron cuando los aspectos tenían otra posición (antes del 2026-11-19):
- *  se convierten al orden actual al leerlas. Las nuevas se guardan ya con `orden` 2 y no se tocan. */
+ *  se convierten al orden actual al leerlas. `orden` 1 y 2 guardan cifras de 0 a 10 (antes del 2026-11-25): se pasan
+ *  a los cinco niveles con los cortes de entonces (`aNiveles`). Las nuevas se guardan con `orden` 3 y no se tocan. */
+const enFormatoActual = (f: any) => {
+  const o = Number(f.orden);
+  if (o >= 3) return f.puntuaciones;
+  return comun.aNiveles(o === 1 ? comun.aOrdenNuevo(f.puntuaciones) : f.puntuaciones);
+};
 const publica = (f: any) => ({
   id: f.id,
   nombre: f.nombre,
   creada: f.created_at,
-  puntuaciones: Number(f.orden) === 1 ? comun.aOrdenNuevo(f.puntuaciones) : f.puntuaciones,
+  puntuaciones: enFormatoActual(f),
 });
 
 /** El texto del correo de resultados, con las mismas cifras que la pantalla. */
 function textoResultados(nombre: string, r: any, enlace: string, clave: string): string {
   const lineas = r.temas.map((t: any) =>
-    `- ${t.n}: llegan a básico ${t.basico} de ${t.aspectos} aspectos, a intermedio ${t.intermedio} y a avanzado ${t.avanzado}. ` +
+    `- ${t.n}: de ${t.aspectos} aspectos, llegan a básico ${t.basico}, a intermedio ${t.intermedio}, a avanzado ${t.avanzado} y al ideal ${t.ideal}; se quedan en antisistema ${t.antisistema}. ` +
     `Más parecido: ${t.mejor ? `${t.mejor.n} (${t.mejor.parecido} %)` : '—'}.`);
   return [
     `Hola. Esta es tu figura en Geometría política, «${nombre}».`,
@@ -143,6 +149,9 @@ export function registrarFiguras(app: Express, db: any) {
       const novedades = b.novedades === true;
       if (novedades && !correo) return res.status(400).json({ error: 'Para recibir novedades necesitamos tu correo.', campo: 'novedades' });
 
+      // Una página abierta desde antes del 2026-11-25 enviaría cifras de 0 a 10: sin esta marca no se aceptan,
+      // porque una figura antigua con todo por debajo de 5 se leería como niveles.
+      if (b.escala !== 'niveles') return res.status(400).json({ error: 'El test ha cambiado. Recarga la página y vuelve a publicar tu figura.' });
       if (!comun.figuraValida(b.puntuaciones, datos)) {
         return res.status(400).json({ error: 'La figura no está completa. Revisa los temas.' });
       }
@@ -152,7 +161,7 @@ export function registrarFiguras(app: Express, db: any) {
       const textoCasilla = novedades ? textoConsentimiento('boletin', RESPONSABLE) : null;
       await db.execute(sql`
         INSERT INTO figuras_geometria (id, nombre, puntuaciones, correo, quiere_novedades, texto_consentimiento, clave_hash, orden)
-        VALUES (${id}, ${nombre}, ${JSON.stringify(b.puntuaciones)}::jsonb, ${correo}, ${novedades}, ${textoCasilla}, ${sha256(clave)}, 2)
+        VALUES (${id}, ${nombre}, ${JSON.stringify(b.puntuaciones)}::jsonb, ${correo}, ${novedades}, ${textoCasilla}, ${sha256(clave)}, 3)
       `);
       void ritmo(db, REGLAS.formulario, ipDe(req));
 

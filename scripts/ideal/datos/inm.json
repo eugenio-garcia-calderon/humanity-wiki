@@ -1,0 +1,48 @@
+{
+ "clave": "inm",
+ "pendiente": true,
+ "anti_tema": "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
+ "ideal_tema": "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto.",
+ "aspectos": [
+  {
+   "i": 0,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 1,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 2,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 3,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 4,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 5,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 6,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  },
+  {
+   "i": 7,
+   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+  }
+ ]
+}

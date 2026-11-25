@@ -1,0 +1,395 @@
+{
+  "clave": "amb",
+  "anti_tema": "Negar el problema o no proponer nada, incumplir los compromisos europeos de clima, o cerrar centrales y sectores sin alternativa para quien vive de ellos.",
+  "ideal_tema": "Una economía sin emisiones netas con reglas automáticas: presupuesto de carbono que se corrige solo, luz limpia, segura y a coste estable, agua repartida según la que hay y un campo que cobra por lo que cuida.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada sobre el agua, tolerar pozos ilegales o vertidos sin depurar, o prometer agua que la cuenca no tiene.",
+      "ideal": "Repartir cada año el agua que de verdad hay: derechos como porcentaje del agua disponible, medida con contador y publicada, con el caudal del río reservado primero y la naturaleza anotada en las cuentas públicas.",
+      "titulo": "Agua repartida según la que hay",
+      "slug": "agua-repartida-segun-la-que-hay",
+      "resumen": "Lo avanzado pacta y restaura. El ideal cambia la regla de fondo: las concesiones dejan de ser un volumen fijo y pasan a ser una parte del agua disponible cada año en cada cuenca, medida con contador y publicada. El río y el acuífero van primero. Y bosques, ríos y humedales entran en las cuentas públicas como un patrimonio que se mide cada año.",
+      "medidas": [
+        "Convertir las concesiones en una parte del agua disponible: cada año, según embalses y acuíferos, se anuncia qué porcentaje toca, como en la cuenca Murray-Darling de Australia.",
+        "Fijar por cuenca un tope de extracción sostenible, con el caudal ecológico y la recarga de los acuíferos reservados antes de repartir nada.",
+        "Contador con lectura a distancia en todas las tomas, datos de uso, reservas y calidad publicados por cuenca, y cierre efectivo de los pozos sin derecho.",
+        "Reutilizar el agua depurada y desalar donde el balance no cuadra, y que el precio de cada uso cubra sus costes, incluidos los ambientales, con un mínimo vital protegido.",
+        "Plan nacional de restauración con metas anuales: ríos sin barreras inútiles, humedales y bosques recuperados, y pago a quien los cuida por el servicio que presta.",
+        "Prevención de incendios todo el año con presupuesto propio y evaluado: gestión del monte, ganadería extensiva y cuadrillas rurales fijas, con cuentas públicas de lo gastado en prevenir y en apagar."
+      ],
+      "supone": {
+        "personas": "El regante y la ciudad saben cada año con cuánta agua cuentan y por qué. En sequía el recorte es proporcional y conocido de antemano, no una negociación de urgencia. Quien ahorra puede ceder agua a otro usuario bajo control público. Los pueblos ganan empleo estable en el monte y los ríos conservan su caudal.",
+        "cuentas": "Hay que pagar contadores, depuración avanzada, desaladoras y restauración. Una parte sale de precios que cubran el coste real del agua, como pide la Directiva Marco del Agua; otra, de fondos europeos y del presupuesto. No hemos podido verificar una cifra oficial del coste total para España. La prevención de incendios pasa a ser gasto fijo anual.",
+        "puesta_en_marcha": "Reforma de la Ley de Aguas para redefinir las concesiones, con una transición larga y revisión cuenca a cuenca en los planes hidrológicos. Pacto con comunidades autónomas y regantes. El plan nacional de restauración que exige la UE y las nuevas cuentas europeas de ecosistemas marcan el calendario."
+      },
+      "integra": "Recoge la demanda de seguridad para el regadío y de obra donde falta agua (reglas claras, desalación, reutilización) y la de proteger ríos y acuíferos (tope de extracción, caudal primero, restauración). Las dos partes ganan certeza.",
+      "referencias": [
+        {
+          "lugar": "Australia (cuenca Murray-Darling)",
+          "que": "Los derechos de agua son una parte del recurso, separada de la tierra. Cada año se anuncia un porcentaje de asignación, de 0 a 100 %, según el agua disponible, y los derechos se pueden ceder. El Plan de Cuenca de 2012 fija límites de extracción por zonas.",
+          "url": "https://www.bom.gov.au/water/nwa/2019/mdb/regiondescription/waterrights.shtml"
+        },
+        {
+          "lugar": "Unión Europea (restauración de la naturaleza)",
+          "que": "Un reglamento en vigor desde agosto de 2024 obliga a aplicar medidas de restauración en al menos el 20 % de la tierra y el mar de la UE para 2030 y a devolver 25.000 km de ríos a su curso libre. Cada país debe presentar un plan nacional.",
+          "url": "https://environment.ec.europa.eu/topics/nature-and-biodiversity/nature-restoration-regulation_en"
+        },
+        {
+          "lugar": "Unión Europea (reutilización de agua)",
+          "que": "Desde junio de 2023 rigen normas comunes de calidad y control para regar con agua depurada. La UE depura unos 40.000 millones de m³ al año y solo vuelve a usar alrededor de 1.000 millones.",
+          "url": "https://water.europa.eu/freshwater/europe-freshwater/water-reuse"
+        },
+        {
+          "lugar": "Portugal",
+          "que": "Una agencia creada en 2018, la AGIF, coordina y evalúa todo el sistema de fuegos rurales y publica su gasto: unos 2.427 millones de euros entre 2020 y 2024, un 25 % menos de lo planificado.",
+          "url": "https://www.rtp.pt/noticias/pais/despesa-do-sistema-de-gestao-de-fogos-rurais-25-abaixo-do-previsto-indica-relatorio_n1679403"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Las concesiones actuales son derechos adquiridos, a menudo por décadas. Cambiarlas puede acabar en indemnizaciones y pleitos.",
+          "r": "El límite existe. Por eso se propone una transición larga, revisar cada concesión al renovarla y compensar donde la ley lo exija. Es una reforma de muchos años, no de una legislatura."
+        },
+        {
+          "o": "Permitir ceder agua entre usuarios puede concentrarla en quien más paga y dejar sin riego a las explotaciones pequeñas.",
+          "r": "La cesión va dentro del tope de la cuenca, con registro público y reglas que la autoridad puede restringir. El riesgo no desaparece: hay que vigilar la concentración y reservar agua para los usos prioritarios."
+        },
+        {
+          "o": "Subir el precio del agua hasta su coste real encarece los alimentos y castiga al regadío frente a competidores de fuera.",
+          "r": "La subida va por tramos y con plazos, y el agua reutilizada da más seguridad en sequía. Aun así, algunos cultivos de poco valor y mucha agua dejarán de salir a cuenta en ciertas zonas."
+        }
+      ],
+      "fuentes": [
+        { "t": "Bureau of Meteorology (Australia): derechos de agua en la cuenca Murray-Darling", "url": "https://www.bom.gov.au/water/nwa/2019/mdb/regiondescription/waterrights.shtml" },
+        { "t": "Comisión Europea: Reglamento de restauración de la naturaleza", "url": "https://environment.ec.europa.eu/topics/nature-and-biodiversity/nature-restoration-regulation_en" },
+        { "t": "Water Information System for Europe: reutilización del agua", "url": "https://water.europa.eu/freshwater/europe-freshwater/water-reuse" },
+        { "t": "Eurostat: las cuentas ambientales europeas se amplían a bosques y ecosistemas", "url": "https://ec.europa.eu/eurostat/en/web/products-eurostat-news/w/cn-20241111-1" },
+        { "t": "Ministerio para la Transición Ecológica: recuperación de costes de los servicios del agua", "url": "https://www.miteco.gob.es/es/agua/temas/planificacion-hidrologica/marco-del-agua/recuperacion_costes.html" },
+        { "t": "RTP: gasto del sistema portugués de gestión de fuegos rurales, según informe de la AGIF", "url": "https://www.rtp.pt/noticias/pais/despesa-do-sistema-de-gestao-de-fogos-rurais-25-abaixo-do-previsto-indica-relatorio_n1679403" }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada para el campo, cerrar centrales o explotaciones sin alternativa, o animar a incumplir las normas ambientales y sanitarias.",
+      "ideal": "Que cada pueblo afectado tenga por ley su parte de la renta: un pago fijo por cada kWh renovable producido en su término, empleo firmado antes de cada cierre y pago al agricultor por los servicios ambientales medidos.",
+      "titulo": "Renta rural garantizada por ley en la transición",
+      "slug": "renta-rural-garantizada-en-la-transicion",
+      "resumen": "Lo avanzado quiere que la transición deje más renta en el mundo rural. El ideal lo convierte en un derecho con reglas fijas: una parte de cada kilovatio hora va al municipio y a los vecinos, ningún cierre empieza sin empleo alternativo firmado, y el agricultor cobra por el carbono, el agua y la biodiversidad que su finca aporta, además de un precio que cubre sus costes.",
+      "medidas": [
+        "Pago obligatorio al municipio por cada kWh que produzcan los parques eólicos y solares de su término, y bono anual a los vecinos más cercanos, siguiendo los modelos de Alemania y Dinamarca.",
+        "Derecho de los vecinos y del ayuntamiento a entrar como socios en los proyectos de su término, y fondo local gestionado por el municipio.",
+        "Convenio de transición firmado antes de cada cierre de central, mina o gran industria: empleo o formación pagada para cada trabajador y calendario de inversiones con seguimiento público.",
+        "Pago por resultados ambientales medidos en cada finca (carbono en el suelo, agua, biodiversidad, prevención de incendios), añadido a las ayudas a la producción y con un solo trámite.",
+        "Inspección de oficio para que ningún contrato pague al productor por debajo de su coste, con observatorio público de costes por producto y sanciones publicadas.",
+        "Si se pone precio a las emisiones del campo, que lo recaudado vuelva al sector para pagar el cambio, como pactó Dinamarca con agricultores, industria, sindicatos y ecologistas."
+      ],
+      "supone": {
+        "personas": "El vecino de un pueblo con molinos o placas ve ingresos en su ayuntamiento y en su bolsillo, no solo el cambio en el paisaje. El trabajador de una central conoce su destino antes del cierre. El agricultor añade un ingreso estable por cuidar el suelo y el monte, y tiene a quién acudir si le obligan a vender a pérdidas.",
+        "cuentas": "El pago por kWh lo abonan los promotores; en Alemania el tope es de 0,2 céntimos por kWh. Los convenios ya tienen fondos: el ministerio cifra en casi 2.000 millones de euros las ayudas a las comarcas mineras desde 2019. El pago ambiental sale de reorientar la política agraria común y del presupuesto; su coste no está cuantificado.",
+        "puesta_en_marcha": "Ley estatal que fije el pago local por kWh y el bono vecinal. Convenio obligatorio antes de autorizar un cierre. Rediseño del plan español de la política agraria común para pagar resultados medidos. Más inspectores para la agencia que vigila la cadena alimentaria. Una legislatura para las leyes y varios años para medir resultados en finca."
+      },
+      "integra": "Atiende a quien teme que el campo pague la factura climática (renta, precios que cubren costes, menos trámites) y a quien pide más ambición ambiental (se paga por resultados reales y la transición no se frena).",
+      "referencias": [
+        {
+          "lugar": "Alemania",
+          "que": "El artículo 6 de su ley de renovables permite a los promotores pagar hasta 0,2 céntimos por kWh vertido a los municipios situados a menos de 2.500 metros de un aerogenerador o que acogen una planta solar en suelo. Es voluntario.",
+          "url": "https://www.taylorwessing.com/en/insights-and-events/insights/2022/05/finanzielle-beteiligung-von-kommunen-bei-wind--und-photovoltaik-projekten"
+        },
+        {
+          "lugar": "Dinamarca (acuerdo tripartito de 2024)",
+          "que": "Gobierno, agricultores, industria, sindicatos y ecologistas pactaron un impuesto a las emisiones del ganado desde 2030: 300 coronas por tonelada, 750 en 2035, con una deducción del 60 %. Lo recaudado en 2030 y 2031 vuelve al sector.",
+          "url": "https://www.en.kefm.dk/news/news-archive/2024/jul/the-danish-government-and-parties-in-%E2%80%9Cgreen-tripartite%E2%80%9D-agree-on-a-ground-breaking-model-for-a-carbon-tax-on-food-and-agriculture-production"
+        },
+        {
+          "lugar": "España (ley de la cadena alimentaria)",
+          "que": "La ley exige contrato escrito y que el precio que cobra el productor primario supere su coste efectivo de producción. Cada operador debe pagar al anterior al menos lo que le costó producir. Las cláusulas que lo incumplen son nulas.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-8554"
+        },
+        {
+          "lugar": "Inglaterra",
+          "que": "El Gobierno paga a agricultores y gestores de tierras por bienes y servicios ambientales y climáticos, junto a la producción de alimentos, mediante dos programas: el incentivo de agricultura sostenible y el de custodia del campo.",
+          "url": "https://www.gov.uk/government/publications/environmental-land-management-update-how-government-will-pay-for-land-based-environment-and-climate-goods-and-services"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un pago obligatorio por kWh encarece los proyectos y puede frenar inversiones o acabar en la factura de la luz.",
+          "r": "En Alemania el tope es de 0,2 céntimos por kWh, poco frente al precio de la energía, y reduce la oposición local. Pero es un coste real: fijado demasiado alto, los proyectos se irán a otros territorios."
+        },
+        {
+          "o": "Medir carbono, agua o biodiversidad finca a finca es caro y poco preciso. Puede acabar pagando papeleo en vez de resultados.",
+          "r": "El límite se reconoce. Se puede empezar por indicadores sencillos y comprobables, como cubierta vegetal, setos o pastoreo, y afinar con los años. Inglaterra ya paga por acciones de este tipo."
+        },
+        {
+          "o": "Prohibir vender por debajo de coste es difícil de vigilar y no protege frente a productos importados más baratos.",
+          "r": "La norma ya existe; faltan inspección y datos de costes. No resuelve la competencia exterior: eso depende de exigir en frontera las mismas reglas, y se decide en la UE."
+        }
+      ],
+      "fuentes": [
+        { "t": "Agencia Danesa de la Energía: los cuatro esquemas para vecinos y municipios de plantas renovables", "url": "https://ens.dk/en/node/4347" },
+        { "t": "Taylor Wessing: participación financiera de los municipios en proyectos eólicos y solares (art. 6 EEG)", "url": "https://www.taylorwessing.com/en/insights-and-events/insights/2022/05/finanzielle-beteiligung-von-kommunen-bei-wind--und-photovoltaik-projekten" },
+        { "t": "Ministerio danés de Clima y Energía: acuerdo tripartito sobre el impuesto al carbono en la agricultura", "url": "https://www.en.kefm.dk/news/news-archive/2024/jul/the-danish-government-and-parties-in-%E2%80%9Cgreen-tripartite%E2%80%9D-agree-on-a-ground-breaking-model-for-a-carbon-tax-on-food-and-agriculture-production" },
+        { "t": "BOE: Ley 12/2013, de medidas para mejorar el funcionamiento de la cadena alimentaria (texto consolidado)", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-8554" },
+        { "t": "Ministerio para la Transición Ecológica: 2.000 millones para las comarcas mineras desde 2019", "url": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2026/julio/el-miteco-ha-destinado-2-000-millones-a-construir-el-futuro-de-l.html" },
+        { "t": "Gobierno del Reino Unido: cómo se pagarán los bienes y servicios ambientales y climáticos ligados a la tierra", "url": "https://www.gov.uk/government/publications/environmental-land-management-update-how-government-will-pay-for-land-based-environment-and-climate-goods-and-services" }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "No proponer nada sobre el respaldo, o decidir cierres y aperturas de centrales por consigna, sin informes técnicos ni margen de seguridad.",
+      "ideal": "Fijar por ley cuántas horas al año puede faltar potencia como máximo y que un organismo independiente lo compruebe cada año. Ninguna central cierra ni se prorroga sin ese informe, y la estabilidad de la red se contrata aparte.",
+      "titulo": "Norma legal de fiabilidad eléctrica",
+      "slug": "norma-legal-de-fiabilidad-electrica",
+      "resumen": "Lo avanzado pide un plan con margen, evaluado de forma independiente. El ideal pone el listón en la ley y lo hace automático: un máximo de horas al año sin potencia suficiente, comprobado cada año. De ese cálculo salen el calendario nuclear, las subastas de respaldo y las obras de red. La decisión deja de depender de quién gobierna.",
+      "medidas": [
+        "Norma de fiabilidad en la ley: un máximo de horas al año en que la demanda puede superar a la potencia disponible. Gran Bretaña usa tres horas al año para dimensionar sus subastas de capacidad.",
+        "Informe anual independiente, con datos del operador del sistema y del regulador nuclear, que diga si se cumple la norma en cada escenario: sequía, frío sin viento o fallo de una interconexión.",
+        "Calendario nuclear atado al informe: cada reactor sigue o cierra según su seguridad, su coste y la necesidad del sistema, con residuos y desmantelamiento pagados por el titular.",
+        "Subastas de potencia firme abiertas a todas las tecnologías: baterías, bombeo, demanda que se desconecta, gas de respaldo o nuclear compiten por estar disponibles cuando falta.",
+        "Contratar aparte la estabilidad de la red (control de tensión e inercia) con compensadores síncronos y baterías que forman red, y exigir a las renovables que regulen tensión.",
+        "Interconexión con Francia hasta el objetivo europeo del 15 % de la potencia instalada, con calendario público y seguimiento de cada obra."
+      ],
+      "supone": {
+        "personas": "Menos riesgo de apagones como el de abril de 2025 y decisiones que se pueden entender: cualquiera puede leer el informe anual y ver si sobra o falta potencia. Los trabajadores y las comarcas de cada central saben con años de antelación si sigue o cierra, y por qué.",
+        "cuentas": "El respaldo y la estabilidad se pagan en la factura. Gran Bretaña adjudicó contratos de estabilidad por 323 millones de libras; de su primera fase esperaba hasta 128 millones de ahorro para los consumidores. Alargar una nuclear exige inversión: en Bélgica se estimó entre 1.600 y 2.000 millones de euros para dos reactores. No hay cifra verificada para España.",
+        "puesta_en_marcha": "Reforma de la ley del sector eléctrico para fijar la norma de fiabilidad y el órgano que la evalúa. Un mecanismo de capacidad debe encajar en las normas europeas de ayudas públicas. Aplicar las recomendaciones del informe europeo sobre el apagón, publicado en marzo de 2026. Las interconexiones dependen también de Francia y llevan años de obra."
+      },
+      "integra": "Ni nuclear sí ni nuclear no por principio: decide el dato. Recoge la exigencia de respaldo firme y de no cerrar a ciegas, y la de un sistema renovable, porque contratar la estabilidad aparte permite más sol y viento sin riesgo.",
+      "referencias": [
+        {
+          "lugar": "Gran Bretaña (mercado de capacidad)",
+          "que": "Sus subastas de capacidad, a uno y a cuatro años vista, se dimensionan con una norma de fiabilidad de tres horas al año de pérdida de carga esperada. La subasta para 2029/30 tiene un objetivo de 39,4 GW.",
+          "url": "https://www.gov.uk/government/publications/capacity-market-auction-parameters-letter-from-desnz-to-neso-february-2026/final-auction-parameters-t-1-and-t-4-capacity-market-auctions"
+        },
+        {
+          "lugar": "Gran Bretaña (operador del sistema)",
+          "que": "Contrata la estabilidad por separado de la energía. En la primera fase puso en marcha doce compensadores síncronos, máquinas que dan inercia a la red sin generar electricidad, con un ahorro previsto de hasta 128 millones de libras.",
+          "url": "https://www.neso.energy/news/first-phase-stability-pathfinders-delivered"
+        },
+        {
+          "lugar": "Bélgica",
+          "que": "Pactó alargar diez años dos reactores, Doel 4 y Tihange 3, con una sociedad a medias entre el Estado y la empresa, un precio garantizado por contrato y una suma fija de 15.000 millones de euros para el tratamiento futuro de los residuos.",
+          "url": "https://world-nuclear-news.org/articles/final-accord-reached-on-belgian-reactor-operations"
+        },
+        {
+          "lugar": "Unión Europea (interconexiones)",
+          "que": "El objetivo es que cada país pueda importar de sus vecinos al menos el 15 % de su potencia instalada en 2030. La tabla de la Comisión sitúa a España en el 3,11 % en 2026, por debajo del 4,96 % de 2021.",
+          "url": "https://energy.ec.europa.eu/infrastructure/electricity-interconnection-targets_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un mecanismo de capacidad puede acabar pagando a centrales de gas por estar paradas y encarecer la factura.",
+          "r": "Por eso la subasta es abierta: gana quien ofrezca potencia firme más barata, sea batería, bombeo o demanda que se desconecta. El riesgo de contratar de más existe y depende de que el cálculo anual sea de verdad independiente."
+        },
+        {
+          "o": "Alargar las nucleares exige inversiones que las empresas condicionan a rebajas de impuestos o a garantías públicas.",
+          "r": "Cierto. La regla no obliga a alargar: compara el coste de seguir con el de sustituir esa potencia. Si solo sale con ayuda pública, la cifra debe publicarse y decidirse a la vista, como en Bélgica."
+        },
+        {
+          "o": "La interconexión con Francia no depende solo de España y acumula años de retraso.",
+          "r": "Es un límite real. Por eso el plan no puede fiar la seguridad a esos cables: la norma de fiabilidad debe cumplirse también en el escenario de frontera cerrada."
+        }
+      ],
+      "fuentes": [
+        { "t": "Gobierno del Reino Unido: parámetros de las subastas T-1 y T-4 del mercado de capacidad (febrero de 2026)", "url": "https://www.gov.uk/government/publications/capacity-market-auction-parameters-letter-from-desnz-to-neso-february-2026/final-auction-parameters-t-1-and-t-4-capacity-market-auctions" },
+        { "t": "NESO: entregada la primera fase de los contratos de estabilidad", "url": "https://www.neso.energy/news/first-phase-stability-pathfinders-delivered" },
+        { "t": "NESO: la primera batería que forma red de Gran Bretaña se conecta en Escocia", "url": "https://www.neso.energy/news/great-britains-first-grid-forming-battery-connects-scotland" },
+        { "t": "World Nuclear News: acuerdo final sobre la operación de los reactores belgas", "url": "https://world-nuclear-news.org/articles/final-accord-reached-on-belgian-reactor-operations" },
+        { "t": "Comisión Europea: objetivos de interconexión eléctrica", "url": "https://energy.ec.europa.eu/infrastructure/electricity-interconnection-targets_en" },
+        { "t": "ENTSO-E: apagón del 28 de abril de 2025, informes del panel de expertos", "url": "https://www.entsoe.eu/publications/blackout/28-april-2025-iberian-blackout/" }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No proponer nada sobre la factura, prometer precios fijados por decreto sin decir quién paga, o dejar que se corte la luz a hogares vulnerables.",
+      "ideal": "Que la luz se pague a un coste estable: la energía con apoyo público cobra un precio fijo y devuelve lo que gane de más, ese dinero baja la factura, y la ayuda a los hogares vulnerables llega sola, sin solicitud.",
+      "titulo": "Luz a coste estable y ayuda automática",
+      "slug": "luz-a-coste-estable-y-ayuda-automatica",
+      "resumen": "Lo avanzado paga cada tecnología por su coste. El ideal añade tres reglas automáticas: los contratos de precio fijo devuelven al consumidor lo que sobra cuando el mercado sube; la factura solo lleva costes eléctricos; y la protección al hogar vulnerable se aplica de oficio, cruzando datos de Hacienda y Seguridad Social, sin papeleo ni renovaciones.",
+      "medidas": [
+        "Contratos por diferencias de doble sentido para toda nueva renovable o nuclear con apoyo público: precio fijo por subasta y, si el mercado paga más, la planta devuelve la diferencia.",
+        "Destinar por ley esas devoluciones a rebajar la factura de hogares y empresas, con la cuenta publicada cada año.",
+        "Bono social automático: la administración cruza renta y prestaciones y la comercializadora aplica el descuento sin solicitud, como en Portugal.",
+        "Garantía pública, a precio de mercado, para que pymes e industria puedan firmar contratos de compra de energía a largo plazo sin que se subvencione el precio.",
+        "Factura limpia: sacar de la luz, de forma gradual, los cargos que no son coste eléctrico y llevarlos al presupuesto diciendo qué partida los cubre.",
+        "Protocolo de crisis fijado de antemano: qué rebajas se activan, a partir de qué precio y cuándo se retiran, para no improvisar."
+      ],
+      "supone": {
+        "personas": "Quien tiene derecho al bono lo recibe sin pedirlo ni renovarlo. La factura se mueve menos con el precio del gas. La industria puede firmar un precio para muchos años y planificar inversiones. Y cualquiera puede ver cuánto han devuelto las plantas con precio garantizado y en qué se ha usado.",
+        "cuentas": "Los contratos de doble sentido no son gratis: cuando el mercado baja del precio pactado, el sistema paga la diferencia; cuando sube, cobra. Pasar cargos al presupuesto exige ingresos o recortes equivalentes. Un bono automático llega a más hogares y cuesta más que uno que hay que pedir; en Portugal lo tienen unos 735.000 clientes de luz.",
+        "puesta_en_marcha": "La reforma europea del mercado eléctrico, en vigor desde julio de 2024, da la base: exige contratos de doble sentido para la nueva generación con apoyo público tras tres años de transición. Falta la ley española que fije el destino de las devoluciones, el cruce automático de datos para el bono y el calendario para limpiar la factura."
+      },
+      "integra": "Mantiene el mercado y la competencia por subasta y da precio estable a la industria. A la vez protege de oficio a quien no puede pagar y devuelve al consumidor los ingresos extraordinarios. No fija precios por decreto ni deja a nadie sin luz.",
+      "referencias": [
+        {
+          "lugar": "Unión Europea (reforma del mercado eléctrico)",
+          "que": "El apoyo público directo a nueva eólica, solar, geotermia, hidráulica sin embalse y nuclear debe darse con contratos por diferencias de doble sentido, y lo que el Estado recaude con ellos ha de repercutir en los clientes finales.",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837"
+        },
+        {
+          "lugar": "Portugal",
+          "que": "La tarifa social se aplica de forma automática: la dirección general de energía cruza datos con Hacienda y Seguridad Social y la comercializadora descuenta sin solicitud. En junio de 2026 la tenían 735.186 clientes de luz y 56.215 de gas natural.",
+          "url": "https://www.deco.proteste.pt/casa-energia/eletricidade-gas/dicas/tarifa-social-energia-quem-tem-direito-desconto-eletricidade-gas"
+        },
+        {
+          "lugar": "Reino Unido",
+          "que": "Sus contratos por diferencias dan a cada planta de bajas emisiones un precio fijo actualizado durante 15 años. Se adjudican en rondas competitivas con ofertas a sobre cerrado y los gestiona una sociedad de propiedad pública que actúa de contraparte.",
+          "url": "https://www.gov.uk/government/collections/contracts-for-difference"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Si el Estado garantiza precios a largo plazo y el mercado baja, los consumidores acaban pagando la energía más cara de lo que cuesta en ese momento.",
+          "r": "Es el coste del seguro: se renuncia a parte de las bajadas para evitar los picos. Las subastas competitivas reducen el riesgo de pactar precios altos, pero no lo eliminan."
+        },
+        {
+          "o": "Cruzar datos fiscales y sociales para dar el bono de oficio plantea dudas de protección de datos y deja fuera a quien no figura en los registros.",
+          "r": "Hace falta una base legal expresa y que la comercializadora solo sepa si hay derecho, no el motivo. Para quien no aparece en los registros debe seguir abierta una ventanilla de solicitud."
+        },
+        {
+          "o": "Sacar cargos de la factura no los elimina: los pasa a los impuestos y los pagan también quienes consumen poco.",
+          "r": "Así es. La ventaja es que los impuestos se reparten según la renta y la factura no. Tiene que hacerse poco a poco y diciendo qué partida lo cubre."
+        }
+      ],
+      "fuentes": [
+        { "t": "Parlamento Europeo (Observatorio Legislativo): resumen del reglamento de reforma del mercado eléctrico", "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1785837" },
+        { "t": "Comisión Europea: diseño del mercado eléctrico", "url": "https://energy.ec.europa.eu/topics/markets-and-consumers/electricity-market-design_en" },
+        { "t": "DECO Proteste: tarifa social de energía, quién tiene derecho al descuento", "url": "https://www.deco.proteste.pt/casa-energia/eletricidade-gas/dicas/tarifa-social-energia-quem-tem-direito-desconto-eletricidade-gas" },
+        { "t": "Gobierno del Reino Unido: Contracts for Difference", "url": "https://www.gov.uk/government/collections/contracts-for-difference" }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada sobre renovables, frenar toda instalación por principio, o autorizarlas sin red, sin almacenamiento y sin contar con el territorio.",
+      "ideal": "Planificar a la vez plantas, red y almacenamiento: zonas acordadas con los municipios donde el permiso es rápido, red construida antes de que haga falta y derecho de cada vecino a producir, compartir y guardar su energía.",
+      "titulo": "Renovables con red, almacén y vecinos primero",
+      "slug": "renovables-con-red-almacen-y-vecinos",
+      "resumen": "Lo avanzado describe la meta: casi 100 % renovable con almacenamiento y comunidades energéticas. El ideal fija el orden para llegar: primero el mapa, acordado con cada territorio; después la red y el almacenamiento, construidos por adelantado; y cada planta nueva llega con estabilidad para la red y con una parte de la renta para el pueblo que la acoge.",
+      "medidas": [
+        "Mapa único de zonas de aceleración, hecho con municipios y comunidades autónomas: dentro, permiso rápido; fuera, protección del suelo agrario valioso y del paisaje.",
+        "Red planificada por adelantado: el plan se revisa cada dos años con la previsión de demanda y de renovables, y el permiso de conexión caduca si el proyecto no avanza.",
+        "Objetivo anual de almacenamiento (baterías y bombeo) ligado a la energía renovable que se desperdicia: si supera un umbral, se convoca una subasta.",
+        "Toda planta nueva se conecta con capacidad de regular tensión, y se contratan baterías que forman red para dar estabilidad, como hace el operador británico.",
+        "Derecho a compartir energía: autoconsumo colectivo y comunidad energética con un solo trámite digital y un plazo máximo de conexión.",
+        "Cada proyecto grande ofrece participación a vecinos y ayuntamiento y aporta a un fondo local, igual que en la renta rural garantizada."
+      ],
+      "supone": {
+        "personas": "Un vecino puede unirse a la instalación solar de su pueblo o de su bloque con un trámite. Los pueblos saben de antemano dónde puede ir una planta y dónde no, y reciben parte de la renta. Se desperdicia menos energía limpia y hay menos proyectos e industrias parados a la espera de un punto de conexión.",
+        "cuentas": "La red y el almacenamiento se pagan en la factura durante décadas. Adelantar la inversión sube ese coste a corto plazo y lo baja si evita energía desperdiciada y compras de gas. No hemos podido verificar una cifra oficial de inversión para España. Las comunidades energéticas tienen apoyo europeo: la Comisión cuenta más de 8.000 en la UE.",
+        "puesta_en_marcha": "La directiva europea de renovables fija al menos un 42,5 % renovable en 2030 y obligaba a designar zonas de aceleración antes de febrero de 2026. Faltan en España una planificación de red con revisión frecuente, un objetivo legal de almacenamiento, la ventanilla única para compartir energía y la ley de participación local. Requiere acuerdo con las comunidades autónomas."
+      },
+      "integra": "Responde a quien quiere renovables rápidas y a quien teme la saturación del territorio: se acelera donde se ha acordado y se protege el resto. Combina grandes plantas competitivas con energía en manos de los vecinos, y no deja la estabilidad al azar.",
+      "referencias": [
+        {
+          "lugar": "Unión Europea (directiva de renovables)",
+          "que": "Obliga a los países a designar zonas de aceleración, donde no se espera un impacto ambiental significativo y el permiso es más ágil, y a promover la participación directa e indirecta de las comunidades locales en los proyectos.",
+          "url": "https://energy.ec.europa.eu/topics/renewable-energy/enabling-framework-renewables_en"
+        },
+        {
+          "lugar": "Unión Europea (comunidades energéticas)",
+          "que": "El derecho europeo reconoce desde 2019 las comunidades energéticas, y la reforma del mercado eléctrico refuerza su derecho a compartir energía entre socios. La Comisión cuenta más de 8.000 en la UE, según su informe de noviembre de 2025.",
+          "url": "https://energy.ec.europa.eu/topics/markets-and-consumers/energy-consumers-and-prosumers/energy-communities_en"
+        },
+        {
+          "lugar": "Gran Bretaña (operador del sistema)",
+          "que": "Adjudicó diez contratos de estabilidad por 323 millones de libras, cinco de ellos a baterías que forman red: imitan con su electrónica a un generador clásico y aportan inercia y potencia de cortocircuito. Los contratos iniciales duran diez años.",
+          "url": "https://www.neso.energy/news/great-britains-first-grid-forming-battery-connects-scotland"
+        },
+        {
+          "lugar": "Dinamarca",
+          "que": "El dueño de cada planta eólica o solar paga un bono anual a los vecinos más cercanos según la producción, ingresa una suma en un fondo que gestiona el municipio y debe comprar la vivienda a quien pierda más de un 1 % de su valor y quiera vender.",
+          "url": "https://ens.dk/en/node/4347"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Las zonas de aceleración recortan trámites ambientales y pueden dejar pasar proyectos dañinos.",
+          "r": "La evaluación se hace una vez, al trazar el mapa, y con participación local; por eso el mapa tiene que ser exigente. Si se traza deprisa o sin datos de fauna y paisaje, el riesgo es real."
+        },
+        {
+          "o": "Construir red por adelantado puede dejar líneas poco usadas que pagan todos los consumidores.",
+          "r": "Puede ocurrir. Se limita revisando el plan cada dos años y pidiendo compromisos firmes a quien solicita conexión. Quedarse corto también cuesta: energía desperdiciada e industria que no puede conectarse."
+        },
+        {
+          "o": "Un sistema casi 100 % renovable necesita guardar energía durante semanas, y eso hoy no existe a un precio razonable.",
+          "r": "Baterías y bombeo cubren horas o días, no semanas sin viento. Por eso este ideal va unido a la norma de fiabilidad: mientras no haya alternativa hará falta respaldo firme, aunque funcione pocas horas."
+        }
+      ],
+      "fuentes": [
+        { "t": "Comisión Europea: marco facilitador de las renovables (zonas de aceleración y permisos)", "url": "https://energy.ec.europa.eu/topics/renewable-energy/enabling-framework-renewables_en" },
+        { "t": "Comisión Europea: Directiva de energías renovables, objetivos y normas", "url": "https://energy.ec.europa.eu/topics/renewable-energy/renewable-energy-directive-targets-and-rules/renewable-energy-directive_en" },
+        { "t": "Comisión Europea: comunidades energéticas", "url": "https://energy.ec.europa.eu/topics/markets-and-consumers/energy-consumers-and-prosumers/energy-communities_en" },
+        { "t": "NESO: la primera batería que forma red de Gran Bretaña se conecta en Escocia", "url": "https://www.neso.energy/news/great-britains-first-grid-forming-battery-connects-scotland" },
+        { "t": "Agencia Danesa de la Energía: esquemas para vecinos y municipios de plantas renovables", "url": "https://ens.dk/en/node/4347" }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "Negar el cambio climático, proponer salir de los acuerdos de clima, incumplir los objetivos europeos o no proponer nada.",
+      "ideal": "Un presupuesto de carbono legal que se corrige solo: si un sector se pasa, el Gobierno debe aprobar medidas en un plazo fijo. Y un precio al carbono en todos los sectores cuya recaudación vuelve a los hogares a partes iguales.",
+      "titulo": "Presupuesto de carbono que se corrige solo",
+      "slug": "presupuesto-de-carbono-que-se-corrige-solo",
+      "resumen": "Lo avanzado fija neutralidad antes de 2050 con presupuesto vinculante y comité independiente. El ideal añade lo que falta para que se cumpla: presupuestos fijados con doce años de antelación, corrección obligatoria cuando hay desvío, todos los sectores dentro, también campo y transporte, y un precio al carbono cuyo dinero vuelve a la gente.",
+      "medidas": [
+        "Presupuestos de carbono de cinco años aprobados por ley con doce años de antelación, como en el Reino Unido, y repartidos además por sectores.",
+        "Corrección automática: si el comité científico certifica un desvío, el Gobierno debe llevar al Congreso medidas que lo cierren en un plazo fijo, y su omisión se puede reclamar ante los tribunales.",
+        "Fecha de neutralidad revisada cada cinco años por el comité, con una meta para 2040 no inferior a la europea: un 90 % menos de emisiones netas que en 1990.",
+        "Precio al carbono en calefacción y transporte con devolución íntegra: un pago igual por persona, más ayudas a los hogares vulnerables para cambiar de caldera o de vehículo.",
+        "El campo dentro de la cuenta, con plazos largos y con retorno al sector de lo que pague, siguiendo el pacto danés.",
+        "Contabilidad pública anual de emisiones por sector y por comunidad autónoma, y también de las emisiones de lo que importamos."
+      ],
+      "supone": {
+        "personas": "Cada hogar recibe un pago igual por persona; quien contamina menos que la media sale ganando. Las empresas saben con doce años de antelación cuánto se podrá emitir. La calefacción y los carburantes fósiles se encarecen de forma gradual y anunciada, con ayuda para cambiar a quien no puede pagarlo.",
+        "cuentas": "El precio al carbono no engorda el presupuesto: se devuelve. Suiza cobra 120 francos por tonelada de CO₂ en los combustibles de calefacción y en 2025 devolvió 61,80 francos por persona a través del seguro médico. La UE aporta el Fondo Social para el Clima: 86.700 millones de euros entre 2026 y 2032 para hogares y transporte vulnerables.",
+        "puesta_en_marcha": "Reforma de la ley de cambio climático para dar fuerza legal a los presupuestos y a la corrección obligatoria, y reforzar el comité independiente. El precio al carbono en edificios y transporte llega con el nuevo mercado europeo de emisiones, previsto para 2028; España decide cómo devuelve el dinero. Necesita un pacto que sobreviva a los cambios de gobierno."
+      },
+      "integra": "Usa un instrumento de mercado, el precio, y lo hace neutral en impuestos: el Estado no se queda con la recaudación. A la vez garantiza el resultado climático con límites legales y protege a los hogares con menos renta y al campo con plazos y retorno.",
+      "referencias": [
+        {
+          "lugar": "Reino Unido",
+          "que": "Su ley de clima obliga a fijar presupuestos de carbono de cinco años con al menos doce de antelación y a preparar políticas para cumplirlos. El sexto, para 2033-2037, exige un 78 % menos de emisiones que en 1990.",
+          "url": "https://www.theccc.org.uk/climate-action/"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "Su ley de clima de 2021 fijó la neutralidad en 2045, un 65 % menos de emisiones en 2030 y un 88 % menos en 2040, con objetivos anuales y obligación de corregir si se incumplen. Respondió a una sentencia del Tribunal Constitucional de abril de 2021.",
+          "url": "https://www.bundesregierung.de/breg-en/issues/climate-action/climate-change-act-2021-1936846"
+        },
+        {
+          "lugar": "Suiza",
+          "que": "Cobra una tasa de 120 francos por tonelada de CO₂ a los combustibles fósiles de calefacción. La parte que vuelve a la población se reparte a partes iguales entre todos los residentes, descontada de la prima del seguro médico obligatorio.",
+          "url": "https://www.bafu.admin.ch/en/co2-levy-private-individuals"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "En marzo de 2026 incorporó a su ley del clima una meta vinculante para 2040: un 90 % menos de emisiones netas que en 1990, con al menos un 85 % logrado dentro de la UE y hasta un 5 % con créditos internacionales.",
+          "url": "https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2040-climate-target_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un precio al carbono en calefacción y carburantes pesa más a quien vive en el campo o en casas mal aisladas, aunque luego reciba un pago.",
+          "r": "Es cierto para una parte de los hogares. El pago igual compensa a quien consume menos que la media; el resto necesita ayudas directas para cambiar de caldera o de coche, que es para lo que existe el fondo social europeo."
+        },
+        {
+          "o": "Dar a los tribunales la última palabra sobre la política climática quita margen al Parlamento elegido.",
+          "r": "El Parlamento fija el presupuesto y puede cambiarlo por ley, a la vista de todos. Lo que no puede es incumplirlo en silencio. El límite se reconoce: un juez puede ordenar un plan, no ejecutarlo."
+        },
+        {
+          "o": "Tener la ley no garantiza cumplirla, e ir más rápido que otros países puede llevarse industria fuera sin bajar las emisiones del planeta.",
+          "r": "El Reino Unido cumplió sus tres primeros presupuestos y aun así su comité avisó de que no iba en senda para los siguientes. Por eso la meta no baja de la europea, que comparten nuestros socios, y se cuentan las emisiones importadas."
+        }
+      ],
+      "fuentes": [
+        { "t": "Climate Change Committee (Reino Unido): objetivos legales y presupuestos de carbono", "url": "https://www.theccc.org.uk/climate-action/" },
+        { "t": "LSE Grantham Institute: qué es la Ley de Cambio Climático de 2008", "url": "https://www.lse.ac.uk/granthaminstitute/explainers/what-is-the-2008-climate-change-act/" },
+        { "t": "Gobierno Federal de Alemania: Ley de Protección del Clima de 2021", "url": "https://www.bundesregierung.de/breg-en/issues/climate-action/climate-change-act-2021-1936846" },
+        { "t": "Oficina Federal de Medio Ambiente de Suiza: la tasa sobre el CO₂ para los particulares", "url": "https://www.bafu.admin.ch/en/co2-levy-private-individuals" },
+        { "t": "Comisión Europea: objetivo climático para 2040", "url": "https://climate.ec.europa.eu/eu-action/climate-strategies-targets/2040-climate-target_en" },
+        { "t": "Comisión Europea: Fondo Social para el Clima", "url": "https://employment-social-affairs.ec.europa.eu/policies-and-activities/funding/social-climate-fund_en" }
+      ]
+    }
+  ]
+}

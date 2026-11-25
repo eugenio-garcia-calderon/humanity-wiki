@@ -1,0 +1,630 @@
+{
+  "clave": "ser",
+  "anti_tema": "No proponer nada sobre sanidad, educación y cuidados, o romper la base: negar la atención a quien vive aquí, ocultar los datos o incumplir lo que la ley ya garantiza.",
+  "ideal_tema": "Una sola red universal con las mismas reglas para todo centro: plazos máximos que se cumplen solos, datos abiertos de resultado y coste, elección real y dinero repartido según la necesidad, igual en un pueblo que en una capital.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No decir nada sobre los conciertos, o romper la base: dar dinero público a centros sin control ni evaluación, o incumplir contratos ya firmados.",
+      "ideal": "Un único contrato para todo centro pagado con impuestos: mismo precio por el mismo servicio, cuentas abiertas, admisión sin filtros ni cuotas y no prórroga automática si dos evaluaciones seguidas salen peor que la red pública.",
+      "titulo": "Contrato único para todo centro pagado con impuestos",
+      "slug": "contrato-unico-centros-pagados-con-impuestos",
+      "resumen": "Lo avanzado limita los conciertos a donde mejoran lo medido. El ideal fija por ley las condiciones: el centro privado que cobra dinero público acepta el mismo precio, los mismos indicadores, la misma admisión y la misma transparencia que uno público. Así el debate deja de ser «público o privado» y pasa a ser «quién cumple».",
+      "medidas": [
+        "Pagar el mismo precio por el mismo servicio a cualquier centro, ajustado por la gravedad o la dificultad de cada paciente o alumno, para que no compense quedarse con los casos fáciles.",
+        "Prohibir cuotas, aportaciones «voluntarias» y servicios de pago obligatorios en todo lo que financia el dinero público, con inspección y devolución a las familias.",
+        "Incluir en cada contrato indicadores de resultado y de coste, publicados cada año junto a los de los centros públicos de su zona.",
+        "Cuentas abiertas: el centro concertado publica en qué gasta el dinero público que recibe y qué beneficio obtiene de él.",
+        "Regla de reversión escrita en el contrato: si el centro sale peor que la red pública comparable en dos evaluaciones seguidas, no se prorroga; si sale mejor, puede ampliarse.",
+        "Admisión con las mismas reglas y por la misma oficina que en la red pública, con reserva de plazas para alumnado o pacientes con más necesidades."
+      ],
+      "supone": {
+        "personas": "Quien va a un centro concertado no paga nada por lo que ya cubren sus impuestos y puede ver, con datos, cómo funciona frente al centro público de al lado. Nadie queda fuera por ser un caso caro o difícil.",
+        "cuentas": "No exige más gasto: cambia cómo se contrata. El caso valenciano enseña las dos caras: la auditoría pública del hospital de Manises midió un gasto un 24,6 % menor que el de hospitales comarcales públicos, pero también propuestas de liquidación que diferían en 179,8 millones de euros por falta de un procedimiento claro.",
+        "puesta_en_marcha": "Una ley básica estatal que fije el contrato tipo para conciertos sanitarios y educativos; las comunidades lo aplican al renovar cada concierto. Los contratos vigentes se respetan hasta su vencimiento. La comparación entre centros la publica un evaluador independiente."
+      },
+      "integra": "De la derecha recoge que importa el resultado y el coste, no quién gestiona, y que la iniciativa privada puede aportar. De la izquierda, que el dinero público no pague selección de usuarios, cuotas encubiertas ni beneficios opacos.",
+      "referencias": [
+        {
+          "lugar": "Dinamarca",
+          "que": "Las regiones son dueñas de la mayoría de los hospitales y limitan los contratos con privados a procedimientos concretos o a cuando no llegan al plazo garantizado. En 2020, unos 120.000 pacientes fueron atendidos en privados con dinero público.",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/provision-of-services/specialized-care"
+        },
+        {
+          "lugar": "Inglaterra",
+          "que": "Para la primera consulta, el paciente puede elegir cualquier proveedor con contrato del servicio público de salud (NHS), también privado. El sistema de citas muestra de cada uno la espera y la nota del inspector público.",
+          "url": "https://www.gov.uk/government/publications/the-nhs-choice-framework/the-nhs-choice-framework-what-choices-are-available-to-me-in-the-nhs"
+        },
+        {
+          "lugar": "Comunitat Valenciana (Sindicatura de Comptes)",
+          "que": "La auditoría pública de la concesión del hospital de Manises (2017) halló un gasto un 24,6 % menor que en hospitales comarcales, pero un contrato sin indicadores de resultado y una comisión de seguimiento reunida solo 12 veces en siete años.",
+          "url": "https://valenciaplaza.com/sindicatura-comptes-hospital-manises"
+        },
+        {
+          "lugar": "España (ley de educación)",
+          "que": "La ley ya prohíbe a los colegios concertados cobrar por las enseñanzas gratuitas, exigir aportaciones a fundaciones o imponer servicios de pago, y manda reservar plazas para alumnado con necesidad de apoyo.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2006-7899"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Con el mismo precio y sin poder elegir usuarios, muchos centros privados dejarán de concertar y habrá menos oferta para reducir esperas.",
+          "r": "Es un riesgo real. El precio ajustado por dificultad debe cubrir el coste de un centro eficiente; si aun así no hay oferta, esa plaza tiene que crearla la red pública. Lo que no cabe es pagar más por atender casos más fáciles."
+        },
+        {
+          "o": "Obligar a publicar cuentas y beneficio invade la libertad de empresa y puede chocar con el secreto comercial.",
+          "r": "Solo se publica la parte financiada con dinero público, que ya está sujeta a control. El centro que no quiera esa transparencia puede trabajar fuera del concierto."
+        },
+        {
+          "o": "Una reversión casi automática ignora lo que cuesta recuperar un servicio: personal, inversiones pendientes y pleitos.",
+          "r": "Cierto: la vuelta a gestión pública del hospital de Alzira en 2018 acabó en el Tribunal Supremo. Por eso la regla se pacta en el contrato desde el inicio y la decisión de no prorrogar debe apoyarse en informes económicos."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Observatorio Europeo de Sistemas y Políticas de Salud: Dinamarca 2024, atención especializada",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/provision-of-services/specialized-care"
+        },
+        {
+          "t": "Gobierno del Reino Unido: The NHS Choice Framework",
+          "url": "https://www.gov.uk/government/publications/the-nhs-choice-framework/the-nhs-choice-framework-what-choices-are-available-to-me-in-the-nhs"
+        },
+        {
+          "t": "Valencia Plaza: la auditoría de la Sindicatura de Comptes al Hospital de Manises",
+          "url": "https://valenciaplaza.com/sindicatura-comptes-hospital-manises"
+        },
+        {
+          "t": "Valencia Plaza: el Supremo valida la reversión del hospital de Alzira",
+          "url": "https://valenciaplaza.com/sentencia-supremo-reversion-hospital-alzira"
+        },
+        {
+          "t": "BOE: Ley Orgánica 2/2006, de Educación (texto consolidado), artículos 84, 87, 88 y 116",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2006-7899"
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada, o romper la base: gastar sin control ni cuentas, justificar el fraude o bajar impuestos sin decir qué servicio se deja de pagar.",
+      "ideal": "Revisar todo el gasto por turnos, con una opción de ahorro obligada; financiar solo lo que demuestra su valor; y no subir la presión fiscal media sin haber respondido antes, una a una y en público, a las propuestas de ahorro.",
+      "titulo": "Evaluar antes de gastar y antes de subir impuestos",
+      "slug": "evaluar-antes-de-gastar-y-de-subir-impuestos",
+      "resumen": "Lo avanzado pide evaluar cada euro antes de subir impuestos. El ideal lo convierte en regla permanente: revisiones independientes de todo el gasto en ciclos fijos, obligación de aplicar cada propuesta o explicar por escrito por qué no, y un filtro público de coste y beneficio para cada medicamento, tecnología o programa nuevo.",
+      "medidas": [
+        "Revisar cada gran partida de gasto al menos una vez cada cinco años, con un presidente independiente y con al menos una opción que ahorre entre el 10 % y el 20 %, como en los Países Bajos.",
+        "«Cumplir o explicar» con rango de ley y también para las comunidades: cada propuesta del evaluador se aplica o se rechaza por escrito, en público y con plazo.",
+        "Financiar medicamentos y tecnologías nuevas solo tras una evaluación pública de lo que aportan frente a lo que cuestan, con un umbral conocido de antemano.",
+        "Comprar en común entre comunidades los medicamentos y equipos de alto coste, con los precios pagados a la vista.",
+        "Antes de cualquier subida de la presión fiscal media, un informe público que diga qué ahorros evaluados se han aplicado, cuáles no y por qué.",
+        "Destinar lo ahorrado primero al servicio evaluado (menos espera, más profesionales) y solo después a otros fines."
+      ],
+      "supone": {
+        "personas": "El contribuyente puede ver qué programas funcionan y cuáles se han rediseñado o retirado. Los pacientes acceden a los tratamientos nuevos con una regla conocida, no según la comunidad o la presión de cada momento.",
+        "cuentas": "Las revisiones cuestan poco frente al gasto que examinan, pero el ahorro no está garantizado: depende de que se apliquen. En España, de las 357 propuestas de la AIReF que sigue el Ministerio de Hacienda (2022-2025), constan 217 implantadas, 58 en proceso y 82 rechazadas.",
+        "puesta_en_marcha": "Reformar la ley de la AIReF para hacer permanentes las revisiones y extender el «cumplir o explicar» a comunidades y ayuntamientos. Fijar por ley el umbral de coste por beneficio en salud, apoyado en la evaluación clínica conjunta europea, que se aplica desde enero de 2025."
+      },
+      "integra": "De la derecha recoge que no se pidan más impuestos mientras haya gasto que no demuestra su utilidad. De la izquierda, que la contención no sea un recorte lineal a ciegas: se retira lo que no funciona para proteger lo que sí.",
+      "referencias": [
+        {
+          "lugar": "Países Bajos",
+          "que": "Hace revisiones de gasto desde los años ochenta: más de 300, entre tres y siete al año, con presidente independiente, sin veto de ningún ministerio y con al menos una opción de ahorro del 10 al 20 %. Se publican y se envían al Parlamento.",
+          "url": "https://www.rijksfinancien.nl/sites/default/files/extrainfo/ibos/Spending%20Reviews%20in%20the%20Netherlands.pdf"
+        },
+        {
+          "lugar": "España (Ministerio de Hacienda y AIReF)",
+          "que": "Las revisiones de gasto de la AIReF se siguen con el principio de «cumplir o explicar»: de 357 propuestas (2022-2025), el informe de seguimiento da 217 por implantadas, 58 en proceso y 82 rechazadas.",
+          "url": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/IRG/Documents/INFORME%20SPENDING%20REVIEW%202025%2031032025.pdf"
+        },
+        {
+          "lugar": "Inglaterra (NICE)",
+          "que": "Evalúa cada tratamiento nuevo con un umbral de coste por año de vida ganado con buena salud: de 20.000 a 30.000 libras, que el Gobierno anunció elevar a 25.000-35.000 desde abril de 2026.",
+          "url": "https://www.nice.org.uk/news/articles/changes-to-nice-s-cost-effectiveness-thresholds-confirmed"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "El Reglamento (UE) 2021/2282 se aplica desde el 12 de enero de 2025 y prevé evaluaciones clínicas conjuntas de las tecnologías sanitarias, coordinadas por un grupo de los Estados miembros.",
+          "url": "https://health.ec.europa.eu/health-technology-assessment/implementation-regulation-health-technology-assessment_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un umbral de coste por beneficio deja sin financiar tratamientos que alargan la vida de pacientes concretos. Es poner precio a la salud.",
+          "r": "El precio ya se pone, pero sin reglas y con diferencias entre territorios. Un umbral público permite negociar el precio y prever excepciones tasadas, como las enfermedades raras. El límite existe: habrá negativas difíciles."
+        },
+        {
+          "o": "Las revisiones no ahorran si el Gobierno puede rechazar las propuestas con una explicación de trámite.",
+          "r": "Es el límite del modelo: en España se ha rechazado cerca de una de cada cuatro. La regla no obliga a aplicar, obliga a dar la cara. Por eso se liga a cualquier subida de impuestos, que es cuando hay incentivo para responder."
+        },
+        {
+          "o": "Condicionar las subidas de impuestos a evaluaciones puede bloquear ingresos necesarios en plena crisis.",
+          "r": "La regla exige responder antes a las propuestas de ahorro, no aplicarlas todas. Y debe prever una excepción para emergencias, con control posterior del Parlamento."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Ministerio de Finanzas de los Países Bajos: Spending Reviews in the Netherlands",
+          "url": "https://www.rijksfinancien.nl/sites/default/files/extrainfo/ibos/Spending%20Reviews%20in%20the%20Netherlands.pdf"
+        },
+        {
+          "t": "Ministerio de Hacienda: informe de seguimiento de las recomendaciones de los spending reviews, 2025",
+          "url": "https://www.sepg.pap.hacienda.gob.es/sitios/sepg/es-ES/Presupuestos/IRG/Documents/INFORME%20SPENDING%20REVIEW%202025%2031032025.pdf"
+        },
+        {
+          "t": "NICE: Changes to NICE's cost-effectiveness thresholds confirmed",
+          "url": "https://www.nice.org.uk/news/articles/changes-to-nice-s-cost-effectiveness-thresholds-confirmed"
+        },
+        {
+          "t": "Comisión Europea: aplicación del Reglamento de evaluación de tecnologías sanitarias",
+          "url": "https://health.ec.europa.eu/health-technology-assessment/implementation-regulation-health-technology-assessment_en"
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "No proponer nada, o romper la base: negar toda elección a la persona, o una «elección» en la que es el centro quien escoge a quién admite.",
+      "ideal": "Elegir cualquier centro de la red pagada con dinero público en toda España, con el dinero siguiendo a la persona, un comparador oficial de resultados y un solo régimen sanitario, al que el mutualismo se incorpora por fases.",
+      "titulo": "Elección informada en toda la red y un solo régimen",
+      "slug": "eleccion-informada-en-toda-la-red-y-un-solo-regimen",
+      "resumen": "Lo avanzado da libertad de elección con datos de resultados. El ideal la extiende a todo el país y la hace efectiva: el dinero sigue a la persona, ni la información ni el transporte dependen de la renta, las plazas disputadas se reparten con reglas públicas y los funcionarios dejan de tener, por fases, un régimen aparte.",
+      "medidas": [
+        "Derecho a elegir médico de familia, hospital y centro de especialidades entre todos los que tienen financiación pública, en cualquier comunidad y sin autorización previa.",
+        "Un comparador oficial único con la espera, los resultados y la calificación de cada centro, visible en el momento de pedir la cita o la plaza escolar.",
+        "El dinero sigue a la persona: el centro que atiende a más pacientes o alumnos recibe más financiación, y la comunidad de origen compensa a la de destino de forma automática.",
+        "Cuando un colegio tiene más solicitudes que plazas, criterios públicos y sorteo; nunca selección hecha por el centro.",
+        "Ayuda de transporte para quien cambia de centro por necesidad (espera excesiva o falta de servicio cerca), para que elegir no dependa de tener coche o dinero.",
+        "Régimen sanitario único: el mutualismo de funcionarios se integra por fases y condicionado a reforzar antes la sanidad pública y bajar las esperas, como aconseja la AIReF."
+      ],
+      "supone": {
+        "personas": "Una persona puede operarse en el hospital que elija, también en otra comunidad, y ver antes cuánto se espera y cómo les va a sus pacientes. Una familia elige colegio sin que el centro pueda filtrarla. Los funcionarios conservan la elección, pero dentro de la misma red que los demás.",
+        "cuentas": "Elegir mueve dinero entre centros y comunidades; no lo crea. Sobre el mutualismo, la AIReF midió en 2022 un gasto de 1.030 euros por mutualista de opción privada frente a 1.405 por persona en el sistema público, con buena parte de los casos graves atendidos en la pública. Integrarlo exige reforzarla antes.",
+        "puesta_en_marcha": "Reformar la ley de cohesión del Sistema Nacional de Salud para reconocer la elección entre comunidades y crear la compensación automática entre ellas. Acordar el comparador entre el Estado y las comunidades. Una ley que fije las fases y las condiciones de la integración del mutualismo."
+      },
+      "integra": "De la derecha recoge la libertad de elegir y que los centros compitan por atender mejor. De la izquierda, que esa libertad sea de la persona y no del centro, que no dependa de la renta y que no haya una sanidad distinta según el empleo.",
+      "referencias": [
+        {
+          "lugar": "Inglaterra",
+          "que": "Derecho legal a elegir, al ser derivado, cualquier proveedor con contrato del NHS para la primera consulta, y a pedir otro si la espera pasa de 18 semanas. La web de citas enseña la espera y la nota de inspección de cada uno.",
+          "url": "https://www.gov.uk/government/publications/the-nhs-choice-framework/the-nhs-choice-framework-what-choices-are-available-to-me-in-the-nhs"
+        },
+        {
+          "lugar": "Dinamarca",
+          "que": "Elección libre de cualquier hospital público del país. Si la espera para el tratamiento supera 30 días, derecho a un hospital privado que tenga acuerdo con las regiones. Quien elige uno distinto del más cercano se paga, por regla general, el transporte.",
+          "url": "https://www.borger.dk/sundhed-og-sygdom/dine-rettigheder-som-patient/Frit-og-udvidet-frit-valg-af-sygehus"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "Cualquier persona puede acudir a un centro de salud de cualquier parte del país y pedir atención especializada en una región distinta de la suya.",
+          "url": "https://www.informationsverige.se/en/om-sverige/att-varda-sin-halsa-i-sverige/rattigheter-och-skyldigheter-i-motet-med-varden.html"
+        },
+        {
+          "lugar": "España (AIReF)",
+          "que": "Su evaluación del mutualismo de funcionarios (2025) halló que el 72 % de los nuevos mutualistas de MUFACE eligió sanidad pública en 2023, y aconseja no integrar de golpe a todos, sino de forma progresiva y reforzando antes el sistema público.",
+          "url": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "La elección la aprovechan más las familias con estudios y recursos: los centros peor valorados pierden usuarios y dinero, y la segregación aumenta.",
+          "r": "Ocurre si no se corrige. Por eso el ideal incluye sorteo, transporte, reserva de plazas y un plan obligado de mejora para el centro que pierde usuarios. Aun así, parte del efecto puede persistir y hay que medirlo cada año."
+        },
+        {
+          "o": "Si todos eligen los mismos hospitales, las esperas se concentran allí y los hospitales pequeños se vacían.",
+          "r": "El comparador enseña la espera real, lo que reparte la demanda. Y los servicios que deben existir cerca aunque tengan poca actividad no pueden financiarse solo por número de usuarios: necesitan un mínimo fijo."
+        },
+        {
+          "o": "Quitar el mutualismo a los funcionarios rompe una condición de su empleo y puede saturar la sanidad pública.",
+          "r": "La integración es gradual y condicionada a que bajen las esperas. La propia AIReF desaconseja el traspaso inmediato de todos los mutualistas, y el ideal respeta ese criterio."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Gobierno del Reino Unido: The NHS Choice Framework",
+          "url": "https://www.gov.uk/government/publications/the-nhs-choice-framework/the-nhs-choice-framework-what-choices-are-available-to-me-in-the-nhs"
+        },
+        {
+          "t": "borger.dk (portal oficial danés): Frit og udvidet frit valg af sygehus",
+          "url": "https://www.borger.dk/sundhed-og-sygdom/dine-rettigheder-som-patient/Frit-og-udvidet-frit-valg-af-sygehus"
+        },
+        {
+          "t": "Information om Sverige (portal oficial sueco): derechos y obligaciones en la atención sanitaria",
+          "url": "https://www.informationsverige.se/en/om-sverige/att-varda-sin-halsa-i-sverige/rattigheter-och-skyldigheter-i-motet-med-varden.html"
+        },
+        {
+          "t": "AIReF: Mutualismo administrativo. Resumen ejecutivo (marzo de 2025)",
+          "url": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf"
+        },
+        {
+          "t": "BOE: Ley Orgánica 2/2006, de Educación (texto consolidado), artículo 84, admisión de alumnos",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2006-7899"
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No proponer nada, o romper la base: ocultar o maquillar las listas de espera y negarse a publicar los resultados de los centros.",
+      "ideal": "Plazos máximos que se cumplen solos: vencido el plazo, la persona es atendida en otro centro sin coste ni reclamación. Y un evaluador independiente que publica, centro a centro, resultados, coste y lo que cuentan los pacientes.",
+      "titulo": "Garantía de plazo automática y evaluador independiente",
+      "slug": "garantia-de-plazo-automatica-y-evaluador-independiente",
+      "resumen": "Lo avanzado fija plazos por ley y evaluación independiente. El ideal añade la consecuencia: si el plazo vence, el sistema ofrece otro centro y paga el desplazamiento sin que el paciente tenga que reclamar. Y mide no solo la actividad, sino los resultados en salud y en aprendizaje, con la misma vara para todos los centros.",
+      "medidas": [
+        "Plazos máximos por ley para la consulta de primaria, el diagnóstico, el especialista y la intervención; al vencer, oferta automática de otro centro público o concertado, con el transporte pagado.",
+        "Un registro único de esperas, auditado desde fuera, que cuente desde que el médico indica la prueba o la operación y no deje pacientes fuera de la lista.",
+        "Una agencia evaluadora independiente del Gobierno y de las comunidades, que inspecciona todos los centros y les da una calificación pública en pocos niveles.",
+        "Obligación de mostrar esa calificación en la entrada y en la web de cada centro.",
+        "Medir lo que importa a la persona (cómo está tras la operación, si entiende su tratamiento) con encuestas comunes y comparables entre países.",
+        "En educación, publicar el progreso del alumnado teniendo en cuenta su punto de partida, no solo la nota media, para no premiar al centro que selecciona."
+      ],
+      "supone": {
+        "personas": "Quien espera una operación conoce la fecha límite y, si se pasa, recibe una alternativa sin tener que reclamar. Antes de elegir centro, cualquiera puede ver su calificación. A los profesionales se les reconocen los resultados, no solo el volumen de trabajo.",
+        "cuentas": "La garantía obliga a pagar la atención fuera cuando el centro propio no llega, así que cuesta más donde hay más espera. Sin capacidad suficiente no se cumple: Suecia la tiene por ley desde 2010 y, según el Observatorio Europeo, no la ha cumplido nunca. Por eso va unida a profesionales y financiación.",
+        "puesta_en_marcha": "Sustituir el real decreto de 2011, que solo fija 180 días para cinco operaciones y no prevé consecuencias expresas, por una ley con plazos para todo el recorrido del paciente. Crear la agencia por ley, con los datos de las comunidades. Aplicación por fases, empezando por lo más grave."
+      },
+      "integra": "De la derecha recoge la exigencia de resultados, la transparencia y que se use capacidad privada si la pública no llega a tiempo. De la izquierda, que el derecho sea igual para todos y nadie necesite un seguro privado para saltarse la cola.",
+      "referencias": [
+        {
+          "lugar": "Dinamarca",
+          "que": "Garantiza el diagnóstico en 30 días y el tratamiento en otros 30. Si la región no llega, debe avisar al paciente de que puede tratarse en otro sitio a cargo de su región. Un portal público enseña esperas e indicadores de calidad.",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/organization-and-governance/person-centred-care"
+        },
+        {
+          "lugar": "Suecia (región de Västra Götaland)",
+          "que": "Garantía legal: contacto el mismo día, valoración en 3 días, especialista en 90 y tratamiento en otros 90. Si la región no llega, debe ofrecer otro proveedor, incluso en otra región, con la misma tasa para el paciente y el viaje cubierto.",
+          "url": "https://www.1177.se/en/Vastra-Gotaland/other-languages/other-languages/regler-och-rattigheter---andra-sprak/vardgaranti-andra-sprak-vgr/"
+        },
+        {
+          "lugar": "Inglaterra (Care Quality Commission)",
+          "que": "El inspector público califica los servicios de salud y cuidados en cuatro niveles, de «excelente» a «inadecuado», y los centros están obligados a exhibir su calificación, también en su web.",
+          "url": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings"
+        },
+        {
+          "lugar": "España",
+          "que": "El Real Decreto 1039/2011 fija un máximo de 180 días naturales para cinco operaciones (cirugía cardíaca valvular y coronaria, cataratas, prótesis de cadera y de rodilla), sin consecuencias expresas si se supera.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2011-14190"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Una garantía sin médicos ni quirófanos es papel mojado: Suecia la tiene por ley y no la cumple.",
+          "r": "Es cierto, y es el mayor límite. La garantía no crea capacidad: la hace visible y obliga a pagarla fuera. Por eso va unida al ideal de profesionales y al de financiación; sola no basta."
+        },
+        {
+          "o": "Publicar clasificaciones empuja a los centros a evitar los casos difíciles y a enseñar solo para el examen.",
+          "r": "Los indicadores se ajustan por la gravedad del paciente o el punto de partida del alumno y se combinan con inspección presencial. El riesgo no desaparece: hay que revisar los indicadores cada pocos años."
+        },
+        {
+          "o": "Otra agencia estatal invade competencias de las comunidades y duplica inspecciones.",
+          "r": "La agencia evalúa y publica; no gestiona. Puede crearse como órgano común del Estado y las comunidades, y sustituir, no añadir, a las inspecciones actuales cuando se solapen."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Observatorio Europeo de Sistemas y Políticas de Salud: Dinamarca 2024, atención centrada en la persona",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/organization-and-governance/person-centred-care"
+        },
+        {
+          "t": "1177 (portal sanitario público sueco): Healthcare guarantee",
+          "url": "https://www.1177.se/en/Vastra-Gotaland/other-languages/other-languages/regler-och-rattigheter---andra-sprak/vardgaranti-andra-sprak-vgr/"
+        },
+        {
+          "t": "Observatorio Europeo: Suecia, una garantía de espera reforzada para la atención especializada",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/updates/hspm/sweden-2023/a-strengthened-waiting-time-guarantee-to-shorten-the-queues-in-specialized-care"
+        },
+        {
+          "t": "Care Quality Commission: Ratings",
+          "url": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings"
+        },
+        {
+          "t": "BOE: Real Decreto 1039/2011, criterios marco para garantizar un tiempo máximo de acceso a las prestaciones del SNS",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2011-14190"
+        },
+        {
+          "t": "OCDE: Patient-Reported Indicator Surveys (PaRIS)",
+          "url": "https://www.oecd.org/en/about/programmes/patient-reported-indicator-surveys-paris.html"
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada, o romper la base: dejar plazas sin cubrir de forma indefinida o encadenar contratos temporales al margen de la ley.",
+      "ideal": "Un órgano independiente calcula cada tres años cuántos profesionales harán falta a 15 años vista; la formación se financia según ese cálculo, y las plazas difíciles llevan un plus que crece con la lejanía y la permanencia.",
+      "titulo": "Plantillas previstas a 15 años y plus por permanencia",
+      "slug": "plantillas-a-15-anos-y-plus-por-lejania-y-permanencia",
+      "resumen": "Lo avanzado calcula plantillas por población y da incentivos. El ideal añade tiempo y obligación: una previsión independiente a 15 años, revisada cada tres, que el Gobierno debe financiar o explicar por qué no; y un plus reglado, común a toda España, que sube con la lejanía y con cada año que el profesional se queda.",
+      "medidas": [
+        "Un órgano independiente de planificación para sanidad, docencia y cuidados, que publica cada tres años la necesidad por especialidad y territorio a 15 años.",
+        "Plazas MIR, de enfermería y de magisterio financiadas según ese cálculo; si el Gobierno ofrece menos, lo justifica por escrito ante el Parlamento.",
+        "Un mapa oficial de plazas de difícil cobertura por niveles de lejanía, y un plus salarial común que crece con el nivel y con los años de permanencia.",
+        "Medicina de familia y pediatría de primaria con condiciones que compitan con el hospital: cupo máximo de pacientes, tiempo protegido para formarse y carrera profesional propia.",
+        "Plazas estables convocadas cada año, y contrato de varios años al terminar la residencia para quien se queda en una zona con déficit.",
+        "Ratios máximas por profesional (pacientes por médico y por enfermera, alumnos por docente, personas por cuidador), revisadas con cada previsión."
+      ],
+      "supone": {
+        "personas": "Tener médico de familia asignado, y que sea el mismo durante años, también en un pueblo. Para el profesional, saber qué plazas habrá, qué gana por ir a una zona difícil y cómo progresa. Para el estudiante, plazas de formación que responden a empleo real.",
+        "cuentas": "Coste alto y sostenido: más plazas de formación, pluses y plantillas estables. No hay cifra verificada para España. Como referencia, Australia paga al médico hasta 60.000 dólares australianos al año en las zonas más remotas, a partir del quinto año de permanencia.",
+        "puesta_en_marcha": "Una ley que cree el órgano de planificación sobre la base de los estudios de oferta y necesidad de especialistas que el Ministerio de Sanidad impulsa desde 2006. Acuerdo entre el Estado y las comunidades sobre el mapa y el plus común. El efecto tarda lo que dura la formación de cada profesión."
+      },
+      "integra": "De la izquierda recoge las plantillas suficientes, el empleo estable y el refuerzo de la atención primaria. De la derecha, planificar con datos, pagar según el mérito y la permanencia, y formar según la necesidad y no por inercia.",
+      "referencias": [
+        {
+          "lugar": "Países Bajos",
+          "que": "Un órgano asesor creado en 1999 calcula aproximadamente cada tres años, con proyecciones a 10-20 años, cuántas personas deben empezar cada año la formación de especialista, y lo traslada al Ministerio de Sanidad, que fija el presupuesto.",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3465184"
+        },
+        {
+          "lugar": "Inglaterra",
+          "que": "El plan de plantilla del NHS mira a 15 años: prevé duplicar las plazas de las facultades de medicina hasta 15.000 en 2031 y subir un 50 % las de formación de médico de familia, hasta 6.000. Se revisa al menos cada dos años.",
+          "url": "https://www.england.nhs.uk/ltwp/about-the-plan/"
+        },
+        {
+          "lugar": "Australia",
+          "que": "Paga a los médicos un incentivo que crece con la lejanía del lugar, medida en una escala oficial, y con los años de servicio: hasta 60.000 dólares australianos al año en el nivel más remoto, a partir del quinto año.",
+          "url": "https://www.health.gov.au/our-work/workforce-incentive-program/doctor-stream/payment-amounts"
+        },
+        {
+          "lugar": "España (Ministerio de Sanidad)",
+          "que": "El estudio de oferta y necesidad 2023-2035 cuenta 318 especialistas del sistema público por 100.000 habitantes, de 258,4 en Andalucía a 396,7 en Cataluña, y un 59,4 % de médicos de atención primaria con 50 años o más.",
+          "url": "https://www.sanidad.gob.es/areas/profesionesSanitarias/profesiones/necesidadEspecialistas/docs/Oferta_y_necesidad_de_medicos_especialistas_en_Espana_2023-2035.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Planificar a 15 años falla: cambian la tecnología, la demografía y lo que quieren los profesionales.",
+          "r": "Por eso se revisa cada tres años y orienta, no fija una cifra exacta. Y tiene límites: en Países Bajos, con órgano planificador, el Tribunal de Cuentas constató en 2025 una escasez nacional de médicos de familia. Planificar ayuda; no garantiza."
+        },
+        {
+          "o": "Los pluses por lejanía son caros y, si se retiran, el profesional se va. Pagar más no arraiga a nadie.",
+          "r": "El dinero solo no basta: por eso el plus crece con la permanencia y debe acompañarse de formación, equipo y apoyo para instalarse. Cada plus se evalúa y se retira el que no retenga a nadie."
+        },
+        {
+          "o": "Un plus y unas ratios comunes para toda España invaden la gestión de personal de las comunidades.",
+          "r": "Las comunidades siguen contratando y organizando. Lo común es un suelo acordado entre todas, para que no compitan entre sí por los mismos profesionales a base de subir ofertas."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Van Greuningen et al. (2012): Ten years of health workforce planning in the Netherlands, Human Resources for Health",
+          "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3465184"
+        },
+        {
+          "t": "Tribunal de Cuentas de los Países Bajos: Focus on shortage of general practitioners (2025)",
+          "url": "https://english.rekenkamer.nl/documents/2025/04/02/focus-on-shortage-of-general-practitioners"
+        },
+        {
+          "t": "NHS England: NHS Long Term Workforce Plan, About the plan",
+          "url": "https://www.england.nhs.uk/ltwp/about-the-plan/"
+        },
+        {
+          "t": "Gobierno de Australia: Workforce Incentive Program, Doctor Stream incentive payment amounts",
+          "url": "https://www.health.gov.au/our-work/workforce-incentive-program/doctor-stream/payment-amounts"
+        },
+        {
+          "t": "Ministerio de Sanidad: Oferta y necesidad de médicos especialistas en España 2023-2035",
+          "url": "https://www.sanidad.gob.es/areas/profesionesSanitarias/profesiones/necesidadEspecialistas/docs/Oferta_y_necesidad_de_medicos_especialistas_en_Espana_2023-2035.pdf"
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "No proponer nada, o romper la base: cerrar consultorios y escuelas rurales sin alternativa, o negar la atención a quien viene de otra comunidad.",
+      "ideal": "Tiempos máximos de acceso fijados por ley (por ejemplo, un punto de atención a menos de 30 minutos), una historia clínica única que el paciente controla y que le sigue por España y la UE, y reparto territorial según la necesidad.",
+      "titulo": "Servicio a 30 minutos y reparto según la necesidad",
+      "slug": "servicio-a-30-minutos-y-reparto-segun-la-necesidad",
+      "resumen": "Lo avanzado promete el mismo servicio en un pueblo que en una capital, con un fondo de nivelación. El ideal lo hace exigible: un tiempo máximo de acceso fijado por ley, datos clínicos que viajan con la persona y una fórmula pública que reparte el dinero según población, salud, dispersión e insularidad, no según lo gastado el año anterior.",
+      "medidas": [
+        "Fijar por ley tiempos máximos de desplazamiento a urgencias, atención primaria, escuela y ventanilla de servicios; donde no se cumplan, unidad móvil, transporte o teleconsulta obligatorios.",
+        "Historia clínica única: cualquier profesional autorizado de cualquier comunidad la consulta, y el paciente ve quién ha entrado y puede bloquear accesos.",
+        "Receta, citas e informes válidos en toda España sin trámites, y en el formato europeo antes de las fechas que marca la UE.",
+        "Una fórmula pública de reparto entre comunidades según población, necesidad sanitaria y social, dispersión, insularidad y envejecimiento, recalculada cada año con datos nuevos.",
+        "Puntos de servicio compartidos en los pueblos: sanidad, servicios sociales y trámites en un mismo local, con personal presencial y apoyo digital.",
+        "Decidir cerca: comunidades y municipios organizan el servicio; lo común a todo el país es el mínimo garantizado y los datos."
+      ],
+      "supone": {
+        "personas": "Quien vive en un pueblo sabe a qué distancia máxima tendrá urgencias, médico, escuela y ventanilla. Quien enferma de viaje es atendido con su historial a la vista. Cada paciente puede comprobar quién ha consultado sus datos.",
+        "cuentas": "Mantener servicios donde vive poca gente cuesta más por habitante: es el precio de la igualdad territorial, y la fórmula lo reconoce de forma abierta. No hay cifra verificada del coste para España. Compartir locales y usar la teleconsulta puede reducirlo, sin que haya aquí un dato comprobado.",
+        "puesta_en_marcha": "Reformar la financiación autonómica para incluir la fórmula de necesidad, lo que exige acuerdo entre comunidades. Una ley básica de tiempos máximos de acceso. Los datos tienen fechas europeas: resúmenes de paciente y recetas en marzo de 2029; imágenes, análisis e informes de alta en marzo de 2031."
+      },
+      "integra": "De la derecha recoge la igualdad entre españoles vivan donde vivan y una tarjeta que funcione en todo el país. De la izquierda, que no se cierren servicios rurales por no ser rentables. De ambos lados, la gestión cercana por comunidades y municipios.",
+      "referencias": [
+        {
+          "lugar": "Finlandia",
+          "que": "Financia a sus regiones de servicios sanitarios y sociales con una fórmula fijada por ley: población, coeficientes de necesidad y condiciones como la densidad, las islas o las lenguas. Se recalcula cada año y cada región decide cómo gastarlo.",
+          "url": "https://vm.fi/en/funding-of-wellbeing-services-counties"
+        },
+        {
+          "lugar": "Estonia",
+          "que": "Más del 99 % de los datos que generan hospitales y médicos está digitalizado y cada ciudadano ve su historial en un portal seguro. Cada acceso queda registrado, y el paciente puede bloquear sus datos y decidir quién los ve.",
+          "url": "https://www.coe.int/en/web/bioethics/-/estonia-digital-health-system"
+        },
+        {
+          "lugar": "Francia",
+          "que": "La red France services busca que cada persona tenga un punto de atención de los servicios públicos a menos de 30 minutos de su casa; cuenta con unos 2.800 espacios.",
+          "url": "https://www.banquedesterritoires.fr/programme-france-services"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "El Espacio Europeo de Datos de Salud, en vigor desde el 26 de marzo de 2025, da a cada persona acceso a sus datos de salud y prevé el intercambio de resúmenes de paciente y recetas entre todos los países desde marzo de 2029.",
+          "url": "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un tiempo máximo por ley obliga a mantener, en zonas despobladas, servicios con muy poca actividad, caros y difíciles de dotar de personal.",
+          "r": "El estándar puede cumplirse con unidad móvil, transporte o teleconsulta, no solo con un edificio. Aun así costará más por habitante, y hay que decirlo: es una decisión de igualdad, no de ahorro."
+        },
+        {
+          "o": "Una fórmula de reparto por necesidad enfrenta a las comunidades: cada una defenderá el criterio que más la favorece.",
+          "r": "Es la mayor dificultad política. Ayuda que la fórmula la proponga un órgano técnico, que sea pública y que el cambio se aplique por tramos, para que ninguna comunidad pierda de golpe."
+        },
+        {
+          "o": "Una historia clínica única concentra datos muy sensibles: más riesgo de fugas y de accesos indebidos.",
+          "r": "El riesgo es real. Se reduce con un registro de cada acceso visible para el paciente, el derecho a restringir partes del historial y sanciones. El modelo estonio y la norma europea van en esa línea."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Ministerio de Finanzas de Finlandia: Determination of funding for wellbeing services counties",
+          "url": "https://vm.fi/en/funding-of-wellbeing-services-counties"
+        },
+        {
+          "t": "e-Estonia: e-Health Records",
+          "url": "https://e-estonia.com/service/e-health/e-health-records/"
+        },
+        {
+          "t": "Consejo de Europa: Digital health system, Estonia",
+          "url": "https://www.coe.int/en/web/bioethics/-/estonia-digital-health-system"
+        },
+        {
+          "t": "Banque des Territoires (Caisse des Dépôts): Programme France services",
+          "url": "https://www.banquedesterritoires.fr/programme-france-services"
+        },
+        {
+          "t": "Comisión Europea: European Health Data Space Regulation (EHDS)",
+          "url": "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en"
+        }
+      ]
+    },
+    {
+      "i": 6,
+      "anti": "No proponer nada, o romper la base: negar la atención sanitaria o la escuela a personas que viven en España, o desmantelar la red pública.",
+      "ideal": "Derecho efectivo por residencia, con un solo documento válido en toda España; una cartera común fijada por ley; y centros públicos con autonomía, dirección elegida por mérito y la misma evaluación que cualquier otro.",
+      "titulo": "Universalidad sin trámites y centros públicos autónomos",
+      "slug": "universalidad-sin-tramites-y-centros-publicos-autonomos",
+      "resumen": "Lo avanzado pide universalidad completa y una gestión pública evaluada como las demás. El ideal cierra los huecos que quedan: que el derecho no dependa de un trámite distinto en cada comunidad ni de un régimen aparte, y que el centro público tenga con qué responder de sus resultados: autonomía, dirección profesional y presupuesto propio.",
+      "medidas": [
+        "Un único documento sanitario, válido en toda España, para toda persona que vive aquí y cumple los requisitos de la ley, con un mismo procedimiento en todas las comunidades.",
+        "Cartera común fijada por ley estatal y ampliada solo tras una evaluación pública de coste y beneficio: lo que entra, entra para todos y en todas las comunidades.",
+        "Regímenes especiales integrados por fases en el sistema común, para que el empleo no determine qué sanidad se tiene.",
+        "Directores de hospitales, centros de salud y colegios públicos elegidos por concurso de mérito, con contrato de objetivos y evaluación pública al final del mandato.",
+        "Autonomía de gestión para el centro público: presupuesto propio, capacidad de organizar plantilla y horarios, y rendición de cuentas con los mismos indicadores que un concertado.",
+        "Lo privado como complemento: la red pública debe poder atender por sí misma la cartera común en cada territorio; los conciertos cubren picos y carencias, con el contrato único."
+      ],
+      "supone": {
+        "personas": "Nadie que viva en España y tenga derecho se queda sin médico por un papel distinto en cada comunidad. El centro público de cada barrio tiene un director que responde de sus resultados y margen para organizarse mejor.",
+        "cuentas": "Atender a quien hoy queda fuera por trámites tiene un coste, sin cifra verificada. La dirección profesional y la autonomía no exigen más gasto, sino cambiar normas de personal y de presupuesto. En Dinamarca, donde la mayor parte de la atención hospitalaria es pública, la prestada en privados con dinero público costó 706 millones de coronas en 2020.",
+        "puesta_en_marcha": "Desarrollar el decreto-ley de 2018 de acceso universal con un procedimiento único; hoy el documento que acredita el derecho lo regula cada comunidad. Un estatuto del directivo público sanitario y educativo. Dar presupuesto propio a los centros exige cambiar leyes autonómicas de salud y de función pública."
+      },
+      "integra": "De la izquierda recoge la universalidad sin exclusiones y la red pública como columna. De la derecha, que lo público se gestione con profesionalidad, autonomía y cuentas claras, y que se le exija lo mismo que a un centro privado.",
+      "referencias": [
+        {
+          "lugar": "España",
+          "que": "El Real Decreto-ley 7/2018 reconoce el derecho a la atención sanitaria a españoles y extranjeros residentes, y a los extranjeros sin autorización de residencia con requisitos. El documento que lo acredita lo regula cada comunidad.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-10752"
+        },
+        {
+          "lugar": "Dinamarca",
+          "que": "Las regiones son propietarias y gestoras de la mayoría de los hospitales, con personal asalariado. Los hospitales privados tienen un peso pequeño y se usan para procedimientos concretos o cuando no se llega al plazo garantizado.",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/provision-of-services/specialized-care"
+        },
+        {
+          "lugar": "Inglaterra (Care Quality Commission)",
+          "que": "El inspector público califica los servicios de salud y cuidados con una única escala de cuatro niveles y les obliga a exhibir el resultado.",
+          "url": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings"
+        },
+        {
+          "lugar": "España (AIReF)",
+          "que": "La evaluación independiente del mutualismo de funcionarios (2025) aconseja no pasar de golpe a todos los mutualistas al sistema común e integrarlos de forma progresiva, reforzando antes la sanidad pública.",
+          "url": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Garantizar la atención a cualquier persona que viva aquí, con o sin papeles, puede atraer a quien viene solo a tratarse y encarece el sistema.",
+          "r": "La ley ya pone requisitos para evitarlo: no tener otra cobertura, no poder traerla del país de origen y que no haya un tercero obligado a pagar. El ideal mantiene esos filtros y unifica el trámite."
+        },
+        {
+          "o": "Dar autonomía y directivos con contrato de objetivos a los centros públicos es el primer paso para privatizarlos.",
+          "r": "La titularidad, el personal y la financiación siguen siendo públicos; cambia quién responde de los resultados. El riesgo se acota si la ley prohíbe vender o ceder el centro."
+        },
+        {
+          "o": "Elegir a los directores por mérito choca con la costumbre de nombrarlos por confianza política, y nadie renunciará a ella.",
+          "r": "Es un límite político real. La vía es un pacto que fije el concurso y un órgano de selección independiente, aplicado a los nombramientos futuros."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "BOE: Real Decreto-ley 7/2018, sobre el acceso universal al Sistema Nacional de Salud",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-10752"
+        },
+        {
+          "t": "Observatorio Europeo de Sistemas y Políticas de Salud: Dinamarca 2024, atención especializada",
+          "url": "https://eurohealthobservatory.who.int/monitors/health-systems-monitor/countries-hspm/hspm/denmark-2024/provision-of-services/specialized-care"
+        },
+        {
+          "t": "Care Quality Commission: Ratings",
+          "url": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings"
+        },
+        {
+          "t": "AIReF: Mutualismo administrativo. Resumen ejecutivo (marzo de 2025)",
+          "url": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf"
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "anti": "No proponer nada, o romper la base: recortar por debajo de lo que la ley ya garantiza, o prometer servicios sin decir cómo se pagan.",
+      "ideal": "Un suelo de gasto por habitante ajustado por necesidad, fijado por ley para cuatro años y actualizado cada año con la demografía y los costes; con una parte reservada a primaria y dependencia, y revisado contra resultados.",
+      "titulo": "Suelo de gasto a cuatro años, por ley y por necesidad",
+      "slug": "suelo-de-gasto-a-cuatro-anos-por-ley-y-por-necesidad",
+      "resumen": "Lo avanzado pide financiación estable, finalista donde haga falta y revisada contra resultados. El ideal le pone mecanismo: una ley fija el mínimo de cada año para toda una legislatura, una fórmula lo actualiza según el envejecimiento y los costes, y un fondo de reserva evita recortar en las crisis, cuando más se usan los servicios.",
+      "medidas": [
+        "Una ley plurianual que fija, para cuatro años, el mínimo que se destina a sanidad, educación y dependencia; el Gobierno no puede presupuestar por debajo.",
+        "Suelo por habitante ajustado por edad, estado de salud, pobreza y dispersión, recalculado cada año con datos oficiales.",
+        "Parte reservada: un porcentaje mínimo del gasto sanitario para la atención primaria y un nivel mínimo estatal de dependencia que cubra el coste real del servicio.",
+        "Un fondo de reserva que se llena en los años buenos y solo puede usarse para mantener el suelo en las recesiones.",
+        "Cada aumento por encima del suelo se liga a objetivos medidos (esperas, abandono escolar, plazas de cuidados) y se revisa al año: sin resultado, el dinero se reasigna.",
+        "Encaje con la contención del gasto: el suelo protege el mínimo; todo lo demás pasa por la revisión de gasto antes de subir impuestos."
+      ],
+      "supone": {
+        "personas": "Los centros saben con cuatro años de antelación con qué contarán y pueden contratar de forma estable. El ciudadano deja de ver recortes en plena crisis y puede comprobar si el dinero añadido redujo las esperas o mejoró los resultados.",
+        "cuentas": "Depende del nivel del suelo, que es la decisión política central. Referencias comprobadas: la ley educativa española manda planificar hasta un mínimo del 5 % del PIB en gasto público educativo; Inglaterra fijó por ley un mínimo para su sanidad que subía de 127.007 a 148.467 millones de libras entre 2020-21 y 2023-24.",
+        "puesta_en_marcha": "Una ley estatal de suelo de gasto, coordinada con la reforma de la financiación autonómica, porque quien gasta son las comunidades. Debe encajar en las reglas fiscales europeas y en la ley de estabilidad presupuestaria. El fondo de reserva solo se llena si hay superávit en los años buenos."
+      },
+      "integra": "De la izquierda recoge la suficiencia y que los servicios no sean lo primero que se recorta. De la derecha, que el dinero añadido se condicione a resultados, que haya un fondo en vez de más deuda y que el suelo no sea un cheque en blanco.",
+      "referencias": [
+        {
+          "lugar": "Inglaterra",
+          "que": "La NHS Funding Act 2020 obligó al ministro a asignar a la sanidad pública inglesa, como mínimo, la cantidad fijada para cada uno de cuatro ejercicios: de 127.007 millones de libras en 2020-21 a 148.467 millones en 2023-24.",
+          "url": "https://www.legislation.gov.uk/ukpga/2020/5/section/1"
+        },
+        {
+          "lugar": "España (ley de educación de 2020)",
+          "que": "Su disposición adicional octava ordena formular, en dos años desde la entrada en vigor, un plan de aumento del gasto público educativo hasta un mínimo del 5 % del producto interior bruto.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-17264"
+        },
+        {
+          "lugar": "Finlandia",
+          "que": "El dinero estatal para las regiones sanitarias y sociales se calcula con una fórmula de necesidad, sube cada año según la demanda y los costes previstos, y se corrige después con el gasto real del conjunto del país.",
+          "url": "https://vm.fi/en/funding-of-wellbeing-services-counties"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Un suelo de gasto por ley es rígido: resta margen al presupuesto anual, puede chocar con las reglas fiscales y premia gastar, no gastar bien.",
+          "r": "Por eso el suelo cubre solo el mínimo ajustado por necesidad y lo que lo supera se condiciona a resultados. La rigidez es deliberada, pero limitada a cuatro años y revisable con la ley siguiente."
+        },
+        {
+          "o": "Escribir cifras en una ley no garantiza nada: un plan del 5 % del PIB para educación puede quedarse en un mandato sin cumplir.",
+          "r": "Cierto: un plan no es una obligación de gasto. La ley inglesa fue más allá y fijó cantidades mínimas exigibles año a año. El ideal toma esa fórmula, no la del plan."
+        },
+        {
+          "o": "Reservar fondos para primaria o dependencia invade la autonomía de las comunidades para decidir sus prioridades.",
+          "r": "Es una tensión real. La parte reservada se limita a mínimos acordados entre todas y el resto queda libre, como en Finlandia, donde cada región decide el uso de su financiación."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "legislation.gov.uk: NHS Funding Act 2020, section 1",
+          "url": "https://www.legislation.gov.uk/ukpga/2020/5/section/1"
+        },
+        {
+          "t": "BOE: Ley Orgánica 3/2020, por la que se modifica la Ley Orgánica de Educación, disposición adicional octava",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-17264"
+        },
+        {
+          "t": "Ministerio de Finanzas de Finlandia: Determination of funding for wellbeing services counties",
+          "url": "https://vm.fi/en/funding-of-wellbeing-services-counties"
+        }
+      ]
+    }
+  ]
+}
