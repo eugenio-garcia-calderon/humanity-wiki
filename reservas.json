@@ -23,6 +23,12 @@
       "ruta": "public/geometria-figura/revisor.js",
       "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
       "desde": "2026-11-25T12:00:53.241Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "public/geometria-figura/datos.json",
+      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
+      "desde": "2026-11-25T12:00:55.714Z"
     }
   ]
 }
