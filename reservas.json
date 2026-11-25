@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0241_agricultura_sintropica.sql",
+      "motivo": "agricultura sintrópica en luzhumanidad.com",
+      "desde": "2026-11-25T15:22:22.716Z"
+    }
+  ]
 }
