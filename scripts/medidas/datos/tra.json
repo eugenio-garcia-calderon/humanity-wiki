@@ -1,0 +1,400 @@
+{
+  "tema": "tra",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "Los seis aspectos tocan lo esencial y sus niveles Ideal son concretos y comparables con otros países. Pero varios niveles Básico e Intermedio describen lo que ya es ley en España, uno de los aspectos tiene los niveles en orden invertido y el tema deja fuera el paro, los autónomos, la salud laboral y el trabajo sin contrato.",
+    "problemas": [
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "El tema no cubre la protección de quien se queda en paro (prestación y subsidio), a los autónomos, la salud y la seguridad en el trabajo ni la lucha contra el trabajo sin contrato; solo aparecen de pasada o nada.",
+        "mejora": "Añadir un aspecto «Paro, autónomos y trabajo seguro», o al menos repartir esas medidas: el paro en Flexibilidad, los falsos autónomos y el trabajo sin contrato en Empleo estable."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 2,
+        "problema": "Los niveles Intermedio y Avanzado están en orden invertido: el ajuste automático evaluado por un organismo independiente ya existe desde 2023 y es más exigente que un Pacto de Toledo, que funciona desde 1995. Además «AIReF» va sin explicar.",
+        "mejora": "Intermedio: examen independiente y ajuste escrito de antemano. Avanzado: reglas blindadas por mayoría amplia, jubilación flexible y más cotizantes. Explicar la sigla.",
+        "fuente": "https://www.boe.es/eli/es/rdl/2023/03/16/2/con"
+      },
+      {
+        "aspecto": null,
+        "nivel": 1,
+        "problema": "Muchos niveles Básico e Intermedio ya son ley en España (pensiones con el IPC, registro de jornada, indefinido como norma, permisos de nacimiento iguales e intransferibles), así que casi todos los programas los cumplen y el test no distingue.",
+        "mejora": "Decir en esos niveles «mantener y hacer cumplir», con su instrumento de control, y subir el listón de Intermedio y Avanzado con lo que aún no existe.",
+        "fuente": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx"
+      },
+      {
+        "aspecto": 0,
+        "nivel": 4,
+        "problema": "El salto de Avanzado a Ideal no es acumulativo: pasa de mejorar el sistema por cotizaciones a sustituirlo por una pensión igual para todos, sin decir cómo se respeta lo ya cotizado. Y el Avanzado es un deseo («que nadie caiga en la pobreza»), no una medida.",
+        "mejora": "Avanzado con instrumentos (suelo legal en el umbral de pobreza, complementos reconocidos de oficio, ahorro de empresa) e Ideal con la transición por generaciones escrita."
+      },
+      {
+        "aspecto": 2,
+        "nivel": null,
+        "problema": "El nombre y la descripción miran solo a la empresa («que contratar no sea un riesgo»), mientras los niveles altos mezclan la seguridad del trabajador. Quien lo responde no sabe qué se le pregunta.",
+        "mejora": "Renombrarlo «Contratar y cambiar de empleo con seguridad» y describirlo como el equilibrio entre adaptarse la empresa y no quedar desprotegido el trabajador."
+      },
+      {
+        "aspecto": 3,
+        "nivel": null,
+        "problema": "El aspecto se llama «Formación y productividad», pero ningún nivel propone nada sobre productividad más allá de los cursos: ni gestión de pymes, ni tamaño de empresa, ni innovación.",
+        "mejora": "Añadir en Intermedio y Avanzado medidas de productividad de las empresas: mejora de gestión y digitalización de pymes, quitar frenos a crecer y un consejo de productividad independiente."
+      },
+      {
+        "aspecto": 5,
+        "nivel": 0,
+        "problema": "El Indefinido rechaza «fijar los sueldos por decreto», pero el salario mínimo de los niveles Básico e Ideal se fija precisamente por real decreto. Parece contradictorio.",
+        "mejora": "Escribir «sustituir la negociación colectiva por sueldos fijados por el Gobierno para todos los empleos»."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 1,
+        "problema": "El Básico «reconocer el problema» no es una medida: cualquiera lo cumple con una frase y no obliga a nada.",
+        "mejora": "Proyecciones públicas de gasto y cotizantes a largo plazo y cuentas separadas entre pensiones contributivas y gastos que se pagan con impuestos."
+      },
+      {
+        "aspecto": 4,
+        "nivel": 3,
+        "problema": "«Horarios europeos» es jerga: quien no sigue el debate no sabe que significa terminar antes la jornada laboral y escolar.",
+        "mejora": "Decirlo con palabras: horarios de trabajo, colegios y comercios acordados para acabar antes por la tarde."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Pensiones suficientes",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre cuánto debe cobrar un jubilado, o con planes que congelan las pensiones o recortan las ya reconocidas.",
+          "medidas": [
+            { "nombre": "Sin plan sobre la cuantía", "texto": "No dice cuánto debe cobrar una persona mayor ni cómo se actualiza su pensión; lo deja a lo que decida cada presupuesto anual." },
+            { "nombre": "Congelar o recortar lo reconocido", "texto": "Propone dejar de actualizar las pensiones o rebajar las ya concedidas, y rompe la confianza de quien cotizó con unas reglas conocidas." },
+            { "nombre": "Subidas prometidas sin financiar", "texto": "Promete subir todas las pensiones sin decir de dónde sale el dinero ni cómo afecta a las cuentas de los próximos años." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Mantener el poder de compra: todas las pensiones suben cada año con el IPC (el índice de precios) por ley, y nadie mayor se queda sin ingresos.",
+          "medidas": [
+            { "nombre": "Subida con el IPC fijada por ley", "texto": "Todas las pensiones suben cada enero con la inflación media del año anterior, como fija ya la ley de 2021; ningún presupuesto anual puede saltarse la regla.", "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2025/121225-revalorizacion-pensiones.aspx" },
+            { "nombre": "Complemento hasta la pensión mínima", "texto": "Quien cotizó poco recibe de la Seguridad Social un complemento hasta la pensión mínima, tras comprobar que no tiene otros ingresos suficientes." },
+            { "nombre": "Pensión no contributiva para quien no cotizó", "texto": "Toda persona mayor sin ingresos suficientes, haya trabajado con contrato o no, tiene derecho a una pensión no contributiva que gestionan las comunidades autónomas." },
+            { "nombre": "Aviso anual de la pensión futura", "texto": "La Seguridad Social envía cada año a cada trabajador una estimación de la pensión que cobrará, para que pueda planificar y ahorrar a tiempo." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Subir más las pensiones más bajas para acercarlas al umbral de pobreza y corregir lo que pierden en pensión quienes dejaron de trabajar para cuidar.",
+          "medidas": [
+            { "nombre": "Mínimas y no contributivas por encima del IPC", "texto": "Subidas adicionales de las pensiones mínimas y no contributivas con un calendario de varios años aprobado por ley, hasta llegar al umbral de pobreza de una persona sola.", "meta": true },
+            { "nombre": "Años de cuidado que cuentan como cotizados", "texto": "Los periodos dedicados a cuidar hijos o familiares dependientes se cotizan a cargo del Estado, para que no abran huecos en la carrera laboral ni rebajen la pensión." },
+            { "nombre": "Complemento contra la brecha de género", "texto": "Complemento por hijo en la pensión de quien vio recortada su carrera por los cuidados, que se mantiene hasta que la diferencia entre pensiones de hombres y mujeres se reduzca a la mitad.", "meta": true },
+            { "nombre": "Huecos de cotización rellenados", "texto": "Los meses sin cotizar dentro del periodo que se usa para calcular la pensión se rellenan con bases mínimas, para que una racha de paro no hunda la pensión de por vida." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Que ninguna persona mayor quede bajo el umbral de pobreza, con un suelo fijado por ley, complementos que llegan solos y un informe anual que lo mide.",
+          "medidas": [
+            { "nombre": "Suelo de pensión en el umbral de pobreza", "texto": "La ley fija que la pensión mínima de una persona que vive sola nunca queda por debajo del umbral de pobreza que publica cada año el Instituto Nacional de Estadística." },
+            { "nombre": "Complementos reconocidos de oficio", "texto": "Cruzando datos de Hacienda y de la Seguridad Social, el complemento a mínimos y la no contributiva se conceden a quien le corresponde sin que tenga que pedirlos." },
+            { "nombre": "Informe anual de suficiencia", "texto": "La Seguridad Social publica cada año cuántos mayores viven bajo el umbral de pobreza, por sexo, edad y comunidad, y cuánto supone la pensión media frente al salario medio." },
+            { "nombre": "Ahorro de empresa para sueldos medios y bajos", "texto": "Planes de pensiones por sector con aportación de la empresa y comisiones bajas, abiertos a pymes y autónomos, para completar la pensión pública de quien hoy no ahorra." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una pensión pública igual para todos los mayores residentes, por encima del umbral de pobreza, ligada al salario mínimo y que nunca sube menos que el IPC.",
+          "medidas": [
+            { "nombre": "Pensión básica igual para todos", "texto": "Una cuantía pública única para toda persona en edad de jubilación, completa con una vida de residencia en España y proporcional si se ha residido menos, como en Países Bajos.", "fuente": "https://svb.nl/en/aow-pension/aow-pension-in-brief" },
+            { "nombre": "Cuantía ligada al salario mínimo neto", "texto": "La ley fija la pensión básica como un porcentaje del salario mínimo neto, nunca por debajo del umbral de pobreza, con un importe para quien vive solo y otro para quien convive.", "fuente": "https://svb.nl/en/aow-pension/how-much-will-you-get-in-aow-pension-and-other-pensions/aow-amounts-depending-on-living-situation" },
+            { "nombre": "Doble ancla: salario mínimo e IPC", "texto": "Sube cada año con el salario mínimo y, como poco, con el IPC. Si un año el IPC la deja por encima del porcentaje fijado, las subidas siguientes absorben la diferencia." },
+            { "nombre": "Transición por generaciones", "texto": "Lo ya cotizado se reconoce con las reglas actuales y el nuevo sistema se aplica poco a poco a quien aún está lejos de jubilarse, con una ley pactada en el Pacto de Toledo." },
+            { "nombre": "Lo de encima, con ahorro propio o de empresa", "texto": "Quien quiera cobrar más que la pensión básica lo construye con ahorro de empresa o personal, con cuentas claras y sin cargo al sistema público." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Sostenibilidad de las pensiones",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Negar que el envejecimiento encarece las pensiones, o proponer desmontar el sistema sin decir quién pagará a los que ya cobran.",
+          "medidas": [
+            { "nombre": "Negar el envejecimiento", "texto": "Sostiene que el gasto en pensiones no crecerá aunque haya más jubilados por cada trabajador, y por eso no prevé ni ingresos nuevos ni ajustes." },
+            { "nombre": "Desmontar sin sustituto", "texto": "Propone dejar de pagar el sistema público o pasarlo a cuentas privadas sin explicar quién paga, mientras tanto, las pensiones de quienes ya están jubilados." },
+            { "nombre": "Tapar el agujero cada año", "texto": "Cubre lo que falta cada año con préstamos y transferencias del Estado, sin plan ni horizonte, y deja la factura a quienes hoy son jóvenes." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Reconocer el problema con datos públicos: cuánto crecerá el gasto, cuántos cotizarán por cada jubilado y qué se paga con cotizaciones y qué con impuestos.",
+          "medidas": [
+            { "nombre": "Proyecciones públicas a 20 y 40 años", "texto": "La Seguridad Social publica cada año sus previsiones de gasto, ingresos y cotizantes por jubilado a 20 y 40 años, con los supuestos que ha usado, para que cualquiera pueda revisarlas.", "meta": true },
+            { "nombre": "Cuentas separadas por origen del dinero", "texto": "El presupuesto separa las pensiones pagadas con cotizaciones de los gastos que no lo son, como los complementos a mínimos o las rebajas de cuotas, que se pagan con impuestos." },
+            { "nombre": "Fondo de reserva con reglas", "texto": "Un fondo de reserva de la Seguridad Social que se llena en los años buenos y solo se usa según reglas escritas en la ley, publicando cada movimiento." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Reglas que obligan a actuar: un organismo independiente examina las cuentas cada pocos años y, si se desvían, se aplica un ajuste escrito de antemano.",
+          "medidas": [
+            { "nombre": "Examen de un organismo independiente", "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) comprueba con regularidad si el gasto en pensiones respeta el límite legal y publica su informe completo.", "fuente": "https://www.boe.es/eli/es/rdl/2023/03/16/2/con" },
+            { "nombre": "Ajuste automático si hay desvío", "texto": "Si el examen detecta desvío, se aplica una corrección ya escrita en la ley, en ingresos o en gasto, salvo que el Parlamento apruebe otra que ahorre lo mismo." },
+            { "nombre": "Cada reforma, con su cuenta a 30 años", "texto": "Toda reforma de pensiones llega al Parlamento con su efecto estimado en gasto e ingresos a 30 años, calculado por el organismo independiente y no por el Gobierno.", "meta": true },
+            { "nombre": "Cotizar por todo lo que se cobra", "texto": "La Inspección de Trabajo cruza datos con Hacienda para detectar sueldos no declarados y falsos autónomos, que restan cotizaciones al sistema." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Reglas pactadas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo de mujeres, mayores, jóvenes e inmigrantes.",
+          "medidas": [
+            { "nombre": "Reglas blindadas por mayoría amplia", "texto": "Las reglas básicas del sistema solo se cambian con una mayoría reforzada acordada en el Pacto de Toledo, la comisión del Congreso que revisa las pensiones." },
+            { "nombre": "Jubilación flexible y activa", "texto": "Salir antes o después de la edad legal con la pensión ajustada sin premio ni castigo para el sistema, y poder combinar pensión y trabajo a tiempo parcial." },
+            { "nombre": "Más cotizantes con más empleo", "texto": "Planes con objetivos públicos para subir el empleo de mujeres, mayores de 55 y jóvenes, y vías ágiles para que quien llega de fuera trabaje con contrato y cotice.", "meta": true },
+            { "nombre": "Salida antes para trabajos penosos", "texto": "Jubilación anticipada sin recorte para oficios físicamente duros o peligrosos, decidida oficio a oficio con estudios de salud y revisada cada cierto tiempo." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una edad de jubilación que sigue por fórmula a la esperanza de vida, avisada con años de antelación, y un balance anual que activa ajustes pactados.",
+          "medidas": [
+            { "nombre": "Edad ligada a la esperanza de vida", "texto": "La edad legal se recalcula cada cinco años según la esperanza de vida a los 65, se anuncia con 15 de antelación y nunca sube más de un año de una vez, como en Dinamarca.", "meta": true, "fuente": "https://economy-finance.ec.europa.eu/system/files/2021-05/dk_-_ar_2021_final_pension_fiche.pdf" },
+            { "nombre": "Cada año de vida ganado, repartido", "texto": "La ley fija qué parte de cada año de vida ganado se traduce en trabajar más y cuál en más años de jubilación, como hace Países Bajos desde 2025.", "fuente": "https://www.cbs.nl/en-gb/news/2024/26/population-outlook-2050-more-residents-born-outside-the-netherlands/state-pension-age" },
+            { "nombre": "Balance anual del sistema", "texto": "El organismo independiente compara cada año las pensiones prometidas con los cotizantes, los salarios y los ingresos previstos, y publica si salen las cuentas." },
+            { "nombre": "Ajuste pactado si el balance no cuadra", "texto": "Si el balance sale negativo, se activa un ajuste acordado de antemano que reparte el esfuerzo entre ingresos, edad y subidas por encima del IPC; la garantía del IPC no se toca." },
+            { "nombre": "Voto del Congreso en cada revisión", "texto": "La fórmula no se aplica a escondidas: cada subida de edad se vota en el Congreso con el balance delante, como hace el Parlamento danés.", "fuente": "https://via.ritzau.dk/pressemeddelelse/14420769/forhojelse-af-folkepensionsalderen-i-2040-sikrer-velfaerden?lang=da" }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Flexibilidad para contratar",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre contratación, o con despido sin causa ni compensación, o prohibiendo a la empresa ajustar plantilla aunque peligre.",
+          "medidas": [
+            { "nombre": "Sin propuesta sobre contratación", "texto": "No dice cómo se contrata, cómo se despide ni qué pasa con quien pierde el empleo; deja intactos los problemas sin nombrarlos." },
+            { "nombre": "Despido libre y sin compensación", "texto": "Defiende despedir sin causa ni indemnización, dejando al trabajador sin ingresos ni posibilidad de reclamar ante un juez." },
+            { "nombre": "Plantilla congelada por ley", "texto": "Impide a la empresa reducir plantilla incluso cuando pierde dinero, lo que la empuja al cierre y hace que todos pierdan el empleo." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Contratar fácil y con reglas claras: pocos modelos de contrato, un solo trámite digital y ayuda a quien contrata por primera vez.",
+          "medidas": [
+            { "nombre": "Pocos modelos de contrato", "texto": "Indefinido, formativo y temporal solo por causas concretas, explicados en una guía pública sencilla; es la base que ya fijó la reforma laboral de 2021.", "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo" },
+            { "nombre": "Alta en un solo trámite digital", "texto": "Dar de alta a un trabajador con un único formulario en línea que sirve a la vez para la Seguridad Social, Hacienda y el servicio de empleo." },
+            { "nombre": "Ayuda para el primer contrato", "texto": "Asesoría pública gratuita, presencial y en línea, para autónomos y microempresas que contratan por primera vez: qué contrato, qué cuesta y qué obligaciones trae." },
+            { "nombre": "Periodo de prueba claro", "texto": "Duración máxima del periodo de prueba fijada por ley y convenio, la misma para todos los contratos, para que ninguna de las partes se lleve sorpresas." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Adaptarse sin despedir: cambios de jornada, de funciones y reducciones temporales pactados con la plantilla antes de recurrir al despido.",
+          "medidas": [
+            { "nombre": "Reducción temporal de jornada con ayuda", "texto": "Expedientes de regulación temporal de empleo (los ERTE): en una crisis la empresa reduce horas en vez de despedir, el Estado cubre parte del sueldo y el tiempo libre se usa para formarse." },
+            { "nombre": "Bolsa de horas anual", "texto": "Distribución irregular de la jornada a lo largo del año pactada en convenio, con preaviso y límites, para cubrir picos de trabajo sin horas extra ni despidos." },
+            { "nombre": "Cambio de funciones con formación", "texto": "Cambiar de puesto o de centro dentro de la empresa, acordado con los representantes de los trabajadores y acompañado de la formación necesaria." },
+            { "nombre": "Condiciones de crisis por tiempo limitado", "texto": "Una empresa en dificultades puede aplicar condiciones distintas a las del convenio solo con acuerdo o arbitraje, por un tiempo fijado y con compromiso de empleo." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Seguridad que va con la persona: una cuenta de indemnización que se lleva de empresa en empresa y un servicio de empleo que recoloca y se evalúa.",
+          "medidas": [
+            { "nombre": "Mochila de indemnización portátil", "texto": "La empresa ingresa cada mes una parte del sueldo en una cuenta individual del trabajador, que la conserva al cambiar de empleo o al dimitir, como en Austria desde 2003.", "fuente": "https://www.sozialministerium.gv.at/Themen/Arbeit/Arbeitsrecht/Entlohnung/Betriebliche-Mitarbeiter-und-Selbststaendigenvorsorge.html" },
+            { "nombre": "Orientador personal desde el primer mes", "texto": "Cada persona que se queda en paro tiene un orientador del servicio de empleo y un plan de búsqueda escrito antes de que acabe su primer mes sin trabajo.", "meta": true },
+            { "nombre": "Programas de empleo evaluados", "texto": "Cada programa público de empleo tiene una evaluación independiente con resultados publicados; lo que no ayuda a encontrar trabajo deja de financiarse." },
+            { "nombre": "Recolocación en despidos colectivos", "texto": "La empresa que despide a muchos trabajadores paga un plan de recolocación con una entidad externa, y el servicio de empleo publica cuántos encontraron trabajo." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un solo contrato indefinido con coste de salida conocido y en parte portátil, a cambio de un seguro de paro alto y una recolocación rápida y evaluada.",
+          "medidas": [
+            { "nombre": "Contrato indefinido único", "texto": "Un contrato indefinido como única forma normal de entrada; los temporales quedan para sustituciones y temporadas, para que nadie encadene contratos." },
+            { "nombre": "Indemnización conocida desde el primer día", "texto": "Indemnización por despido fijada por ley según la antigüedad, igual para todos los contratos y exigible desde el primer día, como el pago de transición de Países Bajos.", "fuente": "https://business.gov.nl/running-your-business/staff/dismissing-staff/transition-payment-after-dismissal/" },
+            { "nombre": "Paro alto y ligado a la búsqueda", "texto": "Prestación por desempleo alta al principio, unida a un plan de búsqueda y formación con citas y ofertas; quien lo rechaza sin motivo pierde parte de la ayuda, como en Dinamarca.", "fuente": "https://www.star.dk/en/about-the-danish-agency-for-labour-market-and-recruitment/flexicurity" },
+            { "nombre": "Primero la red, después la salida sencilla", "texto": "La salida solo se simplifica cuando el servicio de empleo demuestra con datos públicos que recoloca; sin esa pata, el modelo no se activa." },
+            { "nombre": "Nulidad intacta ante la discriminación", "texto": "El despido discriminatorio o que vulnera derechos fundamentales sigue siendo nulo, con readmisión y decisión del juez. La sencillez no llega hasta ahí." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Formación y productividad",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre formación ni productividad, o defendiendo que reciclarse es asunto de cada uno y retirando la formación a quien está en paro.",
+          "medidas": [
+            { "nombre": "Sin plan de formación", "texto": "No dice nada sobre cómo aprende un adulto un oficio nuevo ni sobre por qué se produce poco por hora trabajada." },
+            { "nombre": "Reciclarse es cosa de cada uno", "texto": "Retira los cursos públicos a quien está en paro y deja la formación solo a quien puede pagarla, aunque sea quien más la necesita." },
+            { "nombre": "Cursos sin control de resultados", "texto": "Reparte fondos públicos de formación sin medir si alguien encuentra trabajo después, lo que favorece cursos de relleno y fraude." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Formación gratuita para quien busca empleo, reconocimiento oficial de lo que ya se sabe hacer y un buscador público de cursos.",
+          "medidas": [
+            { "nombre": "Cursos para personas en paro", "texto": "Oferta pública y gratuita de cursos ligados a oficios con demanda, gestionada por las comunidades autónomas, con plazas todo el año." },
+            { "nombre": "Acreditar lo aprendido trabajando", "texto": "Procedimiento abierto todo el año para que la experiencia laboral se reconozca con un certificado oficial, sin tener que repetir lo que ya se sabe hacer." },
+            { "nombre": "Competencias digitales para adultos", "texto": "Cursos gratuitos de manejo digital básico en ayuntamientos, bibliotecas y centros de adultos, pensados para quien nunca los ha necesitado en su trabajo." },
+            { "nombre": "Buscador único de cursos", "texto": "Un portal público que reúne todos los cursos pagados con dinero público, de cualquier administración, con fechas, plazas y requisitos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "FP dual en todo el país, formación continua dentro de la empresa y apoyo a las pymes para trabajar mejor y crecer.",
+          "medidas": [
+            { "nombre": "FP dual en cada comarca", "texto": "Formación profesional que se cursa a la vez en el centro y en la empresa, con plazas al alcance de todas las comarcas y contenidos decididos con cada sector." },
+            { "nombre": "Formación continua en horario de trabajo", "texto": "Crédito de formación de las empresas simplificado y permisos para formarse dentro de la jornada, pactados en convenio y con un certificado al final." },
+            { "nombre": "Mejora de gestión para pymes", "texto": "Programas públicos de mejora de la gestión y digitalización de pequeñas empresas, cofinanciados por el Estado, las comunidades y la UE, con resultados evaluados." },
+            { "nombre": "Crecer sin castigo", "texto": "Revisar las obligaciones y costes que saltan de golpe al pasar de cierto número de trabajadores, para que las empresas no se frenen en vez de crecer." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una cuenta personal de formación para toda la vida, resultados de cada curso publicados y un organismo que estudia la productividad cada año.",
+          "medidas": [
+            { "nombre": "Cuenta personal de formación", "texto": "Cada persona tiene desde su primer empleo una cuenta con saldo anual para cursos, que conserva al cambiar de empresa o quedarse en paro, como en Francia.", "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705" },
+            { "nombre": "Resultados de cada curso publicados", "texto": "Cada curso, centro y oficina de empleo publica cuántos de sus alumnos trabajan al cabo de un año y en qué, comparando personas de perfil parecido." },
+            { "nombre": "Orientación antes de gastar el saldo", "texto": "Antes de usar la cuenta, una orientación personal ayuda a elegir el curso según los oficios con futuro en la zona y el perfil de cada uno." },
+            { "nombre": "Consejo de productividad independiente", "texto": "Un organismo independiente analiza cada año por qué crece o se estanca la productividad en cada sector y propone medidas, con informe público ante el Congreso." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un derecho a formarse toda la vida: más saldo para quien menos estudios tiene, permiso pagado para reciclarse y dinero solo para lo que da resultados.",
+          "medidas": [
+            { "nombre": "Más saldo para quien menos tiene", "texto": "La cuenta recibe más saldo si la persona no tiene titulación y una recarga extra a partir de los 40 años para cambiar de oficio, como hace Singapur.", "meta": true, "fuente": "https://www.moe.gov.sg/news/press-releases/20240304-new-skillsfuture-level-up-programme-to-boost-mid-career-upskilling-and-reskilling" },
+            { "nombre": "Permiso pagado para reciclarse", "texto": "Durante un curso largo a tiempo completo se cobra una parte del sueldo, con un máximo de meses a lo largo de la vida, para cambiar de oficio sin quedarse sin ingresos." },
+            { "nombre": "El dinero sigue a los resultados", "texto": "Solo se financian los cursos, centros y oficinas que publican sus resultados de empleo; los que no colocan pierden la financiación pública." },
+            { "nombre": "FP gobernada con los oficios", "texto": "Estado, comunidades y organizaciones de cada oficio deciden juntos qué se enseña y cuántas plazas hay, como en Suiza, donde la mayoría de jóvenes elige la FP.", "fuente": "https://www.sbfi.admin.ch/dam/sbfi/en/dokumente/2024/07/bbch_2024.pdf.download.pdf/BBCH_2024_EN.pdf" },
+            { "nombre": "Copago pequeño contra el fraude", "texto": "Un copago reducido por curso, del que queda exento quien no tiene ingresos, para frenar los cursos de relleno sin cerrar la puerta a nadie, como aplica Francia.", "fuente": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10705" }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Jornada y conciliación",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre horarios y cuidados, o justificando jornadas sin registro ni límite, horas extra sin pagar o la retirada de permisos.",
+          "medidas": [
+            { "nombre": "Sin propuesta sobre el tiempo de trabajo", "texto": "No dice nada de horas, horarios ni cuidados, como si conciliar fuera un asunto privado de cada familia." },
+            { "nombre": "Jornadas sin registro ni límite", "texto": "Defiende quitar el registro de jornada o dejar sin control las horas extra, lo que en la práctica permite trabajar horas que no se pagan." },
+            { "nombre": "Retirar permisos de cuidado", "texto": "Propone recortar los permisos de nacimiento o de cuidado de familiares ya reconocidos, sin ofrecer nada que los sustituya." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Que se cumpla la jornada: registro diario fiable que el trabajador puede consultar, toda hora extra pagada y una Inspección que lo comprueba.",
+          "medidas": [
+            { "nombre": "Registro digital de jornada", "texto": "Registro diario de entrada y salida, digital y que no se puede alterar después, que el trabajador consulta y la Inspección comprueba; amplía el registro obligatorio desde 2019.", "fuente": "https://www.mites.gob.es/ficheros/ministerio/GuiaRegistroJornada.pdf" },
+            { "nombre": "Horas extra pagadas o compensadas", "texto": "Toda hora extra se paga con el recargo del convenio o se compensa con descanso en un plazo fijado, y respeta el límite anual de la ley." },
+            { "nombre": "Inspección donde más se incumple", "texto": "La Inspección de Trabajo planifica sus visitas de jornada en los sectores y empresas con más denuncias, y publica cada año qué ha encontrado." },
+            { "nombre": "Descansos y vacaciones efectivos", "texto": "Descanso diario y semanal y vacaciones pagadas que se disfrutan de verdad, sin cambios de turno avisados con horas de antelación." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Permisos de cuidado pagados, escuelas infantiles y atención a la dependencia, para que conciliar no dependa de dejar el trabajo.",
+          "medidas": [
+            { "nombre": "Permisos de nacimiento iguales y pagados", "texto": "Mantener y hacer cumplir el permiso por nacimiento igual para cada progenitor, pagado y que no se puede ceder al otro, ya aprobado en España en 2025.", "fuente": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2025/290725-rueda-de-prensa-ministros.aspx" },
+            { "nombre": "Permiso pagado para cuidar a un familiar", "texto": "Días retribuidos para atender a un familiar enfermo o en el hospital, y reducción de jornada para cuidados largos con cotización completa." },
+            { "nombre": "Escuela infantil de 0 a 3 años asequible", "texto": "Plazas públicas o concertadas de escuela infantil para quien las pida, con precio según ingresos, gestionadas por comunidades y ayuntamientos." },
+            { "nombre": "Dependencia que libera tiempo", "texto": "Ayuda a domicilio y centros de día con plazos cortos de resolución, para que cuidar a un mayor no obligue a reducir o dejar el empleo." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una jornada más corta pactada por sectores, horarios de trabajo y colegios que terminan antes por la tarde y cuidados repartidos entre hombres y mujeres.",
+          "medidas": [
+            { "nombre": "Reducción de jornada por convenio", "texto": "Los convenios de cada sector pactan una semana laboral más corta, por etapas y según lo que permita cada actividad, sin rebaja de sueldo." },
+            { "nombre": "Pruebas piloto evaluadas", "texto": "Antes de generalizar una reducción, pruebas en administraciones y empresas voluntarias con datos públicos de productividad y bienestar, como hizo Islandia.", "fuente": "https://autonomy.work/portfolio/icelandsww/" },
+            { "nombre": "Horarios que terminan antes", "texto": "Administraciones, colegios y comercios acuerdan horarios para acabar antes por la tarde, con comidas más cortas y sin largas pausas a mediodía." },
+            { "nombre": "Desconexión con sanción", "texto": "El derecho a no responder mensajes de trabajo fuera de la jornada, recogido en cada convenio y sancionado por la Inspección si se incumple." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Menos horas a medida que sube la productividad, sin perder sueldo; permisos iguales usables durante la infancia y derecho a adaptar el horario.",
+          "medidas": [
+            { "nombre": "Productividad convertida en tiempo", "texto": "Cláusula en cada convenio sectorial que fija qué parte de la mejora de productividad va a sueldo y cuál a reducir horas; los sectores que más mejoran bajan antes." },
+            { "nombre": "Permisos usables durante la infancia", "texto": "Parte de los días de permiso se guardan y se usan cuando el hijo los necesite, hasta los 12 años, pagados y reservados a cada progenitor, como en Suecia.", "fuente": "https://www.forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit" },
+            { "nombre": "Adaptar el horario salvo causa escrita", "texto": "Derecho a pedir cambio de horario, de jornada o teletrabajo; la empresa responde por escrito en plazo y solo puede negarse por una causa organizativa concreta." },
+            { "nombre": "Encuesta pública del uso del tiempo", "texto": "Una encuesta oficial periódica mide horas de trabajo pagado y de cuidados por sexo y edad, para saber si el reparto mejora de verdad." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Empleo estable y salarios",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre salarios, o suprimir el salario mínimo, tolerar el trabajo sin contrato o sustituir la negociación por sueldos fijados por el Gobierno.",
+          "medidas": [
+            { "nombre": "Suprimir el salario mínimo", "texto": "Elimina el suelo salarial sin poner nada en su lugar, de modo que quien tiene menos poder para negociar puede cobrar lo que se le imponga." },
+            { "nombre": "Tolerar el trabajo sin contrato", "texto": "No propone nada contra el empleo sin dar de alta ni contra los falsos autónomos, que dejan al trabajador sin paro, sin baja y sin pensión." },
+            { "nombre": "Todos los sueldos fijados por el Gobierno", "texto": "Sustituye la negociación entre empresas y trabajadores por sueldos decididos por el Gobierno para cada empleo, más allá del salario mínimo." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Un salario mínimo que se actualiza cada año, el contrato indefinido como norma y control del trabajo sin contrato y de los falsos autónomos.",
+          "medidas": [
+            { "nombre": "Salario mínimo actualizado cada año", "texto": "El Gobierno fija el salario mínimo cada año tras consultar a sindicatos y empresas, teniendo en cuenta precios, productividad y empleo." },
+            { "nombre": "Indefinido como norma, de hecho", "texto": "Contrato temporal solo con causa concreta y sanción a quien lo use en fraude; mantener y vigilar la regla que fijó la reforma laboral de 2021.", "fuente": "https://www.sepe.es/noticia/SEPE/2021/Diciembre/El-BOE-publica-las-medidas-urgentes-para-la-reforma-laboral--la-garant-a-de-la-estabilidad-en-el-empleo-y-la-transformaci-n-del-mercado-de-trabajo" },
+            { "nombre": "Inspección contra el trabajo sin contrato", "texto": "Campañas de la Inspección de Trabajo con datos cruzados de Hacienda y Seguridad Social, y alta inmediata del trabajador encontrado sin contrato." },
+            { "nombre": "Contra los falsos autónomos", "texto": "Se presume contrato laboral para quien trabaja bajo las órdenes de una empresa o plataforma digital aunque figure como autónomo; la empresa debe probar lo contrario." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Menos temporalidad también en las administraciones, sueldos que no pierden poder de compra y el mismo convenio para quien trabaja en una subcontrata.",
+          "medidas": [
+            { "nombre": "Oposiciones con calendario fijo", "texto": "Cada administración convoca sus plazas con un calendario fijo y publicado, para no acumular interinos durante años en puestos que son permanentes." },
+            { "nombre": "Cláusula de revisión salarial", "texto": "Los convenios incluyen una revisión si los precios suben más de lo previsto, para que los sueldos no pierdan poder de compra en el conjunto del convenio." },
+            { "nombre": "Mismo convenio en las subcontratas", "texto": "Quien trabaja para una subcontrata cobra según el convenio del sector de la actividad que realiza, no según uno más bajo elegido por la empresa." },
+            { "nombre": "Sanción por encadenar contratos", "texto": "Quien encadena contratos temporales para el mismo puesto pasa a ser fijo, y la empresa paga una sanción que aumenta si repite." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Salarios que crecen con la productividad, negociados por sectores, con temporalidad y brecha salarial publicadas empresa por empresa.",
+          "medidas": [
+            { "nombre": "Cláusula de productividad en convenios", "texto": "Los convenios sectoriales ligan las subidas a la productividad del sector, medida con datos oficiales, además de a los precios." },
+            { "nombre": "Brecha salarial publicada por empresa", "texto": "Las empresas publican la diferencia de sueldo entre hombres y mujeres por categoría, como exige la directiva europea de transparencia salarial desde 2027.", "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" },
+            { "nombre": "Temporalidad publicada por empresa y organismo", "texto": "Cada empresa grande y cada administración publica su porcentaje de contratos temporales, en un registro abierto que cualquiera puede consultar." },
+            { "nombre": "Sueldo visible en las ofertas", "texto": "Las ofertas de empleo indican el sueldo o su banda antes de la entrevista, y no se puede preguntar al candidato cuánto cobraba antes.", "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un salario mínimo fijado por regla a propuesta de una comisión independiente, salarios ligados a la productividad y planes obligatorios si hay desvíos.",
+          "medidas": [
+            { "nombre": "Salario mínimo fijado por regla", "texto": "La ley mantiene el salario mínimo en el 60 % del salario medio, para que su cuantía deje de depender de quién gobierna cada año.", "meta": true },
+            { "nombre": "Comisión independiente del salario mínimo", "texto": "Una comisión de sindicatos, empresas y universidad propone cada otoño la cifra, publica sus datos y calcula el efecto en el empleo y en la pensión ligada a él, como en Reino Unido.", "fuente": "https://www.gov.uk/government/organisations/low-pay-commission/about" },
+            { "nombre": "Plan corrector de la brecha", "texto": "Si la brecha salarial de una empresa llega al 5 % en una categoría y no se justifica, la empresa acuerda con la plantilla un plan corrector con plazo.", "meta": true, "fuente": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023L0970" },
+            { "nombre": "Plan obligatorio si la temporalidad se desvía", "texto": "La empresa o administración cuya temporalidad supere la meta legal de su sector presenta un plan con plazo para convertir contratos, revisado por la Inspección.", "meta": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

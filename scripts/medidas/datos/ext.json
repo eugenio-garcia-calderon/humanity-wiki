@@ -1,0 +1,378 @@
+{
+  "tema": "ext",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "Los niveles Ideal son concretos, comprobables y están bien respaldados por la página ideal. Fallan los escalones de abajo: varios Básicos son frases que firmaría cualquiera, algunas escalas miden solo procedimiento o «más integración» en vez de calidad, y el tema deja fuera la protección de los españoles en el exterior y las amenazas nuevas como los ciberataques.",
+    "problemas": [
+      {
+        "aspecto": 3,
+        "nivel": null,
+        "problema": "La escala de Unión Europea premia «más integración» como si fuera más calidad: quien quiere menos competencias europeas pero cumple, influye y controla bien queda siempre en Básico.",
+        "mejora": "Escalar por calidad: cumplir y ejecutar (Básico), compartir donde un país solo no llega con mandato del Congreso (Intermedio), recursos propios y voz común (Avanzado), mayoría con freno y control democrático (Ideal)."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 1,
+        "problema": "Varios Básicos no discriminan: «Unas fuerzas armadas preparadas que cumplen sus misiones» o «Apoyar a las empresas que exportan» (Comercio) los suscribe cualquiera y no dicen nada comprobable.",
+        "mejora": "Básicos con instrumentos medibles: plazas de tropa cubiertas, mantenimiento antes que compras, misiones autorizadas por el Congreso; seguro y financiación a la exportación con datos de uso."
+      },
+      {
+        "aspecto": 2,
+        "nivel": 2,
+        "problema": "Soberanía mide solo el procedimiento (explicado, pactado, votado) y no el contenido; el Intermedio cita Marruecos, Gibraltar y el Sáhara mientras la descripción habla de Ceuta, Melilla, pesca y campo.",
+        "mejora": "Dar a Básico e Intermedio medidas de fondo (fronteras con medios, cuotas de pesca, Ceuta y Melilla, acuerdos escritos con Marruecos, protección consular) y dejar el procedimiento para Avanzado e Ideal."
+      },
+      {
+        "aspecto": 0,
+        "nivel": 2,
+        "problema": "El Intermedio de Comercio mezcla cláusulas comerciales con «industria tecnológica y de defensa propia», que es materia del aspecto de Defensa y salta del comercio a la política industrial.",
+        "mejora": "Llevar la industria de defensa al aspecto de Defensa; en Comercio, Intermedio con cláusulas y posición debatida antes, y Avanzado con dependencias críticas y prioridad Iberoamérica y Mediterráneo."
+      },
+      {
+        "aspecto": 5,
+        "nivel": 3,
+        "problema": "Cooperación cambia de tema a mitad de escala: el Avanzado abandona la cantidad y calidad de la ayuda y salta a condicionar el comercio; y el Básico (solo emergencias) queda por debajo de la ley de cooperación vigente.",
+        "mejora": "Básico: cumplir la ley y publicar las cuentas. Intermedio: senda al 0,7 % y concentración. Avanzado: criterios públicos, fondo de emergencia y diligencia debida. Ideal: senda obligatoria y coherencia auditada."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "El tema no cubre la protección de los españoles en el exterior, que su propio ideal menciona, ni los ciberataques, la desinformación y la protección de infraestructuras críticas.",
+        "mejora": "Incluir la protección consular en Soberanía y la ciberdefensa y las amenazas híbridas en Defensa, o crear un séptimo aspecto de seguridad y ciudadanos en el exterior."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Comercio, industria e influencia",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "No tener política comercial, o proponer cerrarse al comercio o saltarse los acuerdos y normas comerciales ya firmados.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice qué mercados abrir, a qué empresas apoyar ni qué posición llevar a Bruselas en los acuerdos comerciales: la política se reduce a reaccionar a cada crisis." },
+            { "nombre": "Cierre por cuenta propia", "texto": "Proponer aranceles o vetos unilaterales, algo que dentro de la UE un Estado no puede decidir solo y que expone a represalias contra lo que España vende fuera." },
+            { "nombre": "Incumplir lo firmado", "texto": "Plantear desobedecer acuerdos comerciales o normas de la Organización Mundial del Comercio ya ratificados, en lugar de renegociarlos por las vías previstas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Apoyo práctico a las empresas que venden fuera, sobre todo pymes, y cumplimiento leal de los acuerdos comerciales vigentes.",
+          "medidas": [
+            { "nombre": "Apoyo a la exportación que se mide", "texto": "Mantener la red de oficinas comerciales en el exterior, el seguro de crédito y la financiación pública para exportar, y publicar cada año cuántas empresas usan cada servicio." },
+            { "nombre": "Sacar partido a los acuerdos vigentes", "texto": "Aplicar los acuerdos comerciales de la UE ya en vigor e informar a cada sector de las rebajas de aranceles que puede usar, con guías y atención específica para pymes." },
+            { "nombre": "Defensa frente a la competencia desleal", "texto": "Pedir a la Comisión Europea medidas contra la venta a precio de saldo o las importaciones subvencionadas cuando un sector español lo sufre, con un expediente documentado." },
+            { "nombre": "Control de inversiones en sectores críticos", "texto": "Revisar antes de autorizarla la compra extranjera de empresas de sectores críticos, como permite la norma europea, con plazos conocidos y apertura en todo lo demás." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Acuerdos con cláusulas sociales y ambientales cuya posición se debate antes, ventanilla única para pymes y ayuda a quien pierde con la apertura.",
+          "medidas": [
+            { "nombre": "Cláusulas laborales y ambientales", "texto": "Defender en el Consejo de la UE que cada acuerdo incluya capítulos de derechos laborales básicos y clima, seguidos por un comité con empresas, sindicatos y organizaciones sociales." },
+            { "nombre": "Posición debatida antes de votar en Bruselas", "texto": "El Gobierno presenta en la comisión del Congreso su posición sobre cada gran acuerdo antes de votarlo en el Consejo de la UE, con un estudio de impacto por sectores y regiones." },
+            { "nombre": "Ventanilla única para pymes que exportan", "texto": "Un solo punto, estatal y coordinado con las comunidades, que reúne información, financiación, seguros y ferias para la pyme que quiere vender fuera, con encuestas de satisfacción públicas." },
+            { "nombre": "Ayuda a los sectores que pierden", "texto": "Planes de formación, reconversión e inversión para los sectores y comarcas que salen perdiendo con un acuerdo, apoyados también en el fondo europeo de adaptación a la globalización." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Peso real en Europa, Iberoamérica y el Mediterráneo: diplomacia económica coordinada, menos dependencias críticas y cultura como activo.",
+          "medidas": [
+            { "nombre": "Un solo plan por país", "texto": "En cada país prioritario, la embajada, la oficina comercial, el Instituto Cervantes y las oficinas de las comunidades trabajan con un plan común y objetivos compartidos." },
+            { "nombre": "Mapa público de dependencias críticas", "texto": "Identificar de qué proveedores depende el país en medicamentos, chips, materias primas y energía, y diversificarlos con proyectos europeos, sin cerrar el mercado al resto." },
+            { "nombre": "Iberoamérica y el Mediterráneo como prioridad", "texto": "Acuerdos de inversión, cooperación técnica y movilidad de estudiantes y profesionales con Iberoamérica y el norte de África, impulsados desde la UE y con seguimiento anual." },
+            { "nombre": "El español y la cultura como activo", "texto": "Financiación estable del Instituto Cervantes y de la acción cultural exterior, ligada a objetivos de alumnos, centros y audiencias que se publican cada año." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Mercado abierto con reglas exigibles e iguales para lo importado y lo producido aquí, y una estrategia de influencia votada y medida.",
+          "medidas": [
+            { "nombre": "Cláusulas que se pueden hacer cumplir", "texto": "Apoyar en la UE solo acuerdos cuyo capítulo de sostenibilidad permita, como último recurso, suspender rebajas de aranceles si el socio incumple el Acuerdo de París o los derechos laborales básicos." },
+            { "nombre": "Cláusulas espejo", "texto": "Exigir al producto importado las mismas normas sanitarias, ambientales y de bienestar animal que al europeo, con controles en frontera y salvaguardias automáticas para el campo." },
+            { "nombre": "Preferencia europea solo en lo estratégico", "texto": "Mínimo de componentes europeos en defensa, energía y tecnologías críticas, como ya exige el programa europeo de industria de defensa, y mercado abierto en todo lo demás." },
+            { "nombre": "Canal de denuncias con plazo de respuesta", "texto": "Empresas, sindicatos y organizaciones pueden denunciar que un socio incumple un acuerdo; el Gobierno responde en un plazo fijo y, si hay base, lleva el caso a la Comisión Europea." },
+            { "nombre": "Estrategia de influencia votada y coherente", "texto": "Plan a diez años para el español y la cultura votado en el Congreso con metas medibles, e informe anual que cruza qué se exporta y con qué apoyo público con los criterios de derechos humanos." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Defensa y seguridad",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta de defensa, o proponer desmantelar las fuerzas armadas, incumplir lo firmado con los aliados o usarlas fuera de la ley.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice qué amenazas hay que cubrir, con qué medios ni con qué dinero: la defensa queda a la inercia del presupuesto de cada año." },
+            { "nombre": "Promesas sin financiar", "texto": "Comprometer ante los aliados un nivel de gasto o de capacidades sin decir de dónde sale el dinero ni incluirlo en los presupuestos." },
+            { "nombre": "Fuerzas armadas fuera de la ley", "texto": "Plantear desmantelarlas, abandonar las alianzas firmadas sin el procedimiento previsto o enviarlas a misiones sin la autorización del Congreso que exige la ley." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Fuerzas armadas con personal, material y entrenamiento suficientes para sus misiones, autorizadas por el Congreso y fieles a lo firmado.",
+          "medidas": [
+            { "nombre": "Plantillas cubiertas y personal que se queda", "texto": "Cubrir las plazas de tropa y marinería con sueldos y carrera que retengan al personal, y publicar cada año cuántas plazas quedan vacantes en cada ejército." },
+            { "nombre": "Mantener antes que comprar", "texto": "Dar prioridad al mantenimiento, los repuestos, la munición y el entrenamiento sobre las compras nuevas, para que el material que ya existe esté listo para usarse." },
+            { "nombre": "Misiones autorizadas por el Congreso", "texto": "Cumplir la Ley Orgánica de la Defensa Nacional: las misiones en el exterior que no son de defensa directa de España necesitan consulta y autorización previa del Congreso." },
+            { "nombre": "Compromisos con los aliados cumplidos", "texto": "Aportar las fuerzas y las contribuciones acordadas en la OTAN y en la UE, y explicar en el Congreso cada nuevo compromiso antes de firmarlo." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Una ley de programación de la defensa a varios años, debatida en el Congreso, que incluye ciberdefensa, industria y el futuro del personal.",
+          "medidas": [
+            { "nombre": "Ley de programación a varios años", "texto": "Fijar por ley las capacidades que se quieren y su calendario de pago, para que los grandes programas figuren en el presupuesto desde el principio y no se paguen con créditos añadidos a mitad de año." },
+            { "nombre": "Ciberdefensa y amenazas nuevas", "texto": "Incluir en la programación la ciberdefensa, la protección de infraestructuras críticas y la respuesta a la desinformación, coordinadas entre Defensa, Interior y las comunidades." },
+            { "nombre": "Industria de defensa en red europea", "texto": "Apoyar a la industria española para que entre en programas europeos, con contratos publicados, control de conflictos de interés y evaluación de lo que aporta en empleo y tecnología." },
+            { "nombre": "Salida laboral tras el servicio", "texto": "Formación y títulos reconocidos para que quien deja las fuerzas armadas acceda a empleo público o privado, con seguimiento público de cuántos lo consiguen." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Defensa suficiente y europea: necesidades pactadas a largo plazo entre los grandes grupos, proyectos conjuntos y control parlamentario real.",
+          "medidas": [
+            { "nombre": "Mesa permanente con todos los grupos", "texto": "Una mesa de defensa con todos los grupos parlamentarios prepara la ley de programación y sus revisiones antes de que el Gobierno las presente, para que sobrevivan a los cambios de gobierno." },
+            { "nombre": "Proyectos europeos que cubren carencias", "texto": "Entrar en los proyectos de la cooperación permanente entre ejércitos europeos y en el Fondo Europeo de Defensa cuando cubren carencias propias y abaratan frente a hacerlo solos." },
+            { "nombre": "Informe anual de cada programa", "texto": "Informe anual con los sobrecostes y retrasos de cada gran programa, revisado por el Tribunal de Cuentas y debatido en el Congreso antes de los presupuestos." },
+            { "nombre": "Comisión con acceso y medios", "texto": "La comisión de defensa del Congreso accede a información reservada de programas y operaciones y tiene personal técnico propio para analizarla." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una ley de defensa a diez años con mayoría reforzada, gasto ligado a capacidades comprobables, compra europea por defecto y voto de cada gran contrato.",
+          "medidas": [
+            { "nombre": "Ley a diez años con mayoría reforzada", "texto": "Ley de programación a diez años, precedida de una revisión estratégica pública, aprobada por mayoría reforzada del Congreso y actualizada obligatoriamente a mitad de periodo.", "meta": true },
+            { "nombre": "Gasto ligado a capacidades", "texto": "Cada partida responde a un objetivo pactado con la OTAN y la UE, con indicadores públicos de disponibilidad, personal y munición, y no solo a un porcentaje del PIB." },
+            { "nombre": "Voto previo de cada gran contrato", "texto": "La comisión del Congreso aprueba cada contrato de armamento por encima de un umbral fijado en la ley, con trámite de urgencia y sesiones reservadas, como ya se hace en Alemania." },
+            { "nombre": "Compra conjunta europea por defecto", "texto": "Comprar solos o fuera de Europa exige justificar por escrito el plazo o el precio; los grandes programas llevan un mínimo de componentes europeos." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Soberanía e intereses nacionales",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Renunciar a defender el territorio y los intereses del país, o defenderlos saltándose el derecho internacional, los tratados o el Parlamento.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice qué intereses defiende ni cómo: cada crisis con un vecino se improvisa y la posición depende de quién gobierne ese día." },
+            { "nombre": "Giros sin explicar", "texto": "Cambiar posiciones de Estado sobre territorio, fronteras o pesca sin pasar por el Congreso ni explicar qué se obtiene a cambio." },
+            { "nombre": "Defensa fuera de la ley", "texto": "Proponer acciones unilaterales que violan tratados o el derecho internacional, lo que debilita a un país mediano en los tribunales y foros donde se resuelven sus disputas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Defender con medios y dentro de la ley el territorio, las fronteras, Ceuta y Melilla, Gibraltar, la pesca y a los españoles en el exterior.",
+          "medidas": [
+            { "nombre": "Fronteras con medios", "texto": "Personal, tecnología y coordinación entre Policía, Guardia Civil y la agencia europea de fronteras en Ceuta, Melilla y Canarias, con datos públicos de los medios desplegados." },
+            { "nombre": "Ceuta y Melilla con servicios e inversión", "texto": "Plan de inversión y servicios públicos para Ceuta y Melilla, y defensa en cada foro internacional de su pertenencia a España y a la UE." },
+            { "nombre": "Pesca defendida con datos", "texto": "Negociar en la UE cuotas y acuerdos de pesca con otros países apoyados en datos científicos, y ayudar a la flota cuando un acuerdo se suspende." },
+            { "nombre": "Gibraltar por la vía negociada", "texto": "Defender la posición española sobre Gibraltar en la ONU y en las negociaciones entre la UE y el Reino Unido, protegiendo el empleo de quien cruza a trabajar cada día." },
+            { "nombre": "Españoles en el exterior protegidos", "texto": "Consulados con personal suficiente, citas en plazo razonable y un servicio de emergencias consulares que actúa en catástrofes, detenciones y evacuaciones." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Las decisiones sobre Marruecos, el Sáhara, Gibraltar, fronteras y pesca se explican en el Congreso y se apoyan en acuerdos escritos.",
+          "medidas": [
+            { "nombre": "Explicar antes de decidir", "texto": "El Gobierno comparece en el Congreso antes de cambiar la posición sobre Marruecos, el Sáhara Occidental o Gibraltar, y publica qué se acuerda y qué se obtiene a cambio." },
+            { "nombre": "Acuerdos escritos con Marruecos", "texto": "Acuerdos con Marruecos sobre migración, pesca, comercio y pasos fronterizos de Ceuta y Melilla, escritos y públicos, que no dependan de la sintonía entre dos gobiernos." },
+            { "nombre": "Sáhara Occidental dentro de la ONU", "texto": "Apoyar una solución política negociada en el marco de las resoluciones del Consejo de Seguridad de la ONU, y dar cuenta al Congreso de cada paso." },
+            { "nombre": "Defensa jurídica permanente", "texto": "Un equipo estable de derecho internacional en el Ministerio de Exteriores que prepara la defensa de los intereses del país en tratados, tribunales y organismos internacionales." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes grupos y con indicadores, que no cambia con cada gobierno.",
+          "medidas": [
+            { "nombre": "Lista escrita de intereses permanentes", "texto": "Integridad territorial, Ceuta y Melilla, Gibraltar, fronteras, pesca, campo, Mediterráneo e Iberoamérica, cada uno con objetivos e indicadores que se revisan." },
+            { "nombre": "Pacto entre los grandes grupos", "texto": "Acuerdo escrito entre los grandes grupos sobre los intereses permanentes y las líneas que ningún gobierno cruza, revisado al empezar cada legislatura." },
+            { "nombre": "Informe por legislatura con todos los grupos", "texto": "El Gobierno presenta al Parlamento un informe de política exterior por legislatura, preparado con un grupo de seguimiento de todos los partidos, como hace Finlandia." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Estrategia de intereses permanentes votada por mayoría reforzada, con consulta previa a todos los grupos y ningún giro sin voto, dentro del derecho internacional.",
+          "medidas": [
+            { "nombre": "Estrategia votada, no solo comunicada", "texto": "Reformar la ley de acción exterior para que el Congreso vote por mayoría reforzada la Estrategia de Acción Exterior, que hoy aprueba el Gobierno y las Cortes solo debaten." },
+            { "nombre": "Comisión reservada de consulta previa", "texto": "Una comisión con todos los grupos, bajo secreto, a la que el Gobierno consulta antes de toda decisión exterior de gran importancia y de fijar un mandato de negociación." },
+            { "nombre": "Ningún giro sin debate y voto", "texto": "Cambiar la posición sobre un interés permanente exige debate y voto en el Congreso antes de comunicarlo a otro Estado; sin reforma constitucional obliga políticamente, no jurídicamente." },
+            { "nombre": "Rendición de cuentas anual con indicadores", "texto": "El ministro rinde cuentas cada año ante las Cortes de cada interés permanente con sus indicadores, y la comisión publica su propia valoración." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Unión Europea",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "No tener posición sobre Europa, o proponer desobedecer sus normas y sentencias mientras se siguen recibiendo sus fondos.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice qué quiere España de la UE ni qué posición lleva a cada Consejo: se acepta o se rechaza lo que proponen otros." },
+            { "nombre": "Fondos sí, normas no", "texto": "Proponer incumplir directivas o sentencias del Tribunal de Justicia de la UE mientras se siguen cobrando sus fondos, lo que expone a multas y a recortes de esos mismos fondos." },
+            { "nombre": "Romper sin contar el coste", "texto": "Plantear salir de la UE o del euro sin explicar qué pasaría con el comercio, la moneda, la libre circulación de personas y los fondos europeos." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cumplir las normas europeas en plazo, gastar bien los fondos y defender con datos la posición española en cada negociación.",
+          "medidas": [
+            { "nombre": "Directivas en plazo", "texto": "Incorporar las directivas europeas a la ley española dentro de plazo, con un calendario público que siga cada una y evite sanciones del Tribunal de Justicia de la UE." },
+            { "nombre": "Fondos europeos bien ejecutados", "texto": "Gastar los fondos europeos a tiempo y con evaluación pública de resultados, en un portal donde se vea qué recibe cada proyecto y para qué." },
+            { "nombre": "Comunidades en la posición española", "texto": "Las comunidades autónomas participan en las posiciones que afectan a sus competencias a través de la conferencia con el Estado para asuntos europeos." },
+            { "nombre": "Presencia en las instituciones", "texto": "Preparar y apoyar a españoles para las oposiciones y puestos de las instituciones europeas, y llevar a cada negociación estudios propios de impacto." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Decidir en común donde un país solo no llega —energía, defensa, migración y fronteras—, con el Congreso informado antes de cada Consejo.",
+          "medidas": [
+            { "nombre": "Energía conectada con Europa", "texto": "Más interconexiones eléctricas y de gas con Francia y el resto de la UE, y compras conjuntas de energía en las crisis, para reducir el aislamiento de la Península." },
+            { "nombre": "Migración con reparto y fronteras comunes", "texto": "Aplicar el pacto europeo de migración y asilo con un reparto efectivo de responsabilidades entre países y un control común de las fronteras exteriores." },
+            { "nombre": "Compras de defensa en común", "texto": "Usar los préstamos y programas europeos para comprar material junto a otros países cuando cubre carencias propias y sale más barato que hacerlo solos." },
+            { "nombre": "El Congreso, antes y después de cada Consejo", "texto": "El Gobierno expone en el Congreso su posición antes de cada Consejo Europeo y rinde cuentas después de lo que se votó." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una UE con recursos propios suficientes, una voz exterior común y más decisiones por mayoría, avanzando con los países dispuestos.",
+          "medidas": [
+            { "nombre": "Recursos propios nuevos", "texto": "Financiar el presupuesto europeo con ingresos europeos nuevos, por ejemplo sobre emisiones de carbono en frontera o grandes empresas digitales, y no solo con aportaciones nacionales." },
+            { "nombre": "Una sola voz hacia fuera", "texto": "Posiciones comunes, servicio diplomático europeo reforzado y sanciones decididas juntas, para que la UE pese ante las grandes potencias." },
+            { "nombre": "Avanzar con los dispuestos", "texto": "Mientras no haya acuerdo de todos, usar la abstención constructiva y las cooperaciones reforzadas para que los países que quieren avanzar no queden bloqueados." },
+            { "nombre": "Control de lo común", "texto": "Cada fondo o deuda común queda sometido al control presupuestario del Parlamento Europeo y a la auditoría del Tribunal de Cuentas Europeo." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "UE que decide su política exterior por mayoría cualificada con freno de emergencia, paga lo común con lo común, y Congreso que fija la posición española.",
+          "medidas": [
+            { "nombre": "Pasarela a la mayoría cualificada", "texto": "Activar la pasarela del artículo 31.3 del Tratado de la UE para decidir por mayoría cualificada sanciones, declaraciones y posiciones exteriores, sin reformar los tratados." },
+            { "nombre": "Freno de emergencia y unanimidad militar", "texto": "Un Estado puede oponerse por razones vitales y declaradas de política nacional y el asunto sube al Consejo Europeo; las decisiones militares siguen por unanimidad." },
+            { "nombre": "Deuda común solo para bienes comunes", "texto": "Presupuesto europeo mayor con recursos propios, y deuda común reservada a defensa, energía, fronteras e innovación, no a gasto corriente de cada país." },
+            { "nombre": "Voto previo de las Cortes", "texto": "Cualquier paso a la mayoría cualificada o renuncia al veto exige voto previo de las Cortes, que fijan el mandato del Gobierno en los grandes asuntos europeos." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Paz, diplomacia y desarme",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta de paz, o justificar guerras de agresión, ignorar las resoluciones de la ONU o vender armas sin control.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice qué hará España ante los conflictos ni con qué medios: se limita a sumarse a declaraciones de otros." },
+            { "nombre": "Doble vara ante las agresiones", "texto": "Condenar o justificar una agresión según quién la comete, en lugar de aplicar el mismo derecho internacional a todos." },
+            { "nombre": "Armas sin control", "texto": "Vender armas sin mirar a quién ni para qué, o proponer saltarse los controles que ya fijan la ley española y la posición común europea sobre exportación de armas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cumplir las resoluciones de la ONU, pagar lo comprometido, aportar a misiones de paz y aplicar con rigor la ley vigente de control de armas.",
+          "medidas": [
+            { "nombre": "Resoluciones de la ONU cumplidas", "texto": "Aplicar las sanciones y resoluciones obligatorias del Consejo de Seguridad y explicar cada voto de España en la Asamblea General." },
+            { "nombre": "Cuotas pagadas en plazo", "texto": "Pagar a tiempo las cuotas de la ONU y de sus misiones de paz, y publicar lo aportado a cada organismo." },
+            { "nombre": "Ley de control de armas aplicada", "texto": "Cumplir la ley de 2007 sobre comercio de armas: cada venta pasa por la junta interministerial y se deniega en los supuestos que marca la ley." },
+            { "nombre": "Presencia en misiones de paz", "texto": "Aportar personal a misiones de paz de la ONU y la UE autorizadas por el Congreso, con formación específica en protección de civiles." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Mediación activa en los conflictos cercanos, prevención temprana y una venta de armas más vigilada y más transparente.",
+          "medidas": [
+            { "nombre": "Equipo de mediación en Exteriores", "texto": "Un equipo de mediadores formados en el Ministerio de Exteriores que ofrece buenos oficios en Iberoamérica, el Mediterráneo y el Sahel." },
+            { "nombre": "Alerta temprana de conflictos", "texto": "Análisis periódico del riesgo de conflicto en las regiones prioritarias, que activa diplomacia preventiva antes de que estalle la violencia." },
+            { "nombre": "Informes de armas más completos", "texto": "Informes al Congreso con país de destino, tipo de material y uso final declarado, publicados con menos retraso y debatidos cada año en comisión." },
+            { "nombre": "Comprobar el uso final", "texto": "Verificar después de la venta que las armas llegan a quien se dijo y se usan para lo que se dijo, con inspecciones pactadas en el contrato." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una diplomacia de paz con medios y presupuesto estable, que media, acoge negociaciones y reduce las armas sin dejar indefenso a nadie.",
+          "medidas": [
+            { "nombre": "Presupuesto estable para la paz", "texto": "Partida para mediación, prevención y reconstrucción fijada para varios años, que no se recorta a mitad de ejercicio." },
+            { "nombre": "Buenos oficios y sede de negociaciones", "texto": "Representar intereses entre países sin relaciones y acoger negociaciones entre partes enfrentadas, como hacen Suiza y Noruega." },
+            { "nombre": "Escuela de mediadores", "texto": "Formación propia de mediadores con universidades y la Escuela Diplomática, abierta también a profesionales de Iberoamérica y el Mediterráneo." },
+            { "nombre": "Desarme verificable y recíproco", "texto": "Promover tratados de desarme y control de armas que se puedan verificar y obliguen a todas las partes, sin reducir de forma unilateral la defensa propia ni la de los aliados." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Mediación profesional de Estado, cada licencia de armas a la vista y denegada ante riesgo grave, y justicia internacional aplicada sin excepciones.",
+          "medidas": [
+            { "nombre": "Unidad de mediación de Estado", "texto": "Unidad permanente con mediadores de carrera, presupuesto plurianual y mandato respaldado por todos los grupos, dispuesta a hablar con todas las partes de un conflicto." },
+            { "nombre": "Cada licencia de armas publicada", "texto": "Publicar cada licencia de exportación —país, tipo de material, valor y uso final— en un plazo fijo, y no solo estadísticas agregadas cada seis meses." },
+            { "nombre": "Denegación obligatoria ante riesgo grave", "texto": "Denegar la venta si hay riesgo grave de uso contra civiles o en una guerra de agresión, con informe motivado y control previo del Congreso para países en conflicto." },
+            { "nombre": "Justicia internacional sin excepciones", "texto": "Ejecutar las órdenes de la Corte Penal Internacional y las sentencias de la Corte Internacional de Justicia sea quien sea el afectado, aliado o adversario." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Cooperación y derechos humanos",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta de cooperación, o negar la ayuda incluso en emergencias y justificar violaciones de derechos según quién las cometa.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice cuánto se dedica a la ayuda, a qué ni cómo se evalúa: la cooperación queda a lo que sobre en cada presupuesto." },
+            { "nombre": "Ni siquiera en las emergencias", "texto": "Proponer suprimir también la ayuda humanitaria ante terremotos, guerras o hambrunas, cuando la vida de la gente depende de días." },
+            { "nombre": "Derechos humanos según quién", "texto": "Callar ante las violaciones de derechos humanos de los socios y denunciarlas solo cuando las comete un adversario." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Ayuda humanitaria rápida, cumplimiento real de la ley de cooperación de 2023 y cuentas públicas de qué se financia y dónde.",
+          "medidas": [
+            { "nombre": "Respuesta humanitaria rápida", "texto": "Capacidad de enviar ayuda y equipos en días ante catástrofes y hambrunas, a través de la agencia española de cooperación y organizaciones con experiencia." },
+            { "nombre": "Cumplir la ley de cooperación", "texto": "Aplicar la ley de cooperación de 2023 con sus planes, órganos y objetivos de gasto, en lugar de dejarla en el papel." },
+            { "nombre": "Cuentas abiertas de la ayuda", "texto": "Publicar qué proyectos financia la ayuda española, dónde y con quién, en formato abierto y comparable con el de otros donantes." },
+            { "nombre": "Voz en los foros de derechos humanos", "texto": "Votar en el Consejo de Derechos Humanos de la ONU con criterios explicados, y proteger con visados y apoyo a defensores de derechos perseguidos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Ayuda al desarrollo que crece cada año camino del 0,7 % de la renta que fija la ley, concentrada donde más aporta y gestionada por profesionales.",
+          "medidas": [
+            { "nombre": "Calendario anual hacia el 0,7 %", "texto": "Subir la ayuda cada año con un calendario publicado en los presupuestos hasta llegar al 0,7 % de la renta nacional bruta.", "meta": true },
+            { "nombre": "Menos países, más impacto", "texto": "Concentrar la ayuda en un número limitado de países y sectores —salud, agua, educación, buen gobierno— donde España aporta experiencia, en lugar de dispersarla." },
+            { "nombre": "Agencia de cooperación profesional", "texto": "Personal estable y especializado en la agencia española de cooperación, con carrera propia, para gestionar más dinero sin perder control." },
+            { "nombre": "Estado, comunidades y ayuntamientos coordinados", "texto": "Un registro común de la ayuda del Estado, las comunidades y los ayuntamientos que evite duplicar proyectos en los mismos lugares." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Comercio, alianzas y ayuda condicionados a los derechos humanos con criterios públicos, fondo de emergencia propio y empresas responsables.",
+          "medidas": [
+            { "nombre": "Criterios públicos de derechos humanos", "texto": "Criterios escritos para comercio, ayuda y alianzas, con una escala de respuesta conocida: diálogo, aviso, suspensión de ventajas comerciales y, al final, sanciones." },
+            { "nombre": "Suelo humanitario y fondo de emergencia", "texto": "Una parte mínima de la ayuda reservada a la acción humanitaria y un fondo de emergencia que se puede usar sin esperar a aprobar una partida nueva." },
+            { "nombre": "Empresas que vigilan su cadena", "texto": "Aplicar la directiva europea que obliga a las grandes empresas a vigilar los derechos humanos en su cadena de suministro, con apoyo a las pymes proveedoras para cumplir." },
+            { "nombre": "Canje de deuda por desarrollo", "texto": "Cambiar deuda de países pobres con España por inversión en salud, educación o clima en esos países, con evaluación pública de lo financiado." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "El 0,7 % con senda anual obligatoria, ayuda evaluada por sus resultados y los mismos criterios de derechos para todos, auditados por un órgano independiente.",
+          "medidas": [
+            { "nombre": "Senda obligatoria hasta el 0,7 %", "texto": "Si un presupuesto queda por debajo de la senda anual hasta el 0,7 % de la renta nacional bruta, el Gobierno debe explicarlo y someterlo a un voto expreso del Congreso.", "meta": true },
+            { "nombre": "Evaluación independiente de cada programa", "texto": "Evaluación pública e independiente de cada gran programa: se mantiene lo que demuestra resultados y se cierra lo que no, con cuentas claras frente al desvío de fondos." },
+            { "nombre": "La misma vara para todos los países", "texto": "Los criterios de derechos humanos se aplican igual a aliados y adversarios en comercio, alianzas y venta de armas, y cada excepción se explica en el Congreso." },
+            { "nombre": "Informe de coherencia independiente", "texto": "Informe anual sobre la coherencia entre ayuda, comercio, deuda y venta de armas, elaborado por un órgano independiente y debatido en el Congreso." }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "tema": "ins",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "El tema es neutral, los niveles Indefinido describen bien posturas y no personas, y el Ideal es concreto y está respaldado por la página ideal. Falla en tres cosas: dos aspectos miden casi lo mismo (indultos y gracia colectiva), varios niveles Básico describen lo que ya existe y nadie discute, y la pregunta «¿Funcionan los contrapesos del poder?» deja fuera al Tribunal Constitucional, al Tribunal de Cuentas y al control del Gobierno por el Parlamento.",
+    "problemas": [
+      {
+        "aspecto": 2,
+        "nivel": null,
+        "problema": "«Igualdad ante la ley» y «Convivencia y medidas de gracia» se solapan: los dos hablan de indultos, de amnistía y de dos tercios, así que una misma postura puntúa dos veces y el aspecto 2 en Básico («indultos individuales motivados») queda por debajo de lo que el aspecto 0 pide en Intermedio para lo mismo.",
+        "mejora": "El aspecto 0 trata aforamientos, cumplimiento de sentencias e indulto individual; el aspecto 2 solo las medidas de gracia colectivas por conflictos políticos, con verdad, reparación y mayorías amplias."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "El tema pregunta si funcionan los contrapesos del poder pero no mide el Tribunal Constitucional, el Tribunal de Cuentas, el uso del decreto-ley ni si el Gobierno contesta al Parlamento, que son contrapesos tan importantes como el Consejo General del Poder Judicial.",
+        "mejora": "Se integran en los aspectos existentes: Tribunal Constitucional en independencia judicial, Tribunal de Cuentas en transparencia, decreto-ley y control parlamentario en calidad democrática. A medio plazo, valorar un séptimo aspecto propio."
+      },
+      {
+        "aspecto": null,
+        "nivel": 1,
+        "problema": "Varios niveles Básico son frases que cualquiera suscribe y que describen lo que ya hay: «Que las condenas se cumplan», «Perseguir la corrupción en los tribunales», «Elecciones limpias». No distinguen a quien tiene un plan de quien no lo tiene.",
+        "mejora": "Básico con instrumentos concretos y comprobables: informe anual de sentencias que las administraciones no cumplen, cumplimiento real de la ley de transparencia, decreto-ley solo para urgencias, preguntas parlamentarias contestadas en plazo."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 2,
+        "problema": "Tribunales de instancia y negociación previa al juicio ya están aprobados por ley desde 2025: el nivel Intermedio premia prometer lo que ya está hecho.",
+        "mejora": "Pedir que se apliquen con medios y que se midan sus resultados, y subir de nivel lo que aún falta (expediente digital compatible entre administraciones, juicios cortos para asuntos sencillos)."
+      },
+      {
+        "aspecto": 3,
+        "nivel": 2,
+        "problema": "Usa la sigla CGPJ sin explicarla y apoya el nivel en «como recomienda la Comisión Europea», que es un argumento de autoridad y no una medida.",
+        "mejora": "Escribir «Consejo General del Poder Judicial» y decir la medida: al menos la mitad de sus vocales elegidos por los propios jueces, con concursos de méritos públicos para los altos cargos."
+      },
+      {
+        "aspecto": 5,
+        "nivel": 3,
+        "problema": "«Una reforma electoral pactada por todos» exige unanimidad, más que el Ideal («consenso amplio»), y «listas más abiertas» (Intermedio) y «listas desbloqueadas» (Ideal) no se distinguen.",
+        "mejora": "Avanzado pide consenso amplio y el Ideal lo blinda con dos tercios; Intermedio, voto preferente dentro de la lista; Ideal, libertad para ordenar a los candidatos."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 3,
+        "problema": "Avanzado habla de jueces por habitante «en la media europea» y el Ideal de «la mediana europea»: dos indicadores distintos para la misma meta.",
+        "mejora": "Usar en los dos la mediana europea que publica el Consejo de Europa, que no se deforma por los países con cifras muy altas."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Igualdad ante la ley",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta, o con una vara distinta según quién sea el condenado: comprensión o descrédito del tribunal cuando es de los propios.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice nada sobre aforamientos, indultos ni cumplimiento de sentencias: deja todo como está sin explicar si le parece justo." },
+            { "nombre": "Doble vara según el condenado", "texto": "Pide dureza para los delitos del adversario y comprensión, indulto o ataques al tribunal cuando el condenado es afín, sea cual sea su causa." },
+            { "nombre": "Sentencias que se cumplen a medias", "texto": "Acepta que una administración retrase o ignore una sentencia firme que le resulta incómoda, o lo presenta como una forma legítima de hacer política." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Las sentencias firmes se cumplen en plazo, también las que obligan a una administración, y los condenados con cargo no tienen trato aparte.",
+          "medidas": [
+            { "nombre": "Sentencias contra la administración, en plazo", "texto": "Estado, comunidades y ayuntamientos cumplen las sentencias firmes en el plazo que fija el juez; si no, el responsable paga multas personales hasta que se cumpla." },
+            { "nombre": "Informe anual de sentencias pendientes", "texto": "El Consejo General del Poder Judicial publica cada año qué sentencias contra administraciones siguen sin cumplirse, desde cuándo y qué órgano es responsable." },
+            { "nombre": "Misma cárcel para todos", "texto": "Quien ha tenido un cargo público cumple la pena con las mismas reglas de permisos y semilibertad que cualquiera; los cambios de régimen de condenados por corrupción se publican motivados." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Cada indulto, motivado y publicado con sus informes; nunca a favor de quien gobierna o de quien le da apoyo, y menos fueros especiales.",
+          "medidas": [
+            { "nombre": "Indulto motivado y publicado", "texto": "Cada indulto se publica con su motivación, los informes del tribunal que condenó y de la fiscalía y la pena que se perdona, en un registro público consultable." },
+            { "nombre": "Sin indulto a los propios", "texto": "La ley prohíbe indultar a miembros o exmiembros del Gobierno y a cargos de los partidos que lo sostienen en el Parlamento." },
+            { "nombre": "Abstención del ministro con interés", "texto": "El ministro con relación personal, profesional o de partido con el condenado no participa en la deliberación del indulto, y su ausencia consta en el acta." },
+            { "nombre": "Fin del fuero especial autonómico", "texto": "Las comunidades que aún dan tribunal especial a sus diputados y consejeros lo suprimen en su Estatuto, como ya han hecho varias comunidades.", "fuente": "https://commission.europa.eu/document/download/2bd09a6f-ef56-494a-8303-e0de808ee981_es" }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Ningún indulto por corrupción, un órgano independiente informa toda medida de gracia y el Parlamento no puede bloquear un proceso sin motivo.",
+          "medidas": [
+            { "nombre": "Ningún indulto por corrupción", "texto": "La ley excluye del indulto la malversación, el soborno, el tráfico de influencias y cualquier delito cometido desde un cargo público." },
+            { "nombre": "Informe de una comisión de gracia independiente", "texto": "Antes de cada indulto informa una comisión ajena al Gobierno; si el Gobierno se aparta de su criterio, debe explicarlo por escrito ante el Congreso." },
+            { "nombre": "Permiso para procesar sin bloqueo", "texto": "El permiso del Congreso o del Senado para procesar a un parlamentario se vota en un plazo fijo y solo se niega si se motiva que la causa es una persecución política." },
+            { "nombre": "Indulto recurrible", "texto": "La ley permite recurrir un indulto ante el Tribunal Supremo por falta de motivación o de requisitos, y a las víctimas ser parte en ese recurso." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Fuero especial solo por actos del cargo, ningún indulto sin aval independiente y ninguna gracia colectiva sin dos tercios: la ley obliga igual a todos.",
+          "medidas": [
+            { "nombre": "Fuero solo por actos del cargo", "texto": "Reforma constitucional: diputados, senadores y Gobierno solo tienen tribunal especial por lo que hacen en el ejercicio del cargo; por lo demás, el juez de cualquier vecino." },
+            { "nombre": "Sin aval independiente no hay indulto", "texto": "Sin informe favorable de la comisión de gracia, con mayoría de jueces sorteados y juristas, y del tribunal que condenó, el Gobierno no puede indultar." },
+            { "nombre": "Gracia colectiva solo por dos tercios", "texto": "Cualquier medida de gracia para muchas personas exige ley aprobada por dos tercios del Congreso, sin urgencia y aplicada caso por caso por los jueces." },
+            { "nombre": "Evaluación anual del uso del perdón", "texto": "Informe anual al Congreso con todos los indultos, si se ajustaron a los criterios de la ley y cuántos beneficiados volvieron a delinquir." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Justicia rápida y con medios",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin plan para los retrasos, promesas sin dinero, o la lentitud usada como excusa para saltarse la justicia.",
+          "medidas": [
+            { "nombre": "Sin plan para los retrasos", "texto": "No propone medios, plazos ni cambios en la organización de los juzgados; trata la lentitud de la justicia como algo inevitable." },
+            { "nombre": "Promesas sin financiar", "texto": "Anuncia más jueces o juicios más rápidos sin calendario, sin presupuesto y sin acuerdo con las comunidades que pagan los medios de los juzgados." },
+            { "nombre": "Justicia por la propia mano", "texto": "Presenta la lentitud como excusa para ignorar resoluciones, cobrar o desalojar por la fuerza o declarar culpables fuera de los tribunales." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Ningún juzgado parado por falta de personas o de medios: plazas cubiertas, sustituciones rápidas e informática que funcione.",
+          "medidas": [
+            { "nombre": "Cubrir todas las vacantes", "texto": "Estado y comunidades convocan cada año las plazas libres de jueces, fiscales, letrados y funcionarios, sin dejar juzgados con puestos vacíos durante meses." },
+            { "nombre": "Sustitutos sin parar el juzgado", "texto": "Cuando un juez o un funcionario se va de baja o cambia de destino, una bolsa de sustitutos preparada cubre el puesto para que los asuntos no se detengan." },
+            { "nombre": "Medios materiales básicos", "texto": "Salas suficientes, videoconferencia y programas informáticos que funcionen en todos los juzgados; cada comunidad publica el estado de los suyos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "La nueva organización en tribunales de instancia y la negociación previa al juicio se aplican con medios; el expediente es digital en todo el país.",
+          "medidas": [
+            { "nombre": "Tribunales de instancia con medios", "texto": "Aplicar con personal y presupuesto la ley de 2025 que agrupa los juzgados en tribunales de instancia, para repartir el trabajo entre jueces y compartir oficina.", "fuente": "https://web.icam.es/ley-organica-1-2025-de-2-de-enero-de-medidas-en-materia-de-eficiencia-del-servicio-publico-de-justicia/" },
+            { "nombre": "Negociación previa con mediadores gratuitos", "texto": "La negociación o mediación antes del pleito civil, que ya exige esa ley, se hace con mediadores acreditados y gratuitos para quien tiene derecho a justicia gratuita.", "fuente": "https://web.icam.es/ley-organica-1-2025-de-2-de-enero-de-medidas-en-materia-de-eficiencia-del-servicio-publico-de-justicia/" },
+            { "nombre": "Expediente digital compatible", "texto": "Todo el procedimiento en formato digital, y los sistemas del Estado y de las comunidades se entienden entre sí: abogado y ciudadano consultan su asunto en línea." },
+            { "nombre": "Juicios cortos para asuntos sencillos", "texto": "Procedimientos breves y orales para reclamaciones pequeñas, de consumo o de tráfico, con sentencia en la misma vista cuando sea posible." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Plazos máximos por ley para cada tipo de pleito, datos abiertos por juzgado y plantilla de jueces camino de la mediana europea.",
+          "medidas": [
+            { "nombre": "Plazo máximo por tipo de procedimiento", "texto": "La ley fija un plazo máximo para cada tipo de asunto y cada instancia, que se revisa cada cuatro años con la duración real medida.", "meta": true },
+            { "nombre": "Datos públicos por juzgado", "texto": "Duración, asuntos pendientes y resoluciones de cada juzgado, en datos abiertos y cada trimestre, para comparar y decidir dónde reforzar." },
+            { "nombre": "Camino a la mediana europea de jueces", "texto": "Calendario de convocatorias para alcanzar la mediana europea de jueces por habitante que mide el Consejo de Europa; España está hoy por debajo de ella.", "fuente": "https://rm.coe.int/spain/1680b1df89" },
+            { "nombre": "Oficina judicial profesional", "texto": "Letrados y gestores llevan el trámite y la organización con objetivos medibles, y el juez dedica su tiempo a juzgar." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "El plazo es un derecho: si se incumple, refuerzo automático del juzgado y compensación al ciudadano; plantilla ligada por ley a la carga de trabajo.",
+          "medidas": [
+            { "nombre": "Compensación por retraso", "texto": "Cada año de retraso no causado por las partes da derecho a una compensación tasada, pagada por la Administración tras una simple queja ante el propio tribunal." },
+            { "nombre": "Refuerzo automático del juzgado", "texto": "El juzgado que supera el plazo en una parte fijada de sus asuntos recibe jueces y personal de refuerzo sin esperar a una decisión política." },
+            { "nombre": "Plantilla fijada por ley", "texto": "El número de jueces se liga por ley a la mediana europea y a la carga de trabajo, con convocatorias a diez años y financiación pactada entre Estado y comunidades.", "meta": true },
+            { "nombre": "Rapidez sin perder calidad", "texto": "Se publica por juzgado qué parte de sus sentencias se revoca en recurso, para que el plazo no empuje a resolver deprisa y peor." },
+            { "nombre": "Mediación que se evalúa", "texto": "La negociación previa se mide por tipo de asunto y se retira allí donde no reduce los pleitos ni acorta los plazos." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Convivencia y medidas de gracia",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin criterio sobre el perdón por hechos de un conflicto político, o impunidad para la causa propia y perdón usado como moneda de cambio.",
+          "medidas": [
+            { "nombre": "Sin criterio propio", "texto": "No dice cuándo ni cómo cabría un perdón por delitos ligados a un conflicto político; lo decide caso a caso según convenga en cada momento." },
+            { "nombre": "Impunidad para la causa propia", "texto": "Justifica los delitos cometidos por la causa que comparte y niega las sentencias, sea cual sea esa causa." },
+            { "nombre": "Perdón a cambio de apoyos", "texto": "Acepta conceder o negar medidas de gracia como pieza de una negociación para formar gobierno o aprobar presupuestos." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cualquier perdón por hechos de un conflicto político es individual, con informe del tribunal y sin borrar la reparación a las víctimas.",
+          "medidas": [
+            { "nombre": "Solo perdón individual", "texto": "Ninguna medida general: cada persona se estudia por separado, con informe del tribunal que condenó y de la fiscalía, por el procedimiento ordinario del indulto." },
+            { "nombre": "Víctimas escuchadas", "texto": "Las víctimas y los perjudicados son oídos antes de cualquier perdón y pueden presentar alegaciones por escrito." },
+            { "nombre": "La reparación no se perdona", "texto": "El perdón de la pena nunca borra la obligación de devolver lo apropiado o de indemnizar el daño causado." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "El perdón exige un compromiso escrito de actuar dentro de la ley, es revocable y se tramita aparte de cualquier negociación de gobierno.",
+          "medidas": [
+            { "nombre": "Compromiso escrito de legalidad", "texto": "Quien recibe la gracia se compromete por escrito a perseguir sus fines solo por vías legales; no se le pide renunciar a sus ideas." },
+            { "nombre": "Perdón condicional y revocable", "texto": "El beneficio queda sujeto a no volver a delinquir por la misma causa durante un plazo; si ocurre, un tribunal lo revoca y la pena se cumple." },
+            { "nombre": "Fuera de los pactos de gobierno", "texto": "Ninguna medida de gracia figura en un acuerdo de investidura o de presupuestos; si se plantea, se tramita aparte y en público." },
+            { "nombre": "Sin vía de urgencia", "texto": "Toda medida que afecte a varias personas sigue el trámite ordinario, con informes del Consejo de Estado y del Consejo General del Poder Judicial." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Reconciliación con verdad y reparación, para hechos acotados y pactada por mayorías que incluyan a ambos lados del conflicto.",
+          "medidas": [
+            { "nombre": "Mayoría que incluya a los dos lados", "texto": "Una medida colectiva necesita el apoyo de grupos que representen a votantes de lados distintos del conflicto, no solo de la mayoría que gobierna." },
+            { "nombre": "Reconocimiento de los hechos", "texto": "Quien se acoge reconoce ante un órgano independiente lo que hizo; el relato queda archivado y sirve para que se conozca la verdad." },
+            { "nombre": "Fondo de reparación a las víctimas", "texto": "Un fondo público, con aportación de quienes se acogen según su capacidad, repara a las víctimas; ellas participan en cómo se decide." },
+            { "nombre": "Ámbito acotado", "texto": "Hechos y fechas definidos y con relación directa con el conflicto; quedan fuera las violaciones graves de derechos humanos y la corrupción para lucro propio." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una ley marco previa a cualquier caso: dos tercios, sin urgencia, con audiencia pública, aplicada por jueces y con seguimiento público.",
+          "medidas": [
+            { "nombre": "Ley marco previa a los casos", "texto": "Ley orgánica que fija de antemano mayoría, procedimiento y condiciones para cualquier conflicto futuro, igual para todos y aprobada sin un caso concreto encima de la mesa." },
+            { "nombre": "Dos tercios en la Constitución", "texto": "Aprobación por dos tercios del Congreso, regla que se lleva a la Constitución; mientras tanto, compromiso público de los grupos de no aprobar gracia colectiva con menos apoyo." },
+            { "nombre": "Audiencia pública previa", "texto": "Antes de votar se escucha en público a víctimas, juristas y órganos consultivos, y sus informes se publican junto al texto." },
+            { "nombre": "Jueces que aplican caso por caso", "texto": "Son los jueces quienes deciden quién cumple los requisitos; las víctimas pueden recurrir y conservan su derecho a ser indemnizadas." },
+            { "nombre": "Seguimiento público del resultado", "texto": "Un informe periódico dice cuántas personas se acogieron, cuántas repararon el daño y cuántas incumplieron, para saber si el conflicto se cerró de verdad." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Independencia judicial",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre quién gobierna a los jueces, o defensa de que la mayoría del momento controle a jueces y fiscales.",
+          "medidas": [
+            { "nombre": "Sin propuesta sobre el gobierno de los jueces", "texto": "Acepta el bloqueo de los órganos judiciales o el reparto de sus puestos por cuotas de partido como algo normal." },
+            { "nombre": "Jueces y fiscales al servicio de la mayoría", "texto": "Defiende que el Gobierno o la mayoría parlamentaria decidan nombramientos y sanciones de jueces o den órdenes a los fiscales en casos concretos." },
+            { "nombre": "Señalar a jueces por sus sentencias", "texto": "Ataca en público a jueces con nombre y apellidos por resolver en contra, en lugar de recurrir o criticar con argumentos la resolución." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Los órganos de gobierno de los jueces y el Tribunal Constitucional se renuevan a tiempo, y ningún juez queda solo ante la presión.",
+          "medidas": [
+            { "nombre": "Renovación en plazo", "texto": "El Consejo General del Poder Judicial y el Tribunal Constitucional se renuevan cuando vence el mandato; si no hay acuerdo, el Parlamento vota en cada periodo de sesiones hasta lograrlo." },
+            { "nombre": "Consejo caducado con poderes limitados", "texto": "Mientras el Consejo tiene el mandato vencido, no hace nombramientos de libre elección y se limita a la gestión ordinaria." },
+            { "nombre": "Amparo al juez presionado", "texto": "El Consejo General del Poder Judicial defiende en público a cualquier juez presionado o señalado, venga de donde venga la presión." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Al menos la mitad de los vocales del Consejo, elegidos por los propios jueces; altos cargos por concurso de méritos público.",
+          "medidas": [
+            { "nombre": "Jueces que eligen a jueces", "texto": "Al menos la mitad de los vocales del Consejo General del Poder Judicial, elegidos por los propios jueces, como fija la recomendación del Consejo de Europa sobre los jueces.", "fuente": "https://rm.coe.int/16807096c1" },
+            { "nombre": "Concurso de méritos para altos cargos", "texto": "Magistrados del Tribunal Supremo y presidentes de tribunales se nombran por concurso con baremo público, resolución motivada y posibilidad de recurso." },
+            { "nombre": "Espera entre política y juzgado", "texto": "El juez que ocupa un cargo político espera un periodo antes de volver a juzgar y no lleva asuntos de su antiguo partido o gobierno." },
+            { "nombre": "Órdenes a la Fiscalía, por escrito", "texto": "Toda comunicación del Gobierno con el Fiscal General se hace por escrito y se publica; nunca sobre casos concretos en curso." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Elección de los órganos judiciales que no dependa de ninguna mayoría, Tribunal Constitucional sin cuotas y Fiscalía autónoma con medios propios.",
+          "medidas": [
+            { "nombre": "Voto directo de todos los jueces", "texto": "Todos los vocales judiciales los eligen los jueces en activo por voto directo y secreto, con candidaturas avaladas por compañeros y no solo por asociaciones." },
+            { "nombre": "Juristas elegidos tras examen público", "texto": "Los vocales juristas los elige el Parlamento por tres quintos, tras una comparecencia pública en la que se examinan sus méritos y su independencia." },
+            { "nombre": "Tribunal Constitucional sin cuotas", "texto": "Los candidatos al Tribunal Constitucional comparecen en público, un comité de expertos informa de su idoneidad y no pueden haber tenido cargo político reciente." },
+            { "nombre": "Fiscalía con presupuesto propio", "texto": "La Fiscalía gestiona su propio presupuesto y su plantilla, sometida al control ordinario del Tribunal de Cuentas y del Parlamento." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Vocales judiciales elegidos por todos los jueces con un voto plural, desbloqueo por sorteo y un Fiscal General con mandato único y largo.",
+          "medidas": [
+            { "nombre": "Voto que asegura pluralidad", "texto": "Sistema de voto proporcional o limitado que impide que una sola asociación o corriente ocupe todos los puestos, con presencia de todas las categorías de la carrera." },
+            { "nombre": "Sorteo si hay bloqueo", "texto": "Si pasan seis meses sin acuerdo para elegir a los vocales juristas, se sortean entre los candidatos ya declarados idóneos.", "meta": true },
+            { "nombre": "Fiscal General con mandato único y largo", "texto": "Mandato único que no coincide con la legislatura, sin cargo político reciente, cese solo por causas fijadas en la ley y rendición de cuentas ante el Parlamento." },
+            { "nombre": "Nombramiento fiscal fuera del Gobierno", "texto": "Reforma constitucional para que el Fiscal General no lo proponga el Gobierno, sino el Parlamento por mayoría reforzada tras un concurso público." },
+            { "nombre": "Responsabilidad sin control político", "texto": "Inspección y expedientes disciplinarios de jueces y fiscales con datos públicos y anonimizados, para que la independencia no se convierta en opacidad." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Transparencia y lucha contra la corrupción",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin medidas, o con indignación solo ante la corrupción ajena y defensa de la opacidad cuando afecta a los propios.",
+          "medidas": [
+            { "nombre": "Sin propuesta contra la corrupción", "texto": "Condena casos concretos, casi siempre ajenos, pero no propone ningún instrumento para prevenirlos, detectarlos o castigarlos." },
+            { "nombre": "Ataque a quien investiga", "texto": "Resta importancia a los casos propios y desacredita a periodistas, jueces, policías o denunciantes que los sacan a la luz." },
+            { "nombre": "Opacidad defendida", "texto": "Se opone a publicar agendas, contratos, reuniones o las cuentas de partidos y de sus fundaciones." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Las leyes de transparencia que ya existen se cumplen, las cuentas de los partidos se revisan a tiempo y las causas de corrupción tienen medios.",
+          "medidas": [
+            { "nombre": "Cumplir la ley de transparencia", "texto": "Todas las administraciones publican lo que la ley ya les exige y contestan en plazo a las solicitudes de información; el órgano de transparencia puede sancionar a quien no lo haga." },
+            { "nombre": "Cuentas de partidos revisadas a tiempo", "texto": "El Tribunal de Cuentas revisa las cuentas de partidos y fundaciones en un plazo corto y publica sus informes, para que las irregularidades no prescriban." },
+            { "nombre": "Medios para investigar la corrupción", "texto": "Fiscales, peritos de Hacienda y policías especializados suficientes para las causas de corrupción, de modo que no se alarguen por falta de quien las estudie." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Registro obligatorio de grupos de presión, agendas públicas, contratos en abierto y protección real de quien denuncia.",
+          "medidas": [
+            { "nombre": "Registro obligatorio de grupos de interés", "texto": "Quien intenta influir en una decisión pública se inscribe gratis y declara cada cierto tiempo a quién contactó y para qué; si no lo hace, se le sanciona." },
+            { "nombre": "Agendas públicas", "texto": "Ministros, altos cargos y diputados publican su agenda de reuniones con nombre de los asistentes y asunto, en formato abierto." },
+            { "nombre": "Protección real del denunciante", "texto": "Aplicar con medios la ley de 2023 que protege a quien informa de infracciones y su autoridad independiente: canales seguros en toda administración y empresa obligada.", "fuente": "https://www.boe.es/eli/es/l/2023/02/20/2" },
+            { "nombre": "Contratos y subvenciones en abierto", "texto": "Todos los contratos y subvenciones de Estado, comunidades y ayuntamientos en una plataforma única, con datos abiertos que cualquiera puede descargar y cruzar." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una autoridad anticorrupción independiente que investiga, la huella de quién influyó en cada ley y el dueño real de quien contrata con lo público.",
+          "medidas": [
+            { "nombre": "Autoridad de integridad independiente", "texto": "Organismo independiente del Gobierno, con dirección elegida por mayoría reforzada, que investiga, revisa las declaraciones de bienes de los cargos y propone sanciones." },
+            { "nombre": "Huella de cada ley", "texto": "Junto a cada ley se publica la lista de reuniones, documentos recibidos y cambios introducidos desde el primer borrador." },
+            { "nombre": "Conflictos de interés fuera del ministerio", "texto": "El control de incompatibilidades de los altos cargos pasa a la autoridad independiente; el Consejo de Europa lo sigue pidiendo a España.", "fuente": "https://rm.coe.int/grecorc5-2025-17-final-eng-add-to-2nd-compliance-report-spain-public/1680b6ce89" },
+            { "nombre": "Dueño real de quien contrata", "texto": "Ninguna empresa contrata ni recibe subvenciones sin declarar en un registro público quién es su dueño real, la persona que la controla de verdad." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Todo contacto para influir en una norma, contrato o subvención, publicado con la decisión; autoridad con presupuesto propio que sanciona.",
+          "medidas": [
+            { "nombre": "Huella de toda decisión con dinero público", "texto": "No solo las leyes: contratos, subvenciones y nombramientos publican quién intervino y qué contactos hubo, incluidos los de los asesores." },
+            { "nombre": "Autoridad que sanciona con presupuesto propio", "texto": "La autoridad de integridad tiene presupuesto fijado por ley para varios años y puede sancionar ella misma, sin depender de un ministerio." },
+            { "nombre": "Puertas giratorias vigiladas", "texto": "Periodo de espera al dejar el cargo antes de trabajar para empresas del sector que se regulaba, autorizado y vigilado por la autoridad independiente." },
+            { "nombre": "Denunciante resarcido", "texto": "Quien denuncia y sufre represalias recibe defensa jurídica gratuita y una compensación, y quien tomó represalias responde por ello." },
+            { "nombre": "Transparencia automática", "texto": "Agendas, contratos y declaraciones se publican solos en pocos días y en formato abierto, sin que nadie tenga que pedirlos." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Participación y calidad democrática",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre cómo se vota y se controla al Gobierno, o dudas sin pruebas sobre las elecciones y desprecio por el Parlamento.",
+          "medidas": [
+            { "nombre": "Sin propuesta de participación", "texto": "No dice nada sobre la ley electoral, el control del Gobierno ni la voz de la ciudadanía entre elecciones." },
+            { "nombre": "Fraude sin pruebas", "texto": "Pone en duda la limpieza de las elecciones sin aportar pruebas ante la administración electoral o los tribunales, o se niega a aceptar el resultado." },
+            { "nombre": "Saltarse al Parlamento", "texto": "Defiende gobernar a golpe de decreto, convocar consultas improvisadas sin garantías o ignorar a las instituciones representativas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Elecciones limpias y accesibles, debates garantizados y un Parlamento que controla de verdad al Gobierno.",
+          "medidas": [
+            { "nombre": "Votar desde fuera sin trabas", "texto": "Plazos y trámites que permitan votar a quien vive en el extranjero o no puede ir al colegio electoral, con recuento auditado por la administración electoral." },
+            { "nombre": "Debates electorales por ley", "texto": "Debates obligatorios en los medios públicos en cada elección general, con reglas de participación fijadas por la Junta Electoral y no por los partidos." },
+            { "nombre": "Decreto-ley solo para urgencias", "texto": "El Gobierno usa el decreto-ley solo ante urgencias reales y sin mezclar materias distintas en un mismo texto, para que el Congreso pueda votar cada cosa por separado." },
+            { "nombre": "Preguntas al Gobierno contestadas", "texto": "Las preguntas escritas de los diputados se contestan en plazo y con contenido real; el Congreso publica cuáles quedan sin respuesta." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Iniciativas populares más fáciles y que no caducan, voto preferente dentro de la lista y consultas locales con reglas.",
+          "medidas": [
+            { "nombre": "Firmas digitales para iniciativas", "texto": "Las iniciativas legislativas populares recogen firmas por internet con identificación oficial, sin coste para los promotores." },
+            { "nombre": "Iniciativas que no caducan", "texto": "Una iniciativa popular admitida no se pierde al acabar la legislatura y se debate en el Pleno, con sus promotores presentándola." },
+            { "nombre": "Voto preferente en la lista", "texto": "El votante puede marcar a un candidato preferido dentro de la lista que elige; quien reúne suficientes marcas sube en el orden." },
+            { "nombre": "Consultas locales con reglas", "texto": "Leyes autonómicas que dicen quién puede convocar una consulta local, con qué apoyo, con información neutral y si el resultado obliga o no." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Reforma electoral por consenso amplio, asambleas de ciudadanos por sorteo para los grandes temas y campañas con cuentas a la vista.",
+          "medidas": [
+            { "nombre": "Asambleas ciudadanas por sorteo", "texto": "Para los grandes temas, asambleas elegidas por sorteo equilibrado en edad, sexo, territorio y estudios, con dieta, permiso laboral, expertos de posiciones opuestas y sesiones públicas." },
+            { "nombre": "Reforma electoral por consenso amplio", "texto": "La ley electoral se revisa con una comisión de expertos y todos los grupos, y solo se cambia con un apoyo mucho mayor que la mayoría de gobierno." },
+            { "nombre": "Cuentas de campaña a la vista", "texto": "Donaciones, préstamos y gastos de campaña se publican durante la propia campaña y no meses después." },
+            { "nombre": "Administración electoral reforzada", "texto": "Las juntas electorales tienen personal permanente y propio para vigilar campañas, financiación y propaganda, y resolver quejas en días." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un consejo ciudadano sorteado fija temas y obliga al Congreso a responder; listas desbloqueadas y reglas del juego solo por dos tercios.",
+          "medidas": [
+            { "nombre": "Consejo ciudadano permanente", "texto": "Un consejo elegido por sorteo y renovado por partes decide cada año qué temas se llevan a una asamblea ciudadana, como en la comunidad germanófona de Bélgica.", "fuente": "https://www.futuregenerations.be/files/documents/news/20190226_dgpermanentcitizensassembly_pressrelease.pdf" },
+            { "nombre": "Respuesta obligada en plazo", "texto": "El Congreso estudia cada recomendación en comisión, el Gobierno responde por escrito cuál acepta y por qué, y el Pleno vota en un plazo máximo de un año.", "meta": true },
+            { "nombre": "Listas desbloqueadas", "texto": "El votante puede ordenar a los candidatos dentro de la lista que elige, no solo marcar a uno." },
+            { "nombre": "Reglas del juego por dos tercios", "texto": "La ley electoral y la de consultas solo se cambian por dos tercios del Congreso, para que ninguna mayoría ajuste las reglas a su favor." },
+            { "nombre": "Firmas ligadas al censo", "texto": "El mínimo de firmas para una iniciativa popular se fija como proporción del censo y no como cifra fija, lo que exige reformar la Constitución." }
+          ]
+        }
+      ]
+    }
+  ]
+}

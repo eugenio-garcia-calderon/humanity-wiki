@@ -1,0 +1,401 @@
+{
+  "tema": "eco",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "El tema está bien orientado: cada aspecto sube de verdad desde «no tener cuentas» hasta un ideal concreto y respaldado por ejemplos de otros países. Falla en tres cosas: un aspecto lleva en el nombre una dirección política («bajar impuestos») y se pisa con Equidad fiscal; varios niveles intermedios son una sola frase vaga o repiten el anterior; y todo mira al Estado central, sin comunidades ni ayuntamientos, ni contratación pública. Hay siglas sin explicar (AIReF, IRPF, PIB).",
+    "problemas": [
+      {
+        "aspecto": 2,
+        "nivel": null,
+        "problema": "El nombre «Bajar impuestos y competir» ya da por buena una dirección, mientras Equidad fiscal da la contraria; quien quiere recaudar más no tiene una escalera neutral, y los dos Ideales casi coinciden («base ancha», «a igual renta, igual impuesto»).",
+        "mejora": "Renombrarlo a «Diseño de los impuestos» (sencillez, previsibilidad y competitividad) y dejar el reparto de la carga solo en Equidad fiscal, para que cada medida esté en un único aspecto."
+      },
+      {
+        "aspecto": 0,
+        "nivel": 2,
+        "problema": "Básico («cumplir las reglas europeas») e Intermedio («senda pactada vigilada por la AIReF») son casi lo mismo, porque las reglas europeas reformadas en 2024 ya piden un plan de gasto a varios años vigilado por la autoridad fiscal.",
+        "mejora": "Básico: presupuestos en plazo, plan europeo cumplido y comunidades y ayuntamientos con su límite. Intermedio: previsiones de ingresos independientes, coste de cada ley nueva y gestión prudente de la deuda."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 3,
+        "problema": "El Avanzado de Pymes es una sola medida (medir el coste de cada norma), más estrecha que el Intermedio, que trae tres: el listón no sube y falta el problema central, que las empresas pequeñas no crecen.",
+        "mejora": "Avanzado con prueba de impacto en pymes revisada por un órgano independiente, regímenes simplificados, fechas fijas de entrada en vigor y un plan para suavizar los umbrales que frenan crecer."
+      },
+      {
+        "aspecto": 4,
+        "nivel": null,
+        "problema": "La contratación pública solo aparece en Indefinido («adjudicar obra por afinidad»): ningún nivel dice cómo se evita ni cómo se mide si un concurso funciona.",
+        "mejora": "Publicación de todos los contratos en datos abiertos en Básico e indicadores de competencia (número de ofertas, sobrecostes, modificados) en Avanzado."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "Todo el tema habla del Estado central: no dice nada de cómo se financian comunidades y ayuntamientos ni de su deuda, aunque gestionan la sanidad, la educación y gran parte de la inversión.",
+        "mejora": "Meter el límite y la vigilancia de comunidades y ayuntamientos en Déficit y deuda, y la coordinación de los impuestos cedidos en Equidad; a medio plazo, un aspecto propio de financiación territorial."
+      },
+      {
+        "aspecto": 3,
+        "nivel": 1,
+        "problema": "«Inspección suficiente» no se puede comprobar: no dice suficiente respecto a qué, ni cómo se sabría que se cumple.",
+        "mejora": "Concretar: plantilla de inspección según un plan plurianual publicado, cobro efectivo de las sanciones firmes y canal de denuncia protegido."
+      },
+      {
+        "aspecto": 5,
+        "nivel": 1,
+        "problema": "«Progresivo y que se aplique de verdad en todos los tramos» es confuso para quien no es experto: no explica qué es progresivo ni qué se escapa hoy.",
+        "mejora": "Decirlo llano: quien más gana paga un porcentaje mayor, se publica el tipo real por tramo y se cierran los huecos que permiten pasar sueldos a sociedades."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "Los textos usan siglas sin explicar (AIReF, IRPF, PIB) en un test pensado para cualquiera.",
+        "mejora": "Explicar cada sigla la primera vez que aparece en cada aspecto: Autoridad Independiente de Responsabilidad Fiscal, impuesto sobre la renta, producto interior bruto."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Déficit y deuda",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin cuentas aprobadas ni reglas: se gasta sin plan, se ignoran los compromisos europeos o se plantea no pagar la deuda.",
+          "medidas": [
+            { "nombre": "Presupuestos prorrogados por sistema", "texto": "Gobernar años seguidos con los presupuestos prorrogados, sin presentar unas cuentas nuevas al Parlamento ni explicar en qué cambia el gasto." },
+            { "nombre": "Reglas fiscales como papel mojado", "texto": "Tratar los compromisos de déficit y deuda con la Unión Europea como opcionales, sin plan para cumplirlos ni explicación cuando se incumplen." },
+            { "nombre": "Impago o promesas sin financiar", "texto": "Defender que la deuda pública no se devuelva, o prometer gasto nuevo sin decir con qué ingresos se paga ni cuánto aumenta la deuda." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cuentas en regla: presupuestos aprobados a tiempo, compromisos europeos cumplidos y datos de déficit y deuda publicados sin retraso.",
+          "medidas": [
+            { "nombre": "Presupuesto en plazo cada año", "texto": "El Gobierno presenta los presupuestos al Congreso en el plazo que fija la Constitución y negocia para aprobarlos; la prórroga es la excepción, no la costumbre." },
+            { "nombre": "Plan fiscal europeo cumplido", "texto": "España presenta y cumple el plan fiscal a medio plazo acordado con la Unión Europea, que fija cuánto puede crecer el gasto cada año; si se desvía, lo corrige en el presupuesto siguiente." },
+            { "nombre": "Comunidades y ayuntamientos también", "texto": "Las comunidades autónomas y los ayuntamientos tienen su propio límite de déficit y deuda, y el Estado avisa y exige un plan de corrección a quien se desvía, como prevé la ley de estabilidad presupuestaria." },
+            { "nombre": "Cuentas publicadas cada mes", "texto": "Hacienda publica cada mes el déficit del Estado, las comunidades, los ayuntamientos y la Seguridad Social en datos abiertos y comparables, para que cualquiera vea si se cumple el plan." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Una senda de deuda a varios años, pactada en el Congreso y vigilada por un árbitro independiente con previsiones propias.",
+          "medidas": [
+            { "nombre": "Senda de deuda votada en el Congreso", "texto": "Al inicio de la legislatura el Congreso aprueba una senda de déficit y deuda a varios años para todas las administraciones; el Gobierno solo puede cambiarla explicándolo en el Pleno." },
+            { "nombre": "Previsiones de ingresos independientes", "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) revisa las previsiones de ingresos del Gobierno; si no las avala, el presupuesto usa las suyas o justifica por escrito la diferencia." },
+            { "nombre": "Coste de cada ley nueva", "texto": "Toda ley que suba el gasto o baje ingresos lleva una memoria de su coste a varios años, revisada por la AIReF antes de votarse, que dice cómo se financia." },
+            { "nombre": "Gestión prudente de la deuda", "texto": "El Tesoro alarga los plazos de la deuda y reparte sus vencimientos, y el presupuesto muestra cuánto se paga en intereses y cuánto subiría si suben los tipos de interés." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una regla que mira el ciclo: ahorra en los años buenos, deja actuar en los malos y hace bajar la deuda cada año respecto a lo que produce el país.",
+          "medidas": [
+            { "nombre": "Regla de gasto anticíclica", "texto": "El gasto solo crece al ritmo de la economía a medio plazo, no al de los ingresos de un año de bonanza; lo que entra de más en esos años reduce deuda." },
+            { "nombre": "Deuda a la baja cada año", "texto": "Objetivo legal de que la deuda baje cada año en proporción al producto interior bruto (PIB, lo que produce el país), salvo en recesión; si no ocurre, el Gobierno informa al Congreso.", "meta": true },
+            { "nombre": "Ingresos extraordinarios a reducir deuda", "texto": "Lo que entra sin esperarlo (una bonanza puntual, la venta de una participación pública) se destina por ley a bajar deuda, no a crear gasto permanente." },
+            { "nombre": "Estabilizadores que actúan solos", "texto": "El paro y otros gastos que suben en las crisis funcionan sin aprobar nada nuevo, y la regla no obliga a recortarlos cuando la economía cae." },
+            { "nombre": "Informe anual de riesgos fiscales", "texto": "El Gobierno publica cada año los riesgos que no se ven en el déficit: avales concedidos, pleitos pendientes, empresas públicas y gasto futuro en pensiones, con lo que costarían si salieran mal." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un freno de deuda en la ley, calculado con los ingresos de un año normal, con hucha para las crisis y cada desvío devuelto con plazo.",
+          "medidas": [
+            { "nombre": "Techo con los ingresos de un año normal", "texto": "El techo de gasto se calcula con los ingresos estructurales (los de un año sin bonanza ni crisis), lo valida la AIReF con método público, se fija a tres años y nunca se cumple bajando la inversión de su suelo legal." },
+            { "nombre": "Cuenta de compensación y hucha", "texto": "Cada exceso sobre el techo se apunta en una cuenta y se devuelve en los años siguientes con plazo legal; lo que sobra en los años buenos va a una hucha que solo se usa en crisis." },
+            { "nombre": "Ancla de deuda con pacto amplio", "texto": "Objetivo de deuda a largo plazo aprobado por mayoría amplia, con una transición larga desde la deuda actual y revisado cada dos legislaturas por una comisión con todos los grupos.", "meta": true },
+            { "nombre": "Cláusula de emergencia con devolución", "texto": "En pandemias o catástrofes se puede superar el techo, pero hay que votarlo en el Congreso y la ley fija el calendario para devolver lo gastado de más." },
+            { "nombre": "Programas electorales con su coste", "texto": "Antes de cada elección, la AIReF calcula y publica el efecto en las cuentas del programa de cada candidatura que lo pida, sin opinar sobre sus prioridades." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Pymes y autónomos",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta para las empresas pequeñas, o aceptar que la Administración les pague tarde y les pida los mismos papeles una y otra vez.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No tener ninguna medida para pymes y autónomos más allá de mensajes de apoyo, sin decir qué trámite, cuota o plazo cambiaría." },
+            { "nombre": "Morosidad pública aceptada", "texto": "Dar por normal que ayuntamientos, comunidades o el Estado paguen sus facturas meses tarde y sin intereses, cargando su falta de liquidez sobre la pequeña empresa." },
+            { "nombre": "Normas sin pensar en el pequeño", "texto": "Aprobar las mismas obligaciones para una gran empresa que para un autónomo, sin medir cuánto le cuesta a cada uno cumplirlas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "La Administración cumple lo que exige: paga en plazo, pide menos papeles y deja hacer todos los trámites por internet.",
+          "medidas": [
+            { "nombre": "Pago en el plazo legal", "texto": "Todas las administraciones pagan sus facturas en el plazo que marca la ley y publican cada mes su periodo medio de pago; la que se pasa queda señalada y presenta un plan." },
+            { "nombre": "Todos los trámites por internet", "texto": "Cualquier trámite de una pyme con el Estado, la comunidad o el ayuntamiento puede hacerse por internet con una única identificación digital." },
+            { "nombre": "Abrir con declaración responsable", "texto": "En las actividades de bajo riesgo, la licencia previa se sustituye por una declaración del titular, y la inspección llega después, no antes de abrir." },
+            { "nombre": "Guía oficial de obligaciones", "texto": "Una página oficial dice, según la actividad y el tamaño, qué obligaciones fiscales, laborales y de seguridad tiene la empresa, con fecha de última revisión." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Las cargas se ajustan al tamaño real: cuota según ingresos, una sola ventanilla entre administraciones y financiación para crecer.",
+          "medidas": [
+            { "nombre": "Cuota según ingresos reales", "texto": "El autónomo cotiza según su rendimiento neto real, que la Seguridad Social regulariza cada año con los datos de Hacienda: quien gana poco, paga poco." },
+            { "nombre": "Ventanilla única entre administraciones", "texto": "Un solo punto, físico y digital, donde la empresa hace los trámites de Estado, comunidad y ayuntamiento; son ellos quienes se pasan el expediente." },
+            { "nombre": "Crédito y avales públicos", "texto": "Las entidades públicas de crédito y garantía dan préstamos y avales a pymes viables que la banca no atiende, y publican cada año sus resultados e impagos." },
+            { "nombre": "Segunda oportunidad ágil", "texto": "Un procedimiento rápido y barato para que el autónomo o la pequeña empresa que fracasa de buena fe cierre, se libre de las deudas que no puede pagar y vuelva a empezar." },
+            { "nombre": "Compra pública abierta a pequeños", "texto": "Contratos públicos divididos en lotes, requisitos proporcionados al tamaño del contrato y pago directo a subcontratistas, para que las pymes compitan sin intermediarios." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Cada norma nueva se mide antes por su coste para las empresas pequeñas, y crecer deja de castigarse con saltos de obligaciones.",
+          "medidas": [
+            { "nombre": "Prueba de impacto en pymes", "texto": "Antes de aprobar una ley o reglamento, el ministerio calcula cuánto cuesta cumplirla a una empresa pequeña y propone alternativas más simples; un órgano independiente revisa el cálculo." },
+            { "nombre": "Regímenes simplificados por tamaño", "texto": "Versiones sencillas de la contabilidad, la prevención de riesgos y la protección de datos para las empresas más pequeñas, con el mismo nivel de protección para trabajadores y clientes." },
+            { "nombre": "Fechas fijas de entrada en vigor", "texto": "Las normas que afectan a empresas entran en vigor solo en dos fechas fijas al año y con aviso previo, para que puedan prepararse sin sorpresas.", "meta": true },
+            { "nombre": "Plan para los umbrales que frenan crecer", "texto": "Estudio público de los umbrales de plantilla y facturación que cambian obligaciones de golpe, con un plan para suavizar los que llevan a las empresas a no crecer." },
+            { "nombre": "Revisión de las normas vigentes", "texto": "Revisión periódica, con las asociaciones de pymes y autónomos, de las normas que más cuestan, para retirar o simplificar las que no consiguen su objetivo." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Empresa en un día y por internet, datos pedidos una sola vez, pago público automático con intereses y cuota sobre lo facturado.",
+          "medidas": [
+            { "nombre": "Empresa en un día", "texto": "Registro mercantil y fiscal en línea: constituir, modificar o cerrar una sociedad en un día y sin desplazamientos, con todos los registros públicos conectados.", "meta": true },
+            { "nombre": "Datos pedidos una sola vez", "texto": "Ninguna administración puede pedir a una empresa un dato que ya tenga otra: la ley lo hace exigible y un acuerdo entre Estado, comunidades y ayuntamientos lo hace posible." },
+            { "nombre": "Pago automático con intereses", "texto": "Si una factura pública vence sin pagar, el sistema abona solo los intereses y la compensación por costes de cobro que fija la norma europea, sin que la empresa tenga que reclamar." },
+            { "nombre": "Cuota sobre lo facturado", "texto": "El autónomo cotiza un porcentaje de lo que factura cada mes o trimestre: si no ingresa, no paga, con una cuota mínima voluntaria para mantener su protección." },
+            { "nombre": "Una carga entra, otra sale", "texto": "Quien impone una carga nueva retira otra de coste equivalente, con un contador público de costes y beneficios, y las obligaciones crecen por escalones suaves con el tamaño." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Bajar impuestos y competir",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Cambiar impuestos sin previsión ni financiación: rebajas sin decir quién las paga o cambios por sorpresa que rompen la seguridad jurídica.",
+          "medidas": [
+            { "nombre": "Rebajas sin financiar", "texto": "Prometer bajar impuestos sin decir qué gasto se recorta, qué otro impuesto sube o cuánta deuda nueva se asume para pagarlo." },
+            { "nombre": "Cambios retroactivos o por sorpresa", "texto": "Subir o crear impuestos con efecto sobre años ya cerrados, o con días de aviso, de modo que nadie puede planificar una inversión." },
+            { "nombre": "Impuestos a golpe de coyuntura", "texto": "Crear y quitar impuestos según el momento o el sector que más presiona, sin evaluar su efecto ni dar un horizonte estable." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Impuestos previsibles: sin efectos retroactivos, con aviso previo y sin que la inflación suba lo que se paga sin que nadie lo vote.",
+          "medidas": [
+            { "nombre": "Renta ajustada a la inflación", "texto": "Actualizar los tramos y mínimos del impuesto sobre la renta (IRPF) con la inflación, para que nadie pague más solo porque suben los precios y su sueldo con ellos." },
+            { "nombre": "Sin efectos retroactivos", "texto": "Ninguna subida de impuestos se aplica a hechos ya ocurridos, y los cambios se anuncian con tiempo suficiente antes de entrar en vigor." },
+            { "nombre": "Cada rebaja con su coste", "texto": "Toda propuesta de rebaja va acompañada de su coste estimado por Hacienda y de cómo se financia: menos gasto, otro ingreso o más deuda, dicho con claridad." },
+            { "nombre": "Respuestas de Hacienda rápidas y vinculantes", "texto": "Hacienda responde por escrito, en plazo corto y de forma vinculante, a las dudas de familias y empresas sobre cómo tributa una operación concreta." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Rebajas selectivas y evaluadas donde más rinden: rentas del trabajo bajas y medias, inversión y contratación.",
+          "medidas": [
+            { "nombre": "Alivio a rentas bajas y medias", "texto": "Rebajas concentradas en las rentas del trabajo bajas y medias, por ejemplo una deducción por trabajar que se reduce al subir el sueldo, evaluada a los pocos años." },
+            { "nombre": "Incentivo a invertir", "texto": "La empresa puede descontar antes en el impuesto de sociedades lo que invierte en maquinaria, tecnología e investigación (amortización acelerada)." },
+            { "nombre": "Menos coste al contratar", "texto": "Rebajas de cotizaciones ligadas a contratar a personas con difícil acceso al empleo, evaluadas para saber si crean empleo o solo cambian su etiqueta." },
+            { "nombre": "Rebajas con fecha de evaluación", "texto": "Cada rebaja nace con objetivos medibles y una evaluación pública a los tres o cuatro años; si no cumple su fin, se retira." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Pocos tipos, pocas excepciones y reglas estables a diez años, para competir con los países vecinos sin perder recaudación.",
+          "medidas": [
+            { "nombre": "Menos tipos y tramos", "texto": "Reducir los tramos de la renta y los tipos del IVA (impuesto sobre el valor añadido), para que el sistema se entienda y cueste menos cumplirlo." },
+            { "nombre": "Quitar excepciones para bajar tipos", "texto": "Cada excepción que se retira se usa para bajar el tipo general, y Hacienda publica el balance entre lo que se quita y lo que se baja." },
+            { "nombre": "Calendario fiscal a diez años", "texto": "Una hoja de ruta de los grandes impuestos a diez años, pactada por amplia mayoría y con las comunidades, que da a familias y empresas un horizonte para decidir.", "meta": true },
+            { "nombre": "Comparación anual con la Unión Europea", "texto": "Un informe anual compara la carga fiscal y la sencillez del sistema español con los demás países de la Unión Europea, para decidir con datos." },
+            { "nombre": "Mínimo común para multinacionales", "texto": "Aplicar y defender las reglas europeas e internacionales de tributación mínima de las grandes multinacionales, para que competir no sea una carrera a la baja." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Base ancha y tipos bajos, ajuste automático a la inflación, beneficio reinvertido sin gravar y cada rebaja con su fuente comprobada.",
+          "medidas": [
+            { "nombre": "Ajuste automático a la inflación", "texto": "La ley actualiza solos, cada 1 de enero, los tramos, mínimos y deducciones de la renta, sin depender de una decisión anual del Gobierno." },
+            { "nombre": "Sociedades tributa al repartir", "texto": "El beneficio que la empresa reinvierte no tributa hasta que se reparte, con normas contra el reparto encubierto y una transición por fases evaluada." },
+            { "nombre": "IVA de base ancha con pago directo", "texto": "Se retiran los tipos reducidos y exenciones que no demuestran su efecto, se compensa a las rentas bajas con un pago directo y el tipo general baja." },
+            { "nombre": "Regla de neutralidad validada", "texto": "Toda rebaja lleva una memoria validada por la AIReF que dice qué beneficio fiscal se suprime o qué gasto se reduce para pagarla, dentro del techo de gasto." },
+            { "nombre": "Declaración hecha y pacto estable", "texto": "Con pocas excepciones, Hacienda entrega la declaración hecha a la mayoría de hogares y pymes, dentro de un pacto a diez años sin cambios retroactivos y con aviso previo." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Lucha contra el fraude",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Tolerar o justificar el fraude: dinero negro visto como normal, amnistías para quien no pagó o inspección usada contra el adversario.",
+          "medidas": [
+            { "nombre": "Amnistías fiscales", "texto": "Proponer que quien ocultó dinero lo regularice pagando menos de lo que debía y sin sanción, lo que premia al que incumplió frente al que pagó." },
+            { "nombre": "Dinero negro como algo normal", "texto": "Presentar la economía sumergida como inevitable o como defensa legítima ante los impuestos, sin ninguna propuesta para reducirla." },
+            { "nombre": "Inspección como arma", "texto": "Usar la Agencia Tributaria para señalar o investigar a adversarios, o filtrar datos fiscales de personas concretas." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Una inspección con plantilla planificada y sanciones que de verdad se cobran: defraudar tiene consecuencias.",
+          "medidas": [
+            { "nombre": "Plantilla de inspección planificada", "texto": "La Agencia Tributaria cubre cada año las jubilaciones y amplía la plantilla de inspección según un plan a varios años, publicado y con seguimiento." },
+            { "nombre": "Sanciones que se cobran", "texto": "Las deudas y sanciones firmes se cobran: embargos rápidos, búsqueda de bienes ocultos y responsabilidad de quien vacía una empresa para no pagar." },
+            { "nombre": "Lista de grandes deudores con seguimiento", "texto": "Además de la lista anual de grandes deudores con deuda firme, Hacienda publica cuánto de esa deuda ha cobrado después." },
+            { "nombre": "Denuncia protegida", "texto": "Un canal para denunciar fraude que protege a quien denuncia y le informa de qué se hizo con la información." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Hacienda cruza datos y ve las operaciones: factura electrónica en todas las empresas, cajas registradoras fiables y límites al efectivo.",
+          "medidas": [
+            { "nombre": "Factura electrónica entre empresas", "texto": "Toda factura entre empresas y autónomos se emite en formato electrónico estándar, con un programa gratuito para los pequeños y calendario según tamaño." },
+            { "nombre": "Cruce automático de datos", "texto": "Hacienda cruza bancos, registros de la propiedad, plataformas digitales y Seguridad Social para detectar ingresos no declarados." },
+            { "nombre": "Límite al pago en efectivo", "texto": "Tope legal a los pagos en efectivo entre empresas y profesionales, junto con medios de pago digitales baratos para el pequeño comercio." },
+            { "nombre": "Programas de caja certificados", "texto": "Prohibidos los programas de facturación que permiten borrar ventas: comercios y hostelería usan programas certificados que no se pueden manipular." },
+            { "nombre": "Plataformas digitales que informan", "texto": "Las plataformas de alquiler y venta por internet comunican a Hacienda lo que ingresa cada vendedor, como exige la norma europea." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Medios comparables a los de los vecinos, frente común europeo contra los paraísos fiscales y una estimación oficial del fraude cada año.",
+          "medidas": [
+            { "nombre": "Medios comparables a los vecinos", "texto": "Plantilla y presupuesto de la Agencia Tributaria por contribuyente al nivel de la media de los países vecinos, con un informe público anual de la comparación.", "meta": true },
+            { "nombre": "Estimación oficial anual del fraude", "texto": "Hacienda publica cada año cuánto se deja de ingresar por fraude y errores, impuesto a impuesto, con el método explicado." },
+            { "nombre": "Frente común europeo", "texto": "Intercambio automático de datos fiscales entre países, lista europea de paraísos fiscales con consecuencias y registro público de quién es el dueño real de cada sociedad." },
+            { "nombre": "Inspección guiada por el riesgo", "texto": "Las inspecciones se eligen por análisis de datos y de riesgo, no al azar, y los resultados se publican por sector y tamaño de empresa." },
+            { "nombre": "Delito fiscal juzgado en plazo", "texto": "Juzgados y fiscales especializados con medios para que los grandes casos de delito fiscal no se alarguen durante años hasta perder su efecto." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Defraudar es difícil y cumplir, fácil: factura en tiempo real, declaraciones hechas y una brecha fiscal medida con objetivo de bajada.",
+          "medidas": [
+            { "nombre": "Factura en tiempo real", "texto": "Cada factura pasa por un sistema público en el momento de emitirse; la que no pasa por él no cuenta como emitida." },
+            { "nombre": "Declaraciones hechas por Hacienda", "texto": "Con esos datos Hacienda entrega ya hechos el IVA y la renta de autónomos y pymes: quien cumple solo revisa y confirma." },
+            { "nombre": "Brecha fiscal medida por un independiente", "texto": "Un organismo independiente estima cada año, con método público, lo que debería ingresarse y no se ingresa, impuesto a impuesto y por tipo de contribuyente." },
+            { "nombre": "Objetivo legal de reducción", "texto": "Meta legal de reducción de esa brecha a cinco años; si no se cumple, el Gobierno lo explica en el Congreso y presenta un plan.", "meta": true },
+            { "nombre": "Agencia independiente y datos con garantías", "texto": "Dirección de la Agencia Tributaria con mandato fijo y mayoría reforzada; lo que pagan grandes empresas y altos cargos se puede consultar, y queda registrado quién consulta." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Gasto e inversión pública",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Gastar sin plan ni control, adjudicar a dedo o rechazar por principio toda inversión pública, sin mirar qué funciona.",
+          "medidas": [
+            { "nombre": "Gasto sin control", "texto": "Aprobar gasto fuera del presupuesto o sin justificar en qué se usa, sin auditorías ni cuentas publicadas." },
+            { "nombre": "Adjudicaciones por afinidad", "texto": "Repartir contratos y subvenciones a empresas o entidades cercanas a quien gobierna, o trocear contratos para evitar el concurso." },
+            { "nombre": "Todo o nada por principio", "texto": "Rechazar toda inversión pública por principio, o defender cualquier gasto sin preguntarse si cumple su objetivo." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Gasto controlado y a la vista: se mantiene lo que sostiene servicios e infraestructuras y cada contrato se publica.",
+          "medidas": [
+            { "nombre": "Mantener antes que inaugurar", "texto": "Cada presupuesto reserva lo necesario para mantener carreteras, redes de agua, hospitales y escuelas en buen estado antes de financiar obra nueva." },
+            { "nombre": "Todos los contratos publicados", "texto": "Todo contrato de cualquier administración se publica en la plataforma de contratación con importe, adjudicatario y ofertas recibidas, en datos abiertos." },
+            { "nombre": "Cuentas auditadas en plazo", "texto": "El Tribunal de Cuentas y los órganos de control de las comunidades revisan las cuentas en plazo, y sus informes dicen quién debe corregir qué." },
+            { "nombre": "Inversión ejecutada a la vista", "texto": "Cada trimestre se publica cuánto de la inversión aprobada se ha ejecutado de verdad, por ministerio y por proyecto." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Inversión programada a varios años en ciencia, digitalización e infraestructuras, con fondos propios y no solo europeos.",
+          "medidas": [
+            { "nombre": "Planes de inversión a varios años", "texto": "Programas de inversión a cuatro o cinco años con dotación comprometida cada año, para que obras e investigación no se paren si cambia el presupuesto.", "meta": true },
+            { "nombre": "Ciencia con calendario fijo", "texto": "Convocatorias de investigación con fechas fijas y presupuesto conocido de antemano, para que los equipos puedan planificar y retener a su personal." },
+            { "nombre": "Fondos europeos con continuidad", "texto": "Cada proyecto pagado con fondos europeos dice, antes de empezar, cómo se mantendrá con fondos propios cuando esos fondos se acaben." },
+            { "nombre": "Equipos técnicos propios", "texto": "Equipos técnicos estables en las administraciones para preparar, contratar y vigilar las inversiones, sin depender de consultoras externas para todo." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Cada gran gasto se evalúa antes y después por un organismo independiente, y el presupuesto se organiza por objetivos.",
+          "medidas": [
+            { "nombre": "Evaluación previa de grandes proyectos", "texto": "Toda inversión por encima de cierto importe pasa un análisis de coste y beneficio social, publicado antes de aprobarla y revisado por un organismo independiente." },
+            { "nombre": "Evaluación posterior", "texto": "A los pocos años de terminar una obra o programa se compara lo que costó y lo que logró con lo prometido, y el resultado se publica." },
+            { "nombre": "Presupuesto por objetivos", "texto": "Cada programa del presupuesto dice qué quiere conseguir, con indicadores, y el Gobierno informa cada año de si lo ha logrado." },
+            { "nombre": "Revisiones de gasto con respuesta", "texto": "La AIReF revisa bloques de gasto (subvenciones, medicamentos, incentivos) y el Gobierno responde por escrito a cada recomendación." },
+            { "nombre": "Indicadores de competencia en concursos", "texto": "Se publican, por organismo, el número de ofertas en cada concurso, los sobrecostes y los contratos modificados, para detectar dónde se contrata mal." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Ningún gasto es para siempre: cada programa caduca salvo evaluación favorable, y las grandes obras salen de una lista ordenada por beneficio social.",
+          "medidas": [
+            { "nombre": "Cláusula de caducidad", "texto": "Todo programa de gasto y toda subvención nace con objetivos medibles y fecha tope; para prorrogarlo hacen falta una evaluación publicada y un voto expreso." },
+            { "nombre": "Revisión de todo el gasto", "texto": "La AIReF revisa todo el gasto por bloques en cada legislatura, y el Gobierno debe cumplir o explicar cada recomendación en el Congreso." },
+            { "nombre": "Lista de prioridades de obras", "texto": "Un órgano independiente ordena las grandes infraestructuras por su beneficio social frente al coste; si el Parlamento se salta el orden, debe explicarlo." },
+            { "nombre": "Registro único de evaluaciones", "texto": "Todas las evaluaciones de todas las administraciones en un registro abierto, y el gasto de cada programa consultable euro a euro." },
+            { "nombre": "Suelo de inversión que no se recorta", "texto": "Suelo legal de inversión en investigación y en mantenimiento de infraestructuras, fijado como parte del PIB a diez años, que no se recorta en los años malos.", "meta": true }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Equidad fiscal",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Defender privilegios fiscales a medida o impuestos confiscatorios, o negar que deba aportar más quien más tiene.",
+          "medidas": [
+            { "nombre": "Privilegios a medida", "texto": "Defender regímenes especiales o deducciones pensadas para un grupo concreto, sin evaluar a quién benefician ni cuánto cuestan." },
+            { "nombre": "Impuestos confiscatorios", "texto": "Proponer impuestos que se lleven la mayor parte de un patrimonio o de una renta, en contra de la Constitución, que prohíbe que el sistema sea confiscatorio." },
+            { "nombre": "Negar la progresividad", "texto": "Negar que quien más tiene deba aportar más, en contra del principio de progresividad que fija la Constitución." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Un impuesto sobre la renta progresivo de verdad: quien más gana paga un porcentaje mayor, sin huecos para evitarlo.",
+          "medidas": [
+            { "nombre": "Tipo real publicado por tramo", "texto": "Hacienda publica cada año el porcentaje real que paga cada tramo de renta en el impuesto sobre la renta (IRPF), para comprobar que sube con los ingresos." },
+            { "nombre": "Mínimo vital sin impuesto", "texto": "Los ingresos necesarios para vivir con dignidad no tributan, y ese mínimo se actualiza con el coste de la vida." },
+            { "nombre": "Cerrar huecos conocidos", "texto": "Normas claras para que no se puedan pasar sueldos u honorarios a una sociedad solo para pagar menos que un asalariado con los mismos ingresos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "El trabajo y el capital tributan de forma parecida y se revisan las deducciones que aprovechan sobre todo quienes más tienen.",
+          "medidas": [
+            { "nombre": "Acercar trabajo y capital", "texto": "Reducir por pasos anunciados la diferencia entre lo que paga un salario y lo que paga un dividendo o una ganancia de la misma cuantía." },
+            { "nombre": "Revisar deducciones regresivas", "texto": "Revisar las deducciones que aprovechan sobre todo los hogares de más renta y mantener solo las que demuestran cumplir su fin." },
+            { "nombre": "Ayudas fiscales que llegan a todos", "texto": "Las deducciones por hijos o por discapacidad se cobran también cuando el impuesto a pagar no alcanza, para que lleguen a quien menos tiene." },
+            { "nombre": "Mínimos comunes entre comunidades", "texto": "Acuerdo entre comunidades autónomas sobre mínimos en los impuestos que gestionan, como patrimonio y sucesiones, para que mudarse no sea la forma de no pagar." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Un sistema progresivo en su conjunto, con datos públicos de lo que paga cada décimo de la población y cada beneficio fiscal evaluado.",
+          "medidas": [
+            { "nombre": "Lo que paga cada décimo", "texto": "Hacienda publica cada año el porcentaje total (renta, IVA y cotizaciones) que paga cada décimo de hogares, con datos anónimos abiertos a investigadores." },
+            { "nombre": "Beneficios fiscales con coste a la vista", "texto": "Cada deducción, exención o tipo reducido figura en el presupuesto con su coste y sus beneficiarios, y se evalúa al menos una vez por legislatura." },
+            { "nombre": "Progresividad del sistema entero", "texto": "La progresividad se mide sumando todos los impuestos y cotizaciones, no impuesto a impuesto, y es un objetivo explícito de cada reforma." },
+            { "nombre": "Lo que pagan los grandes patrimonios", "texto": "Estimación oficial de lo que pagan en total los hogares con más patrimonio, incluido lo que tributa dentro de las sociedades que controlan." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "A igual renta, igual impuesto, venga de donde venga; impuestos y ayudas en una cuenta única y una tabla oficial de quién paga y quién recibe.",
+          "medidas": [
+            { "nombre": "Una sola escala para toda la renta", "texto": "Salarios, intereses, dividendos, alquileres y ganancias reales (descontada la inflación) pagan lo mismo a igual cuantía." },
+            { "nombre": "Cuenta fiscal única", "texto": "Impuestos y ayudas se liquidan juntos: quien no llega al mínimo recibe la diferencia como pago, sin tener que pedir cada ayuda por separado." },
+            { "nombre": "Tipo mínimo a los mayores patrimonios", "texto": "Un tipo efectivo mínimo sobre la renta total de los mayores patrimonios, coordinado en la Unión Europea para que no dependa de dónde se fije la residencia." },
+            { "nombre": "Beneficios fiscales con caducidad", "texto": "Todo beneficio fiscal caduca a los cinco años salvo que una evaluación independiente lo avale, con su coste y sus beneficiarios publicados.", "meta": true },
+            { "nombre": "Quién paga, quién recibe y quién gana", "texto": "Un organismo independiente publica cada año lo que paga y recibe cada décimo de hogares, y antes de votar cada reforma fiscal, quién gana y quién pierde con ella." }
+          ]
+        }
+      ]
+    }
+  ]
+}

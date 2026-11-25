@@ -1,0 +1,382 @@
+{
+  "tema": "ter",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "Los textos de Indefinido e Ideal son buenos: el primero describe bien cómo se rompe la base y el segundo dice qué se hace y quién lo hace. Los niveles del medio fallan: algunos son aspiraciones que no se pueden comprobar, otros se repiten entre niveles, uno contradice al Ideal y otro trata «más descentralización» como si fuera siempre «mejor». Y el tema solo mira al Estado y las comunidades: faltan los ayuntamientos y la despoblación.",
+    "problemas": [
+      {
+        "aspecto": 0,
+        "nivel": 2,
+        "problema": "Intermedio premia el «esfuerzo fiscal», pero el Ideal mide la capacidad con tipos medios precisamente para que subir o bajar impuestos no dé ni quite transferencias: los dos niveles se contradicen.",
+        "mejora": "Sustituir «esfuerzo fiscal» por población ajustada por coste del servicio y capacidad fiscal medida con el mismo método para todas."
+      },
+      {
+        "aspecto": 2,
+        "nivel": 3,
+        "problema": "Avanzado («un Estado que todos sienten suyo, con reglas que se viven como propias») es un deseo, no una medida, y es menos concreto que el Intermedio que debería superar: nadie puede comprobar si se cumple.",
+        "mejora": "Concretarlo en un registro público de sentencias pendientes, normas básicas preparadas con las comunidades y una lista cerrada de excepciones al mercado común."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "El tema se llama «Territorio» pero solo trata la relación Estado-comunidades: no aparecen los ayuntamientos, sus competencias y su dinero, ni los servicios en las zonas que pierden población.",
+        "mejora": "Incluir el nivel local en Autogobierno (qué hace y con qué paga cada ayuntamiento) y los servicios en zonas despobladas en Igualdad; a medio plazo, valorar un aspecto propio."
+      },
+      {
+        "aspecto": 4,
+        "nivel": 2,
+        "problema": "El «Senado territorial» aparece en Intermedio y otra vez en Avanzado con otras palabras: la escalera no sube, se repite.",
+        "mejora": "Dejar en Intermedio lo que cabe sin reformar la Constitución (acuerdos que obligan, secretaría estable) y llevar el Senado de las comunidades a Avanzado."
+      },
+      {
+        "aspecto": 3,
+        "nivel": 2,
+        "problema": "Intermedio (traspasar lo pendiente y más gestión de impuestos) da a entender que más descentralización es siempre un nivel mejor, mientras el Ideal admite que una tarea suba al Estado si así funciona mejor.",
+        "mejora": "Valorar la calidad del reparto (traspasos con su dinero, cada ayuntamiento con tareas claras y financiadas) en vez de la dirección del cambio."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 3,
+        "problema": "Ningún texto de nivel de Lenguas menciona la escuela, que es donde está el debate real; Avanzado («patrimonio de toda España, sin que ninguna sea un arma») tampoco se puede medir.",
+        "mejora": "Añadir una evaluación externa y pública del dominio de las dos lenguas al acabar la enseñanza obligatoria y optativas de lenguas cooficiales en toda España."
+      },
+      {
+        "aspecto": 0,
+        "nivel": 1,
+        "problema": "Básico («renovar el modelo caducado») es un trámite que cualquiera suscribe y no dice cómo: ya hay una propuesta sobre la mesa, así que no separa a nadie.",
+        "mejora": "Exigir negociación en el órgano común de todas las comunidades y una simulación publicada de cuánto recibiría cada una."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Financiación transparente",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin modelo propio, o uno que rompe la base: negar la solidaridad entre territorios o la autonomía financiera que reconoce la Constitución.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "Se critica el reparto actual sin decir qué fórmula se querría, con qué variables ni cuánto recibiría cada comunidad con ella." },
+            { "nombre": "Dinero a cambio de apoyos", "texto": "Los recursos de cada comunidad se fijan en acuerdos de una en una con el Estado, fuera del sistema común y sin datos publicados, según los votos que se necesiten." },
+            { "nombre": "Negar la solidaridad o la autonomía", "texto": "Proponer que cada comunidad se quede todo lo que recauda sin aportar nada a las demás, o que el Estado decida el gasto autonómico sin dejarle ingresos propios." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Renovar el modelo caducado negociándolo entre todos en el órgano común, con simulaciones publicadas y sin que nadie pierda en la transición.",
+          "medidas": [
+            { "nombre": "Negociación multilateral", "texto": "El nuevo modelo se negocia en el Consejo de Política Fiscal y Financiera, donde están el Estado y todas las comunidades, y no en acuerdos bilaterales sueltos." },
+            { "nombre": "Simulación publicada por comunidad", "texto": "Quien propone un modelo publica cuánto recibiría cada comunidad con él frente a hoy, para que el debate sea sobre números y no sobre impresiones." },
+            { "nombre": "Pagos a cuenta en plazo", "texto": "El Estado paga a tiempo los anticipos mensuales y la liquidación anual a las comunidades, con calendario público, para que puedan hacer sus presupuestos sin adivinar." },
+            { "nombre": "Transición sin pérdidas", "texto": "Mientras se cambia de modelo, ninguna comunidad recibe menos que el año anterior; la diferencia la pone el Estado de forma temporal y con fecha de fin." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Un modelo común con criterios públicos: población ajustada por lo que cuesta prestar los servicios y capacidad fiscal medida igual para todas.",
+          "medidas": [
+            { "nombre": "Población ajustada por coste del servicio", "texto": "El reparto usa la población corregida por edad, dispersión, insularidad y superficie, con los pesos escritos en la ley y no renegociados cada año." },
+            { "nombre": "Una sola fórmula en vez de parches", "texto": "Reunir los fondos y ajustes acumulados en una única fórmula, para que el resultado de cada comunidad se explique por los criterios y no por arreglos sueltos." },
+            { "nombre": "Capacidad fiscal con un método común", "texto": "Lo que cada comunidad puede recaudar se calcula con datos de la Agencia Tributaria publicados y el mismo método para todas, sin premiar ni castigar sus decisiones de impuestos." },
+            { "nombre": "Gasto estatal territorializado", "texto": "Hacienda publica cada año cuánto se transfiere a cada comunidad por cada fondo y por qué criterio, en un solo documento comprensible." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Un modelo que cualquiera puede recalcular: datos abiertos, cuentas territorializadas con método oficial y una banda pactada a las diferencias.",
+          "medidas": [
+            { "nombre": "Hoja de cálculo pública del modelo", "texto": "Hacienda publica cada año los datos y el cálculo completo con la misma herramienta que usa, para que una universidad o un periodista lleguen al mismo resultado." },
+            { "nombre": "Cuentas territorializadas oficiales", "texto": "Publicar cada año cuánto aporta y recibe cada territorio del conjunto de las cuentas públicas, con un único método oficial y sus supuestos explicados." },
+            { "nombre": "Banda pactada de diferencias", "texto": "Fijar por acuerdo cuánto pueden separarse de la media los recursos por habitante ajustado tras el reparto, y corregir cuando una comunidad sale de esa banda." },
+            { "nombre": "Cupo y aportación foral a la vista", "texto": "Publicar con el mismo detalle el cálculo del cupo vasco y de la aportación navarra, sin cambiar el régimen foral que reconoce la Constitución." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una fórmula fijada por ley que un órgano técnico aplica cada año, con suelo garantizado por habitante, el orden respetado y revisión con fecha.",
+          "medidas": [
+            { "nombre": "Órgano técnico que aplica la fórmula", "texto": "Un organismo independiente calcula cada año el reparto con la fórmula aprobada por las Cortes, consulta a las comunidades y publica sus métodos, como la comisión australiana del IVA.", "fuente": "https://www.cgc.gov.au/about-us/fiscal-equalisation" },
+            { "nombre": "Capacidad medida con tipos medios", "texto": "La nivelación mide lo que cada comunidad recaudaría con tipos medios, no lo que recauda: si baja o sube impuestos responde ante sus votantes y no recibe ni más ni menos.", "fuente": "https://www.canada.ca/en/department-finance/programs/federal-transfers/equalization.html" },
+            { "nombre": "Suelo garantizado por habitante", "texto": "Ninguna comunidad queda por debajo de un porcentaje de la media de recursos por habitante ajustado fijado en la ley; por encima de ese suelo se nivela solo una parte de la diferencia." },
+            { "nombre": "Nivelación sin invertir el orden", "texto": "Tras el reparto, una comunidad que aporta más que otra no acaba con menos recursos por habitante ajustado que ella, como ocurre con las reglas de Canadá y Alemania." },
+            { "nombre": "Revisión con fecha y prórroga automática", "texto": "El sistema se evalúa con un informe público cada cuatro o cinco años; si no hay acuerdo para reformarlo, la fórmula sigue aplicándose con datos nuevos y no caduca.", "meta": true }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Lenguas y culturas propias",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre las lenguas, o una que usa una contra otra, niega la oficialidad de alguna o anuncia que no cumplirá las sentencias.",
+          "medidas": [
+            { "nombre": "Una lengua contra otra", "texto": "Plantear la política lingüística para restar derechos a los hablantes de una lengua oficial, sea el castellano o la cooficial, en vez de sumarlos." },
+            { "nombre": "Sentencias sobre lenguas sin cumplir", "texto": "Anunciar que no se aplicará una sentencia firme sobre el uso de las lenguas, o aplicarla solo en apariencia, gobierne quien gobierne." },
+            { "nombre": "Sin plan propio", "texto": "No decir nada sobre cómo se atiende, se enseña y se protege cada lengua, y dejar el asunto a la improvisación o al conflicto." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Proteger las lenguas cooficiales en su territorio y garantizar a la vez el uso del castellano, como fijan la Constitución y los Estatutos.",
+          "medidas": [
+            { "nombre": "Atención en las dos lenguas", "texto": "Las administraciones autonómicas y locales atienden en castellano y en la lengua cooficial, por escrito y en persona, a elección de quien se dirige a ellas." },
+            { "nombre": "Las dos lenguas en la escuela", "texto": "Todo el alumnado de la comunidad estudia castellano y lengua cooficial en la enseñanza obligatoria, con el modelo que fija la comunidad dentro de la ley y las sentencias." },
+            { "nombre": "Apoyo a la cultura en cada lengua", "texto": "Las comunidades financian libros, prensa, teatro y audiovisual en su lengua, con convocatorias públicas y criterios conocidos de antemano." },
+            { "nombre": "Cumplir la Carta Europea de lenguas", "texto": "España aplica los compromisos de la Carta Europea de las Lenguas Regionales o Minoritarias y responde por escrito a cada recomendación del comité del Consejo de Europa.", "fuente": "https://www.coe.int/en/web/european-charter-regional-or-minority-languages/reports-and-recommendations" }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Que el Estado también use y promueva las lenguas cooficiales en sus oficinas, juzgados, instituciones y medios, no solo cada comunidad.",
+          "medidas": [
+            { "nombre": "Oficinas del Estado en la lengua del lugar", "texto": "Delegaciones del Gobierno, Agencia Tributaria, Seguridad Social y demás oficinas estatales atienden en la lengua cooficial del territorio donde están." },
+            { "nombre": "Justicia en la lengua cooficial", "texto": "Los juzgados de cada comunidad pueden tramitar y celebrar juicios en la lengua cooficial cuando lo piden las partes, con intérpretes y traducción a cargo del Estado." },
+            { "nombre": "Lenguas en las instituciones comunes", "texto": "Las Cortes, el Boletín Oficial del Estado y las webs estatales admiten el uso de las lenguas cooficiales y ofrecen versión en ellas, con traducción pagada por el Estado." },
+            { "nombre": "Medios públicos estatales en todas las lenguas", "texto": "La radio y la televisión públicas del Estado emiten en las lenguas cooficiales en sus territorios y ofrecen contenidos subtitulados en ellas para toda España." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Las lenguas oficiales como patrimonio de toda España: se pueden aprender en cualquier comunidad y su dominio se mide con datos públicos.",
+          "medidas": [
+            { "nombre": "Evaluación externa de las dos lenguas", "texto": "Una prueba externa y pública mide al final de la enseñanza obligatoria el nivel en castellano y en la lengua cooficial, y los resultados se publican por comunidad." },
+            { "nombre": "Optativas de lenguas cooficiales en toda España", "texto": "Cualquier alumno puede estudiar catalán, gallego o euskera como optativa en cualquier comunidad, presencial o a distancia, con profesorado financiado por el Estado." },
+            { "nombre": "Intercambios entre comunidades", "texto": "Un programa estatal financia estancias de alumnos y profesores en comunidades con otra lengua, al estilo de los intercambios europeos, y publica cuántos participan." },
+            { "nombre": "Personal que domina la lengua donde atiende", "texto": "Objetivos públicos de personal con dominio de la lengua cooficial en sanidad, Justicia y oficinas del Estado, exigida por puesto y con plazo y formación para quien llega." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Una ley de lenguas oficiales con derechos en los dos sentidos ante cualquier administración y un comisionado independiente que atiende las quejas.",
+          "medidas": [
+            { "nombre": "Ley de lenguas oficiales", "texto": "Una ley estatal pactada con las comunidades reconoce el derecho a usar el castellano y la lengua cooficial ante cualquier administración del territorio, también el Estado y la Justicia." },
+            { "nombre": "Comisionado independiente de lenguas", "texto": "Investiga las quejas de cualquier hablante, de castellano o de lengua cooficial, puede pedir datos a cualquier administración y publica un informe anual con recomendaciones.", "fuente": "https://laws-lois.justice.gc.ca/eng/acts/O-3.01/FullText.html" },
+            { "nombre": "Garantía de resultado en la escuela", "texto": "Cada comunidad elige su modelo escolar, pero todo el alumnado debe acabar dominando las dos lenguas; si una queda por debajo del nivel exigido, se refuerza esa, sea cual sea." },
+            { "nombre": "Rendición de cuentas periódica", "texto": "El Gobierno y las comunidades presentan cada tres años ante las Cortes y los parlamentos autonómicos datos de uso, atención y aprendizaje de cada lengua.", "meta": true }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Cohesión: Constitución y mercado común",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Desobedecer la Constitución o las sentencias, cambiar las reglas comunes por la vía de los hechos o levantar barreras entre territorios.",
+          "medidas": [
+            { "nombre": "Desobedecer sentencias", "texto": "Anunciar o practicar el incumplimiento de la Constitución o de una sentencia firme, venga del Estado o de una comunidad." },
+            { "nombre": "Cambiar las reglas por la vía de los hechos", "texto": "Alterar el reparto de poderes o el estatus de un territorio con actos unilaterales, sin pasar por la reforma que prevén la Constitución y los Estatutos." },
+            { "nombre": "Barreras entre territorios", "texto": "Exigir licencias, registros o requisitos distintos en cada comunidad para vender, trabajar o prestar un servicio, sin motivo de salud, seguridad o medio ambiente." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cumplir la Constitución y las sentencias, defender cualquier cambio por la reforma prevista y no crear trabas nuevas entre comunidades.",
+          "medidas": [
+            { "nombre": "Sentencias cumplidas por todos", "texto": "El Estado y las comunidades cumplen las sentencias del Tribunal Constitucional y de los demás tribunales en el plazo fijado, aunque no les gusten." },
+            { "nombre": "Cambios solo por la reforma prevista", "texto": "Toda propuesta de cambio del modelo territorial, en cualquier dirección, se defiende por los cauces de reforma de la Constitución y de los Estatutos." },
+            { "nombre": "Análisis de impacto en el mercado común", "texto": "Cada nueva norma estatal o autonómica que regula una actividad económica explica si crea trabas a quien viene de otra comunidad y por qué son necesarias." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Unidad de mercado real: un producto, una empresa o un título profesional valen igual en toda España sin repetir trámites.",
+          "medidas": [
+            { "nombre": "Títulos y licencias válidos en toda España", "texto": "Un título profesional, un carné o una licencia obtenidos en una comunidad permiten ejercer en las demás sin examen ni trámite nuevo, salvo excepción justificada." },
+            { "nombre": "Ventanilla contra barreras con plazo", "texto": "Ciudadanos y empresas denuncian una traba ante la Secretaría para la Unidad de Mercado, que responde en un plazo tasado y publica cada caso y su resultado.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-12888" },
+            { "nombre": "Mínimos comunes de salud y seguridad", "texto": "Estado y comunidades pactan mínimos comunes de salud, seguridad y medio ambiente, para que aceptar la norma de otra comunidad no sea una carrera a la baja." },
+            { "nombre": "Requisitos técnicos armonizados", "texto": "Los requisitos técnicos de cada comunidad (instalaciones, etiquetado, accesibilidad) se armonizan en las conferencias sectoriales para que un mismo producto sirva en toda España." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Reglas comunes pactadas y comprobables: sentencias pendientes a la vista, normas básicas preparadas con las comunidades y excepciones tasadas.",
+          "medidas": [
+            { "nombre": "Registro público de sentencias pendientes", "texto": "Un registro recoge, para el Estado y para cada comunidad, qué resoluciones judiciales siguen sin ejecutar, desde cuándo y por qué, con explicación obligatoria pasado el plazo." },
+            { "nombre": "Normas básicas preparadas con las comunidades", "texto": "Las leyes básicas que fijan lo común se preparan con las comunidades en la conferencia sectorial antes de ir a las Cortes, para evitar recursos posteriores." },
+            { "nombre": "Lista cerrada de excepciones", "texto": "Las razones para no aceptar la norma de otra comunidad (salud, seguridad, medio ambiente, lengua en la atención al público) están en una lista pública que se revisa con calendario." },
+            { "nombre": "Negociar antes de recurrir", "texto": "Antes de llevar una ley al Tribunal Constitucional, Estado y comunidad agotan la comisión bilateral de negociación que permite la ley y publican si hubo acuerdo." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un pacto firmado por el Estado y todas las comunidades: reconocimiento mutuo automático, sentencias en plazo y cambios solo por la reforma prevista.",
+          "medidas": [
+            { "nombre": "Acuerdo de reconocimiento mutuo firmado por todos", "texto": "Estado y comunidades firman un acuerdo, trasladado luego a sus leyes, por el que lo legal en una vale en las demás, como el acuerdo canadiense de comercio interior.", "fuente": "https://www.cfta-alec.ca/" },
+            { "nombre": "Plazo de cumplimiento con comparecencia", "texto": "Cada resolución tiene un plazo de cumplimiento público; si se supera sin explicación, el gobierno responsable comparece ante su parlamento y el registro lo señala." },
+            { "nombre": "Compromiso de lealtad con la reforma", "texto": "Todos los gobiernos firman que cualquier cambio del modelo, hacia más o hacia menos autogobierno, irá solo por la reforma de la Constitución o de los Estatutos." },
+            { "nombre": "Revisión conjunta de los mínimos comunes", "texto": "Los mínimos de salud, seguridad y medio ambiente que sostienen el reconocimiento mutuo se revisan entre todos con calendario fijo, no por decisión de una sola parte." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Autogobierno y competencias",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Negar el autogobierno que reconoce la Constitución, ejercer poderes al margen de ella y de los Estatutos, o no proponer ningún reparto.",
+          "medidas": [
+            { "nombre": "Negar el autogobierno", "texto": "Proponer vaciar o suprimir las competencias que reconocen la Constitución y los Estatutos sin pasar por su reforma." },
+            { "nombre": "Poderes al margen de la ley", "texto": "Ejercer o anunciar competencias que ni la Constitución ni el Estatuto atribuyen, o actuar como si una norma anulada siguiera vigente." },
+            { "nombre": "Sin propuesta de reparto", "texto": "No decir qué debe hacer cada nivel de gobierno, Estado, comunidad o ayuntamiento, ni qué cambiaría del reparto actual." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Respetar las competencias de los Estatutos: el Estado no las invade con leyes básicas expansivas y las comunidades no exceden las suyas.",
+          "medidas": [
+            { "nombre": "Leyes básicas que dejan margen", "texto": "El Estado limita lo básico a lo que debe ser común y deja a las comunidades margen real para legislar y gestionar sus materias." },
+            { "nombre": "Conflictos por el cauce legal", "texto": "Las discrepancias sobre quién es competente se resuelven negociando o ante el Tribunal Constitucional, nunca ignorando la norma de la otra parte." },
+            { "nombre": "Respeto a los regímenes forales", "texto": "Se mantienen las singularidades que reconoce la Constitución, como los derechos históricos del País Vasco y Navarra, mientras no se reformen por su cauce." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Completar los traspasos previstos con su dinero y dar a cada ayuntamiento tareas claras y financiadas, sin juzgar la dirección del cambio.",
+          "medidas": [
+            { "nombre": "Calendario público de traspasos pendientes", "texto": "Las comisiones mixtas entre el Estado y cada comunidad publican la lista de traspasos pendientes, su coste y una fecha para cerrarlos." },
+            { "nombre": "Cada traspaso con su financiación", "texto": "Cada traspaso llega con el personal, los medios y el dinero que el Estado gastaba en esa tarea, calculados con un método público." },
+            { "nombre": "Gestión tributaria compartida", "texto": "La Agencia Tributaria y las agencias tributarias autonómicas comparten datos y gestión en un consorcio, para que cada comunidad controle lo que recauda en su territorio." },
+            { "nombre": "Ayuntamientos con tareas claras y pagadas", "texto": "Cada comunidad fija por ley qué servicios prestan sus ayuntamientos y con qué dinero, para que no asuman tareas ajenas sin financiación." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Un autogobierno pactado y estable: cada nivel con competencias claras, sin invadirse y con ingresos propios que respondan de lo que gasta.",
+          "medidas": [
+            { "nombre": "Mapa oficial de competencias", "texto": "Un inventario público dice, para cada materia, qué hace el Estado, qué la comunidad y qué el ayuntamiento, y se actualiza con cada cambio." },
+            { "nombre": "Quien impone un gasto, lo financia", "texto": "Ningún nivel aprueba obligaciones que tenga que pagar otro sin transferirle el dinero; se comprueba en la memoria económica de cada ley." },
+            { "nombre": "Impuestos que dicen a quién van", "texto": "La declaración y los recibos muestran qué parte de cada impuesto va al Estado, a la comunidad y al ayuntamiento, para que cada gobierno responda de lo suyo." },
+            { "nombre": "Fin de los organismos duplicados", "texto": "Revisar los organismos y programas que Estado y comunidades mantienen en paralelo en la misma materia y dejar uno, con la evaluación publicada." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un reparto cerrado con dos reglas, el nivel más cercano capaz y quien decide paga, revisable en los dos sentidos con una prueba pública.",
+          "medidas": [
+            { "nombre": "Competencias enteras, no troceadas", "texto": "Repasar las competencias compartidas y asignar cada una entera a un nivel; quedan compartidas solo las imprescindibles, con el papel de cada nivel por escrito.", "fuente": "https://www.efv.admin.ch/dam/efv/en/dokumente/finanzausgleich/Finanzausgleich_A5_web_e.pdf" },
+            { "nombre": "Prueba pública para subir o bajar una tarea", "texto": "Una tarea pasa al Estado o a las comunidades solo si un estudio público muestra que allí se presta mejor o cuesta menos, y con el mismo pacto que exige un traspaso." },
+            { "nombre": "Quien decide el gasto fija el impuesto", "texto": "Cada competencia va ligada a ingresos propios: el gobierno que decide un servicio decide también el impuesto que lo paga y responde de él ante sus votantes." },
+            { "nombre": "Regla para lo no previsto", "texto": "La ley dice a quién corresponden las materias nuevas, como una pandemia o una tecnología, y con qué procedimiento se asignan, sin reabrir el reparto entero." },
+            { "nombre": "Competencias abiertas a todas", "texto": "Las competencias que cualquier comunidad pueda asumir quedan abiertas a todas, respetando las singularidades que la Constitución ya reconoce, como los regímenes forales." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Cooperación entre gobiernos",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "No proponer nada, o negarse por sistema a cooperar: no convocar los órganos comunes, no acudir a ellos o incumplir lo que se firma.",
+          "medidas": [
+            { "nombre": "La silla vacía", "texto": "No acudir por sistema a la Conferencia de Presidentes o a las conferencias sectoriales, o no convocarlas para no tener que negociar." },
+            { "nombre": "Acuerdos firmados sin cumplir", "texto": "Firmar repartos de fondos o planes conjuntos y después no aplicarlos ni explicar por qué." },
+            { "nombre": "Sin plan de coordinación", "texto": "No decir cómo deben coordinarse el Estado y las comunidades en lo que es de los dos, como la sanidad, las emergencias o el agua." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Reunir con regularidad la Conferencia de Presidentes y las conferencias sectoriales, con orden del día conocido y acuerdos publicados.",
+          "medidas": [
+            { "nombre": "Conferencia de Presidentes regular", "texto": "El presidente del Gobierno convoca a los presidentes autonómicos con una periodicidad conocida, no solo en las crisis, y se publican los acuerdos." },
+            { "nombre": "Conferencias sectoriales activas", "texto": "Cada ministerio reúne a los consejeros de su materia varias veces al año y publica el orden del día, las actas y los acuerdos." },
+            { "nombre": "Fondos repartidos a tiempo", "texto": "Los fondos estatales que gestionan las comunidades se reparten en la conferencia sectorial con criterios públicos y al principio del año, no a última hora." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Conferencias sectoriales con acuerdos que obligan y secretaría estable, todo lo que cabe sin reformar la Constitución.",
+          "medidas": [
+            { "nombre": "Acuerdos sectoriales que obligan", "texto": "Los acuerdos tomados por mayoría reforzada en una conferencia sectorial obligan también a quien votó en contra, con una reforma de la ley de régimen jurídico del sector público.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-10566" },
+            { "nombre": "Secretaría técnica estable", "texto": "Una secretaría permanente prepara los documentos, sigue los acuerdos y guarda la memoria de las conferencias, sin depender de los cambios de ministro." },
+            { "nombre": "Senado como foro autonómico", "texto": "Sin reformar la Constitución, el Senado dedica sesiones a los asuntos autonómicos con presidentes y consejeros e informa sobre las leyes que les afectan." },
+            { "nombre": "Convenios ágiles entre comunidades vecinas", "texto": "Las comunidades firman convenios para compartir servicios que cruzan sus límites, como urgencias, transporte o incendios, con un trámite sencillo y publicado." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Un Senado de las comunidades por reforma constitucional y lealtad en los dos sentidos: se consulta antes, se cumple lo firmado y se comprueba.",
+          "medidas": [
+            { "nombre": "Senado de las comunidades", "texto": "Reformar la Constitución para que el Senado represente a las comunidades y se ocupe en primer lugar de las leyes que afectan a sus competencias." },
+            { "nombre": "Consulta previa en los dos sentidos", "texto": "El Estado consulta a las comunidades antes de aprobar normas que les afecten, y cada comunidad informa de las suyas que afecten a otras, con plazos fijos." },
+            { "nombre": "Registro de cumplimiento de acuerdos", "texto": "Un registro público muestra cada acuerdo de las conferencias y qué gobierno lo ha cumplido y cuándo, para que la lealtad se pueda comprobar." },
+            { "nombre": "Comunidades en la posición ante la Unión Europea", "texto": "Las comunidades participan en la posición española en los consejos de ministros de la Unión Europea que tratan sus competencias, con un representante común." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un Senado de gobiernos autonómicos que vota las leyes que les afectan y conferencias con calendario, secretaría y acuerdos cuyo cumplimiento se publica.",
+          "medidas": [
+            { "nombre": "Senado formado por los gobiernos autonómicos", "texto": "Cada comunidad envía a miembros de su gobierno, que votan en bloque con un número de votos graduado según su población, como en el Bundesrat alemán.", "fuente": "https://www.bundesrat.de/EN/organisation-en/stimmenverteilung-en/stimmenverteilung-en-node.html" },
+            { "nombre": "Visto bueno a las leyes que les afectan", "texto": "Las leyes sobre competencias o ingresos autonómicos necesitan la aprobación de ese Senado, con una comisión de conciliación con el Congreso cuando no hay acuerdo." },
+            { "nombre": "Conferencia de Presidentes con fecha fija", "texto": "La ley fija dos reuniones al año con fecha conocida, orden del día pactado y una secretaría permanente que no depende de ningún gobierno.", "meta": true },
+            { "nombre": "Conferencia solo de comunidades", "texto": "Los gobiernos autonómicos tienen su propia conferencia, sin el Estado, para pactar posiciones comunes y cooperar en servicios compartidos, como hacen los cantones suizos.", "fuente": "https://www.ch.ch/en/political-system/operation-and-organisation-of-switzerland/federalism/" }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Igualdad entre territorios",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "No proponer nada, o aceptar que los derechos básicos dependan del territorio: privilegios para unas comunidades o abandono de otras.",
+          "medidas": [
+            { "nombre": "Derechos según el código postal", "texto": "Aceptar que las prestaciones, las esperas o las ayudas básicas dependan solo de la comunidad donde se vive, sin ningún mínimo común." },
+            { "nombre": "Privilegios o abandono", "texto": "Pedir para un territorio en servicios básicos un trato que no se ofrece a los demás, o dejar sin atender a los que pierden población o renta." },
+            { "nombre": "Sin plan de igualdad", "texto": "No decir cómo se asegura que sanidad, escuela y servicios sociales tengan un nivel parecido en toda España." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Mínimos comunes en sanidad, educación y servicios sociales que toda comunidad ofrece, medidos con los mismos indicadores.",
+          "medidas": [
+            { "nombre": "Carteras comunes de servicios", "texto": "Una lista común de prestaciones sanitarias, educativas y sociales que toda comunidad debe ofrecer, fijada por el Estado con las comunidades." },
+            { "nombre": "Atención desde el primer día al mudarse", "texto": "Quien se muda o se desplaza a otra comunidad es atendido en sanidad y escuela desde el primer día con los mismos derechos que sus vecinos." },
+            { "nombre": "Indicadores comunes de servicios", "texto": "Todas las comunidades envían al Estado los mismos indicadores básicos (esperas, plazas, resultados) con la misma definición, para poder compararlos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Financiar el coste real de esos mínimos en todas partes, también en las zonas que pierden población, con un fondo que reconoce lo que encarece el servicio.",
+          "medidas": [
+            { "nombre": "Fondo que cubre el coste de los mínimos", "texto": "La parte de la financiación dedicada a servicios básicos se calcula según lo que cuesta prestarlos en cada comunidad, no según lo que se recibía antes." },
+            { "nombre": "Ajuste por lo que encarece el servicio", "texto": "El reparto tiene en cuenta lo que encarece el servicio sin que la comunidad lo elija: población mayor, núcleos dispersos, islas, montaña o pobreza." },
+            { "nombre": "Servicios en zonas despobladas", "texto": "Un plan del Estado y las comunidades asegura consultorio, escuela, transporte a demanda y conexión digital en municipios pequeños, con unidades móviles donde no hay demanda suficiente." },
+            { "nombre": "Diputaciones al servicio de los pueblos", "texto": "Las diputaciones y entes comarcales prestan a los municipios pequeños los servicios que no pueden prestar solos, con una cartera publicada y evaluada." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Servicios equivalentes medidos y publicados por comunidad, con estándares pactados, derechos que viajan contigo y corrección cuando una se queda atrás.",
+          "medidas": [
+            { "nombre": "Estándares medibles pactados", "texto": "Estado y comunidades pactan tiempos máximos de espera, ratios y plazos para resolver la dependencia, iguales en toda España y fijados por ley básica." },
+            { "nombre": "Informe anual comparado", "texto": "Un informe público compara cada año a todas las comunidades en equidad, eficacia y coste de sus servicios, con los mismos indicadores y datos abiertos." },
+            { "nombre": "Derechos que viajan contigo", "texto": "La tarjeta sanitaria, la historia clínica, el expediente escolar y el grado de dependencia valen igual al cambiar de comunidad, sin repetir trámites." },
+            { "nombre": "Plan de mejora pactado", "texto": "Si una comunidad queda por debajo de un estándar dos años seguidos, se acuerda con ella un plan con fondos, apoyo técnico y objetivos con fecha.", "meta": true }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un derecho exigible a servicios básicos equivalentes: estándares medidos por un órgano independiente, coste cubierto y corrección automática.",
+          "medidas": [
+            { "nombre": "Derecho exigible por ley", "texto": "Una ley reconoce a cada persona el derecho a los estándares comunes y una vía de reclamación, con atención en otro centro o comunidad si el suyo no los cumple." },
+            { "nombre": "Órgano independiente que mide", "texto": "Un organismo independiente mide cada año los estándares en todas las comunidades y publica los resultados, como hace la comisión australiana de productividad.", "fuente": "https://www.pc.gov.au/ongoing/report-on-government-services" },
+            { "nombre": "Financiación que cubre el estándar", "texto": "El modelo de financiación asegura a cada comunidad el dinero para cumplir los estándares según su población y sus costes, de modo que no cumplir no sea por falta de recursos." },
+            { "nombre": "Corrección automática sin quitar competencias", "texto": "Una regla fijada de antemano activa fondos y apoyo técnico cuando una comunidad baja del estándar, sin depender de la negociación política ni retirarle la competencia." },
+            { "nombre": "Libertad por encima del mínimo", "texto": "Cada comunidad puede ofrecer más o gestionar de otra manera por encima del estándar, pagándolo con sus propios impuestos." }
+          ]
+        }
+      ]
+    }
+  ]
+}

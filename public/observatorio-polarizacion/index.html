@@ -867,6 +867,12 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .gt-niv button:hover{color:var(--ink);background:color-mix(in srgb,var(--m) 10%,transparent)}
 .gt-niv button.on{border-color:var(--m);background:color-mix(in srgb,var(--m) 18%,transparent);color:var(--ink);font-weight:700}
 .gt-txt{margin:0;padding:12px 14px;border-radius:12px;border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);color:var(--ink-2)}
+.mds{margin:6px 0 0;padding-left:1.15em;display:grid;gap:6px}
+.mds li{line-height:1.45}
+.mds li::marker{color:var(--c,currentColor)}
+.mds li b{color:var(--ink);font-weight:700;display:inline}
+.mds-res{display:block;color:var(--ink-2)}
+.mds-c{gap:2px;font-size:13px}
 .gt-txt b{display:block;margin-bottom:2px;color:var(--ink);font-weight:700}
 .gt-txt.vacio{border-left-color:var(--line);background:transparent;color:var(--muted);font-size:14px}
 .gt-lat{overflow:auto;padding:22px clamp(14px,2vw,28px);border-left:1px solid var(--line);background:var(--bg-2);display:grid;gap:14px;align-content:start}
@@ -3904,6 +3910,19 @@ const ILUS = {
   }
   /* ---- Panel lateral de un nivel: se abre solo al pinchar uno de los puntos de la figura ---- */
   const pnl = $("#geo-nivel"), geoEl = $(".geo");
+  // Measures in bullets per aspect and level (scripts/geometria-medidas.mjs → /geometria-figura/medidas.json).
+  // Loaded after the page; until it arrives (or if it fails) the short text of each level is shown.
+  let MEDIDAS = null;
+  const medidasDe = (k, i, n) => (MEDIDAS && MEDIDAS.temas[k] && MEDIDAS.temas[k][i] && MEDIDAS.temas[k][i][n]) || null;
+  function htmlMedidas(k, i, n, corto) {
+    const m = medidasDe(k, i, n); if (!m) return corto;
+    return `<span class="mds-res">${m[0]}</span><ul class="mds">${m[1].map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("")}</ul>`;
+  }
+  function refrescarMedidas() {
+    if (st.nivel && !pnl.hidden) pnl.innerHTML = htmlNivel(st.nivel.i, st.nivel.k);
+    if (typeof gtRefrescarTextos === "function") gtRefrescarTextos();
+  }
+  fetch(new URL("../geometria-figura/medidas.json", location.href)).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.temas) { MEDIDAS = d; refrescarMedidas(); } }).catch(() => { /* sin medidas: queda el texto corto */ });
   function htmlNivel(i, k) {
     const t = T(), e = t.ejes[i], col = colorNivel(k);
     const grupos = { aqui: [], mas: [], menos: [] };
@@ -3917,7 +3936,7 @@ const ILUS = {
     return `<div class="gn-cab"><span class="lbl" style="color:${t.c}">${t.n} · radio ${i + 1}</span><button class="gn-x" type="button" data-gn-cerrar aria-label="Cerrar el detalle">×</button></div>`
       + `<h4>${e.n}</h4><p><small>${e.d}</small></p>`
       + `<div class="gn-niveles" role="group" aria-label="Nivel">${NIVEL_CORTO.map((n, j) => `<button type="button" class="gn-niv${j === k ? " on" : ""}" data-gn-k="${j}" style="--c:${colorNivel(j)}" aria-pressed="${j === k}">${n}</button>`).join("")}</div>`
-      + `<div class="gn-texto" style="--c:${col}"><span class="medida">${NIV_TITULO[k]}</span>${e.niv[k]}${k === NMAX && e.is ? `<br>${enlaceIdeal(e)}` : ""}</div>`
+      + `<div class="gn-texto" style="--c:${col}"><span class="medida">${NIV_TITULO[k]}</span>${htmlMedidas(st.tema, i, k, e.niv[k])}${k === NMAX && e.is ? `<br>${enlaceIdeal(e)}` : ""}</div>`
       + grupo(k === 0 ? "Se quedan por debajo de lo básico" : `Están justo en ${NIVEL_CORTO[k].toLowerCase()}`, grupos.aqui)
       + grupo(k === 0 ? "Pasan de ahí" : "Van más allá", grupos.mas) + grupo("No llegan", grupos.menos)
       + (sinTexto ? `<p><small>Por aspecto, este observatorio aún no tiene un texto de cada partido que justifique su nivel: donde lo hay, sale debajo del nombre.</small></p>` : "")
@@ -4527,7 +4546,8 @@ const ILUS = {
     const box = $("#gt-info"), fan = $("#gt-fantasma"); if (!box) return;
     if (!p) { box.className = "gt-info vacio"; box.style.removeProperty("--c"); box.textContent = GT_PISTA; fan.setAttribute("opacity", "0"); return; }
     const k = KEYS[gt.paso], t = TEMAS[k], [i, v] = p, e = t.ejes[i], [x, y] = gtXY(t.ejes.length, i, v), c = colorEn(t, v);
-    box.className = "gt-info"; box.style.setProperty("--c", c); box.innerHTML = `<b>${i + 1}. ${e.n} · ${NIV_TITULO[v]}</b>${e.niv[v]}`;
+    box.className = "gt-info"; box.style.setProperty("--c", c); const m = medidasDe(k, i, v);
+    box.innerHTML = `<b>${i + 1}. ${e.n} · ${NIV_TITULO[v]}</b>` + (m ? `${m[0]}<ul class="mds mds-c">${m[1].map(([a]) => `<li>${a}</li>`).join("")}</ul>` : e.niv[v]);
     fan.setAttribute("cx", x.toFixed(1)); fan.setAttribute("cy", y.toFixed(1)); fan.setAttribute("stroke", c); fan.setAttribute("opacity", "1");
   }
   function gtCabecera() {
@@ -4556,7 +4576,13 @@ const ILUS = {
   }
   const gtTexto = (t, e, v) => (v === null
     ? `<p class="gt-txt vacio">Sin contestar: si pasas de tema, cuenta como «Indefinido». Desliza o pulsa un nivel para ver la medida.</p>`
-    : `<p class="gt-txt"><b>${NIV_TITULO[v]}</b>${e.niv[v]}</p>`);
+    : `<div class="gt-txt"><b>${NIV_TITULO[v]}</b>${htmlMedidas(KEYS[gt.paso], t.ejes.indexOf(e), v, e.niv[v])}</div>`);
+  // When the measures arrive after the test is open, redraw the texts of the answered cards
+  function gtRefrescarTextos() {
+    if (gtEl.hidden || gt.paso >= KEYS.length) return;
+    const k = KEYS[gt.paso], t = TEMAS[k];
+    $$("[data-gt-q]", gtPreg).forEach((art) => { const i = +art.dataset.gtQ; art.querySelector(".gt-txt").outerHTML = gtTexto(t, t.ejes[i], gt.r[k][i]); });
+  }
   function gtPregunta(k, i) {
     const t = TEMAS[k], e = t.ejes[i], v = gt.r[k][i], hecha = v !== null, val = hecha ? v : 0;
     return `<article class="gt-q${hecha ? " hecha" : ""}" style="--tc:${t.c};--c:${colorEn(t, val)}" data-gt-q="${i}"><h4><span class="gt-num">${i + 1}</span>${e.n}</h4>`

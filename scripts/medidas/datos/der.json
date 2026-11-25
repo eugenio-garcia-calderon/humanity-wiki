@@ -1,0 +1,396 @@
+{
+  "tema": "der",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "Los seis aspectos recogen debates reales y el nivel Ideal está bien construido y equilibrado. Falla la escala: varios niveles Básico e Intermedio describen lo que ya es ley en España, dos aspectos (apoyo a la vida y aborto y eutanasia) se pisan, y quedan fuera derechos centrales como reunión, manifestación y privacidad.",
+    "problemas": [
+      {
+        "aspecto": 4,
+        "nivel": null,
+        "problema": "«Protección de la vida» y «Autonomía personal» se solapan: los dos hablan de cuidados paliativos y de apoyo antes de decidir, y quien hace el test puntúa dos veces lo mismo.",
+        "mejora": "Dejar en «Protección de la vida» las ayudas (maternidad, dependencia, paliativos) y en «Autonomía personal» solo el acceso a la prestación, la objeción de conciencia y su evaluación."
+      },
+      {
+        "aspecto": null,
+        "nivel": 2,
+        "problema": "Varios niveles piden lo que ya es obligatorio: el Estado aconfesional está en la Constitución, la autoridad de igualdad de trato en la Ley 15/2022 y la independencia de los medios públicos en un reglamento europeo.",
+        "mejora": "Básico pasa a ser «cumplir lo que ya obliga» y los niveles superiores piden ejecución, plazos y datos publicados, no la mera existencia de la norma."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "Faltan derechos centrales del tema: reunión y manifestación, privacidad y protección de datos frente al Estado y a las plataformas, y garantías ante la policía y los tribunales.",
+        "mejora": "Añadir un aspecto de libertades civiles y privacidad digital, con la misma escala de cinco niveles."
+      },
+      {
+        "aspecto": 0,
+        "nivel": 1,
+        "problema": "El aspecto mezcla dos debates, creencias y elección de escuela, y cada nivel atiende solo uno: Básico habla de culto, Intermedio de escuela y Avanzado vuelve a la religión.",
+        "mejora": "Que cada nivel avance a la vez en los tres hilos: igualdad entre creencias, objeción de conciencia y reglas de admisión escolar."
+      },
+      {
+        "aspecto": 5,
+        "nivel": 2,
+        "problema": "El aspecto promete cubrir el origen, a las personas lesbianas, gais, trans, bisexuales e intersexuales y la discapacidad, pero los niveles hablan casi solo de brecha salarial y violencia machista.",
+        "mejora": "Medir la discriminación por origen, orientación, identidad, edad y religión, y dar un cauce de queja para cualquier motivo desde el nivel Intermedio."
+      },
+      {
+        "aspecto": 3,
+        "nivel": 1,
+        "problema": "«Proteger el periodismo» no dice cómo: no aparecen el secreto profesional, el acceso a la información pública ni las demandas abusivas contra periodistas.",
+        "mejora": "Básico con instrumentos concretos: ley del secreto profesional, cumplimiento del reglamento europeo de medios y acceso efectivo a la información pública."
+      },
+      {
+        "aspecto": 2,
+        "nivel": 2,
+        "problema": "La «ayuda universal por crianza» de Intermedio y la «prestación universal por hijo» de Ideal son casi la misma medida, y faltan la conciliación y los tratamientos de fertilidad.",
+        "mejora": "Intermedio limita la ayuda universal a los primeros años, Ideal la extiende hasta la mayoría de edad, y conciliación y reproducción asistida entran en niveles previos."
+      },
+      {
+        "aspecto": null,
+        "nivel": 0,
+        "problema": "El nivel Indefinido mezcla «no proponer nada» con conductas graves como perseguir creencias o encarcelar opiniones, que no merecen la misma lectura.",
+        "mejora": "Describir el Indefinido con viñetas separadas: falta de propuesta por un lado, propuestas que rompen la base de derechos por otro."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Libertad de conciencia y de educación",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta, o una que impone o persigue creencias, elimina toda elección educativa o deja al ciudadano sin servicio por una objeción.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "Repetir el marco vigente sin decir qué se haría con la financiación de las confesiones, la enseñanza religiosa o la admisión de alumnos." },
+            { "nombre": "Creencia favorecida o perseguida", "texto": "Favorecer por ley o con dinero público una creencia frente a las demás, o tratar como sospechosa a una confesión entera por el origen de sus fieles." },
+            { "nombre": "Ni elección ni relevo", "texto": "Suprimir toda elección de centro o toda objeción de conciencia, o, al revés, permitir objeciones que dejan al ciudadano sin el servicio que la ley le reconoce." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Se cumplen de verdad la libertad religiosa y de culto, la aconfesionalidad del Estado y la elección de centro que ya reconoce la Constitución.",
+          "medidas": [
+            { "nombre": "Lugares de culto sin vetos", "texto": "Los ayuntamientos conceden licencias para lugares de culto con las mismas reglas urbanísticas que a cualquier local de reunión, sin vetos por la confesión." },
+            { "nombre": "Registro de entidades religiosas ágil", "texto": "El Estado inscribe en plazo a cualquier confesión que cumpla los requisitos legales y motiva por escrito cada negativa, que se puede recurrir." },
+            { "nombre": "Asistencia religiosa libre", "texto": "Hospitales, cárceles y cuarteles permiten la asistencia religiosa de cualquier confesión que la pida, y nadie está obligado a recibirla ni a declarar sus creencias." },
+            { "nombre": "Elección de centro informada", "texto": "Las comunidades publican, antes de la matrícula, la oferta de plazas, el proyecto educativo y los criterios de admisión de cada centro pagado con fondos públicos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Objeción de conciencia regulada por ley y elección de centro con las mismas reglas de admisión en la red pública y en la concertada.",
+          "medidas": [
+            { "nombre": "Ley general de objeción de conciencia", "texto": "Una ley estatal fija cómo se objeta en cualquier profesión: de forma personal, anticipada y por escrito, y obliga a la Administración a garantizar el servicio." },
+            { "nombre": "Admisión con el mismo baremo", "texto": "Las comunidades aplican un baremo único (cercanía, hermanos, renta) y una oficina común de escolarización para centros públicos y concertados." },
+            { "nombre": "Gratuidad vigilada en la concertada", "texto": "La inspección educativa comprueba que los centros concertados no cobran cuotas obligatorias encubiertas y publica las sanciones que impone." },
+            { "nombre": "Alternativa real a la religión", "texto": "Quien no elige enseñanza religiosa recibe una materia con contenido propio, y ninguna de las dos opciones da ventaja ni castigo en la nota media." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Trato igual efectivo a todas las creencias y a quien no tiene ninguna, objeción con relevo organizado y segregación escolar medida.",
+          "medidas": [
+            { "nombre": "Acuerdos abiertos a toda confesión", "texto": "Las confesiones con arraigo reconocido pueden firmar con el Estado acuerdos de cooperación de igual contenido, y las convicciones no religiosas tienen un cauce equivalente." },
+            { "nombre": "Relevo organizado por la Administración", "texto": "Cada servicio público planifica sus plantillas con el registro de objetores, de modo que el ciudadano nunca tenga que buscar por su cuenta quién le atienda." },
+            { "nombre": "Segregación escolar medida", "texto": "Las comunidades publican cada año la composición social del alumnado de cada centro con fondos públicos y reparten entre todos al alumnado más vulnerable." },
+            { "nombre": "Actos oficiales neutrales", "texto": "Los actos oficiales del Estado no incluyen ceremonias religiosas; las autoridades pueden asistir a título personal a las de cualquier confesión." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un estatuto común para toda creencia y para quien no tiene ninguna, con dinero decidido por cada contribuyente y una sola regla para toda escuela pagada con fondos públicos.",
+          "medidas": [
+            { "nombre": "Marco único de cooperación", "texto": "Una ley orgánica de libertad de conciencia sustituye los acuerdos confesión a confesión por requisitos objetivos iguales; el Estado renegocia los vigentes, incluido el tratado con la Santa Sede." },
+            { "nombre": "Casilla del contribuyente para todos", "texto": "En la declaración de la renta cada persona elige si una parte de su impuesto va a una confesión reconocida, a fines sociales o al Estado. Lo no marcado no se reparte y las cuentas se publican.", "fuente": "https://documenti.camera.it/leg19/dossier/testi/BI0117.htm" },
+            { "nombre": "Objeción con servicio garantizado", "texto": "Objeción personal, anticipada y por escrito en cualquier profesión, con plazo máximo de atención: si se incumple, la Administración deriva al ciudadano con todos los gastos pagados." },
+            { "nombre": "Una regla para toda escuela con fondos públicos", "texto": "Toda escuela pagada con dinero público comparte admisión, gratuidad real sin cuotas y reparto del alumnado con más necesidades, y conserva su ideario propio.", "fuente": "https://www.government.nl/themes/education/freedom-of-education/public-authority-and-private-schools" },
+            { "nombre": "Informe anual independiente", "texto": "Un órgano independiente publica cada año las quejas por discriminación religiosa o ideológica, los servicios no prestados por objeción y la composición social de cada centro." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Protección de la vida y apoyo a la maternidad",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin apoyo a la embarazada ni a la persona enferma o dependiente, o un apoyo usado para presionar, condicionar o engañar a quien decide.",
+          "medidas": [
+            { "nombre": "Sin red de apoyo", "texto": "No prever ayuda económica, vivienda ni cuidados para la embarazada en apuros ni para el enfermo grave, y dejar que la falta de medios decida por ellos." },
+            { "nombre": "Ayuda con condiciones", "texto": "Atar la ayuda a una decisión concreta, retrasar con trámites el acceso a una prestación legal o dar información sanitaria falsa o incompleta." },
+            { "nombre": "Presión a la puerta", "texto": "Tolerar la presión o el acoso a quien acude a un centro sanitario, en cualquier sentido, en lugar de proteger su intimidad y su libertad." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Información veraz y ayudas fáciles de pedir para la embarazada que quiere seguir adelante y para quien cuida a un enfermo o dependiente.",
+          "medidas": [
+            { "nombre": "Información completa por escrito", "texto": "El centro de salud entrega a toda embarazada información escrita de las ayudas, permisos y servicios a los que tiene derecho, sin condicionar su decisión." },
+            { "nombre": "Ayudas de nacimiento en un solo trámite", "texto": "El Estado y las comunidades reúnen en una sola web y un solo trámite las prestaciones por embarazo y nacimiento que hoy se piden en sitios distintos." },
+            { "nombre": "Empleo de la embarazada protegido", "texto": "La Inspección de Trabajo vigila despidos y contratos no renovados a embarazadas y publica cada año cuántas sanciones impone." },
+            { "nombre": "Plan de paliativos en cada comunidad", "texto": "Cada comunidad tiene un plan de cuidados paliativos con equipos en casa y en el hospital, y publica qué zonas cubre y cuáles no." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Una red estable de apoyo a la maternidad y de cuidados paliativos en toda España, con puertas de entrada claras y apoyo a quien cuida.",
+          "medidas": [
+            { "nombre": "Red de apoyo a la maternidad", "texto": "Servicios sociales y entidades concertadas ofrecen acompañamiento, material para el bebé y orientación de empleo a toda embarazada que lo pida, con financiación de varios años." },
+            { "nombre": "Equipo de paliativos en cada área", "texto": "Cada área sanitaria cuenta con un equipo especializado de cuidados paliativos que atiende en casa, en la residencia y en el hospital." },
+            { "nombre": "Teléfono para embarazadas en apuros", "texto": "Un teléfono público, gratuito y confidencial orienta sobre ayudas, vivienda de emergencia y opciones, sin juzgar ni empujar en ningún sentido." },
+            { "nombre": "Apoyo a quien cuida en casa", "texto": "Respiro familiar, formación y cotización a la Seguridad Social para quienes cuidan en casa a un familiar dependiente o enfermo grave." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Que nadie decida por falta de recursos: renta, vivienda y cuidados garantizados para la embarazada y para la persona enferma o dependiente.",
+          "medidas": [
+            { "nombre": "Fondo para embarazadas en apuros", "texto": "Un fondo estatal que se pide en el centro de salud o de servicios sociales, se paga desde el embarazo y no se descuenta de otras prestaciones, como en Alemania.", "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/bundesstiftung-mutter-und-kind/bundesstiftung-mutter-und-kind-73522" },
+            { "nombre": "Vivienda de acogida", "texto": "Las comunidades reservan pisos de acogida para embarazadas y madres solas sin hogar, con acceso en días y acompañamiento social." },
+            { "nombre": "Dependencia en el plazo legal", "texto": "El Estado y las comunidades financian la ley de dependencia para que la ayuda reconocida llegue en el plazo que marca la ley, y publican la espera real por provincia." },
+            { "nombre": "Especialidad de cuidados paliativos", "texto": "Se reconoce la especialidad médica y de enfermería en cuidados paliativos para que haya profesionales formados en todo el territorio." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un derecho exigible al apoyo, en plazo fijo y antes de decidir: renta, vivienda y cuidados, paliativos incluidos, sin ninguna condición.",
+          "medidas": [
+            { "nombre": "Ventanilla única de embarazo", "texto": "En pocos días, un plan personal de renta, vivienda, empleo o estudios y escuela infantil. Es voluntario y no condiciona ni retrasa la decisión de la mujer.", "meta": true },
+            { "nombre": "Ley de cuidados paliativos", "texto": "Equipo especializado en casa o en el hospital en un plazo máximo fijado por ley y reclamable, con una dotación como la de los países europeos mejor cubiertos.", "fuente": "https://www.unav.edu/documents/30448903/31064575/key-insights-esp.pdf" },
+            { "nombre": "Prestación puente en dependencia", "texto": "Si la ayuda reconocida no llega en plazo, se cobra de forma automática una prestación económica hasta que llegue, pagada por la Administración que se retrasa." },
+            { "nombre": "Parto confidencial", "texto": "Dar a luz con atención médica completa sin identificarse públicamente, con los gastos pagados y el derecho del hijo a conocer su origen cuando crezca, como en Alemania.", "fuente": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/vertrauliche-geburt" },
+            { "nombre": "Informe anual por provincia", "texto": "Cobertura de paliativos, espera en dependencia y una encuesta voluntaria y anónima sobre si la falta de recursos pesó en la decisión, publicados cada año." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Familia y natalidad",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin medidas para quien quiere tener hijos, o ayudas que se dan o se niegan según la forma de la familia, su origen o sus ideas.",
+          "medidas": [
+            { "nombre": "Lamentos sin política", "texto": "Lamentar la baja natalidad sin proponer permisos, escuela infantil, vivienda ni ayudas, o prometerlos sin decir cómo se pagan." },
+            { "nombre": "Familias de primera y de segunda", "texto": "Excluir de las ayudas a familias monoparentales, del mismo sexo o de origen extranjero con residencia legal, o premiar un solo modelo de familia." },
+            { "nombre": "Cheques que se esfuman", "texto": "Ayudas de un solo año que cambian con cada gobierno y no permiten a nadie planificar con tiempo la decisión de tener un hijo." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Permisos de nacimiento pagados e iguales, ayuda por hijo a las familias con menos renta y protección del empleo de madres y padres.",
+          "medidas": [
+            { "nombre": "Permiso propio para cada progenitor", "texto": "Cada progenitor tiene su propio permiso pagado por nacimiento, que no se puede ceder, para repartir el cuidado y que no penalice solo a la madre." },
+            { "nombre": "Ayuda por hijo a rentas bajas", "texto": "La Seguridad Social paga una ayuda mensual por hijo a las familias con menos ingresos, compatible con el empleo y pedida en un solo trámite." },
+            { "nombre": "Despido nulo por cuidar", "texto": "La ley anula el despido de quien está embarazada, de permiso o con jornada reducida por cuidado de hijos, y la Inspección de Trabajo lo vigila." },
+            { "nombre": "Reproducción asistida pública", "texto": "La sanidad pública cubre los tratamientos de fertilidad con los mismos requisitos en todas las comunidades y publica sus listas de espera." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Escuela infantil gratuita de cero a tres años, ayuda para toda familia en los primeros años, vivienda para familias jóvenes y jornada adaptable.",
+          "medidas": [
+            { "nombre": "Escuela infantil gratuita", "texto": "Comunidades y ayuntamientos crean plazas públicas gratuitas de cero a tres años, empezando por los barrios y pueblos con menos oferta." },
+            { "nombre": "Ayuda universal en la primera infancia", "texto": "Una ayuda mensual por cada hijo pequeño para toda familia, sin mirar la renta, que se cobra de forma automática desde el nacimiento." },
+            { "nombre": "Vivienda para familias jóvenes", "texto": "Prioridad de los hogares jóvenes con hijos, o que esperan uno, en el alquiler público y asequible del Estado, las comunidades y los ayuntamientos." },
+            { "nombre": "Jornada adaptable sin castigo", "texto": "Derecho a adaptar horario y lugar de trabajo para cuidar, que la empresa solo puede negar por escrito y con causa, sin perder cotización ni promoción." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Una política familiar estable y evaluada, medida por la distancia entre los hijos que la gente quiere tener y los que tiene.",
+          "medidas": [
+            { "nombre": "Indicador de hijos deseados y tenidos", "texto": "El Instituto Nacional de Estadística publica con regularidad la distancia entre hijos deseados y tenidos, por edad, renta y territorio, como ya hace su encuesta de fecundidad.", "fuente": "https://ine.es/dyngs/Prensa/pEF2025.htm" },
+            { "nombre": "Ley de familias con presupuesto plurianual", "texto": "Las ayudas a la crianza se fijan en una ley con financiación de varios años y se actualizan cada año con la subida de los precios." },
+            { "nombre": "Evaluación de cada medida", "texto": "Un órgano evaluador independiente estudia qué permisos, plazas y ayudas reducen esa distancia y publica sus conclusiones antes de cada presupuesto." },
+            { "nombre": "Horarios que permiten criar", "texto": "Pacto con empresas y Administraciones para racionalizar horarios: jornadas que acaban antes, reuniones en horario laboral y calendario escolar coordinado." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Prestación universal por hijo hasta la mayoría de edad, plaza infantil garantizada al acabar el permiso y un pacto a veinte años con una meta medible.",
+          "medidas": [
+            { "nombre": "Prestación universal por hijo", "texto": "Igual para toda familia hasta los 18 años, actualizada cada año con los precios y revisada cada cinco con el coste real de criar, como el Kindergeld alemán.", "meta": true, "fuente": "https://familienportal.de/bmbfsfj/themen/familie/familienleistungen/kindergeld/kindergeld-73892" },
+            { "nombre": "Plaza infantil garantizada por ley", "texto": "Derecho exigible a una plaza gratuita de escuela infantil desde que acaba el permiso de nacimiento, con horario compatible con el trabajo, como en Dinamarca.", "fuente": "https://lifeindenmark.borger.dk/family-and-children/childcare/family-daycare--nurseries-and-kindergartens" },
+            { "nombre": "Permisos más largos y flexibles", "texto": "Permisos pagados más largos, con una parte intransferible para cada progenitor y días que se pueden pasar a otro cuidador, como un abuelo, al modo sueco.", "fuente": "https://forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit" },
+            { "nombre": "Libertad de modelo de crianza", "texto": "Quien prefiera cuidar en casa los primeros meses puede alargar el permiso en vez de usar la plaza, y ninguna forma de familia queda fuera de las ayudas." },
+            { "nombre": "Pacto de Estado a veinte años", "texto": "Un pacto con una sola meta: cerrar la distancia entre hijos deseados y tenidos. El Instituto Nacional de Estadística la mide cada año y un órgano independiente evalúa.", "meta": true }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Libertad de expresión y de prensa",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Pedir cárcel o cierre de medios por opiniones, señalar a periodistas o usar el dinero y los medios públicos para premiar y castigar.",
+          "medidas": [
+            { "nombre": "Castigar opiniones", "texto": "Proponer penas de prisión o el cierre de medios por opiniones, sátira o crítica que no incitan a la violencia." },
+            { "nombre": "Señalar a periodistas", "texto": "Señalar desde un cargo público a periodistas concretos, vetarlos en comparecencias o vigilarlos sin control judicial." },
+            { "nombre": "Dinero público como premio", "texto": "Repartir la publicidad institucional y los puestos directivos de los medios públicos según la línea editorial de cada medio." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Respeto real al trabajo periodístico, sin persecución por opiniones y con las reglas europeas de libertad de los medios cumplidas.",
+          "medidas": [
+            { "nombre": "Ley del secreto profesional", "texto": "Una ley desarrolla el secreto profesional que ya recoge la Constitución, para que ningún periodista pueda ser obligado a revelar sus fuentes." },
+            { "nombre": "Comparecencias con preguntas", "texto": "Las Administraciones dan acceso a todos los medios acreditados y aceptan preguntas en sus comparecencias, sin listas cerradas ni medios vetados." },
+            { "nombre": "Acceso a la información pública", "texto": "El Consejo de Transparencia resuelve las peticiones de información denegadas y sus resoluciones se cumplen, también por los ministerios y las comunidades." },
+            { "nombre": "Reglamento europeo de medios cumplido", "texto": "El Estado aplica el Reglamento Europeo de Libertad de Medios: protección de fuentes, independencia editorial y transparencia de la propiedad.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783152" }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Revisar los delitos de opinión, repartir la publicidad institucional con reglas publicadas y frenar las demandas abusivas contra periodistas.",
+          "medidas": [
+            { "nombre": "Revisión de los delitos de opinión", "texto": "Las Cortes revisan las injurias a instituciones, las ofensas a sentimientos religiosos y los ultrajes a símbolos a la luz de las condenas del Tribunal Europeo de Derechos Humanos.", "fuente": "https://merlin.obs.coe.int/article/8266" },
+            { "nombre": "Publicidad institucional con criterios", "texto": "Cada Administración publica antes los criterios de reparto (audiencia verificada, territorio, lengua) y después cada euro que ha recibido cada medio." },
+            { "nombre": "Freno a las demandas abusivas", "texto": "Archivo rápido y costas para quien demanda a periodistas o activistas solo para callarlos, extendiendo a todos los casos lo que la directiva europea prevé entre países.", "fuente": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783044" },
+            { "nombre": "Cuentas de los medios públicos", "texto": "Los medios públicos publican cuentas, audiencias, contratos externos y quejas, y su dirección comparece cada año ante el Parlamento o la asamblea autonómica." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Medios públicos independientes del Gobierno, propiedad de los medios a la vista y respuestas a los bulos que no hacen de ningún gobierno árbitro de la verdad.",
+          "medidas": [
+            { "nombre": "Consejos de medios públicos plurales", "texto": "Los consejos de la radiotelevisión estatal y de las autonómicas se eligen por mayorías amplias, con perfiles profesionales y un mandato distinto al de la legislatura." },
+            { "nombre": "Registro de propietarios reales", "texto": "Un registro público y abierto con los dueños reales de cada medio y todo el dinero público que recibe, mantenido por la autoridad audiovisual." },
+            { "nombre": "Plataformas transparentes", "texto": "Las grandes plataformas digitales explican cómo ordenan y retiran contenidos y dan datos a investigadores, como exige la normativa europea de servicios digitales." },
+            { "nombre": "Aprender a contrastar en la escuela", "texto": "El currículo enseña a contrastar fuentes y detectar bulos, y las comunidades lo evalúan, en lugar de encargar a un gobierno decidir qué es verdad." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Sin cárcel por opiniones que no incitan a la violencia, medios públicos dirigidos por concurso, publicidad por reglas fijas y jueces, no gobiernos, ante los bulos.",
+          "medidas": [
+            { "nombre": "Sin cárcel por opinar", "texto": "Quitar la pena de prisión a las injurias a instituciones, las ofensas a sentimientos y los ultrajes a símbolos. Las amenazas y la incitación a la violencia siguen siendo delito." },
+            { "nombre": "Dirección por concurso público", "texto": "Como máximo un tercio de consejeros ligados a gobiernos o partidos, dirección elegida por concurso, mandato más largo que la legislatura y cese solo por causa tasada.", "meta": true, "fuente": "https://www.bundesverfassungsgericht.de/SharedDocs/Pressemitteilungen/DE/2014/bvg14-026" },
+            { "nombre": "Publicidad institucional por fórmula", "texto": "El reparto se calcula con una fórmula pública y estable, lo aplica un órgano técnico y no el Gobierno, y cada medio puede recurrir el resultado." },
+            { "nombre": "Jueces, no gobiernos, ante los bulos", "texto": "Ningún órgano del Gobierno decide qué es verdad: la retirada de contenidos solo se hace por orden judicial, con rectificación rápida y plataformas transparentes." },
+            { "nombre": "Periodistas a salvo del espionaje", "texto": "Prohibido vigilar a periodistas o a sus fuentes sin autorización judicial previa y motivada, con aviso posterior al afectado y control parlamentario." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Autonomía personal: aborto y eutanasia",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Incumplir o bloquear desde un cargo público las leyes vigentes, o negar la objeción y castigar a quien no quiere participar.",
+          "medidas": [
+            { "nombre": "Bloqueo desde la Administración", "texto": "No ofrecer la prestación en la sanidad pública de una comunidad, retrasarla con trámites o negarse a crear el registro de objetores que pide la ley." },
+            { "nombre": "Objeción negada o castigada", "texto": "Obligar a un profesional a participar contra su conciencia, o perjudicar su carrera por objetar o por no objetar." },
+            { "nombre": "Cambios sin datos", "texto": "Prometer derogar o ampliar estas leyes sin datos de cómo se aplican y con mayorías justas que cambian con cada gobierno." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cumplir las leyes vigentes de aborto y eutanasia, con información veraz al paciente, intimidad protegida y la objeción que ya prevén.",
+          "medidas": [
+            { "nombre": "La ley vigente, cumplida", "texto": "Cada comunidad presta el aborto y la eutanasia en los términos de la ley estatal, y el Ministerio de Sanidad publica los datos que recibe." },
+            { "nombre": "Información completa al paciente", "texto": "Quien pide la prestación recibe por escrito las alternativas, las ayudas y los cuidados paliativos disponibles, sin que eso añada trámites ni plazos." },
+            { "nombre": "Intimidad protegida", "texto": "Los datos de quien pide estas prestaciones y los del registro de objetores solo sirven para organizar el servicio y nunca se publican de forma individual." },
+            { "nombre": "Comisiones de garantía en marcha", "texto": "Todas las comunidades tienen funcionando la comisión de médicos y juristas que controla cada eutanasia, como exige la ley.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628" }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Que las prestaciones se den en la sanidad pública de todas las comunidades, con la objeción registrada y el relevo organizado.",
+          "medidas": [
+            { "nombre": "Prestación en hospitales públicos", "texto": "Las comunidades ofrecen la prestación en sus propios hospitales y no solo derivando a clínicas concertadas, para que no dependa de un contrato." },
+            { "nombre": "Registro de objetores en cada comunidad", "texto": "Objeción personal, anticipada y por escrito, en un registro confidencial que solo sirve para planificar plantillas, como manda la ley de aborto reformada.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514" },
+            { "nombre": "Formación de los profesionales", "texto": "Las facultades y la formación sanitaria especializada enseñan estas prestaciones, sin obligar a practicarlas a quien objeta." },
+            { "nombre": "Datos por comunidad", "texto": "El Ministerio de Sanidad publica cada año, por comunidad, cuántas prestaciones se hicieron, dónde, en qué tiempos y cuántas se denegaron." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Acceso garantizado y evaluado en todo el territorio, con paliativos y apoyo disponibles para que nadie elija por falta de alternativa.",
+          "medidas": [
+            { "nombre": "Cobertura en cada provincia", "texto": "Las comunidades garantizan un equipo no objetor, propio o desplazado, que presta el servicio sin obligar a viajar lejos de la propia provincia." },
+            { "nombre": "Alternativas ofrecidas, no solo informadas", "texto": "El equipo sanitario, coordinado con servicios sociales, ofrece cuidados paliativos o ayuda a la maternidad ya disponibles, sin retrasar la prestación." },
+            { "nombre": "Evaluación independiente de las leyes", "texto": "La agencia estatal de evaluación de políticas públicas revisa periódicamente la aplicación de ambas leyes y publica sus conclusiones.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677" },
+            { "nombre": "Carrera sin perjuicio", "texto": "Objetar o no objetar no afecta a la promoción, el destino ni el sueldo del profesional, y cada queja se investiga." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Mientras la ley las reconozca, prestación pública en cada provincia y en plazo, objeción respetada, apoyo ofrecido antes y evaluación pública cada año.",
+          "medidas": [
+            { "nombre": "Equipo no objetor con plazo máximo", "texto": "Propio o desplazado en cada provincia, con plazo máximo de atención. Si no se cumple, derivación inmediata a otro centro con todos los gastos pagados.", "meta": true },
+            { "nombre": "Vía urgente en eutanasia", "texto": "Plazo máximo total de tramitación y vía urgente para enfermos terminales, manteniendo los dos informes médicos y el control previo de la comisión de garantía.", "meta": true },
+            { "nombre": "Revisión posterior de cada caso", "texto": "Además del control previo, la comisión revisa cada eutanasia después y publica un informe anual, como hacen las comisiones regionales de Países Bajos.", "fuente": "https://english.euthanasiecommissie.nl/the-committees" },
+            { "nombre": "Datos abiertos cada año", "texto": "Evaluación independiente anual con datos abiertos por provincia: tiempos, lugar de la prestación, objeción, denegaciones y alternativas que faltaron." },
+            { "nombre": "Reformas con evaluación y consenso", "texto": "Toda reforma de fondo, en un sentido o en otro, va precedida de la evaluación pública y busca una mayoría más amplia que la del gobierno del momento." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Igualdad y no discriminación",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Negar la discriminación o la violencia contra las mujeres, justificar el odio o saltarse la presunción de inocencia en nombre de la igualdad.",
+          "medidas": [
+            { "nombre": "Negar el problema", "texto": "Negar que existan la violencia contra las mujeres o la discriminación por origen, orientación o discapacidad, o suprimir sin sustituto los servicios que las atienden." },
+            { "nombre": "Justificar el odio", "texto": "Justificar o callar ante agresiones o campañas de odio contra un grupo, o dar dinero público a quien las promueve." },
+            { "nombre": "Garantías rotas", "texto": "Suprimir la presunción de inocencia o el derecho de defensa de alguien por su sexo o por su grupo, con el argumento que sea." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cumplir las leyes de igualdad y no discriminación que ya existen y perseguir los delitos de odio con fiscales especializados.",
+          "medidas": [
+            { "nombre": "Fiscales de delitos de odio", "texto": "Cada fiscalía provincial tiene un fiscal especializado en delitos de odio y discriminación, y el Ministerio del Interior publica cada año los casos." },
+            { "nombre": "Planes de igualdad comprobados", "texto": "Las empresas obligadas por ley tienen un plan de igualdad registrado y un registro de salarios por sexo, y la Inspección de Trabajo lo comprueba." },
+            { "nombre": "Atención a víctimas de violencia machista", "texto": "Teléfono gratuito, centros de crisis abiertos todo el día y órdenes de protección con seguimiento en todas las comunidades." },
+            { "nombre": "Accesibilidad que ya exige la ley", "texto": "Las Administraciones cumplen las normas de accesibilidad vigentes en edificios, transporte y webs, y sancionan su incumplimiento." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Brecha salarial medida por empresa, protección frente a la violencia machista en todo el territorio, accesibilidad con fechas y discriminación medida.",
+          "medidas": [
+            { "nombre": "Transparencia salarial", "texto": "Las empresas informan de su brecha salarial entre mujeres y hombres a la plantilla y a la Administración, como exige la directiva europea de transparencia salarial.", "fuente": "https://www.consilium.europa.eu/en/policies/pay-transparency/" },
+            { "nombre": "Protección de víctimas coordinada", "texto": "Valoración del riesgo, seguimiento policial y dispositivos de control coordinados entre jueces, policía y servicios sociales, con revisión de cada fallo." },
+            { "nombre": "Plan de accesibilidad con fechas", "texto": "Cada Administración aprueba y publica un plan con fechas y presupuesto para hacer accesibles sus edificios, trámites y transportes." },
+            { "nombre": "Discriminación medida por cualquier motivo", "texto": "Encuestas oficiales, voluntarias y anónimas, sobre discriminación por origen, orientación sexual, identidad, edad, religión o discapacidad." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Igualdad real medida con datos públicos y leyes evaluadas, que se corrigen cuando producen efectos que nadie buscaba.",
+          "medidas": [
+            { "nombre": "Autoridad de igualdad en funcionamiento", "texto": "La autoridad independiente de igualdad de trato que prevé la Ley 15/2022 funciona con presupuesto propio, atiende quejas y puede llevar casos a los tribunales." },
+            { "nombre": "Panel público de igualdad", "texto": "El Instituto Nacional de Estadística publica cada año salarios, empleo, violencia, accesibilidad y discriminación por sexo, origen, discapacidad y edad." },
+            { "nombre": "Evaluación de las leyes de igualdad", "texto": "La agencia estatal de evaluación revisa cada ley de igualdad tras su entrada en vigor y publica qué funciona y qué efectos no buscados tiene.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677" },
+            { "nombre": "Pacto plurianual contra la violencia machista", "texto": "Pacto de Estado con financiación de varios años y evaluación independiente de qué medidas reducen de verdad las agresiones y los asesinatos." },
+            { "nombre": "Protección para toda víctima en el hogar", "texto": "Protección y alojamiento para cualquier víctima de violencia en el hogar, también hombres, menores y mayores, sin restar medios a la violencia machista." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Igualdad que se mide y se corrige: brecha pública empresa a empresa, autoridad independiente para cualquier discriminación, accesibilidad exigible y leyes evaluadas.",
+          "medidas": [
+            { "nombre": "Buscador público de brecha salarial", "texto": "Brecha de cada empresa de más de 50 trabajadores en un buscador público. Si pasa del 5 % sin causa objetiva, plan de corrección pactado con la plantilla.", "meta": true, "fuente": "https://www.gov.uk/government/collections/gender-pay-gap-reporting" },
+            { "nombre": "Autoridad de igualdad para todos", "texto": "Elegida por mayoría amplia, atiende gratis cualquier discriminación (sexo, orientación, origen, discapacidad, edad, religión o ideas) y puede sancionar." },
+            { "nombre": "Accesibilidad universal exigible", "texto": "Fecha límite, presupuesto y sanción para edificios, transporte, webs y trámites, y derecho de cualquier persona a reclamar ante la autoridad independiente." },
+            { "nombre": "Leyes con fecha de revisión", "texto": "Cada ley de igualdad nace con indicadores y se evalúa a los dos años. Si hay efectos no buscados, el Parlamento vota su corrección en seis meses.", "meta": true },
+            { "nombre": "Garantías y acción positiva temporal", "texto": "Presunción de inocencia y proceso justo siempre; las medidas de acción positiva son temporales y se retiran cuando se cierra la diferencia que las justificó." }
+          ]
+        }
+      ]
+    }
+  ]
+}
