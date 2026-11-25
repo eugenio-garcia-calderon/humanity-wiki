@@ -70,6 +70,8 @@ export function ofrecerInstalacion() {
   if (location.pathname.startsWith("/arquitectura")) return;
   // Y para el Estudio sobre la conciencia (2026-11-10): página propia.
   if (location.pathname.startsWith("/conciencia")) return;
+  // Y para la Agricultura sintrópica (2026-11-25): herramienta a pantalla completa.
+  if (location.pathname.startsWith("/agricultura-sintropica")) return;
   // Y para la Economía pública optimizada, antes Modelo socioeconómico (2026-11-10): página propia.
   if (location.pathname.startsWith("/economia-publica-optimizada") || location.pathname.startsWith("/modelo-socioeconomico")) return;
 

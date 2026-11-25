@@ -1174,3 +1174,10 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Second pass on the ideal pages' sources (2026-11-25).** 64 pages (all ten topics) were drafted by agents; references were only partly opened. About 1 day.
 - **Three copies of the level names** (`NIVEL_CORTO` in the observatory page, `NOMBRE_NIVEL` in `comun.js`, `NIVELES` in `scripts/geometria-ideal.mjs`) and two of the 0–10 → level thresholds. One shared file: about 1 hour.
 - **The Política card picture on the home page** (`public/politica/tarjetas/geometria.webp`) is a rendered image of the Inmigración figures; it has to be re-rendered by hand when scores change.
+
+## 2026-11-25 — Agricultura sintrópica: shortcuts taken
+
+- **Species data is in code** (`src/components/agriculturaSintropica/especies.ts`, 79 rows). Eugenio wants it to become «la base de datos de referencia»; when the team starts correcting values, move it to a table with an edit screen (≈ half a day today; more once other pages read it).
+- **The advisor only checks the central module and its 8 neighbours**, not the edges of the plot or the paths. Good enough while every module is identical; it misses edge effects.
+- **Crown colours and plan colours are hex values** in `paleta.ts` and `especies.ts` (3D/CAD data, same precedent as `components/arquitectura/paleta.ts`).
+- **Values not reviewed**: water needs, frost limits, zones and yields per plant are literature-level references written on 2026-11-25. Each card says so.
