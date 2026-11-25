@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/server/sitios.ts",
-      "motivo": "/partidos estático + sitemap",
-      "desde": "2026-11-25T20:10:29.879Z"
-    }
-  ]
+  "reservas": []
 }
