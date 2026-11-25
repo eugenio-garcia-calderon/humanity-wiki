@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Geometría: enlaces del ideal y niveles con medidas",
+      "desde": "2026-11-25T17:42:10.271Z"
+    }
+  ]
 }
