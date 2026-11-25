@@ -55,11 +55,11 @@
       "q": "¿Cómo se entra, quién se queda y cómo se convive?",
       "c": "#5FB3E6",
       "niv": [
-        "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
+        "No proponer nada, o romper la base: negar el auxilio en el mar o el asilo, pedir expulsiones sin juez, o negar que el Estado pueda decidir quién entra.",
         "Saber quién entra, salvar vidas en el mar, proteger a quien huye y cumplir la ley.",
         "Vías legales que funcionan, asilo en plazos razonables, retornos efectivos e integración con idioma y empleo.",
         "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias.",
-        "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."
+        "Un sistema en el que venir con papeles es más fácil que venir con las mafias: puertas legales amplias, fronteras que identifican a todos, asilo rápido, retornos que se cumplen e integración medida por resultados."
       ],
       "ejes": [
         {
@@ -70,12 +70,14 @@
           "n": "Cooperación con los países de origen y tránsito",
           "d": "Que nadie tenga que jugarse la vida para salir de su país: acuerdos con los países de donde se sale y por donde se pasa.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pagar a otros países por frenar salidas sin mirar cómo lo hacen, o rechazar todo acuerdo de readmisión.",
             "Ayuda al desarrollo y acuerdos de readmisión.",
             "Acuerdos que unen contratación en origen, inversión y retornos.",
             "Alianzas estables con cada país de origen y tránsito, evaluadas por sus resultados y por el respeto de los derechos.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un tratado con cada país de origen y tránsito que cambia visados de trabajo y formación por readmisión y lucha contra las mafias, con cupos que suben o bajan según resultados y una auditoría pública de derechos."
+          ],
+          "it": "Tratados de movilidad con visados ligados a resultados",
+          "is": "tratados-de-movilidad-con-visados-ligados-a-resultados"
         },
         {
           "l": [
@@ -85,12 +87,14 @@
           "n": "Control de fronteras y lucha contra las mafias",
           "d": "Saber quién entra, por dónde y cómo, y perseguir a las redes que trafican con personas.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pedir devoluciones sin identificar ni escuchar a nadie, o rechazar todo control de quién entra.",
             "Registrar e identificar a quien llega.",
             "Una agencia única, salvamento reforzado y persecución de las redes de tráfico.",
             "Control integrado con Europa y los países de tránsito, con datos públicos de llegadas y de muertes en las rutas.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Identificar al 100 % de quien llega en 72 horas con un control independiente de derechos, llegar a cero muertes evitables en el mar y quitar a las redes su dinero, con los datos publicados cada mes."
+          ],
+          "it": "Frontera verificada: todos identificados, cero muertes",
+          "is": "frontera-verificada-todos-identificados-cero-muertes"
         },
         {
           "l": [
@@ -100,12 +104,14 @@
           "n": "Seguridad y retorno",
           "d": "Que quien no tiene derecho a quedarse vuelva, y que el delito tenga consecuencias.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pedir expulsiones colectivas o sin recurso ante un juez, o defender que ninguna orden de salida se cumpla nunca.",
             "Expulsar a quien comete delitos graves.",
             "Retornos efectivos tras una decisión firme, y juicios rápidos.",
             "Un retorno con garantías y acuerdos que funcionan, y datos públicos con contexto para desmontar bulos.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Toda orden firme de salida se cumple en un plazo fijado: primero con retorno voluntario asistido y, si no, forzoso con observador independiente. Los datos de retornos y de delincuencia se publican con su contexto."
+          ],
+          "it": "Retorno cumplido, vigilado y con datos abiertos",
+          "is": "retorno-cumplido-vigilado-y-con-datos-abiertos"
         },
         {
           "l": [
@@ -115,12 +121,14 @@
           "n": "Convivencia y normas comunes",
           "d": "Las mismas reglas para todos y barrios donde se viva bien juntos.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pedir leyes distintas según el origen o la religión, o justificar el racismo o el incumplimiento de la ley por motivos culturales.",
             "Las mismas leyes para todos.",
             "Mediación vecinal e inversión en los barrios con más concentración.",
             "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Ningún barrio ni escuela segregado: vivienda asequible repartida por ley entre todos los municipios, inversión por contrato en los barrios con más presión y una sola vara de medir para el delito y para el racismo."
+          ],
+          "it": "Barrios mezclados por ley y una sola vara de medir",
+          "is": "barrios-mezclados-por-ley-y-una-sola-vara-de-medir"
         },
         {
           "l": [
@@ -130,12 +138,14 @@
           "n": "Economía, demografía y pensiones",
           "d": "El papel de la migración en el empleo, la natalidad y las cuentas públicas.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, tratar la inmigración solo como mano de obra barata o solo como un coste, o negar los datos sobre su efecto económico.",
             "Reconocer el papel de la inmigración en el empleo.",
             "Un plan de necesidades de mano de obra pactado con empresas y sindicatos.",
             "Natalidad, empleo e inmigración planificados juntos a diez años.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un plan a diez años, votado cada año en el Congreso, con objetivos de entrada por cada vía, calculados por un comité independiente y ligados al empleo, a la vivienda disponible y a una política propia de natalidad."
+          ],
+          "it": "Plan demográfico a diez años votado cada año",
+          "is": "plan-demografico-a-diez-anos-votado-cada-ano"
         },
         {
           "l": [
@@ -145,12 +155,14 @@
           "n": "Integración: idioma, empleo, vivienda y escuela",
           "d": "Que quien llega pueda formar parte de verdad.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, negar la escuela a los menores sin papeles, o rechazar que se pida aprender el idioma y las normas comunes.",
             "Escolarizar a los menores y ofrecer clases de idioma.",
             "Un itinerario de acogida con idioma, empleo y vivienda.",
             "Integración medida por resultados —empleo, escuela, convivencia— y repartida por el territorio para evitar guetos.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un derecho y un deber de integración: itinerario gratuito de idioma, normas y empleo que empieza antes de tres meses, con plan individual, prueba final y resultados por municipio."
+          ],
+          "it": "Itinerario de integración con derecho, deber y examen",
+          "is": "itinerario-de-integracion-con-derecho-deber-y-examen"
         },
         {
           "l": [
@@ -160,12 +172,14 @@
           "n": "Asilo y derechos humanos",
           "d": "Proteger a quien huye de una guerra o de una persecución, y a los menores que llegan solos.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pedir la salida del sistema de asilo o devolver sin examinar cada caso, o negar que una denegación firme deba cumplirse.",
             "Cumplir el derecho de asilo y proteger a los menores.",
             "Resolver el asilo en meses, con garantías, y un reparto estable de los menores.",
             "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Asilo resuelto en un máximo de 140 días con abogado gratuito desde el primer día, vías seguras para pedirlo sin cruzar el mar y menores repartidos en 14 días, con tutor, por una fórmula fija que paga el Estado."
+          ],
+          "it": "Asilo en 140 días, vías seguras y tutela inmediata",
+          "is": "asilo-en-140-dias-vias-seguras-y-tutela-inmediata"
         },
         {
           "l": [
@@ -175,12 +189,14 @@
           "n": "Vías legales para venir a trabajar o estudiar",
           "d": "Puertas ordenadas para entrar con papeles.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, pedir el cierre de toda vía legal de entrada, o confiar solo en regularizaciones periódicas de quien ya entró sin papeles.",
             "Mantener las vías de arraigo que ya existen.",
             "Visados para buscar empleo, cupos por sectores y títulos homologados en meses.",
             "Una entrada legal ágil y previsible que haga innecesarias las regularizaciones extraordinarias.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Una ventanilla digital única con plazos garantizados: visado de búsqueda de empleo por puntos, cupos anuales por sector, títulos reconocidos en tres meses y arraigo individual permanente con requisitos fijos."
+          ],
+          "it": "Ventanilla única de entrada legal con plazos fijos",
+          "is": "ventanilla-unica-de-entrada-legal-con-plazos-fijos"
         }
       ],
       "v": {
@@ -438,7 +454,7 @@
           1
         ],
         "psoe": [
-          0,
+          1,
           1,
           0,
           1,
@@ -642,7 +658,7 @@
           2,
           1,
           1,
-          0
+          1
         ],
         "psoe": [
           1,
@@ -1023,7 +1039,7 @@
           2,
           2,
           1,
-          0,
+          1,
           0
         ],
         "psoe": [
@@ -1289,11 +1305,11 @@
       "q": "¿Cómo convivimos las distintas partes de España?",
       "c": "#8F9CF7",
       "niv": [
-        "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
+        "No proponer nada, o romper la base por cualquier lado: saltarse la Constitución y las sentencias, o negar el autogobierno y las lenguas que la Constitución reconoce.",
         "Que se cumplan la Constitución y los Estatutos y que cada administración pague a tiempo sus servicios.",
         "Una financiación pactada y transparente, cooperación real entre gobiernos y respeto a la vez por las lenguas y por el mercado común.",
         "Un modelo estable que equilibra autogobierno e igualdad: se sabe quién decide qué, cuánto se paga y cuánto se recibe, y las reglas no dependen de la aritmética de cada legislatura.",
-        "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."
+        "Reglas pactadas que no dependen de cada legislatura: financiación con fórmula pública, competencias claras con ingresos propios, lenguas con derechos en los dos sentidos, gobiernos que deciden juntos y servicios equivalentes."
       ],
       "ejes": [
         {
@@ -1304,12 +1320,14 @@
           "n": "Financiación transparente",
           "d": "Cuánto recibe cada comunidad, y por qué.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada sobre financiación, o negar la solidaridad entre territorios o la autonomía financiera que reconoce la Constitución.",
             "Renovar el modelo de financiación, caducado desde 2014.",
             "Un modelo común con criterios públicos de población y de esfuerzo fiscal.",
             "Un modelo que cualquiera pueda calcular, con las balanzas fiscales publicadas y un límite pactado a las diferencias.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Una fórmula fijada por ley que un órgano técnico aplica y publica cada año: suelo garantizado de recursos por habitante, sin alterar el orden entre comunidades, y revisión obligatoria en plazo para que no vuelva a caducar."
+          ],
+          "it": "Fórmula pública con suelo garantizado y orden respetado",
+          "is": "formula-publica-de-financiacion-con-suelo-y-orden"
         },
         {
           "l": [
@@ -1319,12 +1337,14 @@
           "n": "Lenguas y culturas propias",
           "d": "El catalán, el euskera, el gallego y las demás lenguas y culturas.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "Negar la oficialidad o el uso del castellano o de una lengua cooficial, usar una contra otra o desobedecer las sentencias sobre lenguas.",
             "Proteger las lenguas cooficiales en su territorio.",
             "Que el Estado las use y las promueva también en las instituciones comunes.",
             "Las lenguas oficiales como patrimonio de toda España, enseñadas y usadas sin que ninguna sea un arma contra otra.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Una ley de lenguas oficiales con los mismos derechos en los dos sentidos: usar el castellano y la lengua propia ante cualquier administración, también la del Estado, con un comisionado independiente que atiende las quejas."
+          ],
+          "it": "Ley de lenguas con derechos en los dos sentidos",
+          "is": "ley-de-lenguas-oficiales-con-comisionado-linguistico"
         },
         {
           "l": [
@@ -1334,12 +1354,14 @@
           "n": "Cohesión: Constitución y mercado común",
           "d": "Lo que es de todos: la ley común, el mercado único, la solidaridad.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "Desobedecer la Constitución o las sentencias, cambiar las reglas comunes por la vía de los hechos o levantar barreras entre territorios.",
             "Cumplir la Constitución y las sentencias.",
             "Unidad de mercado: que una empresa o un título valgan igual en toda España.",
             "Un Estado que todos los territorios sienten suyo, con reglas comunes que se viven como propias y no como impuestas.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un pacto firmado por el Estado y todas las comunidades: lo que es legal en una vale en las demás, las sentencias se cumplen en plazo y a la vista de todos, y cualquier cambio de las reglas comunes va por la reforma prevista."
+          ],
+          "it": "Pacto de reconocimiento mutuo y lealtad verificable",
+          "is": "pacto-de-reconocimiento-mutuo-y-lealtad-verificable"
         },
         {
           "l": [
@@ -1349,12 +1371,14 @@
           "n": "Autogobierno y competencias",
           "d": "Cuánto decide cada comunidad por sí misma.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "Negar el autogobierno que la Constitución reconoce o ejercer poderes al margen de ella y de los Estatutos; o no proponer nada.",
             "Respetar las competencias de los Estatutos.",
             "Traspasar las competencias pendientes y reforzar la gestión propia de los impuestos.",
             "Un autogobierno pactado y estable: cada nivel con competencias claras e ingresos propios, sin invadirse.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un reparto cerrado de competencias con dos reglas: cada tarea la hace el nivel más cercano que pueda hacerla bien, y quien decide un gasto lo paga con sus impuestos. Las tareas pueden bajar o subir de nivel con una prueba pública."
+          ],
+          "it": "Mapa cerrado de competencias: quien decide, paga",
+          "is": "mapa-cerrado-de-competencias-quien-decide-paga"
         },
         {
           "l": [
@@ -1364,12 +1388,14 @@
           "n": "Cooperación entre gobiernos",
           "d": "Que el Estado y las comunidades trabajen juntos.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, o negarse por sistema a cooperar: no convocar los órganos comunes, no acudir a ellos o incumplir lo que se firma.",
             "Reunir a menudo la Conferencia de Presidentes.",
             "Conferencias sectoriales con acuerdos vinculantes y un Senado territorial.",
             "Un modelo de cooperación con un Senado de las comunidades y lealtad en los dos sentidos.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un Senado formado por los gobiernos autonómicos, que vota las leyes que les afectan, y un sistema de conferencias con calendario fijo, secretaría propia y acuerdos que obligan a todos y cuyo cumplimiento se publica."
+          ],
+          "it": "Senado de gobiernos autonómicos y acuerdos que obligan",
+          "is": "senado-de-gobiernos-autonomicos-y-acuerdos-vinculantes"
         },
         {
           "l": [
@@ -1379,12 +1405,14 @@
           "n": "Igualdad entre territorios",
           "d": "Que vivir en una comunidad u otra no cambie tus derechos básicos.",
           "niv": [
-            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
+            "No proponer nada, o aceptar que los derechos básicos dependan del territorio: privilegios para unas comunidades o abandono de otras.",
             "Mínimos comunes en sanidad, educación y servicios sociales.",
             "Un fondo de nivelación que garantice un nivel parecido de servicios por habitante.",
             "Servicios equivalentes medidos y publicados por comunidad, con corrección cuando una se queda atrás.",
-            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
-          ]
+            "Un derecho exigible a servicios básicos equivalentes en toda España: estándares comunes medidos cada año por un órgano independiente, financiación que cubre su coste y corrección automática si una comunidad se queda atrás."
+          ],
+          "it": "Garantía de servicios equivalentes en toda España",
+          "is": "garantia-de-servicios-equivalentes-entre-comunidades"
         }
       ],
       "v": {
@@ -1392,7 +1420,7 @@
           1,
           1,
           2,
-          0,
+          1,
           1,
           2
         ],
@@ -1773,7 +1801,7 @@
         "pp": [
           2,
           2,
-          0,
+          1,
           2,
           2,
           1

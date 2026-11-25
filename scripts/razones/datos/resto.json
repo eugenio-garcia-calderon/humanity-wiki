@@ -1,0 +1,215 @@
+{
+ "grupo": "resto",
+ "celdas": [
+  {
+   "partido": "pp",
+   "tema": "inm",
+   "i": 6,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre el derecho de asilo en su programa. Sobre menores solo consta que pide aplicar el acuerdo de retorno con Marruecos y que sus comunidades aceptaron acoger a 400.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pp",
+   "tema": "eco",
+   "i": 5,
+   "tipo": "sube",
+   "nivel": 1,
+   "razon": "Propone bajar el IRPF empezando por las rentas inferiores a 40.000 euros, y en 2026 deflactar el impuesto. La rebaja se dirige a rentas bajas y medias, no elimina los tramos.",
+   "fuente": {
+    "t": "La primera medida de Feijóo será bajar el IRPF a rentas inferiores a 40.000 € y con efectos en 2023",
+    "url": "https://okdiario.com/economia/primera-medida-feijoo-sera-bajar-irpf-rentas-inferiores-40-000-efectos-2023-11082159/amp",
+    "programa": "23-J 2023"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "pp",
+   "tema": "viv",
+   "i": 4,
+   "tipo": "sube",
+   "nivel": 1,
+   "razon": "Propone una ayuda de emancipación de 1.000 euros para que los jóvenes cubran gastos de alquiler o de compra, y ayudas al alquiler para menores de 40 años.",
+   "fuente": {
+    "t": "Feijóo propone una ayuda de emancipación de mil euros a jóvenes para gastos de alquiler o compra",
+    "url": "https://valenciaplaza.com/valenciaplaza/feijoo-propone-ayuda-de-emancipacion-a-jovenes-de-mil-euros-para-pagar-los-gastos-de-alquiler-o-compra-de-vivienda",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "pp",
+   "tema": "viv",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): su responsable de vivienda propone crear un parque público de alquiler para jóvenes con rentas hasta un 30 % por debajo del mercado. No hemos localizado compromiso expreso de no vender la vivienda pública.",
+   "fuente": {
+    "t": "Paloma Martín (PP): crear un parque público de alquiler para jóvenes hasta un 30 % por debajo del mercado",
+    "url": "https://www.vozpopuli.com/espana/politica/paloma-martin-pp-crear-parque-publico-alquiler-jovenes-hasta-30-debajo-mercado.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "pp",
+   "tema": "ter",
+   "i": 3,
+   "tipo": "sube",
+   "nivel": 1,
+   "razon": "Defiende el Estado de las autonomías vigente. Su ponencia de 2025 rechaza negociar nuevas transferencias y descarta la de la Seguridad Social.",
+   "fuente": {
+    "t": "Feijóo asegura que quienes no defiendan el Estado de las autonomías no quieren mucho a España",
+    "url": "https://www.eldebate.com/espana/20260707/feijoo-asegura-quienes-no-defiendan-estado-autonomias-no-quieren-mucho-espana_437075.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "pp",
+   "tema": "ins",
+   "i": 2,
+   "tipo": "sube",
+   "nivel": 1,
+   "razon": "Propone una nueva Ley del Indulto que conserva el indulto individual con más límites: prohibirlo para delitos de corrupción y exigir mayoría reforzada del Congreso si beneficia a políticos.",
+   "fuente": {
+    "t": "Feijóo presenta su Plan de Limpieza Institucional con reforma del suplicatorio y prohibición de indultos por corrupción",
+    "url": "https://www.moncloa.com/2026/07/18/plan-limpieza-institucional-pp-feijoo-3401671/",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "junts",
+   "tema": "inm",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre ayuda al desarrollo ni acuerdos de readmisión con países de origen y tránsito en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "junts",
+   "tema": "inm",
+   "i": 6,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre el derecho de asilo ni la protección de menores en su programa. Solo consta que rechaza que Cataluña entre en el reparto de menores no acompañados.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "junts",
+   "tema": "ter",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre el cumplimiento de la Constitución y de las sentencias en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "junts",
+   "tema": "ter",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): sostiene que Cataluña no debe asistir a la Conferencia de Presidentes y pide negociación bilateral con el Estado; choca con reunir a menudo ese órgano.",
+   "fuente": {
+    "t": "Junts asserts that Catalonia should not be present at the Conference of Presidents and calls for bilateral negotiations",
+    "url": "https://en.ara.cat/politics/junts-asserts-that-catalonia-should-not-be-present-at-the-conference-of-presidents-and-calls-for-bilateral-negotiations_25_5400138.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "junts",
+   "tema": "ter",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre mínimos comunes en sanidad, educación y servicios sociales en su programa. Consta que reclama un concierto económico para Cataluña.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "junts",
+   "tema": "ins",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): reclama que se aplique la ley de amnistía a los condenados y procesados por el procés, lo que deja sin efecto esas condenas; choca con que las condenas se cumplan.",
+   "fuente": {
+    "t": "Junts reclama al Constitucional que aplique la amnistía tras el aval del TJUE (El Debate, 16-7-2026)",
+    "url": "https://www.eldebate.com/espana/cataluna/20260716/junts-reclama-constitucional-aplique-amnistia-aval-tjue-no-vayan-vacaciones_440358_amp.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "psoe",
+   "tema": "ser",
+   "i": 0,
+   "tipo": "sube",
+   "nivel": 1,
+   "razon": "Su Gobierno aprobó en mayo de 2026 un proyecto de ley que deja la gestión privada de la sanidad pública para casos excepcionales y justificados, sin suprimirla.",
+   "fuente": {
+    "t": "El Consejo de Ministros aprueba la ley que limita la gestión privada de la sanidad a casos «excepcionales»",
+    "url": "https://rtvc.es/el-consejo-de-ministros-aprueba-la-ley-que-limita-la-gestion-privada-de-la-sanidad-12-mayo-2026/",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "psoe",
+   "tema": "ser",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre la elección de médico de cabecera en su programa. En atención primaria propone que el 85 % de los pacientes tenga cita en menos de 48 horas.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "psoe",
+   "tema": "eco",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): su Gobierno comunicó a Bruselas en 2026 que no ajustará el IRPF a la inflación, y su programa incluye nuevos impuestos; choca con ajustar el IRPF a la inflación.",
+   "fuente": {
+    "t": "El Gobierno avanza a Bruselas que no ajustará el IRPF a la inflación (El Español, 2-5-2026)",
+    "url": "https://www.elespanol.com/invertia/economia/macroeconomia/20260502/gobierno-avanza-bruselas-no-ajustara-irpf-inflacion-ingresara-anuales-extra-via/1003744230492_0.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "psoe",
+   "tema": "tra",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre simplificar los contratos o los trámites para contratar en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pnv",
+   "tema": "ter",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): plantea el nuevo estatus y el reconocimiento nacional de Euskadi por la vía de un pacto con el Estado, no de forma unilateral.",
+   "fuente": {
+    "t": "El PNV quiere un pacto que reconozca a Euskadi como nación y haga posible su desarrollo en Europa",
+    "url": "https://www.ondavasca.com/el-pnv-quiere-un-pacto-que-reconozca-a-euskadi-como-nacion-y-haga-posible-su-desarrollo-en-europa/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  }
+ ]
+}

@@ -1,0 +1,153 @@
+{
+ "grupo": "fa",
+ "celdas": [
+  {
+   "partido": "fa",
+   "tema": "inm",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre registro e identificación de quien llega ni sobre persecución de redes de tráfico en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "inm",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre expulsión de quien comete delitos graves ni sobre retornos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "ser",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre conciertos puntuales con centros privados para reducir esperas en su programa. Lo localizado va en otra dirección: integrar a los mutualistas de MUFACE en la sanidad pública.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "ser",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre contención o control del gasto en servicios públicos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "ser",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre elección de médico de cabecera, hospital o colegio en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "eco",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre cumplimiento de las reglas fiscales europeas ni sobre senda de déficit y deuda en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "eco",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): propone elevar los impuestos a las grandes fortunas y limitar las herencias a 10 millones por heredero; no hemos localizado ajuste del IRPF a la inflación. Choca con la parte de «no subir impuestos».",
+   "fuente": {
+    "t": "El Frente Amplio promete expropiar viviendas a los fondos buitre y elevar los impuestos a las grandes fortunas",
+    "url": "https://www.democrata.es/actualidad/frente-amplio-promete-expropiar-viviendas-fondos-buitre-elevar-impuestos-grandes-fortunas/",
+    "programa": "29-N 2026"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "tra",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado en su programa propuesta que aborde el aumento del gasto en pensiones por el envejecimiento. Lo localizado: pensiones mínimas al nivel del SMI y tope de jubilación a los 65 años.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "tra",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre simplificar contratos o reducir trámites para contratar en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "viv",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre rebaja de impuestos a la compra de la primera vivienda en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "viv",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre desalojo de la ocupación ilegal de viviendas en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "amb",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre respaldo del sistema eléctrico para evitar apagones en su programa. Lo localizado: mantiene el calendario de cierre de las centrales nucleares.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "der",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): propone una prestación por crianza, que pide aprobar ya, además de comedor escolar gratuito y permisos retribuidos para cuidados. No hemos localizado medidas de información específicas para la embarazada.",
+   "fuente": {
+    "t": "Ampliación | Frente Amplio propone comedor escolar gratis y exige a Sánchez aprobar ya la prestación por crianza",
+    "url": "https://www.democrata.es/politica/ampliacion-frente-amplio-propone-comedor-escolar-gratis-y-exige-a-sanchez-aprobar-ya-la-prestacion-por-crianza/",
+    "programa": "29-N 2026"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "fa",
+   "tema": "ext",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre preparación y misiones de las fuerzas armadas en su programa. Lo localizado en exterior: embargo total de armas a Israel y revertir la posición sobre el Sáhara.",
+   "fuente": null,
+   "confianza": "baja"
+  }
+ ]
+}

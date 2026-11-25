@@ -13282,3 +13282,14 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Checked: `tsc` clean, build passes, both `--verificar`, 25 browser checks with Playwright on the static pages (rings, snapping, hover cards, pinned ideal, migration of saved figures, test publishing body, ideal index and page).
 - **Not verified**: the installed app; touch dragging on a phone; a real `POST /api/figuras` against the server (the test intercepted it); the references of the ideal pages were only partly opened (web fetching was stopped mid-way), each page says it is a draft.
 - Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/{index.html,comun.js,revisor.js,datos.json}`, `public/ideal/`, `scripts/geometria-ideal.mjs`, `scripts/ideal/datos/`, `scripts/geometria-datos.mjs`, `src/server/figuras.ts`, `src/components/politica/VisualesHerramientas.tsx`.
+
+## 2026-11-25 — Geometría política, phase 2: ideals for Inmigración and Territorio, and a reason behind every level-0 cell
+
+> «1 y 2 hazlas» (the pending ideals, and the review of the 103 Antisistema cells).
+
+- **Ideals**: Inmigración (8) and Territorio (6) now have their ideal text and a page each; `/ideal/` lists 64 pages, all ten topics. The «en preparación» placeholders and the `pendiente` flag are gone.
+- **Reasons**: `scripts/geometria-razones.mjs` writes a `RAZONES` block into the geometry page from `scripts/razones/datos/*.json`. A party card at a reviewed cell now shows what the party proposes and where it was read (or «no hemos localizado ninguna propuesta»). Result of the review: 9 cells clash with the basic level (Vox 8, Podemos 1), 5 rose to Basic (PP 4, PSOE 1), 89 are «no proposal located». Level changes are written into the page by the script.
+- **Same ruler**: findings the agents flagged as doubtful (amnesty, leaving NATO, tax rises, a regional vote error…) were downgraded to «no proposal located» for every party. The «Cómo se lee» text now says the review used headline searches, not whole programmes.
+- Checked: `tsc`, build, the three `--verificar` scripts, the browser suite (rings, snapping, pinned ideal, migration, test publishing, 64-page index), and the party card in Chromium.
+- **Not verified**: the installed app; the programmes themselves (see debt); every `contra` source was read as a headline only.
+- Files: `scripts/geometria-razones.mjs`, `scripts/razones/datos/`, `scripts/ideal/datos/{inm,ter}.json`, `public/ideal/`, `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`.
