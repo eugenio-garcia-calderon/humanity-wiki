@@ -89,7 +89,7 @@ const publica = (f: any) => ({
 /** El texto del correo de resultados, con las mismas cifras que la pantalla. */
 function textoResultados(nombre: string, r: any, enlace: string, clave: string): string {
   const lineas = r.temas.map((t: any) =>
-    `- ${t.n}: de ${t.aspectos} aspectos, llegan a básico ${t.basico}, a intermedio ${t.intermedio}, a avanzado ${t.avanzado} y al ideal ${t.ideal}; se quedan en antisistema ${t.antisistema}. ` +
+    `- ${t.n}: de ${t.aspectos} aspectos, llegan a básico ${t.basico}, a intermedio ${t.intermedio}, a avanzado ${t.avanzado} y al ideal ${t.ideal}; se quedan en indefinido ${t.indefinido}. ` +
     `Más parecido: ${t.mejor ? `${t.mejor.n} (${t.mejor.parecido} %)` : '—'}.`);
   return [
     `Hola. Esta es tu figura en Geometría política, «${nombre}».`,

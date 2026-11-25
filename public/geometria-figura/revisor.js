@@ -14,7 +14,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // Si más del 80 % de los valores están en antisistema (0) o en el ideal (4), la figura queda en blanco o negro.
+  // Si más del 80 % de los valores están en indefinido (0) o en el ideal (4), la figura queda en blanco o negro.
   var UMBRAL_EXTREMOS = 0.8;
 
   function iguales(a, b) {
@@ -23,7 +23,7 @@
     return true;
   }
 
-  var NOMBRES = ['Antisistema', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
+  var NOMBRES = ['Indefinido', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
   function revisar(v, datos) {
     var temas = datos.temas;
     var todos = [];
@@ -32,7 +32,7 @@
     // Figura entera en un mismo valor: un solo aviso, no uno por tema.
     var todoIgual = todos.every(function (x) { return x === todos[0]; });
     if (todos.length && todoIgual && todos[0] === 0) {
-      return [{ tipo: 'aviso', tema: null, titulo: 'La figura está en «Antisistema» en todo',
+      return [{ tipo: 'aviso', tema: null, titulo: 'La figura está en «Indefinido» en todo',
         texto: 'Todos los aspectos de todos los temas están por debajo de lo básico. Si es tu posición, la figura lo dice; si no, empieza por los temas que más te importan.' }];
     }
     if (todos.length && todoIgual && todos[0] === 4) {
@@ -48,7 +48,7 @@
       var max = Math.max.apply(null, fila);
 
       if (max === min && min === 0) {
-        items.push({ tipo: 'aviso', tema: i, titulo: 'Todo «' + nombre + '» está en «Antisistema»',
+        items.push({ tipo: 'aviso', tema: i, titulo: 'Todo «' + nombre + '» está en «Indefinido»',
           texto: 'Ningún aspecto de este tema llega a lo básico. Si es tu posición, la figura lo dice; si no, marca al menos los aspectos que te importan.' });
       } else if (max === min && min === 4) {
         items.push({ tipo: 'sugerencia', tema: i, titulo: 'Todo «' + nombre + '» está en «Ideal»',
@@ -72,7 +72,7 @@
     var extremos = todos.filter(function (x) { return x === 0 || x === 4; }).length;
     if (todos.length && extremos / todos.length > UMBRAL_EXTREMOS) {
       items.push({ tipo: 'sugerencia', tema: null, titulo: 'Casi todo está en los extremos',
-        texto: 'Más del 80 % de los aspectos están en «Antisistema» o en «Ideal». Los niveles de en medio son los que más matizan: ¿hay aspectos donde tu postura es más tibia?' });
+        texto: 'Más del 80 % de los aspectos están en «Indefinido» o en «Ideal». Los niveles de en medio son los que más matizan: ¿hay aspectos donde tu postura es más tibia?' });
     }
 
     return items;

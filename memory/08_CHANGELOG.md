@@ -13293,3 +13293,11 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Checked: `tsc`, build, the three `--verificar` scripts, the browser suite (rings, snapping, pinned ideal, migration, test publishing, 64-page index), and the party card in Chromium.
 - **Not verified**: the installed app; the programmes themselves (see debt); every `contra` source was read as a headline only.
 - Files: `scripts/geometria-razones.mjs`, `scripts/razones/datos/`, `scripts/ideal/datos/{inm,ter}.json`, `public/ideal/`, `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`.
+
+## 2026-11-25 — Geometría política: the bottom level is now called «Indefinido»
+
+> «Cambia lo de antisistema por indefinido. En todos los lugares donde aparezca… para que realmente lo que se muestre es algo que está por debajo del básico.»
+
+- The level 0 name «Antisistema» became «Indefinido» in the geometry page (legend, cards, table, sliders, «Cómo se lee»), the test (labels, reviewer messages, radar), the figures e-mail summary (`src/server/figuras.ts`), the home card renderer, and all 64 ideal pages (regenerated). The internal summary field `resumen().antisistema` is now `.indefinido`.
+- Not changed: `docs/` (Eugenio's specification) and older entries of this changelog and of `memory/03_DECISIONS.md`, which keep the old name as history. `scripts/geometria-razones.mjs` still rejects labels like «antisistema» in the reasons on purpose.
+- Local copies: none depend on the name (stored values are numbers). The service worker may still show the old word to the installed app until it updates (`?sw=off`).

@@ -13,7 +13,7 @@ import { cn } from '../../utils/cn';
 //   · Perfiles: the five positions of the left–right line and the seven other currents,
 //     with the amber «enemy» arcs of «Cómo se miran».
 //   · Geometría: the five parties' figures on Inmigración, eight aspects, on the five level rings
-//     (0 antisistema … 4 ideal; the scores are levels since 2026-11-25).
+//     (0 indefinido … 4 ideal; the scores are levels since 2026-11-25).
 //   · Democracia directa: four real measures of «Votar por temas», each with its slider.
 //   · Economía pública optimizada: the eight scales of the model, each split in its three thirds.
 // The numbers below are copied from `public/observatorio-polarizacion/index.html`: that document

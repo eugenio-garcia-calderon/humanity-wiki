@@ -1445,8 +1445,8 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
   <div class="geo-detalle"><aside class="geo-side" aria-label="Detalle del tema"><div class="geo-panel" id="geo-panel" aria-live="polite"></div></aside></div>
   <details class="geo-how">
     <summary>Cómo se lee y de dónde salen las formas</summary>
-    <p>Cada radio es un aspecto del problema, y en cada radio hay cinco posiciones, una por nivel. <b>Antisistema</b>, el círculo rojo de dentro, es quedarse por debajo de lo básico: no proponer nada en ese aspecto, o proponer algo que rompe la base en vez de mejorarla. <b>Lo básico</b> es lo normal en los países europeos. Después vienen <b>lo intermedio</b> y <b>lo avanzado</b>. El círculo dorado de fuera es <b>el ideal</b>: una aspiración a la que hoy probablemente no llega ningún partido, y que dice lo que de verdad habría que hacer. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leerlo en ese aspecto concreto y ver qué partidos llegan. Cada ideal tiene su propia página: pulsa su punto y después «Más». Con «Ver lo mejor de cada partido», cada punto marca el nivel más alto de su aspecto y los partidos de la lista se apagan.</p>
-    <p>El punto de cada partido en cada radio es el nivel que le da este observatorio. No hay posiciones intermedias: solo esas cinco. Hasta el 25 de noviembre de 2026 las notas iban de 0 a 10; se pasaron a niveles con los mismos cortes de entonces (hasta 3, antisistema; de 4 a 6, básico; de 7 a 9, intermedio; 10, avanzado). El nivel más bajo junta dos casos distintos, el vacío y lo destructivo. El 25 de noviembre de 2026 se revisaron una por una las 103 casillas que estaban ahí: en cada una, la tarjeta del partido dice si hemos localizado una propuesta suya que choca con lo básico (con su fuente) o si no hemos localizado ninguna. La revisión se hizo con búsquedas de titulares, no leyendo cada programa entero, y se aplicó la misma vara a todos los partidos: ante la duda, «no localizada». Una casilla en «no localizada» puede estar vacía de verdad o tener una propuesta que no hemos encontrado.</p>
+    <p>Cada radio es un aspecto del problema, y en cada radio hay cinco posiciones, una por nivel. <b>Indefinido</b>, el círculo rojo de dentro, es quedarse por debajo de lo básico: no proponer nada en ese aspecto, o proponer algo que rompe la base en vez de mejorarla. <b>Lo básico</b> es lo normal en los países europeos. Después vienen <b>lo intermedio</b> y <b>lo avanzado</b>. El círculo dorado de fuera es <b>el ideal</b>: una aspiración a la que hoy probablemente no llega ningún partido, y que dice lo que de verdad habría que hacer. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leerlo en ese aspecto concreto y ver qué partidos llegan. Cada ideal tiene su propia página: pulsa su punto y después «Más». Con «Ver lo mejor de cada partido», cada punto marca el nivel más alto de su aspecto y los partidos de la lista se apagan.</p>
+    <p>El punto de cada partido en cada radio es el nivel que le da este observatorio. No hay posiciones intermedias: solo esas cinco. Hasta el 25 de noviembre de 2026 las notas iban de 0 a 10; se pasaron a niveles con los mismos cortes de entonces (hasta 3, indefinido; de 4 a 6, básico; de 7 a 9, intermedio; 10, avanzado). El nivel más bajo junta dos casos distintos, el vacío y lo destructivo. El 25 de noviembre de 2026 se revisaron una por una las 103 casillas que estaban ahí: en cada una, la tarjeta del partido dice si hemos localizado una propuesta suya que choca con lo básico (con su fuente) o si no hemos localizado ninguna. La revisión se hizo con búsquedas de titulares, no leyendo cada programa entero, y se aplicó la misma vara a todos los partidos: ante la duda, «no localizada». Una casilla en «no localizada» puede estar vacía de verdad o tener una propuesta que no hemos encontrado.</p>
     <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
     <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
   </details>
@@ -2859,7 +2859,7 @@ const REFS = [
 
 
 /* ================= 6 · Geometrías ================= */
-/* Cada partido es una figura sobre los radios de cada tema (ocho o seis), con cinco niveles: antisistema, básico, intermedio, avanzado e ideal. Valoración del observatorio, un nivel de 0 a 4 por aspecto, a partir de
+/* Cada partido es una figura sobre los radios de cada tema (ocho o seis), con cinco niveles: indefinido, básico, intermedio, avanzado e ideal. Valoración del observatorio, un nivel de 0 a 4 por aspecto, a partir de
    programas, planes y votaciones hasta noviembre de 2026 (fuentes al final de la página). Entre dos radios
    vecinos el borde se curva siguiendo el círculo cuanto mejor cuida el partido los dos, y es una recta
    (una arista) cuando cuida uno y abandona el otro. */
@@ -3366,15 +3366,15 @@ const ILUS = {
   const CX = 410, CY = 372, VW = 820, VH = 740;
   // R and K change on narrow screens: a smaller circle leaves room for bigger labels (K = text scale)
   let R = 226, K = 1;
-  // CINCO NIVELES (2026-11-25, Eugenio: «que los puntitos coincidan con… antisistema, básico, intermedio, avanzado» y
-  // «un quinto nivel… ideal»). El valor de cada aspecto ES su nivel: 0 Antisistema (por debajo de lo básico: no proponer
+  // CINCO NIVELES (2026-11-25, Eugenio: «que los puntitos coincidan con… indefinido, básico, intermedio, avanzado» y
+  // «un quinto nivel… ideal»). El valor de cada aspecto ES su nivel: 0 Indefinido (por debajo de lo básico: no proponer
   // nada o romper la base), 1 Básico, 2 Intermedio, 3 Avanzado y 4 Ideal. Cinco círculos, a R/5 uno de otro; el de fuera,
   // dorado, es el ideal. `niv` (del tema y de cada aspecto) lleva los cinco textos en ese orden.
   // Antes la escala iba de 0 a 10 con tres círculos; las notas se pasaron con sus mismos umbrales (ver memory/03_DECISIONS.md).
-  const NIV = ["Antisistema", "Lo básico", "Lo intermedio", "Lo avanzado", "El ideal"];
+  const NIV = ["Indefinido", "Lo básico", "Lo intermedio", "Lo avanzado", "El ideal"];
   // Nombres de las tarjetas bajo la figura (las medidas, no los círculos)
-  const NIV_TITULO = ["Antisistema", "Medidas básicas", "Medidas intermedias", "Medidas avanzadas", "Medidas ideales"];
-  const NIVEL_CORTO = ["Antisistema", "Básico", "Intermedio", "Avanzado", "Ideal"];
+  const NIV_TITULO = ["Indefinido", "Medidas básicas", "Medidas intermedias", "Medidas avanzadas", "Medidas ideales"];
+  const NIVEL_CORTO = ["Indefinido", "Básico", "Intermedio", "Avanzado", "Ideal"];
   const NMAX = 4;
   const UMBRAL = [0, 1, 2, 3, 4];
   const ORO = "#F6BE3B", ROJO = "#E5484D";
@@ -3464,7 +3464,7 @@ const ILUS = {
     } catch (e) { /* sin almacenamiento: se empieza de cero */ }
   }
   migrarTu();
-  // De la escala de 0 a 10 a los cinco niveles, con los umbrales de entonces: hasta 3, antisistema; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado
+  // De la escala de 0 a 10 a los cinco niveles, con los umbrales de entonces: hasta 3, indefinido; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado
   function migrarNiveles() {
     try {
       if (localStorage.getItem(LS)) return;
@@ -3566,7 +3566,7 @@ const ILUS = {
     });
     svg.setAttribute("aria-label", "Todos los temas: cada arista es un tema y cada partido, su nivel medio en ese tema");
     svg.innerHTML = s;
-    $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es el nivel medio de sus aspectos en ese tema, de antisistema a ideal (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
+    $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es el nivel medio de sus aspectos en ese tema, de indefinido a ideal (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
     $("#geo-mejor-nota").hidden = true;
     $(".geo-partidos").classList.remove("en-mejor");
   }
@@ -3647,8 +3647,8 @@ const ILUS = {
         + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K * dibujado)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fsi)}" font-weight="${j ? 400 : 600}" fill="${color || (j ? "#C9CCD3" : "#EDEBE6")}">${l}</text>`).join("") + `</g>`;
     });
     const titulo = st.mejor
-      ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: antisistema, básico, intermedio, avanzado e ideal`
-      : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: antisistema, básico, intermedio, avanzado e ideal`;
+      ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: indefinido, básico, intermedio, avanzado e ideal`
+      : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: indefinido, básico, intermedio, avanzado e ideal`;
     // Sin <title> dentro del SVG: el navegador lo mostraba como cuadro gris al pasar el ratón. El texto va en aria-label.
     svg.setAttribute("aria-label", titulo);
     svg.innerHTML = s;
@@ -3693,7 +3693,7 @@ const ILUS = {
     // En el nivel más bajo no se atribuye al partido el texto de ese nivel: la nota no dice si es por vacío o por ir contra lo básico
     const nivel = lvl
       ? `<span class="medida" style="color:${colorNivel(lvl)}">${NIV_TITULO[lvl]}</span>${e.niv[lvl]}`
-      : `<span class="medida" style="color:${ROJO}">Antisistema</span>` + (rz && rz.tp === "contra" ? "Por debajo de lo básico: lo que propone choca con lo básico de este aspecto."
+      : `<span class="medida" style="color:${ROJO}">Indefinido</span>` + (rz && rz.tp === "contra" ? "Por debajo de lo básico: lo que propone choca con lo básico de este aspecto."
         : rz && rz.tp === "vacio" ? "Por debajo de lo básico: no hemos localizado ninguna propuesta suya en este aspecto."
         : "No llega a lo básico en este aspecto: o no propone nada, o lo que propone va contra lo básico.");
     return `<p class="who">${p.n}: ${NIVEL_CORTO[lvl]} <small>(valoración de este observatorio)</small></p>`
@@ -3958,7 +3958,7 @@ const ILUS = {
   function panelYo() {
     const t = T(), fig = miFigura();
     $("#geo-panel").innerHTML = `<span class="lbl">Tu figura · ${t.n}</span><h4>¿Hasta dónde llegarías tú?</h4>
-      <p>Arrastra los puntos blancos sobre cada radio, o usa los deslizadores. Cada aspecto tiene cinco posiciones: antisistema, básico, intermedio, avanzado e ideal. Tu figura se queda solo en este navegador.</p>
+      <p>Arrastra los puntos blancos sobre cada radio, o usa los deslizadores. Cada aspecto tiene cinco posiciones: indefinido, básico, intermedio, avanzado e ideal. Tu figura se queda solo en este navegador.</p>
       <div class="geo-yo-sl">${t.ejes.map((e, i) => `<label><span>${e.n}</span><output data-yo="${i}">${NIVEL_CORTO[fig[i]]}</output><input type="range" min="0" max="${NMAX}" step="1" value="${fig[i]}" data-yi="${i}"></label>`).join("")}</div>
       <div id="geo-yo-rank">${htmlRank()}</div>
       <p class="tiny">Compara tu figura con la valoración de esta página: mide cuánto se separan las dos figuras, radio a radio. No es una recomendación de voto.</p>
@@ -4062,7 +4062,7 @@ const ILUS = {
     }
     const sel = PARTIDOS.filter((p) => st.sel.has(p.k));
     el.innerHTML = `<span class="lbl">${t.n}</span><h4>Pulsa una figura o un aspecto</h4>
-      <p>Pasa el ratón por los cinco círculos y por sus puntos: el de dentro, en rojo, es antisistema (por debajo de lo básico) y el de fuera, dorado, el ideal. Pulsa un punto del ideal para abrir su propuesta. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
+      <p>Pasa el ratón por los cinco círculos y por sus puntos: el de dentro, en rojo, es indefinido (por debajo de lo básico) y el de fuera, dorado, el ideal. Pulsa un punto del ideal para abrir su propuesta. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
       <div class="geo-plist">${sel.map((p) => { const c = cojas(t.v[p.k], t.ejes); return `<button class="geo-pitem" data-ver="${p.k}" style="--pc:${p.c}"><i></i><span><b>${p.n}</b> · ${c.length ? "no llega a lo básico en " + lista(c) : "llega a lo básico en todo"}</span></button>`; }).join("") || `<p class="tiny">Elige al menos un partido arriba.</p>`}</div>`;
   }
 
