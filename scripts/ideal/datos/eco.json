@@ -1,0 +1,390 @@
+{
+  "clave": "eco",
+  "anti_tema": "No presentar cuentas ni presupuestos, justificar el impago de impuestos o de la deuda, o prometer gasto y rebajas sin explicar quién los paga.",
+  "ideal_tema": "Un sistema que cualquiera entiende y puede comprobar: impuestos sencillos y a igual renta igual pago, fraude medido cada año, gasto que solo sigue si funciona y una regla que ahorra en la bonanza para proteger en la crisis.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No aprobar presupuestos, ignorar las reglas fiscales europeas o defender que la deuda pública no se pague.",
+      "ideal": "Un freno de deuda en la ley: el gasto de cada año se liga a los ingresos de un año normal, lo que sobra en la bonanza va a una hucha para las crisis y cada desvío se devuelve con plazo. La deuda baja sin recortar inversión.",
+      "titulo": "Freno de deuda con hucha para las crisis",
+      "slug": "freno-de-deuda-con-hucha-para-las-crisis",
+      "resumen": "Una regla automática que no depende de la voluntad de cada gobierno. El techo de gasto se calcula con los ingresos de un año normal, no con los de un año de bonanza. Va más lejos que lo avanzado porque añade una cuenta que apunta cada desvío y obliga a devolverlo, un ancla de deuda, una hucha para las crisis y el cálculo independiente de lo que cuesta cada programa electoral.",
+      "medidas": [
+        "Techo de gasto ligado a los ingresos estructurales (los de un año económico normal, sin el efecto de la bonanza o de la crisis) y fijado con tres años de antelación.",
+        "Cuenta de compensación: si un año se gasta más de lo que permite el techo, el exceso se apunta y se devuelve en los años siguientes. Lo que sobra en los años buenos se guarda para los malos.",
+        "Ancla de deuda a largo plazo pactada por una mayoría amplia y revisada cada dos legislaturas por una comisión con todos los grupos; si la deuda se aleja, el Gobierno lo explica en el Congreso.",
+        "Cláusula de emergencia para pandemias o catástrofes, con un calendario obligatorio para devolver lo gastado de más.",
+        "La AIReF calcula y publica antes de cada elección el efecto en las cuentas del programa de cada candidatura que lo pida, sin opinar sobre sus prioridades.",
+        "Si los presupuestos no se aprueban a tiempo, el techo de gasto sigue en vigor; y el ajuste nunca puede hacerse bajando la inversión por debajo de su suelo legal."
+      ],
+      "supone": {
+        "personas": "Menos sustos: en una crisis hay margen para sostener el empleo y los servicios sin recortes de urgencia ni subidas de impuestos improvisadas. A cambio, en los años buenos no se reparte todo lo que entra. Los jóvenes heredan menos deuda y menos intereses que pagar.",
+        "cuentas": "No es un gasto nuevo: es una disciplina. En Suiza, la deuda federal bajó unos 27.000 millones de francos entre 2003 y 2019 y la deuda del país ronda el 30 % del PIB. Lo que no se va en intereses queda libre para servicios o para bajar impuestos. El coste es político: renunciar a gastar los ingresos extraordinarios de los años buenos.",
+        "puesta_en_marcha": "Reformar la ley orgánica de estabilidad presupuestaria con un pacto amplio, para que no cambie con cada gobierno; en Suiza la regla la aprobaron los votantes con un 85 % de apoyo. Más medios e independencia para la AIReF, encaje con las reglas fiscales europeas y una transición larga y pactada hasta llegar al ancla de deuda."
+      },
+      "integra": "Recoge la exigencia de cuentas saneadas y de no cargar deuda a los hijos, y a la vez la de proteger el gasto social y el empleo en las crisis: la regla obliga a ahorrar en la bonanza justo para poder gastar cuando hace falta, sin tocar el suelo de inversión.",
+      "referencias": [
+        {
+          "lugar": "Suiza",
+          "que": "Freno de deuda en la Constitución, aprobado por los votantes en 2001 con un 85 % de apoyo y aplicado desde 2003: el gasto ordinario no puede superar los ingresos ajustados al ciclo, y los excesos se anotan en una cuenta y se compensan en años siguientes.",
+          "url": "https://www.efd.admin.ch/en/the-debt-brake"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "Techo de gasto fijado para el tercer año siguiente y ancla de deuda en el 35 % del PIB. El objetivo de superávit pasa a ser de equilibrio a lo largo del ciclo desde 2027. Una comisión con todos los partidos revisa el marco cada dos legislaturas.",
+          "url": "https://www.government.se/contentassets/afd79a1ff8954c78b7681f6a8fa6c8e1/the-fiscal-policy-framework-skr.-20252676.pdf"
+        },
+        {
+          "lugar": "Países Bajos",
+          "que": "Desde 1986, la oficina pública de análisis económico (CPB) calcula el efecto en las cuentas y en la economía de los programas electorales de los partidos que lo piden; participar es voluntario. En la edición 2022-2025 lo hicieron diez partidos.",
+          "url": "https://www.cpb.nl/en/charted-choices-2022-2025"
+        },
+        {
+          "lugar": "Chile",
+          "que": "Regla de balance estructural desde 2001: el gasto autorizado se calcula con los ingresos una vez descontado el efecto del ciclo económico. Desde 2019 existe un Consejo Fiscal Autónomo, de carácter técnico y consultivo.",
+          "url": "https://www.dipres.gob.cl/598/w3-propertyvalue-16156.html"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Una regla rígida puede acabar ahogando la inversión pública, que es lo más fácil de recortar para cumplir el techo.",
+          "r": "El riesgo existe. Por eso el ideal incluye un suelo de inversión que el ajuste no puede tocar y una cláusula de emergencia. Aun así, habrá años en que la regla obligue a elegir entre gastos, y eso es parte de lo que se busca."
+        },
+        {
+          "o": "Los ingresos «estructurales» no se observan: se estiman, y un gobierno puede retocar la estimación a su favor.",
+          "r": "Por eso el cálculo debe validarlo un organismo independiente con método público. Chile creó en 2013 un consejo fiscal para validar esos cálculos y en 2019 lo sustituyó por uno autónomo. El margen de error no desaparece."
+        },
+        {
+          "o": "España parte de una deuda muy superior a la de Suiza o Suecia; aplicar la regla de golpe exigiría un ajuste muy duro.",
+          "r": "Es cierto: hace falta una transición larga y pactada, con una senda de bajada gradual. La regla fija la dirección y el mecanismo, no el ritmo del primer año."
+        }
+      ],
+      "fuentes": [
+        { "t": "Departamento Federal de Finanzas de Suiza: The debt brake", "url": "https://www.efd.admin.ch/en/the-debt-brake" },
+        { "t": "Gobierno de Suecia: The fiscal policy framework (página del Ministerio de Finanzas)", "url": "https://government.se/government-of-sweden/ministry-of-finance/central-government-budget/the-fiscal-policy-framework/" },
+        { "t": "Gobierno de Suecia: The fiscal policy framework, comunicación 2025/26:76", "url": "https://www.government.se/contentassets/afd79a1ff8954c78b7681f6a8fa6c8e1/the-fiscal-policy-framework-skr.-20252676.pdf" },
+        { "t": "CPB (Países Bajos): Charted Choices 2022-2025", "url": "https://www.cpb.nl/en/charted-choices-2022-2025" },
+        { "t": "Dirección de Presupuestos de Chile: Balance estructural", "url": "https://www.dipres.gob.cl/598/w3-propertyvalue-16156.html" }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada para pymes y autónomos, o dar por bueno que la Administración les pague tarde y sin intereses.",
+      "ideal": "Abrir, cambiar o cerrar una empresa en un día y por internet; la Administración no pide dos veces un dato que ya tiene, paga sola a 30 días con intereses, y el autónomo cotiza por lo que de verdad ingresa cada trimestre.",
+      "titulo": "Empresa en un día y papeles una sola vez",
+      "slug": "empresa-en-un-dia-y-papeles-una-sola-vez",
+      "resumen": "Un trato en el que la carga de los papeles pasa de la empresa pequeña a la Administración. Va más lejos que lo avanzado porque no solo mide el coste de cada norma nueva: obliga a compensarlo quitando otra carga equivalente, convierte el pago a tiempo en automático y sustituye los saltos bruscos de obligaciones al crecer por escalones graduales.",
+      "medidas": [
+        "Registro mercantil y fiscal 100 % en línea: constituir una sociedad en horas y sin desplazamientos, y cerrarla con la misma facilidad.",
+        "Principio de «una sola vez»: ninguna Administración puede pedir a una pyme un dato o documento que ya tenga otra Administración.",
+        "Cuota de autónomos como porcentaje de lo facturado, declarada cada mes o trimestre: si no hay ingresos, no hay cuota, con la opción de pagar un mínimo para mantener la protección.",
+        "Pago público automático a 30 días: si la factura vence sin pagar, el sistema abona por sí solo los intereses y la compensación mínima que ya fija la norma europea, sin que la empresa tenga que reclamar.",
+        "Regla «una entra, una sale»: el ministerio que imponga una carga nueva a las empresas debe retirar otra de coste equivalente antes de acabar la legislatura, con un contador público.",
+        "Obligaciones que crecen por escalones suaves con el tamaño de la empresa, en lugar de saltos bruscos al cruzar un umbral de plantilla o de facturación."
+      ],
+      "supone": {
+        "personas": "Quien quiere emprender empieza en un día y no pierde semanas en ventanillas. El autónomo con un mal trimestre no paga una cuota fija que no puede asumir. El proveedor de un ayuntamiento cobra a tiempo sin tener que reclamar. Las normas laborales, ambientales y de consumo no se rebajan: se cumplen con menos trámites.",
+        "cuentas": "El coste principal es conectar registros y bases de datos públicas. Pagar a 30 días no es gasto nuevo: es dinero que ya se debe. El Gobierno alemán cifró en más de 3.100 millones de euros el saldo de cargas retiradas a las empresas con su regla entre 2015 y 2020. Ligar la cuota a lo facturado puede bajar los ingresos de la Seguridad Social en años malos.",
+        "puesta_en_marcha": "Ley que haga exigible la «una sola vez», conexión de los registros estatales, autonómicos y municipales, cambio del sistema de cotización de autónomos pactado con sus asociaciones y un órgano independiente que lleve la cuenta de cargas. Cabe en una legislatura solo si lo asumen también comunidades y ayuntamientos."
+      },
+      "integra": "Une la demanda de menos trabas para quien arriesga con la de proteger al autónomo más frágil y exigir a la Administración lo mismo que ella exige: pagar a tiempo. No se rebaja ninguna protección laboral ni ambiental; se quita papeleo, no derechos.",
+      "referencias": [
+        {
+          "lugar": "Estonia",
+          "que": "El registro mercantil electrónico permite constituir una empresa por internet en minutos y sin notario. Según el portal oficial, el 99 % de las empresas se crea en línea y el plazo de registro pasó de cinco días a un par de horas.",
+          "url": "https://e-estonia.com/service/ease-of-doing-business/e-business-register/"
+        },
+        {
+          "lugar": "Francia",
+          "que": "El microempresario cotiza un porcentaje fijo de lo que factura (por ejemplo, el 12,3 % en venta de mercancías o el 21,2 % en servicios), lo declara cada mes o trimestre y, si no factura, no paga cotizaciones.",
+          "url": "https://entreprendre.service-public.gouv.fr/vosdroits/F36232?profil=tout"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "Desde el 1 de enero de 2015, el ministerio que aumenta el coste de cumplimiento para las empresas debe reducirlo en otra norma antes de acabar la legislatura. Quedan fuera, entre otras, las normas que solo trasladan derecho europeo.",
+          "url": "https://www.bundesregierung.de/breg-de/aktuelles/die-buerokratiebremse-one-in-one-out-regel-1964512"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "La directiva de morosidad (2011/7/UE) obliga a las administraciones a pagar en 30 días, da derecho automático a intereses de al menos 8 puntos sobre el tipo de referencia del BCE y a un mínimo de 40 euros por costes de cobro.",
+          "url": "https://single-market-economy.ec.europa.eu/smes/sme-strategy/late-payment-directive_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "«Una entra, una sale» puede frenar normas necesarias de seguridad, medio ambiente o derechos laborales, porque cuenta el coste de cumplirlas pero no su beneficio.",
+          "r": "Límite real. La regla compensa papeleo, no impide regular, y admite excepciones tasadas, como en Alemania para evitar peligros graves. Aun así, un contador de costes sin contador de beneficios sesga: hay que publicar los dos."
+        },
+        {
+          "o": "Si la cuota depende de lo que el autónomo declara, hay incentivo a declarar menos y cotizar poco, con pensiones bajas mañana.",
+          "r": "Por eso va unida a la factura electrónica del aspecto de fraude y a una cotización mínima voluntaria. Quien cotiza poco tendrá menos pensión contributiva, y hay que decírselo con claridad en cada declaración."
+        },
+        {
+          "o": "Las competencias están repartidas entre Estado, comunidades y ayuntamientos: una ventanilla única real exige que los tres compartan datos.",
+          "r": "Es la dificultad principal. Sin un acuerdo que obligue a las tres administraciones a compartir datos, la ventanilla es solo una página web más. El ideal exige ese pacto; una ley estatal sola no basta."
+        }
+      ],
+      "fuentes": [
+        { "t": "e-Estonia: e-Business Register", "url": "https://e-estonia.com/service/ease-of-doing-business/e-business-register/" },
+        { "t": "Service-public.fr (Entreprendre): Cotisations sociales d'un micro-entrepreneur", "url": "https://entreprendre.service-public.gouv.fr/vosdroits/F36232?profil=tout" },
+        { "t": "Gobierno Federal de Alemania: Die Bürokratiebremse – One in, one out-Regel", "url": "https://www.bundesregierung.de/breg-de/aktuelles/die-buerokratiebremse-one-in-one-out-regel-1964512" },
+        { "t": "Comisión Europea: Late Payment Directive", "url": "https://single-market-economy.ec.europa.eu/smes/sme-strategy/late-payment-directive_en" },
+        { "t": "Banco de España (blog): El tamaño sí importa. El reto del crecimiento de las empresas españolas", "url": "https://www.bde.es/wbe/es/noticias-eventos/blog/el-tamano-si-importa-el-reto-del-crecimiento-de-las-empresas-espanolas.html" }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "Prometer rebajas sin decir cómo se pagan, o cambiar impuestos de forma retroactiva o imprevisible, rompiendo la seguridad jurídica.",
+      "ideal": "Impuestos de base ancha y tipos bajos: casi sin excepciones, ajustados solos a la inflación cada año, sin gravar el beneficio que la empresa reinvierte y con un calendario pactado a diez años. Toda rebaja dice de dónde sale.",
+      "titulo": "Impuestos sencillos, de base ancha y tipos bajos",
+      "slug": "impuestos-sencillos-base-ancha-tipos-bajos",
+      "resumen": "Competir por sencillez y previsibilidad, no por quién baja más. Si casi nadie tiene excepciones, los tipos pueden ser más bajos para todos con la misma recaudación. Va más lejos que lo avanzado porque hace automático por ley el ajuste a la inflación, deja de gravar el beneficio que se reinvierte y ata cada rebaja a una fuente de financiación comprobada por un organismo independiente.",
+      "medidas": [
+        "Ajuste automático por ley, cada 1 de enero, de los tramos, mínimos y deducciones del IRPF a la inflación, sin depender de una decisión anual del Gobierno.",
+        "Impuesto de sociedades que grava el beneficio solo cuando se reparte: lo que la empresa reinvierte no tributa hasta que sale de ella.",
+        "Ensanchar la base del IVA retirando los tipos reducidos y exenciones que no demuestren su efecto, y devolver el coste a las rentas bajas con un pago directo, de modo que el tipo general pueda bajar.",
+        "Regla de neutralidad: toda rebaja lleva una memoria, validada por la AIReF, que dice qué beneficio fiscal se suprime o qué gasto se reduce para pagarla, y respeta el techo de gasto.",
+        "Pacto fiscal a diez años con calendario publicado: ningún cambio retroactivo y un plazo mínimo de aviso antes de que entre en vigor cualquier subida o bajada.",
+        "Menos excepciones para que la declaración quepa en una pantalla y Hacienda pueda entregarla ya hecha a la mayoría de familias y empresas pequeñas."
+      ],
+      "supone": {
+        "personas": "Nadie paga más solo porque suben los precios. La declaración se entiende sin asesor. Una empresa que reinvierte lo que gana no tributa hasta que reparte. A cambio desaparecen deducciones y tipos reducidos a los que mucha gente está acostumbrada: las rentas bajas reciben un pago que lo compensa; las medias y altas notan el cambio en el IVA.",
+        "cuentas": "Se diseña para recaudar lo mismo: lo que se pierde al bajar tipos se recupera al quitar excepciones. Según la Comisión Europea, la «brecha de política accionable» del IVA español (tipos reducidos y exenciones que en principio podrían retirarse) fue del 38,3 % en 2023. Ajustar la renta a la inflación sí cuesta: Austria cifró su alivio en 3.600 millones de euros para 2024.",
+        "puesta_en_marcha": "Reforma de las leyes del IRPF, de sociedades y del IVA, esta última dentro de lo que permite la normativa europea. El cambio en sociedades necesita una transición para no perder recaudación de golpe. El pacto a diez años pide una mayoría mucho más amplia que la del gobierno de turno y acuerdo con las comunidades autónomas."
+      },
+      "integra": "Da a quien pide bajar impuestos tipos más bajos, sencillez y estabilidad para invertir; y a quien pide justicia fiscal, el fin de las excepciones que no demuestran su efecto, sin perder recaudación para los servicios públicos.",
+      "referencias": [
+        {
+          "lugar": "Estonia",
+          "que": "Primera por duodécimo año seguido en el índice de competitividad fiscal de la Tax Foundation (2025): sociedades al 22 % solo sobre el beneficio repartido y renta a un tipo único del 22 %. España figura en el puesto 34 del mismo índice.",
+          "url": "https://taxfoundation.org/research/all/global/2025-international-tax-competitiveness-index/"
+        },
+        {
+          "lugar": "Austria",
+          "que": "Desde 2023, los tramos del impuesto sobre la renta suben cada año de forma automática para devolver dos tercios del efecto de la inflación; el tercio restante lo reparte el Gobierno mediante un acuerdo al que le obliga la ley.",
+          "url": "https://www.bmf.gv.at/presse/pressemeldungen/2023/september/abschaffung-kalte-progression-2024.html"
+        },
+        {
+          "lugar": "Nueva Zelanda",
+          "que": "Su Hacienda define el sistema como de «base ancha y tipos bajos». Con datos de 2009, su IVA tenía el sexto tipo más bajo de la OCDE (12,5 %) y la sexta recaudación más alta (8,5 % del PIB), con la base más amplia de la OCDE.",
+          "url": "https://taxpolicy.ird.govt.nz/publications/2012/2012-other-bim/2-new-zealand-tax-system-and-how-it-compares-internationally"
+        },
+        {
+          "lugar": "Comisión Europea",
+          "que": "Mide cada año cuánto IVA deja de ingresar cada país por decisiones propias. En 2023, la parte que España podría en principio recuperar retirando tipos reducidos y exenciones («brecha de política accionable») fue del 38,3 %; en Italia, del 32,1 %.",
+          "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Quitar los tipos reducidos del IVA encarece la comida y otros básicos, y eso pesa más en las familias con menos renta.",
+          "r": "Es el punto débil si se hace sin compensar. Por eso va ligado a un pago directo a las rentas bajas, que se concentra en quien lo necesita, mientras que el tipo reducido beneficia también a quien más consume. Sin ese pago, no debe hacerse."
+        },
+        {
+          "o": "No gravar el beneficio que se queda en la empresa retrasa la recaudación y permite acumular riqueza dentro de una sociedad sin tributar.",
+          "r": "Riesgo real. Exige normas contra el reparto encubierto (préstamos a socios, gastos personales) y una transición. Estonia aplica el modelo, pero es una economía pequeña: en España habría que evaluarlo por fases antes de generalizarlo."
+        },
+        {
+          "o": "Un pacto a diez años ata las manos a los gobiernos que los ciudadanos elijan después.",
+          "r": "El pacto fija reglas (aviso previo, no retroactividad, ajuste a la inflación), no el nivel de impuestos. Un gobierno puede subirlos o bajarlos, pero con plazo y explicando el coste. Y ninguna ley impide que otra posterior la cambie."
+        }
+      ],
+      "fuentes": [
+        { "t": "Tax Foundation: International Tax Competitiveness Index 2025", "url": "https://taxfoundation.org/research/all/global/2025-international-tax-competitiveness-index/" },
+        { "t": "Ministerio de Finanzas de Austria: Abschaffung der kalten Progression (nota de prensa, septiembre de 2023)", "url": "https://www.bmf.gv.at/presse/pressemeldungen/2023/september/abschaffung-kalte-progression-2024.html" },
+        { "t": "Cámara de Comercio de Austria (WKO): Abschaffung der kalten Progression", "url": "https://www.wko.at/oe/oesterreich/abschaffung-kalte-progression" },
+        { "t": "Inland Revenue (Nueva Zelanda): The New Zealand tax system and how it compares internationally", "url": "https://taxpolicy.ird.govt.nz/publications/2012/2012-other-bim/2-new-zealand-tax-system-and-how-it-compares-internationally" },
+        { "t": "Comisión Europea: VAT gap", "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en" }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "Justificar no pagar impuestos o el dinero negro, defender amnistías fiscales o usar la inspección contra adversarios.",
+      "ideal": "Que defraudar sea difícil y cumplir, fácil: cada factura llega a Hacienda al emitirse, Hacienda entrega hechas las declaraciones y un organismo independiente publica cada año cuánto se deja de ingresar, con objetivo de reducción.",
+      "titulo": "Fraude medido cada año y factura en tiempo real",
+      "slug": "fraude-medido-cada-ano-y-factura-en-tiempo-real",
+      "resumen": "Pasar de perseguir el fraude después a hacerlo difícil antes. Va más lejos que lo avanzado porque la factura electrónica se comunica al momento y sirve para que Hacienda rellene el IVA del contribuyente. Además, la estimación anual del fraude la hace un organismo independiente, impuesto a impuesto, y lleva un objetivo de reducción del que el Gobierno responde en el Congreso.",
+      "medidas": [
+        "Factura electrónica obligatoria que pasa por un sistema público en el momento de emitirse: la que no pasa por él no cuenta como emitida.",
+        "Con esos datos, Hacienda entrega ya hechos el IVA y la renta de autónomos y pymes: quien cumple solo tiene que revisar y confirmar.",
+        "Estimación anual de la brecha fiscal (lo que debería ingresarse y no se ingresa), impuesto a impuesto y por tipo de contribuyente, hecha por un organismo independiente con método público.",
+        "Objetivo legal de reducción de esa brecha a cinco años; si no se cumple, el Gobierno explica por qué en el Congreso y presenta un plan.",
+        "Plantilla y medios de la Agencia Tributaria fijados por ley en relación con el número de contribuyentes, y dirección con mandato fijo y mayoría reforzada, para que la inspección no dependa del Gobierno.",
+        "Transparencia con garantías: lo que pagan las grandes empresas y los altos cargos puede consultarse, y queda registrado quién consulta."
+      ],
+      "supone": {
+        "personas": "Para quien ya paga, menos trabajo: Hacienda le da las declaraciones hechas. Para quien cobra en negro o usa facturas falsas, mucho más difícil. El autónomo que cumple deja de competir con quien no declara. A cambio, Hacienda ve cada factura al momento, y eso exige garantías fuertes sobre quién accede a esos datos y para qué.",
+        "cuentas": "Italia montó su sistema con una inversión inicial de 2,5 millones de euros y un coste de gestión de 20 millones al año, y en 2019 detectó 1.100 millones en créditos de IVA indebidos. La Comisión Europea estima en 7.771 millones el IVA que España dejó de ingresar en 2023 (7,6 % de lo debido). Cuánto se recuperaría no puede prometerse de antemano.",
+        "puesta_en_marcha": "Ley que haga obligatoria la factura electrónica comunicada al momento, con programa gratuito para los pequeños y calendario por tamaño de empresa. Encargo legal de la estimación de la brecha a un organismo independiente. Estatuto de la Agencia Tributaria con mandato fijo. La transparencia de datos fiscales debe pasar el filtro de la protección de datos."
+      },
+      "integra": "Atiende a quien exige que paguen todos, también los grandes, y a quien teme una Hacienda invasiva o usada políticamente: menos papeleo para el que cumple, inspección independiente del Gobierno y control de quién mira los datos de cada uno.",
+      "referencias": [
+        {
+          "lugar": "Italia",
+          "que": "Factura electrónica obligatoria desde 2019 para casi todas las operaciones entre residentes, mediante un sistema público de intercambio; la que no pasa por él se considera no emitida. En 2019 se detectaron 1.100 millones en créditos de IVA indebidos.",
+          "url": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/Italy-Electronic-invoicing-May-2021.pdf"
+        },
+        {
+          "lugar": "Reino Unido",
+          "que": "Su Hacienda publica cada año una estimación oficial de la brecha fiscal, con serie desde 2005-06. En 2024-25 fue del 6,4 % de lo debido (59.200 millones de libras), frente al 7,5 % de 2005-06; el 62 % corresponde a pequeñas empresas.",
+          "url": "https://www.gov.uk/government/news/tax-gap-2024-25-estimated-at-64"
+        },
+        {
+          "lugar": "Noruega",
+          "que": "Cualquier persona de 16 años o más puede consultar, identificándose, la renta neta, el patrimonio neto y el impuesto de otra. La ley obliga a registrar las consultas, el consultado puede ver quién le buscó y hay un tope de 500 fichas vistas al mes.",
+          "url": "https://www.skatteetaten.no/en/forms/search-the-tax-lists"
+        },
+        {
+          "lugar": "Comisión Europea",
+          "que": "Estima cada año el IVA que no se ingresa: en 2023 fue el 9,5 % de lo debido en la UE (128.000 millones de euros), con Austria en el 1,0 % y España en el 7,6 %. En Italia pasó del 19,3 % en 2019 al 15,0 % en 2023.",
+          "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Que Hacienda reciba cada factura al momento es una vigilancia masiva de la actividad económica, con riesgo de filtraciones o de mal uso.",
+          "r": "Riesgo cierto. Exige acceso limitado y registrado, sanciones a quien consulte sin motivo y un control externo e independiente. Sin esas garantías escritas en la misma ley, la medida no debería aprobarse."
+        },
+        {
+          "o": "Obligar a facturar en tiempo real es otra carga para el autónomo y la tienda pequeña, justo lo contrario de reducir trámites.",
+          "r": "Solo compensa si llega con un programa público gratuito y con las declaraciones ya hechas a cambio. El sistema italiano tramitó más de 2.000 millones de ficheros de factura en 2020. A los más pequeños hay que darles el plazo más largo."
+        },
+        {
+          "o": "La brecha fiscal es una estimación con mucho margen de error; fijar un objetivo legal sobre un número incierto invita a maquillarlo.",
+          "r": "Por eso la calcula un organismo independiente y con método público. La Hacienda británica advierte de que revisa al alza años anteriores cuando llegan datos nuevos. El objetivo sirve para rendir cuentas de la tendencia, no del decimal."
+        }
+      ],
+      "fuentes": [
+        { "t": "OCDE, Foro de Administración Tributaria: Italy – Electronic invoicing (mayo de 2021)", "url": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/Italy-Electronic-invoicing-May-2021.pdf" },
+        { "t": "Gobierno del Reino Unido (HMRC): Tax gap 2024-25 estimated at 6.4%", "url": "https://www.gov.uk/government/news/tax-gap-2024-25-estimated-at-64" },
+        { "t": "Agencia Tributaria de Noruega (Skatteetaten): Search the tax lists", "url": "https://www.skatteetaten.no/en/forms/search-the-tax-lists" },
+        { "t": "Comisión Europea: VAT gap", "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en" },
+        { "t": "e-Estonia: e-Tax (declaración de impuestos en línea)", "url": "https://e-estonia.com/service/e-governance/e-tax/" }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "Gastar sin presupuesto ni control, adjudicar obra pública por afinidad o rechazar por principio toda inversión pública.",
+      "ideal": "Ningún gasto es para siempre: cada programa nace con objetivos y fecha de revisión, y solo sigue si una evaluación independiente y pública lo avala. Las grandes obras salen de una lista ordenada por su beneficio social.",
+      "titulo": "Ningún gasto sin evaluación ni fecha de revisión",
+      "slug": "ningun-gasto-sin-evaluacion-ni-fecha-de-revision",
+      "resumen": "Evaluar no basta si la evaluación no tiene consecuencias. Va más lejos que lo avanzado porque todo el gasto, no solo el grande, se revisa al menos una vez por legislatura; cada programa caduca si no se renueva de forma expresa; las infraestructuras salen de una lista pública ordenada por un órgano independiente, y la inversión en ciencia y mantenimiento tiene un suelo que no baja en las crisis.",
+      "medidas": [
+        "Cláusula de caducidad: todo programa de gasto y toda subvención se aprueba con objetivos medibles y una fecha tope; para prorrogarlo hacen falta una evaluación publicada y un voto expreso.",
+        "Revisión de todo el gasto en cada legislatura por la AIReF, por bloques, con la obligación del Gobierno de «cumplir o explicar» cada recomendación en el Congreso.",
+        "Lista pública de prioridades de infraestructuras, ordenada por un órgano independiente según el beneficio social frente al coste; si el Parlamento se salta el orden, debe explicarlo.",
+        "Registro único y abierto con todas las evaluaciones de todas las administraciones, y el gasto de cada programa consultable euro a euro.",
+        "Suelo legal de inversión en investigación y en mantenimiento de infraestructuras, fijado como porcentaje del PIB a diez años: no se recorta en los años malos.",
+        "Techo de gasto e inversiones programados a tres años o más, para que los proyectos no dependan de que cada presupuesto anual se apruebe a tiempo."
+      ],
+      "supone": {
+        "personas": "Los servicios que funcionan se quedan y los que no, se cambian o se cierran, aunque tengan defensores. Menos obras decididas por cálculo electoral y más mantenimiento de lo que ya existe. Investigadores y empresas saben con años de antelación con qué financiación cuentan. Cualquiera puede consultar qué se evaluó y qué resultado dio.",
+        "cuentas": "Evaluar cuesta una parte pequeña de lo que se evalúa y permite mover dinero de lo que no funciona a lo que sí; cuánto se libera no se sabe hasta hacerlo. El suelo de inversión sí compromete dinero fijo cada año y debe caber dentro del techo de gasto del aspecto de deuda: en años malos obliga a ajustar por otras partidas.",
+        "puesta_en_marcha": "España ya tiene una ley de evaluación (27/2022) que pide evaluar antes y después las políticas de mayor peso presupuestario y reserva a la AIReF las revisiones de gasto. Faltaría añadir la caducidad automática, la lista independiente de infraestructuras y el suelo de inversión, y pactarlo con las comunidades autónomas para que valga también para su gasto."
+      },
+      "integra": "Responde a quien desconfía del gasto público, porque nada se financia sin demostrar resultados, y a quien lo defiende, porque protege la inversión en ciencia, infraestructuras y servicios de los recortes de urgencia. Decide la evidencia, no una idea previa sobre el tamaño del Estado.",
+      "referencias": [
+        {
+          "lugar": "Reino Unido",
+          "que": "Una unidad conjunta de la Oficina del Gabinete y el Tesoro (Evaluation Task Force) trabaja para que las decisiones de gasto se apoyen en evaluaciones. En marzo de 2025 abrió un registro que reúne en un solo sitio las evaluaciones del Gobierno.",
+          "url": "https://www.gov.uk/government/organisations/evaluation-task-force"
+        },
+        {
+          "lugar": "Australia",
+          "que": "El organismo Infrastructure Australia asesora con análisis independiente a los gobiernos sobre inversión en infraestructuras y mantiene una lista de prioridades para dirigir el dinero público a los proyectos con mejores resultados esperados.",
+          "url": "https://www.infrastructureaustralia.gov.au/what-we-do"
+        },
+        {
+          "lugar": "España",
+          "que": "La Ley 27/2022 obliga a cada ministerio a evaluar antes y después las políticas con especial repercusión presupuestaria, exige publicar los resultados, reserva a la AIReF las revisiones de gasto y autoriza crear una agencia estatal de evaluación.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "El Gobierno propone al Parlamento un techo de gasto del Estado para el tercer año siguiente, de modo que el marco de gasto se conoce con tres años de antelación.",
+          "url": "https://government.se/government-of-sweden/ministry-of-finance/central-government-budget/the-fiscal-policy-framework/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "No todo se puede medir: la cultura, la ciencia básica o la prevención dan frutos a largo plazo y saldrían mal en una evaluación de corto plazo.",
+          "r": "Cierto. La evaluación debe ajustar el plazo y los criterios a cada política, y el suelo de investigación existe justo para proteger lo que tarda en dar resultados. Evaluar mal es un riesgo; no evaluar es gastar a ciegas."
+        },
+        {
+          "o": "La caducidad automática crea inseguridad: un programa útil puede decaer por un bloqueo parlamentario y no por sus resultados.",
+          "r": "Riesgo real en parlamentos fragmentados. Se atenúa con una prórroga técnica de un año si la evaluación es favorable y falta el voto. Las pensiones, la sanidad o la educación se revisan por programas, pero no caducan como derechos."
+        },
+        {
+          "o": "Un órgano técnico que ordena las obras quita poder de decisión a los representantes elegidos y a los territorios.",
+          "r": "El órgano ordena y publica; el Parlamento decide, pero si se salta el orden debe explicarlo. El equilibrio territorial es una decisión política legítima: lo que se pide es que se tome con el coste a la vista."
+        }
+      ],
+      "fuentes": [
+        { "t": "Gobierno del Reino Unido: Evaluation Task Force", "url": "https://www.gov.uk/government/organisations/evaluation-task-force" },
+        { "t": "Infrastructure Australia: What we do", "url": "https://www.infrastructureaustralia.gov.au/what-we-do" },
+        { "t": "BOE: Ley 27/2022, de 20 de diciembre, de institucionalización de la evaluación de políticas públicas", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677" },
+        { "t": "Gobierno de Suecia: The fiscal policy framework", "url": "https://government.se/government-of-sweden/ministry-of-finance/central-government-budget/the-fiscal-policy-framework/" }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "Defender privilegios fiscales a medida o la confiscación de patrimonios, o negar que deba contribuir quien puede hacerlo.",
+      "ideal": "A igual renta, igual impuesto, venga del trabajo o del capital. Un solo sistema que une impuestos y ayudas, sin beneficios fiscales que no se evalúen, y una tabla oficial anual de lo que paga y recibe cada décimo de la población.",
+      "titulo": "A igual renta, igual impuesto, con cuentas a la vista",
+      "slug": "a-igual-renta-igual-impuesto-cuentas-a-la-vista",
+      "resumen": "La equidad se mide en el conjunto, no impuesto a impuesto. Va más lejos que lo avanzado porque no solo publica datos: grava toda la renta con la misma escala, une impuestos y ayudas en una cuenta única, hace caducar cada beneficio fiscal que no se evalúe y exige calcular quién gana y quién pierde antes de votar cada reforma.",
+      "medidas": [
+        "Una sola escala progresiva para toda la renta: salarios, intereses, dividendos, alquileres y plusvalías reales (descontada la inflación) pagan lo mismo a igual cuantía.",
+        "Cuenta fiscal única: impuestos y ayudas se liquidan juntos, de modo que quien no llega al mínimo recibe la diferencia como pago, sin tener que pedir cada ayuda por separado.",
+        "Tipo efectivo mínimo sobre la renta total de los mayores patrimonios, coordinado a escala europea para que no dependa de dónde se fije la residencia.",
+        "Todo beneficio fiscal nace con fecha de caducidad a cinco años y con su coste y sus beneficiarios publicados; solo se renueva con una evaluación independiente favorable.",
+        "Tabla oficial anual, hecha por un organismo independiente, de cuánto paga en todos los impuestos y cuánto recibe en ayudas y servicios cada décimo de hogares y el 1 % más rico.",
+        "Informe previo obligatorio de cada reforma fiscal: cuánto gana o pierde cada décimo de la población, publicado antes del voto en el Congreso."
+      ],
+      "supone": {
+        "personas": "Dos personas que ganan lo mismo pagan lo mismo, cobren nómina, alquileres o dividendos. Las familias con poca renta reciben lo que les toca sin trámites añadidos. Quien tiene un gran patrimonio no puede quedar por debajo de un mínimo. Y cualquiera puede ver, en una tabla oficial, si el sistema reparte como dice.",
+        "cuentas": "No busca recaudar más, sino repartir distinto y con datos. Llevar el ahorro a la escala general da ingresos; unir las ayudas en una cuenta única cuesta, porque llegan a quien hoy no las pide. El saldo depende del diseño y hay que calcularlo antes: por eso el informe previo de reparto forma parte de la medida.",
+        "puesta_en_marcha": "Reforma del IRPF para unificar las escalas, con transición para el ahorro ya invertido. Cruce de datos entre Hacienda y Seguridad Social para la cuenta única. Encargo legal de la tabla anual a un organismo independiente. El mínimo para grandes patrimonios necesita coordinación europea y encaje con la libre circulación de capitales."
+      },
+      "integra": "Recoge la idea de que quien más tiene debe aportar más, y también la de un sistema neutral, sin privilegios ni castigos según el tipo de renta, en el que las ayudas no quiten las ganas de trabajar. Los datos públicos permiten discutir sobre hechos y no sobre impresiones.",
+      "referencias": [
+        {
+          "lugar": "Reino Unido",
+          "que": "La oficina estadística (ONS) publica cómo los impuestos directos e indirectos y las prestaciones redistribuyen la renta entre los hogares, por quintos y décimos. En el ejercicio 2023-24, los impuestos directos redujeron el índice de Gini 4,4 puntos.",
+          "url": "https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/bulletins/theeffectsoftaxesandbenefitsonhouseholdincome/latest"
+        },
+        {
+          "lugar": "Estados Unidos",
+          "que": "La Oficina Presupuestaria del Congreso (CBO) publica la serie «The Distribution of Household Income», que analiza la renta de los hogares, las ayudas condicionadas a la renta y los impuestos federales, y cómo han cambiado desde 1979.",
+          "url": "https://www.cbo.gov/topics/income-distribution"
+        },
+        {
+          "lugar": "Canadá",
+          "que": "El Ministerio de Finanzas publica el «Report on Federal Tax Expenditures», con el coste estimado de los beneficios fiscales federales en renta, sociedades e impuesto sobre el consumo, y con evaluaciones de medidas fiscales concretas.",
+          "url": "https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures.html"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "El capital se mueve: si el ahorro tributa como el trabajo, parte del capital y de sus dueños puede irse a países con tipos más bajos.",
+          "r": "Es el argumento de fondo para gravar el ahorro aparte, y el límite existe. Por eso se grava solo la ganancia real, se coordina el mínimo en Europa y se aplica por fases. Si la salida de capital fuera alta, habría que moderar el ritmo."
+        },
+        {
+          "o": "Unir impuestos y ayudas en una cuenta puede reducir el incentivo a trabajar si la ayuda se retira muy deprisa al subir el sueldo.",
+          "r": "Depende del diseño: la ayuda debe bajar poco a poco, de modo que trabajar más siempre deje más dinero en el bolsillo. Eso encarece la medida, porque alcanza a más hogares. Hay que elegir el punto y publicarlo."
+        },
+        {
+          "o": "Publicar lo que paga cada décimo simplifica una realidad compleja y puede usarse para enfrentar a unos grupos con otros.",
+          "r": "La tabla incluye también lo que cada grupo recibe en ayudas y servicios, no solo lo que paga, y la hace un organismo independiente con método público. Sin datos oficiales el debate se hace igual, pero con cifras de parte."
+        }
+      ],
+      "fuentes": [
+        { "t": "ONS (Reino Unido): Effects of taxes and benefits on UK household income", "url": "https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/bulletins/theeffectsoftaxesandbenefitsonhouseholdincome/latest" },
+        { "t": "Congressional Budget Office (EE. UU.): Income Distribution", "url": "https://www.cbo.gov/topics/income-distribution" },
+        { "t": "Gobierno de Canadá, Ministerio de Finanzas: Report on Federal Tax Expenditures", "url": "https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures.html" },
+        { "t": "Comisión Europea: VAT gap (incluye lo que se deja de ingresar por tipos reducidos y exenciones)", "url": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en" }
+      ]
+    }
+  ]
+}

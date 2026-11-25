@@ -7,9 +7,10 @@
  * decir cosas distintas.
  *
  * Son las mismas reglas que la página de la geometría (`observatorio-polarizacion/index.html`):
- *   - Escala de 0 a 10 por aspecto. Cada círculo es un umbral: básico desde 4,
- *     intermedio desde 7 y avanzado en 10 (ver «Cómo se lee» en la página).
- *   - Parecido = 100 − (diferencia media por aspecto) × 10, redondeado.
+ *   - CINCO NIVELES por aspecto (2026-11-25): 0 Antisistema, 1 Básico, 2 Intermedio, 3 Avanzado, 4 Ideal.
+ *     El valor de cada aspecto ES su nivel; no hay posiciones intermedias.
+ *   - Parecido = 100 − (diferencia media de nivel por aspecto) × 25, redondeado. Cuentan todos los aspectos.
+ *   - Lo guardado antes de ese día iba de 0 a 10: se convierte con `aNiveles` (los cortes de entonces).
  *
  * Sin dependencias. Funciona como script de navegador (define `Geometria`) y como
  * módulo CommonJS (`require`).
@@ -21,47 +22,45 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // Umbrales de los tres círculos, en la misma escala 0-10 que la página (10/3, 20/3, 10).
-  var UMBRAL = [10 / 3, 20 / 3, 10];
+  var NOMBRE_NIVEL = ['Antisistema', 'Básico', 'Intermedio', 'Avanzado', 'Ideal'];
+  var NMAX = NOMBRE_NIVEL.length - 1;
+  // Un umbral por nivel, en la misma escala (se conserva el nombre por quien lo usa para dibujar los anillos)
+  var UMBRAL = [0, 1, 2, 3, 4];
 
-  var NOMBRE_NIVEL = ['Básico', 'Intermedio', 'Avanzado'];
-
-  /** Cuántos círculos alcanza una cifra: -1 si no llega a básico. */
+  /** El nivel de un valor, de 0 (antisistema) a 4 (ideal). */
   function nivelDe(x) {
-    var n = -1;
-    for (var k = 0; k < UMBRAL.length; k++) if (alcanza(x, k)) n = k;
-    return n;
+    return Math.max(0, Math.min(NMAX, Math.floor(x + 0.01)));
   }
 
-  /** ¿Llega la cifra al círculo k (0 básico, 1 intermedio, 2 avanzado)? */
+  /** ¿Llega el valor al nivel k? */
   function alcanza(x, k) {
-    return x >= UMBRAL[k] - 0.01;
+    return x >= k - 0.01;
   }
 
-  /** La etiqueta que se lee junto a cada deslizador. Los números son los de la página. */
+  /** La etiqueta que se lee junto a cada deslizador. */
   function etiquetaDe(x) {
-    if (x === 0) return 'Lo ignora o lo rechaza';
-    if (x <= 3) return 'No llega a lo básico';
-    if (x <= 6) return 'Básico';
-    if (x <= 9) return 'Intermedio';
-    return 'Avanzado';
+    return NOMBRE_NIVEL[nivelDe(x)];
+  }
+
+  /** De la escala de antes (0 a 10) al nivel: hasta 3, antisistema; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado. */
+  function nivelDeCifra(x) {
+    return x >= 10 ? 3 : x >= 7 ? 2 : x >= 4 ? 1 : 0;
+  }
+  /** Convierte una matriz por tema guardada de 0 a 10 (figuras con `orden` 1 o 2, borradores v1 y v2). */
+  function aNiveles(matrices) {
+    return matrices.map(function (fila) { return fila.map(nivelDeCifra); });
   }
 
   /**
-   * Parecido entre la figura `a` y un partido `b`, de 0 a 100.
-   * Un aspecto que la persona deja en 0 («lo ignoro») NO cuenta: ni penaliza ni premia.
-   * Devuelve null si no queda ningún aspecto que comparar.
+   * Parecido entre la figura `a` y un partido `b`, de 0 a 100. Cuentan todos los aspectos:
+   * el nivel 0 (antisistema) es una posición como las demás.
+   * Devuelve null si no hay ningún aspecto que comparar.
    */
   function parecido(a, b) {
     if (!a || !b || a.length !== b.length || a.length === 0) return null;
-    var suma = 0, n = 0;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] === 0) continue;
-      suma += Math.abs(a[i] - b[i]);
-      n++;
-    }
-    if (n === 0) return null;
-    return Math.round(100 - (suma / n) * 10);
+    var suma = 0;
+    for (var i = 0; i < a.length; i++) suma += Math.abs(a[i] - b[i]);
+    return Math.round(100 - (suma / a.length) * 25);
   }
 
   /** Los partidos con cifra, de más a menos parecidos. Los que no tienen cifra quedan fuera. */
@@ -69,7 +68,7 @@
     return lista.filter(function (p) { return p.parecido !== null; });
   }
 
-  /** ¿Tiene la figura la forma de los datos? `puntuaciones[i]` es un array de cifras de 0 a 10 por tema. */
+  /** ¿Tiene la figura la forma de los datos? `puntuaciones[i]` es un array de niveles de 0 a 4 por tema. */
   function figuraValida(puntuaciones, datos) {
     if (!Array.isArray(puntuaciones) || puntuaciones.length !== datos.temas.length) return false;
     for (var i = 0; i < datos.temas.length; i++) {
@@ -77,7 +76,7 @@
       if (!Array.isArray(fila) || fila.length !== datos.temas[i].ejes.length) return false;
       for (var j = 0; j < fila.length; j++) {
         var x = fila[j];
-        if (typeof x !== 'number' || !Number.isInteger(x) || x < 0 || x > 10) return false;
+        if (typeof x !== 'number' || !Number.isInteger(x) || x < 0 || x > NMAX) return false;
       }
     }
     return true;
@@ -90,9 +89,11 @@
   function resumen(puntuaciones, datos) {
     var temas = datos.temas.map(function (t, i) {
       var fila = puntuaciones[i];
-      var cuenta = [0, 0, 0];
+      // cuenta[k]: cuántos aspectos LLEGAN al nivel k (acumulado); en[k]: cuántos SE QUEDAN en él
+      var cuenta = [0, 0, 0, 0, 0], en = [0, 0, 0, 0, 0];
       fila.forEach(function (x) {
-        for (var k = 0; k < UMBRAL.length; k++) if (alcanza(x, k)) cuenta[k]++;
+        for (var k = 0; k <= NMAX; k++) if (alcanza(x, k)) cuenta[k]++;
+        en[nivelDe(x)]++;
       });
       var parecidos = datos.partidos.map(function (p) {
         return { k: p.k, n: p.n, parecido: parecido(fila, t.v[p.k]) };
@@ -102,9 +103,11 @@
         k: t.k,
         n: t.n,
         aspectos: fila.length,
-        basico: cuenta[0],
-        intermedio: cuenta[1],
-        avanzado: cuenta[2],
+        antisistema: en[0],
+        basico: cuenta[1],
+        intermedio: cuenta[2],
+        avanzado: cuenta[3],
+        ideal: cuenta[4],
         parecidos: parecidos,
         mejor: mejor,
       };
@@ -133,7 +136,7 @@
    */
   function frasePrincipal(general, sujeto) {
     var ord = conCifra(general || []).slice().sort(function (a, b) { return b.parecido - a.parecido; });
-    if (!ord.length) return 'Todavía no hay aspectos que comparar: deja alguno distinto de 0.';
+    if (!ord.length) return 'Todavía no hay aspectos que comparar.';
     var a = ord[0], b = ord[1];
     if (b && a.parecido - b.parecido <= 2) {
       return 'En conjunto, ' + a.n + ' (' + a.parecido + ' %) y ' + b.n + ' (' + b.parecido + ' %) quedan casi empatados como lo más parecido a ' + sujeto + '.';
@@ -167,6 +170,9 @@
   return {
     UMBRAL: UMBRAL,
     NOMBRE_NIVEL: NOMBRE_NIVEL,
+    NMAX: NMAX,
+    aNiveles: aNiveles,
+    nivelDeCifra: nivelDeCifra,
     nivelDe: nivelDe,
     alcanza: alcanza,
     etiquetaDe: etiquetaDe,

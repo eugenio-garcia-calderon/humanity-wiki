@@ -1,0 +1,396 @@
+{
+  "clave": "ext",
+  "anti_tema": "No tener política exterior, o proponer incumplir los tratados firmados, justificar agresiones o abusos según el bando, o desentenderse de los españoles en el exterior.",
+  "ideal_tema": "Una política exterior de Estado, votada en el Congreso, que defiende lo propio dentro de la ley, decide más con Europa, sostiene una defensa suficiente y es coherente entre lo que vende, lo que ayuda y lo que defiende.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada sobre comercio exterior, o plantear cerrar el país al comercio o incumplir los acuerdos y normas comerciales ya firmados.",
+      "ideal": "Abrir mercados con acuerdos cuyas normas laborales, ambientales y sanitarias se puedan exigir con sanción, iguales para lo importado y lo producido aquí, y una estrategia de influencia económica y cultural votada en el Congreso.",
+      "titulo": "Comercio abierto con reglas iguales y exigibles",
+      "slug": "comercio-abierto-con-reglas-iguales-y-exigibles",
+      "resumen": "Lo avanzado pide peso en el mundo y coherencia. El ideal lo convierte en reglas: ningún acuerdo comercial sin cláusulas que se puedan hacer cumplir, las mismas exigencias para el producto importado que para el agricultor o la fábrica de aquí, preferencia europea solo en sectores estratégicos y una cuenta pública anual de qué se vende, a quién y si encaja con lo que el país defiende.",
+      "medidas": [
+        "Apoyar en la UE solo acuerdos comerciales cuyo capítulo de sostenibilidad permita, como último recurso, suspender ventajas arancelarias si se incumple el Acuerdo de París o los derechos laborales básicos.",
+        "Cláusulas espejo: exigir al producto importado las mismas normas sanitarias, ambientales y de bienestar animal que al producido en la UE, con controles en frontera y salvaguardias automáticas para el campo.",
+        "Preferencia europea limitada a sectores estratégicos (defensa, energía, tecnologías críticas), con un mínimo de componentes europeos, y mercado abierto en todo lo demás.",
+        "Ventanilla única para las pymes que exportan, y un canal para que empresas, sindicatos y ONG denuncien incumplimientos de los acuerdos, con respuesta en un plazo fijo.",
+        "Plan a diez años para el español y la cultura como activos exteriores, con metas medibles y financiación estable, coordinado con los países de Iberoamérica.",
+        "Informe anual al Congreso de coherencia: qué se exporta, a qué países y con qué apoyo público, cruzado con los criterios de derechos humanos y de venta de armas."
+      ],
+      "supone": {
+        "personas": "El agricultor y el industrial compiten con productos que cumplen sus mismas normas. El consumidor conserva precios y variedad porque el mercado sigue abierto. Las pymes tienen un solo sitio al que acudir para vender fuera. Y cualquiera puede ver a quién se vende y con qué ayudas públicas.",
+        "cuentas": "No exige grandes partidas nuevas: reordena el apoyo a la exportación que ya existe. Los controles en frontera y la vigilancia de los acuerdos sí cuestan personal. La preferencia europea puede encarecer algunas compras públicas; no hay una cifra verificada de cuánto. El programa europeo de industria de defensa aporta 1.500 millones en subvenciones para toda la UE en 2025-2027.",
+        "puesta_en_marcha": "La política comercial es competencia de la UE: España no puede imponer cláusulas sola, pero sí fijar qué posición lleva al Consejo y votarla antes en el Congreso. La estrategia de influencia y el informe de coherencia pueden crearse reformando la Ley de Acción Exterior de 2014. Las cláusulas espejo dependen de pactarlas con otros Estados miembros."
+      },
+      "integra": "Recoge la demanda de mercados abiertos, empresas que compiten y un campo protegido de la competencia desleal, y también la de que el comercio no rebaje derechos laborales ni clima. Las mismas reglas para todos responden a las dos.",
+      "referencias": [
+        {
+          "lugar": "Unión Europea – Nueva Zelanda",
+          "que": "Su acuerdo comercial, en vigor desde el 1 de mayo de 2024, incluye compromisos sobre el Acuerdo de París y los derechos laborales básicos respaldados por sanciones comerciales como último recurso.",
+          "url": "https://policy.trade.ec.europa.eu/eu-trade-relationships-country-and-region/countries-and-regions/new-zealand/eu-new-zealand-agreement_en"
+        },
+        {
+          "lugar": "Comisión Europea",
+          "que": "Tiene una ventanilla única (Single Entry Point) en la que los Estados y la sociedad civil pueden denunciar que un socio incumple los compromisos de sostenibilidad de un acuerdo; desde 2022 prevé sanciones comerciales como último recurso.",
+          "url": "https://policy.trade.ec.europa.eu/development-and-sustainability/sustainable-development/sustainable-development-eu-trade-agreements_en"
+        },
+        {
+          "lugar": "Unión Europea (industria de defensa)",
+          "que": "El programa EDIP, aprobado por el Consejo el 8 de diciembre de 2025, exige que al menos el 65 % del coste de los componentes de un producto financiado proceda de la UE o de países asociados del Espacio Económico Europeo.",
+          "url": "https://www.consilium.europa.eu/en/policies/defence-industry-programme"
+        },
+        {
+          "lugar": "Unión Europea – Mercosur",
+          "que": "El acuerdo se firmó el 17 de enero de 2026 y su parte comercial se aplica de forma provisional desde el 1 de mayo de 2026. Antes, el 8 de octubre de 2025, la Comisión propuso un reglamento para reforzar la protección de los agricultores europeos.",
+          "url": "https://policy.trade.ec.europa.eu/eu-trade-relationships-country-and-region/countries-and-regions/mercosur/eu-mercosur-agreement_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Las cláusulas espejo y la preferencia europea pueden ser proteccionismo disfrazado: encarecen las compras y provocan represalias de otros países.",
+          "r": "El riesgo existe. Por eso la preferencia se limita a sectores estratégicos y las cláusulas piden lo mismo que ya se exige dentro, no más. Aun así, pueden impugnarse en la OMC y algún socio puede negarse a firmar."
+        },
+        {
+          "o": "España no decide la política comercial: la negocia la Comisión y la aprueban el Consejo y el Parlamento Europeo. Es prometer lo que no se controla.",
+          "r": "Cierto: España solo controla su voto y sus alianzas. El ideal fija esa posición por adelantado y la hace pública; no garantiza el resultado."
+        },
+        {
+          "o": "Sancionar a un socio por incumplir el Acuerdo de París es difícil de aplicar: no está claro cómo mediría un tribunal arbitral ese incumplimiento.",
+          "r": "Es un límite real, y lo señala el análisis del IISD sobre el acuerdo con Nueva Zelanda. La sanción es el último recurso, no la herramienta diaria; lo habitual seguirá siendo el diálogo y la denuncia."
+        }
+      ],
+      "fuentes": [
+        { "t": "Comisión Europea: acuerdo comercial UE – Nueva Zelanda", "url": "https://policy.trade.ec.europa.eu/eu-trade-relationships-country-and-region/countries-and-regions/new-zealand/eu-new-zealand-agreement_en" },
+        { "t": "IISD: la sostenibilidad en el acuerdo Nueva Zelanda – UE", "url": "https://www.iisd.org/articles/policy-analysis/new-zealand-eu-free-trade-agreement" },
+        { "t": "Comisión Europea: desarrollo sostenible en los acuerdos comerciales de la UE", "url": "https://policy.trade.ec.europa.eu/development-and-sustainability/sustainable-development/sustainable-development-eu-trade-agreements_en" },
+        { "t": "Consejo de la UE: Programa Europeo de la Industria de Defensa (EDIP)", "url": "https://www.consilium.europa.eu/en/policies/defence-industry-programme" },
+        { "t": "Comisión Europea: acuerdo UE – Mercosur", "url": "https://policy.trade.ec.europa.eu/eu-trade-relationships-country-and-region/countries-and-regions/mercosur/eu-mercosur-agreement_en" },
+        { "t": "BOE: Ley 2/2014, de la Acción y del Servicio Exterior del Estado", "url": "https://boe.es/buscar/pdf/2014/BOE-A-2014-3248-consolidado.pdf" }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada sobre defensa, o plantear desmantelar las fuerzas armadas, incumplir lo firmado con los aliados o usarlas al margen de la ley.",
+      "ideal": "Una ley de defensa a diez años aprobada por mayoría reforzada, con el gasto ligado a capacidades comprobables y no solo a un porcentaje, compra conjunta europea por defecto y voto del Congreso para cada gran contrato.",
+      "titulo": "Defensa pactada a diez años y ligada a capacidades",
+      "slug": "defensa-pactada-a-diez-anos-ligada-a-capacidades",
+      "resumen": "Lo avanzado pide gasto pactado, industria propia y control. El ideal añade las reglas que faltan: una mayoría amplia para que la ley sobreviva a los cambios de gobierno, cada euro ligado a una capacidad que se pueda comprobar, comprar con otros europeos salvo que se justifique lo contrario y que ningún gran contrato se firme sin pasar antes por el Congreso.",
+      "medidas": [
+        "Ley de programación de la defensa a diez años, aprobada por una mayoría reforzada del Congreso, precedida de una revisión estratégica y con actualización obligatoria a mitad de periodo.",
+        "Gasto ligado a capacidades: cada partida responde a un objetivo acordado con la OTAN y la UE, con indicadores públicos de disponibilidad, personal y munición, y no solo al porcentaje del PIB.",
+        "Mesa permanente de defensa con todos los grupos parlamentarios, que prepara la ley y sus revisiones antes de que el Gobierno las presente.",
+        "Voto previo de la comisión competente del Congreso para cada contrato de armamento que supere un umbral fijado en la ley, con trámite de urgencia y sesiones reservadas cuando haga falta.",
+        "Compra conjunta europea por defecto: comprar en solitario o fuera de Europa exige justificar por escrito el motivo; mínimo de componentes europeos en los grandes programas.",
+        "Informe anual de ejecución, revisado por el Tribunal de Cuentas y debatido en el Congreso antes de los presupuestos, con los sobrecostes y retrasos de cada programa."
+      ],
+      "supone": {
+        "personas": "Los militares saben con qué medios contarán dentro de diez años, y las empresas pueden invertir y contratar con ese horizonte. El contribuyente ve qué capacidad compra cada partida y cuánto se desvía. Y el debate deja de ser cuánto se gasta para ser qué se necesita y para qué.",
+        "cuentas": "Según la OTAN, España dedicó a defensa el 1,43 % del PIB en 2024 y un 2,00 % estimado en 2025 (datos cerrados en junio de 2025). En la cumbre de La Haya de 2025 los aliados fijaron para 2035 al menos un 3,5 % en defensa básica y hasta un 1,5 % en seguridad afín. El ideal no fija un porcentaje: la cifra sale de las capacidades pactadas, y hay que decir de dónde se paga.",
+        "puesta_en_marcha": "Aprobar una ley de programación plurianual y cambiar el Reglamento del Congreso para el voto previo de contratos. Una ley no puede obligar a las siguientes a respetar una mayoría reforzada: en la práctica es un pacto político entre los grandes grupos, renovado en cada revisión. La compra conjunta depende de los programas europeos y de otros gobiernos."
+      },
+      "integra": "Atiende a quien pide fuerzas armadas bien dotadas y cumplir con los aliados, y a quien pide no gastar a ciegas ni sin control democrático. Ligar el gasto a capacidades y pasar cada gran compra por el Congreso responde a los dos.",
+      "referencias": [
+        {
+          "lugar": "Dinamarca",
+          "que": "Su acuerdo de defensa 2024-2033 es un marco a diez años pactado el 28 de junio de 2023 por el Gobierno y otros siete partidos. Destina unos 190.000 millones de coronas y se concreta en acuerdos parciales sucesivos.",
+          "url": "https://www.fmn.dk/en/topics/agreements-and-economi/2024-2033-danish-defence-agreement/"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "Los proyectos de compra de las fuerzas armadas de más de 25 millones de euros necesitan el visto bueno de la comisión de presupuestos del Parlamento. En 2025 aprobó 103 expedientes de este tipo.",
+          "url": "https://www.bmvg.de/de/presse/drittes-jahr-in-folge-rekordwert-25-mio-euro-vorlagen-6053294"
+        },
+        {
+          "lugar": "Francia",
+          "que": "La ley de programación militar 2024-2030 cifra las necesidades en 413.300 millones de euros, obliga a actualizarla por ley antes de acabar 2027 y a entregar al Parlamento un informe de ejecución cada año antes del 30 de abril.",
+          "url": "https://www.senat.fr/leg/tas22-162.html"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "La Comisión de Defensa reúne al Gobierno con los ocho partidos del Parlamento para buscar el consenso más amplio posible sobre defensa y seguridad. El Gobierno basa parte de sus propuestas en los informes de esa comisión.",
+          "url": "https://government.se/government-of-sweden/ministry-of-defence/defence-commission/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Atar el gasto diez años quita margen a los gobiernos futuros y compite con sanidad, pensiones o vivienda sin que el votante pueda corregirlo.",
+          "r": "La ley fija capacidades y un calendario, no un cheque en blanco: se actualiza a mitad de periodo y el Congreso sigue votando cada presupuesto anual. El coste de oportunidad existe, y por eso hay que decir de dónde sale el dinero."
+        },
+        {
+          "o": "El voto del Congreso para cada contrato retrasa compras urgentes y expone información sensible.",
+          "r": "Alemania lo hace con un umbral de 25 millones y aprobó 103 expedientes en 2025. Hacen falta un trámite de urgencia y sesiones reservadas; aun así, algo de lentitud es el precio del control."
+        },
+        {
+          "o": "Comprar en Europa por defecto puede salir más caro y más lento que comprar fuera lo que ya existe, y deja a España pendiente de decisiones de otros.",
+          "r": "A corto plazo es verdad. Por eso es una regla por defecto y no una prohibición: se puede comprar fuera si se justifica por plazo o precio. La apuesta es que comprar juntos abarate a medio plazo; no está garantizado."
+        }
+      ],
+      "fuentes": [
+        { "t": "OTAN: Defence Expenditure of NATO Countries (2014-2025)", "url": "https://nato.int/content/dam/nato/webready/documents/finance/def-exp-2025-en.pdf" },
+        { "t": "OTAN: Declaración de la cumbre de La Haya, 25 de junio de 2025", "url": "https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2025/06/25/the-hague-summit-declaration" },
+        { "t": "Ministerio de Defensa de Dinamarca: acuerdo de defensa 2024-2033", "url": "https://www.fmn.dk/en/topics/agreements-and-economi/2024-2033-danish-defence-agreement/" },
+        { "t": "Ministerio de Defensa de Alemania: expedientes de más de 25 millones aprobados en 2025", "url": "https://www.bmvg.de/de/presse/drittes-jahr-in-folge-rekordwert-25-mio-euro-vorlagen-6053294" },
+        { "t": "Senado de Francia: texto de la ley de programación militar 2024-2030", "url": "https://www.senat.fr/leg/tas22-162.html" },
+        { "t": "Gobierno de Suecia: Comisión de Defensa", "url": "https://government.se/government-of-sweden/ministry-of-defence/defence-commission/" }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "Renunciar a defender el territorio y los intereses del país, o defenderlos saltándose el derecho internacional, los tratados firmados o el Parlamento.",
+      "ideal": "Una estrategia de intereses permanentes votada por mayoría reforzada en el Congreso, que ningún gobierno cambie sin consulta previa a una comisión de todos los grupos y sin debate y voto, siempre dentro del derecho internacional.",
+      "titulo": "Intereses permanentes votados, sin giros por sorpresa",
+      "slug": "intereses-permanentes-votados-sin-giros-por-sorpresa",
+      "resumen": "Lo avanzado pide un pacto entre los grandes partidos. El ideal lo convierte en reglas: la estrategia se vota, no solo se comunica; antes de cambiar de posición sobre Marruecos, el Sáhara, Gibraltar o la pesca hay consulta reservada con todos los grupos; y cada interés se defiende con medios y dentro de la ley internacional, que es lo que da fuerza a un país mediano.",
+      "medidas": [
+        "Votar en el Congreso, por mayoría reforzada, la Estrategia de Acción Exterior, que hoy aprueba el Consejo de Ministros tras enviarla a las Cortes solo para conocimiento y debate.",
+        "Lista escrita de intereses permanentes —integridad territorial, Ceuta y Melilla, Gibraltar, fronteras, pesca, campo, Mediterráneo e Iberoamérica— con objetivos e indicadores para cada uno.",
+        "Comisión de política exterior con todos los grupos, bajo secreto, a la que el Gobierno debe consultar antes de cualquier decisión de gran importancia y de fijar un mandato de negociación.",
+        "Cualquier cambio de posición sobre un interés permanente exige debate y voto en el Congreso antes de comunicarlo a otro Estado.",
+        "Defender cada interés por las vías del derecho internacional —tratados, tribunales y resoluciones de la ONU—, porque es la mejor protección de un país de tamaño medio.",
+        "Informe de política exterior una vez por legislatura, preparado con un grupo de seguimiento de todos los partidos, y balance anual del ministro ante las Cortes."
+      ],
+      "supone": {
+        "personas": "Pescadores, agricultores y vecinos de Ceuta, Melilla o el Campo de Gibraltar saben qué defiende el país y que no cambiará de un día para otro. Los demás países saben a qué atenerse gobierne quien gobierne. Y el ciudadano conoce los giros antes de que ocurran, no después por la prensa.",
+        "cuentas": "Casi no cuesta dinero: cambia el procedimiento, no el presupuesto. Exige personal técnico para la comisión y para medir los indicadores. El coste real es político: el Gobierno pierde margen para actuar solo y deprisa, y la oposición asume parte de la responsabilidad de lo que se decida.",
+        "puesta_en_marcha": "Reformar la Ley 2/2014 de Acción Exterior para que la Estrategia se vote, y el Reglamento del Congreso para crear la comisión reservada. La Constitución encarga al Gobierno dirigir la política exterior (artículo 97): la consulta previa puede ser obligatoria por ley, pero el voto sobre un giro obliga políticamente, no jurídicamente, salvo reforma constitucional."
+      },
+      "integra": "Recoge la firmeza en lo propio —territorio, fronteras, pesca, campo— y también el respeto al derecho internacional y a los pueblos afectados. Y da a todos lo mismo: que la posición del país no dependa de la decisión de una sola persona.",
+      "referencias": [
+        {
+          "lugar": "Dinamarca",
+          "que": "La Constitución regula un Comité de Política Exterior del Parlamento al que el Gobierno debe consultar en los asuntos de gran importancia para la política exterior. Sus reuniones son reservadas y sus miembros guardan secreto.",
+          "url": "https://www.thedanishparliament.dk/en/committees/committees/upn"
+        },
+        {
+          "lugar": "Finlandia",
+          "que": "El Gobierno presenta al Parlamento un informe de política exterior y de seguridad, por lo general una vez por legislatura; el primero fue en 1995. Desde 2004, un grupo de seguimiento con diputados de varios partidos acompaña su redacción.",
+          "url": "https://www.fiia.fi/en/publication/government-reports-on-finnish-foreign-and-security-policy"
+        },
+        {
+          "lugar": "Suiza",
+          "que": "La Ley del Parlamento (artículo 152) obliga al Gobierno federal a consultar a las comisiones de política exterior sobre las grandes orientaciones y antes de aprobar un mandato de negociación internacional.",
+          "url": "https://www.parlament.ch/fr/%C3%BCber-das-parlament/portrait-du-parlement/attributions-assemblee-federale/participation-a-la-politique-exterieure"
+        },
+        {
+          "lugar": "España (punto de partida)",
+          "que": "La Ley 2/2014 prevé una Estrategia de Acción Exterior de cuatro años que aprueba el Consejo de Ministros. A las Cortes se envía antes para su conocimiento y debate, sin votación, y el ministro comparece al menos una vez al año.",
+          "url": "https://boe.es/buscar/pdf/2014/BOE-A-2014-3248-consolidado.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "La diplomacia necesita discreción y rapidez: obligar a consultar y votar antes de cada giro ata al Gobierno y pone sobre aviso a la otra parte.",
+          "r": "Por eso la consulta previa es reservada, como en Dinamarca, y el voto llega antes de comunicar el cambio, no durante la negociación. Se pierde algo de agilidad; se gana que lo acordado dure."
+        },
+        {
+          "o": "Con el Congreso dividido no habrá mayoría reforzada y el país se quedará sin estrategia, o con una tan vaga que no sirva para nada.",
+          "r": "Es el riesgo que describe el análisis finlandés: los informes de consenso tienden al mínimo común. Aun así, un mínimo votado y estable pesa más fuera que una posición ambiciosa que cambia cada cuatro años."
+        },
+        {
+          "o": "Un voto del Congreso no puede obligar jurídicamente al Gobierno, que es quien dirige la política exterior según la Constitución.",
+          "r": "Cierto. Sin reforma constitucional el voto es un compromiso político, con coste para quien lo rompa. La consulta previa obligatoria sí puede fijarse por ley."
+        }
+      ],
+      "fuentes": [
+        { "t": "Parlamento de Dinamarca: el Comité de Política Exterior", "url": "https://www.thedanishparliament.dk/en/committees/committees/upn" },
+        { "t": "FIIA: los informes del Gobierno finlandés sobre política exterior y de seguridad", "url": "https://www.fiia.fi/en/publication/government-reports-on-finnish-foreign-and-security-policy" },
+        { "t": "Gobierno de Finlandia: informe de política exterior y de seguridad remitido al Parlamento", "url": "https://valtioneuvosto.fi/en/-/government-report-on-finnish-foreign-and-security-policy-submitted-to-parliament" },
+        { "t": "Parlamento de Suiza: participación en la política exterior", "url": "https://www.parlament.ch/fr/%C3%BCber-das-parlament/portrait-du-parlement/attributions-assemblee-federale/participation-a-la-politique-exterieure" },
+        { "t": "BOE: Ley 2/2014, de la Acción y del Servicio Exterior del Estado", "url": "https://boe.es/buscar/pdf/2014/BOE-A-2014-3248-consolidado.pdf" },
+        { "t": "Ministerio de Asuntos Exteriores: tramitación de la Estrategia de Acción Exterior 2025-2028", "url": "https://exteriores.gob.es/gl/Comunicacion/Noticias/Paginas/Noticias/El-Consejo-de-Ministros-ha-acordado-iniciar-la-tramitacion-de-la-Estrategia-de-Accion-Exterior-2025-2028.aspx" }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No proponer nada sobre Europa, o plantear desobedecer las normas y sentencias europeas mientras se siguen recibiendo sus fondos.",
+      "ideal": "Promover que la UE decida su política exterior por mayoría cualificada con freno de emergencia, tenga recursos propios y deuda común para bienes comunes, y que el Congreso fije y controle la posición española.",
+      "titulo": "Una Europa que decide por mayoría y rinde cuentas",
+      "slug": "europa-que-decide-por-mayoria-y-rinde-cuentas",
+      "resumen": "Lo avanzado describe la meta: presupuesto propio, política exterior común y decisiones por mayoría. El ideal dice cómo llegar sin perder control democrático: usar las pasarelas que ya están en los tratados, conservar un freno para intereses vitales y la unanimidad en lo militar, pagar lo común con ingresos europeos y acompañar cada cesión de veto con más control del Congreso y del Parlamento Europeo.",
+      "medidas": [
+        "Activar la pasarela del artículo 31.3 del Tratado de la UE para decidir por mayoría cualificada sanciones, declaraciones y posiciones de política exterior, sin reformar los tratados.",
+        "Conservar el freno de emergencia: un Estado puede oponerse por razones vitales y declaradas de política nacional, y el asunto sube al Consejo Europeo. Las decisiones militares siguen por unanimidad.",
+        "Presupuesto europeo mayor, financiado con recursos propios nuevos y no solo con más aportaciones nacionales, y deuda común reservada a bienes comunes: defensa, energía, fronteras e innovación.",
+        "Mandato del Congreso: el Gobierno expone su posición antes de cada Consejo Europeo y rinde cuentas después; cualquier paso a la mayoría cualificada exige voto previo de las Cortes.",
+        "Cumplir en casa: incorporar las directivas en plazo, ejecutar los fondos con evaluación pública y acatar las sentencias del Tribunal de Justicia de la UE.",
+        "Mientras no haya unanimidad para la pasarela, avanzar con los países dispuestos mediante la abstención constructiva y las cooperaciones reforzadas."
+      ],
+      "supone": {
+        "personas": "Europa responde antes y con una sola voz ante una guerra, una crisis energética o una presión comercial, sin quedar bloqueada por un solo gobierno. A cambio, España también puede quedar en minoría alguna vez. El ciudadano gana control: sabe qué posición lleva su Gobierno a Bruselas y puede pedirle cuentas.",
+        "cuentas": "La Comisión propuso en julio de 2025 un presupuesto 2028-2034 de casi 2 billones de euros, el 1,26 % de la renta nacional bruta de la UE, con nuevos recursos propios. La deuda común ya existe: NextGenerationEU tiene un techo de 806.900 millones fijado en 2021, a devolver hasta 2058. Más presupuesto europeo significa más aportación o más ingresos europeos: no es gratis.",
+        "puesta_en_marcha": "La pasarela exige unanimidad del Consejo Europeo: basta un país para pararla. Los nuevos recursos propios también necesitan el acuerdo de todos los Estados. En España, el mandato previo puede fijarse por ley reforzando el control de las Cortes sobre los asuntos europeos. Nueve países, España entre ellos, crearon en 2023 un grupo para avanzar hacia la mayoría cualificada."
+      },
+      "integra": "Recoge el europeísmo que quiere una Unión capaz de actuar y la preocupación por la soberanía: freno de emergencia, unanimidad en lo militar y más poder del Congreso sobre lo que el Gobierno vota en Bruselas.",
+      "referencias": [
+        {
+          "lugar": "Tratado de la Unión Europea (artículo 31)",
+          "que": "Ya permite que el Consejo Europeo, por unanimidad, amplíe la mayoría cualificada en política exterior, salvo en decisiones militares o de defensa. Prevé también la abstención constructiva y un freno por razones vitales de política nacional.",
+          "url": "https://www.legislation.gov.uk/eut/teu/article/31"
+        },
+        {
+          "lugar": "Grupo de Amigos de la mayoría cualificada",
+          "que": "El 4 de mayo de 2023, Alemania, Bélgica, Eslovenia, España, Finlandia, Francia, Italia, Luxemburgo y Países Bajos crearon un grupo para avanzar hacia la mayoría cualificada en política exterior con las disposiciones ya previstas en el Tratado.",
+          "url": "https://www.auswaertiges-amt.de/en/newsroom/news/2595304-2595304"
+        },
+        {
+          "lugar": "Parlamento Europeo",
+          "que": "El 22 de noviembre de 2023 aprobó, por 291 votos a favor, 274 en contra y 44 abstenciones, pedir una reforma de los tratados que lleve a la mayoría cualificada las sanciones y otras decisiones de política exterior.",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1767191"
+        },
+        {
+          "lugar": "Dinamarca",
+          "que": "El Gobierno consulta al Comité de Política Exterior del Parlamento antes y después de las reuniones del Consejo Europeo, además de en los asuntos de gran importancia.",
+          "url": "https://www.thedanishparliament.dk/en/committees/committees/upn"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Sin veto, España puede quedar en minoría en asuntos que le importan mucho, como Gibraltar, Marruecos o Iberoamérica.",
+          "r": "El riesgo es real. El tratado lo acota con un freno por razones vitales de política nacional y deja lo militar en unanimidad. Pero quien acepta decidir por mayoría acepta perder alguna votación."
+        },
+        {
+          "o": "La pasarela necesita unanimidad: los gobiernos que usan el veto no van a votar para perderlo. Es una propuesta sin recorrido.",
+          "r": "Hoy es así. Por eso el ideal incluye un camino intermedio: abstención constructiva y cooperación entre los países dispuestos. El grupo creado en 2023 demuestra apoyo, no que haya unanimidad."
+        },
+        {
+          "o": "Más presupuesto y más deuda común alejan del votante las decisiones de gasto y pueden acabar en transferencias permanentes entre países.",
+          "r": "Por eso se limita a bienes comunes y se liga al control del Parlamento Europeo y de los parlamentos nacionales. La desconfianza entre países que pagan y países que reciben no desaparece con una regla."
+        }
+      ],
+      "fuentes": [
+        { "t": "Tratado de la Unión Europea, artículo 31 (versión consolidada)", "url": "https://www.legislation.gov.uk/eut/teu/article/31" },
+        { "t": "Ministerio de Exteriores de Alemania: declaración del Grupo de Amigos de la mayoría cualificada", "url": "https://www.auswaertiges-amt.de/en/newsroom/news/2595304-2595304" },
+        { "t": "Parlamento Europeo: propuestas de reforma de los tratados, 22 de noviembre de 2023", "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1767191" },
+        { "t": "Comisión Europea: propuesta de presupuesto de la UE 2028-2034", "url": "https://commission.europa.eu/news-and-media/news/eu-budget-2028-2034-stronger-europe-2025-07-16_en" },
+        { "t": "Comisión Europea: NextGenerationEU, financiación en los mercados", "url": "https://commission.europa.eu/strategy-and-policy/eu-budget/eu-borrower-investor-relations/nextgenerationeu_en" },
+        { "t": "Verfassungsblog: hacia la mayoría cualificada en la política exterior de la UE (2026)", "url": "https://verfassungsblog.de/towards-qualified-majority-voting-in-eu-foreign-policy/" }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada sobre paz, o justificar guerras de agresión, ignorar las resoluciones de la ONU o vender armas sin ningún control.",
+      "ideal": "Un servicio de mediación permanente con presupuesto estable y respaldo de todos los grupos, licencias de armas publicadas una a una y denegadas ante riesgo grave, y cumplimiento sin excepciones de la justicia internacional.",
+      "titulo": "Diplomacia de paz profesional y armas bajo control",
+      "slug": "diplomacia-de-paz-profesional-y-armas-bajo-control",
+      "resumen": "Lo avanzado pide una diplomacia de paz con medios. El ideal la hace estable y comprobable: un equipo profesional que no cambia con cada gobierno y habla con todas las partes, cada licencia de exportación de armas a la vista del público y del Congreso, la misma vara de medir para aliados y adversarios ante los tribunales internacionales, y un desarme negociado y verificable, nunca unilateral.",
+      "medidas": [
+        "Unidad permanente de mediación en el Ministerio de Exteriores, con mediadores de carrera, presupuesto plurianual y mandato respaldado por todos los grupos, dispuesta a hablar con todas las partes de un conflicto.",
+        "Centrarse en lo que España puede aportar —Iberoamérica, el Mediterráneo y el Sahel—, con formación propia de mediadores y oferta de buenos oficios, como representar intereses entre países sin relaciones.",
+        "Publicar cada licencia de exportación de armas —país, tipo de material, valor y uso final— en un plazo fijo, y no solo estadísticas agregadas cada seis meses.",
+        "Denegación obligatoria si hay riesgo grave de uso contra civiles o en una guerra de agresión, con informe motivado y control previo del Congreso para las ventas a países en conflicto.",
+        "Ejecutar las órdenes de la Corte Penal Internacional y las sentencias de la Corte Internacional de Justicia sea quien sea el afectado, y pagar en plazo las cuotas a la ONU y a sus misiones.",
+        "Promover tratados de desarme y control de armas verificables y recíprocos, sin reducir de forma unilateral las capacidades de defensa propias ni las de los aliados."
+      ],
+      "supone": {
+        "personas": "Menos guerras largas son menos refugiados, menos inestabilidad cerca de casa y menos gasto en emergencias. Las empresas de defensa saben de antemano a quién pueden vender. Y el ciudadano puede comprobar a qué países se venden armas españolas y con qué garantías.",
+        "cuentas": "La mediación es barata frente a lo que cuesta una guerra: el Gobierno noruego habla de resultados con recursos relativamente modestos, sin dar una cifra en la fuente consultada. Vetar ventas sí cuesta: contratos y empleos que la industria de defensa deja de tener. No hay un cálculo verificado para España.",
+        "puesta_en_marcha": "Crear la unidad por decisión del Gobierno y asegurar su presupuesto en la Estrategia de Acción Exterior. Reformar la Ley 53/2007, que hoy prevé información semestral al Congreso y una comparecencia anual, para publicar licencia a licencia y dar control previo. Formar mediadores y ganar confianza lleva años: Noruega lleva 35."
+      },
+      "integra": "Recoge el rechazo a la guerra y al comercio de armas sin control, y también la exigencia de no quedar indefensos ni hundir la industria: el desarme es recíproco y verificable, y las reglas de venta son claras y previsibles.",
+      "referencias": [
+        {
+          "lugar": "Noruega",
+          "que": "En 35 años ha participado en unos 40 procesos de paz. Su Gobierno presentó en junio de 2025 un libro blanco que fija como señas la disposición a hablar con todas las partes, la discreción y un respaldo político amplio y duradero.",
+          "url": "https://www.regjeringen.no/en/whats-new/government-presents-white-paper-on-norways-peace-and-conflict-resolution-efforts/id3108483/"
+        },
+        {
+          "lugar": "Suiza",
+          "que": "Su Ministerio de Exteriores tiene una unidad de mediadores con experiencia, cofundó con Alemania y Finlandia un máster de mediación en la ETH de Zúrich y ejerce ocho mandatos de potencia protectora, como representar a EE. UU. en Irán desde 1980.",
+          "url": "https://www.eda.admin.ch/dam/en/sd-web/HK3hIcMq7t-Y/Mediationsbrosch%C3%BCre_EN_250729.pdf"
+        },
+        {
+          "lugar": "Tratado sobre el Comercio de Armas (ONU)",
+          "que": "Fija normas internacionales comunes para el comercio de armas convencionales. Está en vigor desde el 24 de diciembre de 2014 y cuenta con 118 Estados parte; el último en sumarse, Ecuador, en 2026.",
+          "url": "https://thearmstradetreaty.org/"
+        },
+        {
+          "lugar": "España (punto de partida)",
+          "que": "La Ley 53/2007 obliga a denegar licencias de exportación de armas en varios supuestos, somete cada autorización al informe vinculante de una junta interministerial y prevé enviar información al Congreso cada seis meses.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2007-22437"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Publicar cada licencia y pasarla por el Congreso ahuyenta a los clientes y regala contratos a competidores con menos escrúpulos, sin salvar una sola vida.",
+          "r": "Puede ocurrir: otro vendedor puede ocupar el hueco. La regla no promete acabar con las guerras, sino que el país no las alimente sin que nadie lo sepa. Se perderá algún contrato."
+        },
+        {
+          "o": "España no es Noruega ni Suiza: está en la OTAN y en la UE, no es neutral y tiene menos crédito como mediador imparcial.",
+          "r": "Noruega también es miembro de la OTAN. Aun así, España no servirá para todos los conflictos: por eso el ideal la centra en las regiones donde tiene lazos y deja el resto a otros."
+        },
+        {
+          "o": "Cumplir siempre con la Corte Penal Internacional puede chocar con aliados y con la propia mediación, que exige hablar con personas acusadas.",
+          "r": "La tensión existe. Mediar es hablar, no dar impunidad: se puede dialogar con una parte y cumplir una orden de detención si pisa territorio propio. Alguna vez eso cerrará una puerta."
+        }
+      ],
+      "fuentes": [
+        { "t": "Gobierno de Noruega: libro blanco sobre la labor de paz y resolución de conflictos (2025)", "url": "https://www.regjeringen.no/en/whats-new/government-presents-white-paper-on-norways-peace-and-conflict-resolution-efforts/id3108483/" },
+        { "t": "Ministerio de Exteriores de Suiza: folleto sobre mediación (julio de 2025)", "url": "https://www.eda.admin.ch/dam/en/sd-web/HK3hIcMq7t-Y/Mediationsbrosch%C3%BCre_EN_250729.pdf" },
+        { "t": "Tratado sobre el Comercio de Armas: sitio oficial", "url": "https://thearmstradetreaty.org/" },
+        { "t": "BOE: Ley 53/2007, sobre el control del comercio exterior de material de defensa y de doble uso", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2007-22437" }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "No proponer nada, o negar la ayuda incluso en las emergencias y justificar violaciones de derechos humanos según quién las cometa.",
+      "ideal": "Llegar al 0,7 % de la renta nacional con una senda anual obligatoria, medir la ayuda por sus resultados y aplicar los mismos criterios públicos de derechos humanos a todos los países en comercio, alianzas y venta de armas.",
+      "titulo": "Ayuda del 0,7 % garantizada y coherencia auditada",
+      "slug": "ayuda-del-07-garantizada-y-coherencia-auditada",
+      "resumen": "Lo avanzado condiciona comercio y alianzas a los derechos humanos con criterios públicos. El ideal añade la garantía de que se cumple: una senda anual hasta el 0,7 % que no pueda aplazarse sin votarlo, ayuda evaluada por lo que consigue y no por lo que gasta, los mismos criterios para amigos y adversarios, y un informe de coherencia hecho por un órgano independiente.",
+      "medidas": [
+        "Senda anual obligatoria hasta el 0,7 % de la renta nacional bruta: si un presupuesto se queda por debajo, el Gobierno debe explicarlo y someterlo a un voto expreso del Congreso.",
+        "Suelo para la acción humanitaria dentro de la ayuda, y un fondo de emergencia disponible sin esperar a aprobar una partida nueva.",
+        "Evaluación independiente y pública de cada gran programa: se mantiene lo que demuestra resultados y se cierra lo que no, con cuentas claras frente a la corrupción y el desvío de fondos.",
+        "Criterios de derechos humanos escritos y públicos, iguales para todos los países, con una escala de respuesta: diálogo, aviso, suspensión de ventajas comerciales y, al final, sanciones.",
+        "Informe anual de coherencia entre ayuda, comercio, deuda y venta de armas, elaborado por un órgano independiente y debatido en el Congreso.",
+        "Exigir a las grandes empresas que vigilen los derechos humanos en su cadena de suministro, con apoyo a las pymes proveedoras para poder cumplir."
+      ],
+      "supone": {
+        "personas": "Quien recibe la ayuda puede contar con ella varios años, no según el presupuesto de cada ejercicio. El contribuyente ve qué se consigue con su dinero. Las empresas saben qué prácticas tienen consecuencias. Y resulta más difícil ayudar con una mano a quien se perjudica con la otra.",
+        "cuentas": "Según la OCDE, la ayuda española fue el 0,25 % de la renta nacional en 2024 y el 0,27 % en 2025 (dato preliminar); el Gobierno la cifra en más de 4.550 millones de euros en 2025. Llegar al 0,7 % supone más que duplicar ese esfuerzo. La propia OCDE ve improbable alcanzarlo en 2030 con la tendencia actual. En 2025 solo cuatro países donantes llegaron al 0,7 %.",
+        "puesta_en_marcha": "La Ley 1/2023 ya fija el 0,7 % en el horizonte de 2030; falta la senda anual vinculante y su reflejo en cada presupuesto, lo que pide un pacto de varias legislaturas. Las condiciones comerciales se deciden en la UE: España puede proponerlas y votarlas, no imponerlas. El informe independiente puede encargarse por ley a un órgano que ya exista."
+      },
+      "integra": "Recoge la solidaridad y la defensa universal de los derechos, y también la exigencia de evaluar cada euro, de que la ayuda sirva a la estabilidad y de que no financie a gobiernos corruptos. Un mismo criterio para todos evita el doble rasero.",
+      "referencias": [
+        {
+          "lugar": "Noruega, Luxemburgo, Suecia y Dinamarca",
+          "que": "Fueron los únicos donantes que llegaron al 0,7 % en 2025, según los datos preliminares de la OCDE: 1,03 %, 0,99 %, 0,85 % y 0,72 % de su renta nacional. El conjunto de los donantes se quedó en el 0,26 %.",
+          "url": "https://www.oecd.org/en/about/news/press-releases/2026/04/international-aid-fell-sharply-in-2025-says-oecd.html"
+        },
+        {
+          "lugar": "Unión Europea (preferencias comerciales)",
+          "que": "Su sistema de preferencias quita aranceles a países en desarrollo y puede retirarlos si no respetan derechos humanos y laborales básicos. En febrero de 2020 la Comisión retiró parte de las ventajas a Camboya por violaciones graves y sistemáticas.",
+          "url": "https://policy.trade.ec.europa.eu/development-and-sustainability/generalised-scheme-preferences_en"
+        },
+        {
+          "lugar": "Unión Europea (diligencia debida)",
+          "que": "Una directiva en vigor desde julio de 2024 obliga a las grandes empresas a detectar y corregir daños a los derechos humanos y al medio ambiente en su cadena. Tras la reforma de 2026 cubre a las de 5.000 empleados y 1.500 millones de facturación o más.",
+          "url": "https://commission.europa.eu/business-economy-euro/doing-business-eu/sustainability-due-diligence-responsible-business/corporate-sustainability-due-diligence_en"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Llegar al 0,7 % cuesta miles de millones al año cuando hay necesidades sin cubrir en casa, y casi todos los donantes están recortando.",
+          "r": "Es la objeción de más peso: la ayuda mundial cayó un 23,1 % en términos reales en 2025, según la OCDE. El ideal no la esquiva: obliga a votar cada año si se cumple la senda y a decir de dónde sale el dinero."
+        },
+        {
+          "o": "Condicionar el comercio a los derechos humanos castiga a la población del país sancionado y deja el hueco a potencias que no ponen condiciones.",
+          "r": "Por eso la escala empieza por el diálogo, y la retirada de ventajas es parcial y el último paso, como en Camboya. El riesgo de que otro ocupe el sitio existe y no tiene solución completa."
+        },
+        {
+          "o": "Los criterios iguales para todos no resisten el primer choque con un proveedor de energía o un aliado militar: acabarán aplicándose solo a los débiles.",
+          "r": "Puede pasar. La defensa es la publicidad: criterios escritos, informe independiente y debate anual hacen visible cada excepción y obligan a justificarla. No la impiden."
+        }
+      ],
+      "fuentes": [
+        { "t": "OCDE: la ayuda internacional cayó con fuerza en 2025 (nota de prensa, 9 de abril de 2026)", "url": "https://www.oecd.org/en/about/news/press-releases/2026/04/international-aid-fell-sharply-in-2025-says-oecd.html" },
+        { "t": "OCDE: perfil de la cooperación al desarrollo de España", "url": "https://www.oecd.org/en/publications/development-co-operation-profiles_04b376d7-en/spain_63702c87-en.html" },
+        { "t": "Ministerio de Asuntos Exteriores: la ayuda oficial española en 2025 (nota de prensa, 10 de abril de 2026)", "url": "https://www.exteriores.gob.es/en/Comunicacion/NotasPrensa/Paginas/2026_NOTAS_P/La-Ayuda-Oficial-al-Desarrollo-espa%C3%B1ola-alcanza-su-mayor-cifra-de-los-ultimos-15-a%C3%B1os.aspx" },
+        { "t": "BOE: Ley 1/2023, de Cooperación para el Desarrollo Sostenible y la Solidaridad Global", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2023-4512" },
+        { "t": "Comisión Europea: Sistema de Preferencias Generalizadas", "url": "https://policy.trade.ec.europa.eu/development-and-sustainability/generalised-scheme-preferences_en" },
+        { "t": "Comisión Europea: directiva de diligencia debida de las empresas en sostenibilidad", "url": "https://commission.europa.eu/business-economy-euro/doing-business-eu/sustainability-due-diligence-responsible-business/corporate-sustainability-due-diligence_en" }
+      ]
+    }
+  ]
+}

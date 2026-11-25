@@ -1,0 +1,473 @@
+{
+  "clave": "der",
+  "anti_tema": "No proponer nada, o romper la base: imponer o perseguir creencias, castigar opiniones, incumplir las leyes vigentes o negar derechos a una parte de la población.",
+  "ideal_tema": "Libertades que se ejercen de verdad y en igualdad: apoyo real a quien decide en un sentido o en otro, conciencia respetada sin dejar a nadie sin servicio, datos públicos y pactos que no cambian con cada mayoría.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada, imponer o perseguir una creencia, o negar a los padres toda elección educativa y a los profesionales toda objeción.",
+      "ideal": "Un solo marco para toda creencia y para quien no tiene ninguna: financiación solo por decisión del contribuyente, objeción personal con relevo garantizado y las mismas reglas para toda escuela pagada con dinero público.",
+      "titulo": "Estatuto común de la libertad de conciencia",
+      "slug": "estatuto-comun-libertad-de-conciencia",
+      "resumen": "Una ley que pone en pie de igualdad a todas las confesiones y a las convicciones no religiosas, regula la objeción de conciencia para que nadie actúe contra sus principios ni nadie se quede sin servicio, y deja elegir escuela con reglas iguales. Va más lejos que lo avanzado porque sustituye los acuerdos caso a caso por un marco único, con dinero decidido por cada contribuyente y resultados medidos.",
+      "medidas": [
+        "Un marco único de cooperación abierto a cualquier confesión u organización de convicciones no religiosas que cumpla requisitos objetivos, en vez de acuerdos distintos para cada una.",
+        "Financiación solo por decisión expresa del contribuyente: una casilla igual para cada confesión reconocida, para fines sociales o para el Estado. Lo que nadie marca no se reparte. Cuentas publicadas cada año.",
+        "Ley de objeción de conciencia: personal, anticipada y por escrito. La Administración organiza el relevo y el ciudadano recibe el servicio en plazo, sin tener que buscarlo por su cuenta.",
+        "Elección de centro en toda la red pagada con dinero público, con las mismas reglas de admisión, gratuidad real sin cuotas y reparto equilibrado del alumnado con más necesidades.",
+        "Enseñanza religiosa voluntaria para cualquier confesión con demanda suficiente, alternativa para quien no la quiera y actos y símbolos del Estado neutrales.",
+        "Informe anual independiente: quejas por discriminación religiosa o ideológica, servicios no prestados por objeción y composición social de cada centro educativo."
+      ],
+      "supone": {
+        "personas": "Quien cree y quien no cree recibe el mismo trato del Estado. Un médico, un farmacéutico o un funcionario pueden objetar por un cauce claro, y el paciente o el ciudadano no lo nota: alguien le atiende en plazo. Las familias eligen entre escuelas públicas y concertadas que juegan con las mismas reglas y sin cuotas encubiertas.",
+        "cuentas": "La casilla no añade gasto si sustituye a las asignaciones actuales. En Italia, el sistema del ocho por mil movía en 2023 unos 1.412 millones de euros potenciales. Lo que sí cuesta es la gratuidad real de toda la red concertada y los equipos de relevo; no hay una cifra oficial verificada para España y por eso no se da aquí.",
+        "puesta_en_marcha": "Hace falta una nueva ley orgánica de libertad religiosa y de conciencia y revisar, negociando, los acuerdos vigentes con las confesiones; el de la Iglesia católica es un tratado internacional y no se cambia solo por ley. La parte educativa exige acuerdo con las comunidades autónomas. Plazo realista: dos legislaturas."
+      },
+      "integra": "Recoge de la derecha la libertad de los padres para elegir escuela y el respeto a la conciencia y a la religión; de la izquierda, el Estado neutral, el trato igual a quien no cree y que la objeción o el ideario no dejen a nadie sin servicio ni separen a los alumnos por renta.",
+      "referencias": [
+        {
+          "lugar": "Países Bajos",
+          "que": "El artículo 23 de su Constitución hace que el Estado financie por igual las escuelas públicas y las privadas, que suelen fundar padres con un ideario. A cambio deben cumplir condiciones, como un mínimo de alumnos y de horas de clase.",
+          "url": "https://www.government.nl/themes/education/freedom-of-education/public-authority-and-private-schools"
+        },
+        {
+          "lugar": "Italia",
+          "que": "Cada contribuyente decide si el ocho por mil de su impuesto sobre la renta va al Estado, a la Iglesia católica o a otras confesiones con acuerdo (valdenses, judíos, budistas, hinduistas…). En 2023 eligió el 40,5 %; el resto se reparte en proporción.",
+          "url": "https://documenti.camera.it/leg19/dossier/testi/BI0117.htm"
+        },
+        {
+          "lugar": "Consejo de Europa (Asamblea Parlamentaria)",
+          "que": "La Resolución 1763 (2010) pide a los Estados garantizar la objeción de conciencia sanitaria y, a la vez, que el paciente sea informado a tiempo, derivado a otro profesional y atendido, sobre todo en urgencias.",
+          "url": "https://pace.coe.int/en/files/17909/html"
+        },
+        {
+          "lugar": "España",
+          "que": "La Ley 24/1992 aprueba el acuerdo con las iglesias evangélicas: enseñanza religiosa, asistencia en hospitales, cárceles y cuarteles, efectos civiles del matrimonio y exenciones fiscales. Es el modelo de acuerdo confesión a confesión.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1992-24853"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Desde el laicismo: pagar con dinero público a confesiones y a colegios con ideario mantiene privilegios y separa a los alumnos por creencia y por renta.",
+          "r": "El dinero a las confesiones solo sale de quien lo marca, y las escuelas con fondos públicos comparten admisión, gratuidad y alumnado vulnerable. El riesgo de segregación existe: por eso se mide cada año y se corrige."
+        },
+        {
+          "o": "Desde las confesiones: igualar a todas y limitar la objeción a la persona ignora el peso histórico de la religión mayoritaria y deja sin amparo a las instituciones con ideario.",
+          "r": "Tratar igual no quita derechos a nadie y los centros privados conservan su ideario. Se reconoce el límite: en el servicio público quien garantiza la prestación es la Administración, y eso impide que un centro público entero objete."
+        },
+        {
+          "o": "Si muchos profesionales objetan en una zona, el relevo garantizado es papel mojado.",
+          "r": "Es el punto más difícil. La ley obliga a planificar plantillas con el registro de objetores y a desplazar equipos o derivar con gastos pagados; el informe anual publica dónde falla."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Gobierno de los Países Bajos: escuelas públicas y privadas (libertad de enseñanza)",
+          "url": "https://www.government.nl/themes/education/freedom-of-education/public-authority-and-private-schools"
+        },
+        {
+          "t": "Cámara de Diputados de Italia: dossier sobre el ocho por mil del IRPEF",
+          "url": "https://documenti.camera.it/leg19/dossier/testi/BI0117.htm"
+        },
+        {
+          "t": "Ministerio de Economía y Finanzas de Italia: estadísticas del ocho por mil",
+          "url": "https://www1.finanze.gov.it/finanze/pagina_dichiarazioni/public/ottoxmille.php"
+        },
+        {
+          "t": "Asamblea Parlamentaria del Consejo de Europa: Resolución 1763 (2010), objeción de conciencia en la atención médica legal",
+          "url": "https://pace.coe.int/en/files/17909/html"
+        },
+        {
+          "t": "BOE: Ley 24/1992, Acuerdo de Cooperación del Estado con las entidades religiosas evangélicas",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1992-24853"
+        },
+        {
+          "t": "BOE: Ley Orgánica 2/2010, texto consolidado (artículo 19 bis, objeción de conciencia)",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514"
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No ofrecer ninguna ayuda a la embarazada ni a la persona enferma, o usar el apoyo para presionar, acosar o engañar a quien tiene que decidir.",
+      "ideal": "Un derecho exigible al apoyo: toda embarazada y toda persona enferma o dependiente recibe en un plazo fijo ayuda económica, vivienda y cuidados, paliativos incluidos, antes de decidir y sin que nada la condicione.",
+      "titulo": "Derecho al apoyo antes de decidir",
+      "slug": "derecho-al-apoyo-antes-de-decidir",
+      "resumen": "Convierte la ayuda a la maternidad, los cuidados paliativos y la atención a la dependencia en derechos con plazo, que se pueden reclamar, y no en ayudas que dependen del presupuesto de cada año o de la provincia. Va más lejos que lo avanzado porque fija plazos, pone una prestación puente si la Administración llega tarde y mide cada año si alguien decidió por falta de recursos.",
+      "medidas": [
+        "Ventanilla única de embarazo: en pocos días, un plan personal de renta, vivienda, empleo o estudios y escuela infantil. Es voluntario y no condiciona ni retrasa la decisión de la mujer.",
+        "Fondo estatal para embarazadas en apuros, que se pide en el centro de salud o de servicios sociales, se paga desde el embarazo y no se descuenta de otras prestaciones.",
+        "Teléfono gratuito las 24 horas y parto confidencial con atención médica completa, respetando el derecho del hijo a conocer su origen cuando crezca.",
+        "Ley de cuidados paliativos: equipo especializado en casa o en el hospital en un plazo máximo, especialidad médica reconocida y una dotación como la de los países europeos mejor cubiertos.",
+        "Dependencia con plazo real: si la ayuda reconocida no llega a tiempo, se cobra de forma automática una prestación puente hasta que llegue.",
+        "Informe anual por provincia: cobertura de paliativos, espera en dependencia y una encuesta voluntaria y anónima sobre si la falta de recursos pesó en la decisión."
+      ],
+      "supone": {
+        "personas": "Una mujer embarazada sin trabajo o sin casa sabe en días con qué cuenta si sigue adelante, y nadie le exige nada a cambio. Un enfermo grave tiene equipo de paliativos en su casa, viva en una capital o en un pueblo. Una familia que cuida a un dependiente no pasa meses sin ayuda. Quien decide, decide con alternativas reales delante.",
+        "cuentas": "Es gasto nuevo y permanente. Alemania dedica hasta 96 millones de euros al año a su fundación federal para embarazadas en apuros. El grueso del coste está en paliativos y dependencia: España tiene algo menos de 1 servicio especializado de paliativos por 100.000 habitantes y los países mejor dotados pasan de 2. No hay una estimación oficial verificada del coste total.",
+        "puesta_en_marcha": "Una ley estatal de cuidados paliativos, el reconocimiento de la especialidad, una reforma de la ley de dependencia para crear la prestación puente y un fondo en los Presupuestos. Sanidad y servicios sociales son de las comunidades: hace falta acuerdo y financiación compartida. Formar equipos lleva años; plazo realista, dos legislaturas."
+      },
+      "integra": "Recoge de la derecha la protección de la vida y de la maternidad con hechos y no solo con palabras; de la izquierda, que el apoyo sea un derecho social y nunca una condición ni una presión. Las dos partes comparten el objetivo: que nadie decida por pobreza o por soledad.",
+      "referencias": [
+        {
+          "lugar": "Alemania",
+          "que": "La Fundación Federal Madre e Hijo ayuda desde 1984, con hasta 96 millones de euros al año, a más de 100.000 embarazadas en apuros. Se pide en los centros de asesoramiento y no se descuenta de otras prestaciones. No es un derecho exigible.",
+          "url": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/bundesstiftung-mutter-und-kind/bundesstiftung-mutter-und-kind-73522"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "El parto confidencial permite dar a luz con atención médica y bajo seudónimo; el Estado paga los gastos y el hijo puede conocer la identidad de la madre a los 16 años. Hay un teléfono gratuito las 24 horas, en 19 idiomas.",
+          "url": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/vertrauliche-geburt"
+        },
+        {
+          "lugar": "Austria, Suecia, Suiza, Países Bajos y Noruega",
+          "que": "Según el Atlas de Cuidados Paliativos en Europa 2025, estos países superan los 2 servicios especializados por 100.000 habitantes. España tiene 0,96, en la media del continente, y ocupa el puesto 25 de 53.",
+          "url": "https://www.unav.edu/documents/30448903/31064575/key-insights-esp.pdf"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Desde la autonomía personal: ofrecer apoyo antes de decidir puede convertirse en presión o en un retraso encubierto para la mujer o para el enfermo.",
+          "r": "Por eso el apoyo es voluntario, lo dan los servicios públicos y no añade plazos ni requisitos a las prestaciones legales. El riesgo existe y se vigila con el informe anual y con una vía de queja."
+        },
+        {
+          "o": "Desde la defensa de la vida: mientras aborto y eutanasia sean legales, las ayudas acompañan pero no protegen la vida del no nacido ni la del enfermo.",
+          "r": "Es cierto que este marco no resuelve ese desacuerdo moral ni lo pretende. Asegura lo que ambas partes comparten: que nadie decida por falta de medios. Quien quiera cambiar la ley conserva la vía democrática para hacerlo."
+        },
+        {
+          "o": "Un derecho exigible con plazo es muy caro y faltan profesionales de paliativos para cumplirlo.",
+          "r": "Es el límite real. La especialidad médica aún no está reconocida en España y hay que formar equipos, así que los plazos deben entrar por fases, con la prestación puente mientras tanto."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Ministerio federal de Familia de Alemania: Bundesstiftung Mutter und Kind",
+          "url": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/bundesstiftung-mutter-und-kind/bundesstiftung-mutter-und-kind-73522"
+        },
+        {
+          "t": "Ministerio federal de Familia de Alemania: parto confidencial y teléfono «Schwangere in Not»",
+          "url": "https://www.bmbfsfj.bund.de/bmbfsfj/themen/familie/schwangerschaft-und-kinderwunsch/vertrauliche-geburt"
+        },
+        {
+          "t": "Atlas de Cuidados Paliativos en Europa 2025 (EAPC y Universidad de Navarra): datos clave",
+          "url": "https://www.unav.edu/documents/30448903/31064575/key-insights-esp.pdf"
+        },
+        {
+          "t": "Atlas de Cuidados Paliativos en Europa 2025: ficha de España",
+          "url": "https://www.unav.edu/documents/30448903/167090281/Spain.pdf"
+        },
+        {
+          "t": "BOE: Ley Orgánica 3/2021, de regulación de la eutanasia (artículo 5, información sobre cuidados paliativos)",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628"
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "No proponer nada para quien quiere tener hijos, o dar las ayudas a unas familias y negarlas a otras por su forma, su origen o sus ideas.",
+      "ideal": "Prestación universal por hijo hasta los 18 años, plaza gratuita de escuela infantil garantizada al acabar el permiso y un pacto a 20 años con una sola meta: cerrar la distancia entre los hijos deseados y los que se tienen.",
+      "titulo": "Pacto de crianza a veinte años",
+      "slug": "pacto-de-crianza-a-veinte-anos",
+      "resumen": "Una política familiar con tres piezas que no dependen del gobierno de turno: dinero por cada hijo hasta la mayoría de edad, una plaza de escuela infantil asegurada por ley y permisos largos y repartidos. Va más lejos que lo avanzado porque convierte cada pieza en un derecho, la blinda en un pacto de 20 años y obliga a corregir las medidas según un dato oficial: los hijos deseados frente a los tenidos.",
+      "medidas": [
+        "Prestación universal por hijo hasta los 18 años, igual para toda familia, actualizada cada año con el IPC y revisada cada cinco con el coste real de criar.",
+        "Plaza gratuita de escuela infantil garantizada por ley desde que acaba el permiso de nacimiento, con horario compatible con el trabajo de los padres.",
+        "Permisos pagados más largos, con una parte que no se puede ceder para cada progenitor y días que se pueden pasar a otro cuidador, como un abuelo.",
+        "Libertad de modelo: quien prefiera cuidar en casa los primeros meses puede alargar el permiso en vez de usar la plaza. Ninguna forma de familia queda fuera.",
+        "Prioridad de las familias jóvenes en el alquiler asequible y derecho a adaptar la jornada sin perder carrera profesional ni cotización.",
+        "Pacto de Estado a 20 años: el INE publica cada año la distancia entre hijos deseados y tenidos y un órgano independiente evalúa qué medidas la reducen."
+      ],
+      "supone": {
+        "personas": "Una pareja joven sabe de antemano con qué contará durante 18 años: un ingreso mensual por hijo, una plaza segura al volver al trabajo y permisos repartidos entre los dos. Tener hijos deja de depender del sueldo o de tener abuelos cerca. Quien no quiere hijos no recibe presión: la meta no es una cifra de nacimientos, sino que cada uno tenga los que desea.",
+        "cuentas": "Es la medida más cara del tema. El coste depende del importe: Alemania paga 259 euros al mes por cada hijo, sin mirar la renta. En Dinamarca los padres pagan como máximo el 25 % del coste de la plaza; aquí sería gratuita. No hay una estimación oficial verificada para España, así que no se da cifra. Parte se recupera si la prestación tributa en el IRPF.",
+        "puesta_en_marcha": "Una ley de familias aprobada con mayoría amplia, que fije las tres piezas y su calendario; acuerdo con comunidades y ayuntamientos, que gestionan las escuelas infantiles; y construcción de plazas, que lleva años. El INE ya mide los hijos deseados en su Encuesta de Fecundidad: bastaría hacerla anual. Despliegue completo: unos diez años."
+      },
+      "integra": "Recoge de la derecha el apoyo decidido a la familia y a la natalidad y la libertad de cada hogar para organizarse; de la izquierda, la universalidad, los servicios públicos gratuitos y el reparto del cuidado entre mujeres y hombres. Nadie queda obligado a un modelo.",
+      "referencias": [
+        {
+          "lugar": "Alemania",
+          "que": "El Kindergeld es de 259 euros al mes por hijo desde el 1 de enero de 2026. Se paga sin tener en cuenta los ingresos, en general hasta los 18 años y hasta los 25 si el hijo sigue formándose.",
+          "url": "https://familienportal.de/bmbfsfj/themen/familie/familienleistungen/kindergeld/kindergeld-73892"
+        },
+        {
+          "lugar": "Suecia",
+          "que": "Cada hijo da derecho a 480 días de permiso pagado; 390 se pagan según el salario. Cada progenitor tiene 90 días reservados que no puede ceder, y se pueden pasar hasta 45 días a otro cuidador, por ejemplo un abuelo.",
+          "url": "https://forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit"
+        },
+        {
+          "lugar": "Dinamarca",
+          "que": "El municipio debe ofrecer una plaza de guardería a todo niño desde las 26 semanas hasta que empieza la escuela. Los padres pagan como máximo el 25 % del coste; el resto lo pone el municipio.",
+          "url": "https://lifeindenmark.borger.dk/family-and-children/childcare/family-daycare--nurseries-and-kindergartens"
+        },
+        {
+          "lugar": "España (INE)",
+          "que": "La Encuesta de Fecundidad 2025 ya mide el dato: el 34,8 % de las mujeres afirmó tener menos hijos de los que quería, y el 15,5 % no deseaba ninguno. El incentivo más pedido fue alargar los permisos de maternidad y paternidad.",
+          "url": "https://ine.es/dyngs/Prensa/pEF2025.htm"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Pagar lo mismo a una familia rica que a una pobre es caro y poco justo: ese dinero rendiría más concentrado en quien lo necesita.",
+          "r": "Lo universal llega a todos sin trámites ni estigma y no se pierde al subir el sueldo. Si tributa en el IRPF, las rentas altas devuelven una parte. El coste es alto y se reconoce: por eso entra por fases."
+        },
+        {
+          "o": "Las ayudas apenas suben la natalidad: países que gastan mucho en familia también tienen pocos nacimientos.",
+          "r": "Por eso la meta no es una tasa de nacimientos, sino la distancia entre hijos deseados y tenidos. El efecto sobre los nacimientos es incierto; lo que se asegura es que el dinero o el trabajo dejen de ser el motivo."
+        },
+        {
+          "o": "Para unos, una política natalista empuja a las mujeres de vuelta a casa; para otros, el Estado sustituye a la familia con guarderías.",
+          "r": "Los días reservados a cada progenitor reparten el cuidado y no hay objetivo de nacimientos. Y cada familia elige entre la plaza o alargar el permiso: el Estado pone los medios, no el modelo."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Portal de familias del Gobierno federal alemán: Kindergeld",
+          "url": "https://familienportal.de/bmbfsfj/themen/familie/familienleistungen/kindergeld/kindergeld-73892"
+        },
+        {
+          "t": "Försäkringskassan (Seguridad Social de Suecia): prestación parental",
+          "url": "https://forsakringskassan.se/english/parents/when-the-child-is-born/parental-benefit"
+        },
+        {
+          "t": "Life in Denmark (portal oficial): guarderías y garantía de plaza",
+          "url": "https://lifeindenmark.borger.dk/family-and-children/childcare/family-daycare--nurseries-and-kindergartens"
+        },
+        {
+          "t": "INE: Encuesta de Fecundidad. Año 2025, datos avance (nota de prensa de 29 de septiembre de 2026)",
+          "url": "https://ine.es/dyngs/Prensa/pEF2025.htm"
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "Pedir cárcel o cierre de medios por opiniones, señalar a periodistas o usar la publicidad institucional y los medios públicos como premio y castigo.",
+      "ideal": "Ninguna pena de cárcel por opiniones que no inciten a la violencia, medios públicos dirigidos por concurso y sin mayoría de cargos políticos, publicidad institucional por reglas fijas y jueces, no gobiernos, ante los bulos.",
+      "titulo": "Palabra libre y medios sin dueño político",
+      "slug": "palabra-libre-y-medios-sin-dueno-politico",
+      "resumen": "Protege por igual la opinión que molesta a unos y la que molesta a otros, y quita a cualquier gobierno las tres palancas con las que se influye en los medios: los nombramientos, la publicidad y la capacidad de decidir qué es verdad. Va más lejos que lo avanzado porque pone reglas automáticas —topes, concursos, criterios publicados antes— donde hoy hay decisiones discrecionales.",
+      "medidas": [
+        "Quitar la pena de cárcel a los delitos de opinión sin incitación a la violencia (injurias a instituciones, ofensas a sentimientos, ultrajes a símbolos). Amenazas e incitación a la violencia siguen siendo delito.",
+        "Medios públicos: como máximo un tercio de consejeros ligados a gobiernos o partidos, dirección elegida por concurso público, mandato más largo que la legislatura y cese solo por causa tasada.",
+        "Publicidad institucional repartida con criterios objetivos publicados de antemano (audiencia verificada, territorio, lengua) y publicación anual de cada euro recibido por cada medio.",
+        "Registro público y abierto de los propietarios reales de cada medio y de todo el dinero público que recibe.",
+        "Ley contra las demandas abusivas a periodistas, con archivo rápido y costas para quien demanda; secreto profesional y prohibición de espiar a periodistas sin control judicial.",
+        "Ante la desinformación, ningún órgano del Gobierno decide qué es verdad: transparencia de las plataformas, rectificación rápida y retirada de contenidos solo por orden de un juez."
+      ],
+      "supone": {
+        "personas": "Nadie se arriesga a la cárcel por una canción, un tuit o una protesta que ofenda, sea cual sea su ideología. El ciudadano sabe quién es el dueño del medio que lee y cuánto dinero público recibe. La televisión y la radio públicas no cambian de línea cuando cambia el gobierno. Un periodista local no puede ser silenciado con una demanda temeraria.",
+        "cuentas": "No exige gasto relevante: son reglas de reparto y de nombramiento. La publicidad institucional se gasta igual, pero con criterios públicos. El registro de propiedad y los concursos tienen un coste administrativo menor, sin cifra verificada. Una financiación estable de los medios públicos, fijada por varios años, da previsibilidad sin gastar más.",
+        "puesta_en_marcha": "Reforma del Código Penal por ley orgánica; nuevas leyes de medios públicos y de publicidad institucional, estatales y autonómicas; y cumplir el Reglamento Europeo de Libertad de Medios, aplicable en su mayor parte desde agosto de 2025. La directiva europea contra las demandas abusivas tenía que incorporarse antes del 7 de mayo de 2026."
+      },
+      "integra": "La misma vara para todos: protege al que critica a la Corona o a la Iglesia y al que critica al Gobierno o al feminismo. Recoge de la izquierda el fin de los delitos de opinión y de la derecha el rechazo a que un gobierno controle los medios o decida qué es desinformación.",
+      "referencias": [
+        {
+          "lugar": "Unión Europea",
+          "que": "El Reglamento Europeo de Libertad de Medios exige nombrar y cesar a los jefes de los medios públicos con procedimientos que protejan su independencia, repartir la publicidad estatal con criterios objetivos publicados antes y dar a conocer a los dueños.",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783152"
+        },
+        {
+          "lugar": "Tribunal Europeo de Derechos Humanos",
+          "que": "En marzo de 2018 condenó a España por vulnerar la libertad de expresión de dos personas penadas por quemar una foto de los Reyes (15 meses de prisión, sustituidos por multa de 2.700 euros). Lo consideró crítica política, no incitación al odio.",
+          "url": "https://merlin.obs.coe.int/article/8266"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "El Tribunal Constitucional Federal fijó en 2014 que los miembros del Estado o cercanos a él no pueden pasar de un tercio en los consejos de la televisión pública ZDF, ni influir de forma decisiva en la elección del resto.",
+          "url": "https://www.bundesverfassungsgericht.de/SharedDocs/Pressemitteilungen/DE/2014/bvg14-026"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "La Directiva 2024/1069 permite archivar pronto las demandas manifiestamente infundadas contra periodistas y activistas en asuntos civiles transfronterizos e imponer las costas y sanciones a quien abusa del proceso.",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783044"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Quitar la cárcel por injurias a las instituciones o por ofender a los creyentes deja sin protección a símbolos y sentimientos que sostienen la convivencia.",
+          "r": "Siguen la vía civil del honor y los delitos de amenazas e incitación a la violencia. Se reconoce el coste: habrá expresiones hirientes sin castigo penal. Es el criterio del Tribunal Europeo, que ya ha condenado a España."
+        },
+        {
+          "o": "Sin un control público ágil, los bulos y el discurso de odio se extienden más deprisa de lo que un juez puede actuar.",
+          "r": "Un juez es más lento que un órgano administrativo, y ese límite se asume. A cambio, ningún gobierno, de ningún color, puede usar la etiqueta de desinformación contra sus críticos. La incitación al odio sigue siendo delito."
+        },
+        {
+          "o": "Exigir mayorías amplias y concursos puede bloquear los nombramientos durante años, como ha ocurrido con otros órganos.",
+          "r": "El riesgo es real. Se reduce con plazos: si no hay acuerdo a tiempo, decide un comité independiente entre los finalistas del concurso, y el cargo saliente no se prorroga sin límite."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Comisión Europea: European Media Freedom Act",
+          "url": "https://commission.europa.eu/topics/democracy/eu-actions-protect-democracy/european-media-freedom-act_en"
+        },
+        {
+          "t": "Parlamento Europeo (Observatorio Legislativo): resumen del Reglamento Europeo de Libertad de Medios",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783152"
+        },
+        {
+          "t": "Observatorio Europeo del Audiovisual (IRIS Merlin): Stern Taulats y Roura Capellera contra España",
+          "url": "https://merlin.obs.coe.int/article/8266"
+        },
+        {
+          "t": "Tribunal Constitucional Federal de Alemania: nota de prensa 26/2014 sobre el tratado de la ZDF",
+          "url": "https://www.bundesverfassungsgericht.de/SharedDocs/Pressemitteilungen/DE/2014/bvg14-026"
+        },
+        {
+          "t": "Parlamento Europeo (Observatorio Legislativo): resumen de la Directiva (UE) 2024/1069 contra las demandas abusivas",
+          "url": "https://oeil.europarl.europa.eu/oeil/en/document-summary?id=1783044"
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "Incumplir o bloquear desde un cargo público las leyes vigentes, o negar toda objeción de conciencia y castigar a quien no quiere participar.",
+      "ideal": "Mientras la ley las reconozca, estas prestaciones se dan en la sanidad pública de cada provincia y en plazo, con la objeción personal respetada, apoyo y paliativos ofrecidos antes y una evaluación pública cada año.",
+      "titulo": "Decisión libre con garantías para todos",
+      "slug": "decision-libre-con-garantias-para-todos",
+      "resumen": "No zanja el debate moral: fija cómo se convive con él. La ley vigente se cumple igual en todo el territorio, el profesional que objeta está protegido y la persona que decide tiene antes a su alcance ayudas y cuidados reales. Va más lejos que lo avanzado porque pone plazos y equipos por provincia, une el acceso a las alternativas del aspecto de protección de la vida y somete todo a evaluación independiente.",
+      "medidas": [
+        "Equipo público no objetor en cada provincia, propio o desplazado, y plazo máximo de atención. Si no se cumple, derivación inmediata con todos los gastos pagados.",
+        "Objeción personal, anticipada y por escrito, en un registro confidencial que solo sirve para organizar el servicio. Ni el objetor ni el no objetor sufren perjuicio en su carrera.",
+        "Antes de decidir, oferta real y no solo información: ayuda a la maternidad y equipo de paliativos disponibles en días. Sin plazos añadidos ni condiciones para acceder a la prestación.",
+        "Eutanasia: plazo máximo total de tramitación y vía urgente para enfermos terminales, manteniendo los dos informes médicos y el control de la comisión de garantía.",
+        "Evaluación anual independiente y con datos abiertos por provincia: tiempos, lugar de la prestación, objeción, denegaciones y alternativas que faltaron.",
+        "Cualquier reforma de fondo de estas leyes, en un sentido o en otro, va precedida de esa evaluación pública y busca una mayoría más amplia que la del gobierno del momento."
+      ],
+      "supone": {
+        "personas": "Una mujer no tiene que viajar a otra provincia ni ir a una clínica privada porque su hospital no lo hace. Un enfermo que cumple los requisitos no muere esperando el trámite. Un médico o una enfermera que no quieren participar lo dicen por el cauce previsto y nadie los señala. Y quien decide lo hace con ayudas y cuidados a su alcance, no por falta de ellos.",
+        "cuentas": "El gasto adicional es pequeño frente al del aspecto de protección de la vida: organizar equipos y evaluar. En 2024 solo el 21,25 % de los abortos se hizo en centros públicos; el resto, en centros privados, concertados o no. No hay una cifra oficial verificada del coste de llevar la prestación a la sanidad pública de cada provincia.",
+        "puesta_en_marcha": "Buena parte ya está en la ley: la objeción individual y los registros por comunidad figuran en la Ley Orgánica 2/2010 reformada. Falta cumplirla y añadir plazos, equipos por provincia y evaluación mediante acuerdo del Consejo Interterritorial y, si hace falta, reforma legal. El apoyo previo depende de desplegar antes la red de ayudas y paliativos."
+      },
+      "integra": "Recoge de la izquierda que un derecho reconocido por la ley no dependa del código postal; de la derecha, la objeción de conciencia protegida y que nadie llegue a esa decisión por falta de ayuda o de cuidados. No da por resuelto el desacuerdo moral: ordena la convivencia mientras dure.",
+      "referencias": [
+        {
+          "lugar": "España",
+          "que": "La Ley Orgánica 2/2010 reformada dice que la objeción es una decisión individual, anticipada y por escrito, que el acceso y la calidad no pueden verse afectados por ella y que cada comunidad tendrá un registro de objetores.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514"
+        },
+        {
+          "lugar": "España",
+          "que": "La ley de eutanasia la incluye en la sanidad pública, exige informar al paciente de los cuidados paliativos, fija un control previo de un médico y un jurista y crea una comisión de garantía en cada comunidad.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628"
+        },
+        {
+          "lugar": "Países Bajos",
+          "que": "Cinco comisiones regionales comprueban si el médico que practicó una eutanasia o ayudó al suicidio cumplió los criterios de cuidado debido que fija la ley. Rinden cuentas cada año con un informe público.",
+          "url": "https://english.euthanasiecommissie.nl/the-committees"
+        },
+        {
+          "lugar": "Consejo de Europa (Asamblea Parlamentaria)",
+          "que": "La Resolución 1763 (2010) une las dos garantías: nadie puede ser obligado ni discriminado por negarse a participar, y el paciente debe ser informado a tiempo, derivado y atendido, sobre todo en urgencias.",
+          "url": "https://pace.coe.int/en/files/17909/html"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Desde la defensa de la vida: garantizar el acceso en cada provincia normaliza prácticas que para muchas personas acaban con una vida humana.",
+          "r": "El marco no responde a esa cuestión moral ni pide a nadie que cambie de convicción. Aplica por igual la ley vigente, protege al objetor y pone delante alternativas reales. La vía para cambiar la ley sigue abierta."
+        },
+        {
+          "o": "Desde la autonomía: los registros de objetores y la oferta previa de alternativas se han usado para estorbar, y la objeción masiva vacía el derecho.",
+          "r": "Hoy el acceso es muy desigual: en 2024 no hubo ningún aborto en centros públicos de Extremadura, Ceuta y Melilla. Por eso la oferta no añade plazos, el registro solo organiza el servicio y la evaluación anual señala dónde se bloquea."
+        },
+        {
+          "o": "En provincias pequeñas puede no haber profesionales dispuestos, y un plazo máximo en la eutanasia puede meter prisa en una decisión irreversible.",
+          "r": "Los equipos desplazados cubren lo primero, con el límite de que haya personal. En la eutanasia el plazo obliga a la Administración, no al paciente; en 2025 murieron 382 personas durante la tramitación."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "BOE: Ley Orgánica 2/2010, de salud sexual y reproductiva y de la interrupción voluntaria del embarazo (texto consolidado)",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2010-3514"
+        },
+        {
+          "t": "BOE: Ley Orgánica 3/2021, de regulación de la eutanasia (texto consolidado)",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2021-4628"
+        },
+        {
+          "t": "Ministerio de Sanidad: informe «Situación del aborto en la sanidad pública» (nota de 7 de octubre de 2025)",
+          "url": "https://www.sanidad.gob.es/en/gabinete/notasPrensa.do?id=6764"
+        },
+        {
+          "t": "Ministerio de Sanidad: 574 personas recibieron la prestación de ayuda para morir en 2025 (nota de 18 de noviembre de 2026)",
+          "url": "https://www.sanidad.gob.es/gabinete/notasPrensa.do?id=7006"
+        },
+        {
+          "t": "Comisiones Regionales de Revisión de la Eutanasia de los Países Bajos: criterios de cuidado debido",
+          "url": "https://english.euthanasiecommissie.nl/the-committees/euthanasia-in-the-netherlands"
+        },
+        {
+          "t": "Comisiones Regionales de Revisión de la Eutanasia de los Países Bajos: informes anuales y dictámenes",
+          "url": "https://english.euthanasiecommissie.nl/the-committees/annual-reports-and-judgments"
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "Negar la discriminación o la violencia contra las mujeres, justificar el odio, o saltarse la presunción de inocencia en nombre de la igualdad.",
+      "ideal": "Igualdad que se mide y se corrige: brecha salarial pública empresa a empresa, una autoridad independiente para cualquier persona discriminada, accesibilidad exigible y cada ley de igualdad evaluada a los dos años.",
+      "titulo": "Igualdad medida y corregida con datos",
+      "slug": "igualdad-medida-y-corregida-con-datos",
+      "resumen": "Trata la igualdad como un resultado que se comprueba y no como una declaración. Cada empresa publica su brecha, cada persona discriminada tiene dónde acudir sea cual sea el motivo, y cada ley nace con indicadores y fecha de examen. Va más lejos que lo avanzado porque obliga al Parlamento a votar la corrección cuando la evaluación detecta un efecto no buscado, y protege a la vez las garantías de todos.",
+      "medidas": [
+        "Buscador público con la brecha salarial de cada empresa de más de 50 trabajadores. Si pasa del 5 % sin causa objetiva, plan de corrección obligatorio pactado con la plantilla.",
+        "Autoridad independiente de igualdad de trato, elegida por mayoría amplia, que atiende gratis cualquier discriminación: sexo, orientación, origen, discapacidad, edad, religión o ideas.",
+        "Pacto de Estado contra la violencia machista con financiación de varios años, protección para toda víctima de violencia en el hogar y evaluación de qué medidas reducen las agresiones.",
+        "Accesibilidad universal exigible: fecha límite, presupuesto y sanción para edificios, transporte, webs y trámites, y derecho a reclamar ante la autoridad independiente.",
+        "Cada ley de igualdad nace con indicadores y se evalúa de forma independiente a los dos años. Si hay efectos no buscados, el Parlamento vota su corrección en seis meses.",
+        "Garantías para todos: presunción de inocencia y proceso justo siempre, y medidas de acción positiva temporales, que se retiran cuando el dato que las justificó se cierra."
+      ],
+      "supone": {
+        "personas": "Una trabajadora puede ver si su empresa paga menos a las mujeres antes de aceptar un empleo. Quien sufre un trato injusto por ser mujer, gay, gitano, mayor, creyente o tener una discapacidad tiene una sola puerta, gratuita. Una persona en silla de ruedas puede exigir la rampa y no solo pedirla. Y nadie pierde sus garantías cuando es denunciado.",
+        "cuentas": "El coste público es moderado: una autoridad, un buscador y evaluaciones. El mayor gasto es la accesibilidad de edificios y transporte, sin cifra oficial verificada. Para las empresas hay una carga de información; por eso las pequeñas quedan fuera. La Unión Europea ya obliga a informar a las de 100 o más trabajadores, con calendario según tamaño.",
+        "puesta_en_marcha": "Incorporar la directiva europea de transparencia salarial y bajar su umbral; poner en marcha la autoridad independiente con elección por mayoría reforzada; renovar el pacto contra la violencia con todos los grupos; y añadir a cada ley una cláusula de evaluación, apoyada en la Ley 27/2022 de evaluación de políticas públicas."
+      },
+      "integra": "Recoge de la izquierda la igualdad real medida empresa a empresa y la protección frente a la violencia machista; de la derecha, la igualdad ante la ley, la presunción de inocencia y que las leyes se evalúen y se corrijan si fallan. Ampara a cualquier persona discriminada, sea cual sea el motivo.",
+      "referencias": [
+        {
+          "lugar": "Unión Europea",
+          "que": "La directiva de transparencia salarial obliga a las empresas de más de 250 empleados a informar cada año de su brecha y a las menores cada tres; las de menos de 100 quedan exentas. Si la brecha supera el 5 % sin causa objetiva, se revisa con la plantilla.",
+          "url": "https://www.consilium.europa.eu/en/policies/pay-transparency/"
+        },
+        {
+          "lugar": "Reino Unido",
+          "que": "Toda empresa con 250 o más empleados debe publicar cada año sus datos de brecha salarial entre mujeres y hombres, y un servicio público permite buscar y comparar los de cada empresa.",
+          "url": "https://www.gov.uk/government/collections/gender-pay-gap-reporting"
+        },
+        {
+          "lugar": "España",
+          "que": "La Ley 27/2022 obliga a los ministerios a evaluar antes y después las políticas de más peso, prevé una agencia estatal de evaluación que actúa con independencia y manda publicar los resultados y las recomendaciones.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Más informes y una autoridad nueva son burocracia para las empresas, y una brecha media no prueba que se pague menos por el mismo trabajo.",
+          "r": "Es verdad que la media mezcla puestos y jornadas. Por eso se publica también la brecha por categoría comparable y las empresas pequeñas quedan fuera. El Reino Unido ya publica los datos de las grandes empresas."
+        },
+        {
+          "o": "Evaluar las leyes de igualdad y poner fecha de fin a la acción positiva abre la puerta a recortar derechos conquistados.",
+          "r": "La evaluación toca los instrumentos, no los derechos, y la corrección la vota el Parlamento a la vista de datos públicos. Una medida que funciona sale reforzada. El riesgo de uso partidista existe, y lo limita la independencia del evaluador."
+        },
+        {
+          "o": "Para unos, proteger a toda víctima diluye la violencia específica contra las mujeres; para otros, las leyes de género ya tratan distinto a hombres y mujeres.",
+          "r": "Se mantiene la protección específica frente a la violencia machista y se suma la de cualquier víctima en el hogar, sin restar. Y las garantías procesales son las mismas para todos. El desacuerdo de fondo no desaparece: se acota con datos."
+        }
+      ],
+      "fuentes": [
+        {
+          "t": "Consejo de la Unión Europea: transparencia salarial en la UE",
+          "url": "https://www.consilium.europa.eu/en/policies/pay-transparency/"
+        },
+        {
+          "t": "Gobierno del Reino Unido: Gender pay gap reporting (guía para empresas)",
+          "url": "https://www.gov.uk/government/collections/gender-pay-gap-reporting"
+        },
+        {
+          "t": "BOE: Ley 27/2022, de institucionalización de la evaluación de políticas públicas en la Administración General del Estado",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2022-21677"
+        }
+      ]
+    }
+  ]
+}

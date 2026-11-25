@@ -57,7 +57,8 @@ const { PARTIDOS, TEMAS } = vm.runInNewContext(codigo, {}, { timeout: 2000 });
 
 // Solo lo que usa el test y el servidor: nada de los textos largos de «p», «t», «obj»…
 const datos = {
-  version: 1,
+  // Versión 2 (2026-11-25): cinco niveles por aspecto (`niv` con cinco textos, `v` con niveles de 0 a 4) y la ficha del ideal (`it`, `is`).
+  version: 2,
   origen: 'public/observatorio-polarizacion/index.html (PARTIDOS y TEMAS)',
   partidos: PARTIDOS.map(p => ({ k: p.k, n: p.n, c: p.c })),
   temas: Object.entries(TEMAS).map(([k, t]) => ({
@@ -66,7 +67,7 @@ const datos = {
     q: t.q,
     c: t.c,
     niv: t.niv,
-    ejes: t.ejes.map(e => ({ l: e.l, n: e.n, d: e.d, niv: e.niv })),
+    ejes: t.ejes.map(e => ({ l: e.l, n: e.n, d: e.d, niv: e.niv, it: e.it, is: e.is })),
     v: t.v,
   })),
 };
@@ -78,12 +79,16 @@ if (datos.temas.length !== 10) errores.push(`Se esperaban 10 temas y hay ${datos
 // (64 deslizadores en total). Por eso se comprueba contra el propio tema, no contra un número fijo.
 for (const t of datos.temas) {
   if (t.ejes.length < 3 || t.ejes.length > 8) errores.push(`${t.k}: ${t.ejes.length} aspectos, fuera de 3-8.`);
-  if (t.niv.length !== 3) errores.push(`${t.k}: se esperaban 3 niveles.`);
-  for (const e of t.ejes) if (e.niv.length !== 3) errores.push(`${t.k}/${e.n}: se esperaban 3 niveles por aspecto.`);
+  if (t.niv.length !== 5) errores.push(`${t.k}: se esperaban 5 niveles.`);
+  for (const e of t.ejes) {
+    if (e.niv.length !== 5) errores.push(`${t.k}/${e.n}: se esperaban 5 niveles por aspecto.`);
+    // `it` e `is` faltan mientras el ideal de ese tema está pendiente; si hay uno, tiene que haber el otro
+    if (!!e.it !== !!e.is || (e.is && !/^[a-z0-9-]+$/.test(e.is))) errores.push(`${t.k}/${e.n}: título o dirección de la ficha del ideal incompletos.`);
+  }
   for (const p of datos.partidos) {
     const v = t.v[p.k];
-    if (!Array.isArray(v) || v.length !== t.ejes.length || v.some(x => !Number.isInteger(x) || x < 0 || x > 10))
-      errores.push(`${t.k}/${p.k}: posición no válida (una cifra de 0 a 10 por aspecto).`);
+    if (!Array.isArray(v) || v.length !== t.ejes.length || v.some(x => !Number.isInteger(x) || x < 0 || x > 4))
+      errores.push(`${t.k}/${p.k}: posición no válida (un nivel de 0 a 4 por aspecto).`);
   }
 }
 if (errores.length) {

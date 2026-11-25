@@ -12,7 +12,8 @@ import { cn } from '../../utils/cn';
 //   · Observatorio: the CIS self-placement of September 2026 (the same ten bars as chapter 1).
 //   · Perfiles: the five positions of the left–right line and the seven other currents,
 //     with the amber «enemy» arcs of «Cómo se miran».
-//   · Geometría: the five parties' figures on Inmigración, eight aspects, with the three rings.
+//   · Geometría: the five parties' figures on Inmigración, eight aspects, on the five level rings
+//     (0 antisistema … 4 ideal; the scores are levels since 2026-11-25).
 //   · Democracia directa: four real measures of «Votar por temas», each with its slider.
 //   · Economía pública optimizada: the eight scales of the model, each split in its three thirds.
 // The numbers below are copied from `public/observatorio-polarizacion/index.html`: that document
@@ -131,26 +132,26 @@ export function VisualPerfiles() {
 
 /* ── Geometría: Inmigración, ocho aspectos, cinco partidos ── */
 const PARTIDOS_INM = [
-  { n: 'PP', v: [7, 8, 9, 8, 5, 6, 3, 6], c: 'stroke-blue-500', f: 'fill-blue-500' },
-  { n: 'PSOE', v: [8, 6, 4, 4, 8, 6, 7, 8], c: 'stroke-red-500', f: 'fill-red-500' },
-  { n: 'Vox', v: [4, 10, 10, 8, 2, 2, 1, 2], c: 'stroke-green-500', f: 'fill-green-500' },
-  { n: 'Frente Amplio', v: [6, 3, 2, 5, 7, 8, 9, 9], c: 'stroke-pink-500', f: 'fill-pink-500' },
-  { n: 'Podemos', v: [4, 1, 1, 4, 6, 7, 10, 9], c: 'stroke-purple-500', f: 'fill-purple-500' },
+  { n: 'PP', v: [2, 2, 2, 2, 1, 1, 0, 1], c: 'stroke-blue-500', f: 'fill-blue-500' },
+  { n: 'PSOE', v: [2, 1, 1, 1, 2, 1, 2, 2], c: 'stroke-red-500', f: 'fill-red-500' },
+  { n: 'Vox', v: [1, 3, 3, 2, 0, 0, 0, 0], c: 'stroke-green-500', f: 'fill-green-500' },
+  { n: 'Frente Amplio', v: [1, 0, 0, 1, 2, 2, 2, 2], c: 'stroke-pink-500', f: 'fill-pink-500' },
+  { n: 'Podemos', v: [1, 0, 0, 1, 1, 2, 3, 2], c: 'stroke-purple-500', f: 'fill-purple-500' },
 ];
 
 export function VisualGeometria() {
   const W = 320, H = 180, cx = 112, cy = 92, R = 74, n = 8;
   const punto = (i: number, v: number) => {
     const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
-    return [cx + (R * v) / 10 * Math.cos(a), cy + (R * v) / 10 * Math.sin(a)] as const;
+    return [cx + (R * (v + 1)) / 5 * Math.cos(a), cy + (R * (v + 1)) / 5 * Math.sin(a)] as const;
   };
   const figura = (v: number[]) => v.map((x, i) => punto(i, x)).map(([x, y], i) => `${i ? 'L' : 'M'}${r1(x)},${r1(y)}`).join('') + 'Z';
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img"
-      aria-label="Geometría de cinco partidos en inmigración: PP, PSOE, Vox, Frente Amplio y Podemos, sobre ocho aspectos y tres círculos">
+      aria-label="Geometría de cinco partidos en inmigración: PP, PSOE, Vox, Frente Amplio y Podemos, sobre ocho aspectos y cinco niveles">
       <circle cx={cx} cy={cy} r={R} className="fill-amber-50 stroke-amber-500" strokeWidth={2} />
-      {[1 / 3, 2 / 3].map(k => <circle key={k} cx={cx} cy={cy} r={R * k} fill="none" className="stroke-slate-300" strokeDasharray="3 4" />)}
-      {Array.from({ length: n }, (_, i) => { const [x, y] = punto(i, 10); return <line key={i} x1={cx} y1={cy} x2={r1(x)} y2={r1(y)} className="stroke-slate-200" />; })}
+      {[1, 2, 3, 4].map(k => <circle key={k} cx={cx} cy={cy} r={(R * k) / 5} fill="none" className={k === 1 ? 'stroke-rose-300' : 'stroke-slate-300'} strokeDasharray="3 4" />)}
+      {Array.from({ length: n }, (_, i) => { const [x, y] = punto(i, 4); return <line key={i} x1={cx} y1={cy} x2={r1(x)} y2={r1(y)} className="stroke-slate-200" />; })}
       {PARTIDOS_INM.map((p, j) => (
         <g key={p.n} className="origin-center transition-opacity duration-300">
           <path d={figura(p.v)} className={cn(p.f, p.c)} fillOpacity={0.12} strokeWidth={1.8} strokeLinejoin="round" />

@@ -793,10 +793,12 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-panel ul{list-style:none;margin:8px 0 12px;padding:0;display:grid;gap:6px}
 .geo-panel li{font-size:14.5px;line-height:1.45;color:var(--ink-2)}
 .geo-panel li b{color:var(--ink);font-weight:600}
-.geo-row{display:grid;grid-template-columns:7.2em minmax(0,1fr) 2em;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2)}
+.geo-row{display:grid;grid-template-columns:7.2em minmax(0,1fr) minmax(2em,auto);align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2)}
 .geo-row .bar{height:8px;border-radius:4px;background:var(--bg-3);overflow:hidden}
 .geo-row .bar i{display:block;height:100%;border-radius:4px}
 .geo-row b{font:500 13px var(--mono);color:var(--ink);text-align:right}
+.geo-ideal-mas{display:inline-block;margin:6px 0 2px;color:#8A5A00;font:600 13.5px/1.35 var(--sans);text-decoration:underline;text-underline-offset:3px;pointer-events:auto}
+.geo-ideal-mas:hover{color:var(--ink)}
 .geo-link{appearance:none;border:0;background:none;padding:0;color:var(--ink);font:600 14px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
 .geo-plist{display:grid;gap:8px;margin-top:10px}
 .geo-pitem{display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;align-items:start;text-align:left;appearance:none;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;color:var(--ink-2);font:400 13.5px/1.45 var(--sans);cursor:pointer}
@@ -979,7 +981,7 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
 .geo-stage{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"svg" "cap" "niv";justify-items:center;row-gap:10px}
 .geo-stage > #geo-svg{grid-area:svg;width:100%;height:auto;max-height:calc(100vh - 60px)}
 .geo-stage > .geo-cap{grid-area:cap;align-self:start;justify-self:stretch}
-.geo-stage > #geo-niveles{grid-area:niv;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;width:100%;margin:0}
+.geo-stage > #geo-niveles{grid-area:niv;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;width:100%;margin:0}
 .geo-stage > #geo-niveles .geo-nv{position:relative}
 /* Al pasar el ratón por una medida, sus puntos caen hacia abajo como una capa: no empujan nada */
 .geo-stage > #geo-niveles .geo-nv-pts{position:absolute;top:100%;left:0;right:0;z-index:5;margin-top:6px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.45)}
@@ -1002,9 +1004,9 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
 .geo-ring.on .hl{opacity:1;stroke-width:6}
 #geo-svg[data-k] .geo-ring:not(.on) .hl{opacity:.1}
 #geo-svg[data-k] .geo-lv .dot{opacity:.2;transition:opacity .2s}
-#geo-svg[data-k="0"] .geo-lv[data-lk="0"] .dot,#geo-svg[data-k="1"] .geo-lv[data-lk="1"] .dot,#geo-svg[data-k="2"] .geo-lv[data-lk="2"] .dot{opacity:1}
+#geo-svg[data-k="0"] .geo-lv[data-lk="0"] .dot,#geo-svg[data-k="1"] .geo-lv[data-lk="1"] .dot,#geo-svg[data-k="2"] .geo-lv[data-lk="2"] .dot,#geo-svg[data-k="3"] .geo-lv[data-lk="3"] .dot,#geo-svg[data-k="4"] .geo-lv[data-lk="4"] .dot{opacity:1}
 .geo-num{opacity:0;pointer-events:none;transition:opacity .2s}
-#geo-svg[data-k="0"] .geo-num[data-lk="0"],#geo-svg[data-k="1"] .geo-num[data-lk="1"],#geo-svg[data-k="2"] .geo-num[data-lk="2"]{opacity:1}
+#geo-svg[data-k="0"] .geo-num[data-lk="0"],#geo-svg[data-k="1"] .geo-num[data-lk="1"],#geo-svg[data-k="2"] .geo-num[data-lk="2"],#geo-svg[data-k="3"] .geo-num[data-lk="3"],#geo-svg[data-k="4"] .geo-num[data-lk="4"]{opacity:1}
 /* Los selectores, desplegados y compactos, encima de la figura */
 .geo-selectores{max-width:1120px;margin:0 auto 10px;display:grid;gap:8px}
 .geo-selectores .geo-temas{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0;max-width:1120px;width:100%;justify-self:center}
@@ -1432,19 +1434,19 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
       <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
       <p class="geo-cap" id="geo-cap"></p>
       <div class="geo-medida vacio" id="geo-medida"></div>
-      <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los tres círculos de cada tema"></div>
+      <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los cinco niveles de cada tema"></div>
     </div>
   </div>
   <div class="sub geo-vistazo">
     <h3>Los diez temas de un vistazo</h3>
-    <p class="ch-lede">Cada fila es un partido y cada columna un tema, con sus tres círculos. Una figura grande y redonda llega lejos en todo; una pequeña o con puntas se queda corta en algo. Pulsa cualquiera para abrirla arriba.</p>
+    <p class="ch-lede">Cada fila es un partido y cada columna un tema. Una figura grande y redonda llega lejos en todo; una pequeña o con puntas se queda corta en algo. Pulsa cualquiera para abrirla arriba.</p>
     <div class="gm-wrap"><div class="gm" id="geo-matriz"></div></div>
   </div>
   <div class="geo-detalle"><aside class="geo-side" aria-label="Detalle del tema"><div class="geo-panel" id="geo-panel" aria-live="polite"></div></aside></div>
   <details class="geo-how">
     <summary>Cómo se lee y de dónde salen las formas</summary>
-    <p>Cada radio es un aspecto del problema, y cada uno de los tres círculos es un nivel. El primero es <b>lo básico</b>: lo mínimo que cualquier gobierno debería garantizar en ese aspecto. El segundo, <b>lo intermedio</b>. El tercero, el círculo ideal, es <b>lo avanzado</b>. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leer qué es lo básico o lo avanzado en ese aspecto concreto y qué partidos llegan. Con «Déjalo de lo mejor de cada uno», cada punto marca la nota más alta de su aspecto y los partidos de la lista se apagan.</p>
-    <p>La distancia de cada partido al centro mide hasta dónde llega su propuesta: 0, lo ignora o lo rechaza; de 4 a 6 cubre lo básico; de 7 a 9, lo intermedio; 10, lo avanzado. Por debajo de 4 no llega a lo básico: es una pata coja.</p>
+    <p>Cada radio es un aspecto del problema, y en cada radio hay cinco posiciones, una por nivel. <b>Antisistema</b>, el círculo rojo de dentro, es quedarse por debajo de lo básico: no proponer nada en ese aspecto, o proponer algo que rompe la base en vez de mejorarla. <b>Lo básico</b> es lo normal en los países europeos. Después vienen <b>lo intermedio</b> y <b>lo avanzado</b>. El círculo dorado de fuera es <b>el ideal</b>: una aspiración a la que hoy probablemente no llega ningún partido, y que dice lo que de verdad habría que hacer. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leerlo en ese aspecto concreto y ver qué partidos llegan. Cada ideal tiene su propia página: pulsa su punto y después «Más». Con «Ver lo mejor de cada partido», cada punto marca el nivel más alto de su aspecto y los partidos de la lista se apagan.</p>
+    <p>El punto de cada partido en cada radio es el nivel que le da este observatorio. No hay posiciones intermedias: solo esas cinco. Hasta el 25 de noviembre de 2026 las notas iban de 0 a 10; se pasaron a niveles con los mismos cortes de entonces (hasta 3, antisistema; de 4 a 6, básico; de 7 a 9, intermedio; 10, avanzado). El nivel más bajo junta dos casos distintos, el vacío y lo destructivo, y la nota no dice cuál de los dos es.</p>
     <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
     <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
   </details>
@@ -2857,7 +2859,7 @@ const REFS = [
 
 
 /* ================= 6 · Geometrías ================= */
-/* Cada partido es una figura sobre los radios de cada tema (ocho o seis), con tres círculos: lo básico, lo intermedio y lo avanzado. Valoración del observatorio, de 0 a 10, a partir de
+/* Cada partido es una figura sobre los radios de cada tema (ocho o seis), con cinco niveles: antisistema, básico, intermedio, avanzado e ideal. Valoración del observatorio, un nivel de 0 a 4 por aspecto, a partir de
    programas, planes y votaciones hasta noviembre de 2026 (fuentes al final de la página). Entre dos radios
    vecinos el borde se curva siguiendo el círculo cuanto mejor cuida el partido los dos, y es una recta
    (una arista) cuando cuida uno y abandona el otro. */
@@ -2876,38 +2878,38 @@ const PMAP = Object.fromEntries(PARTIDOS.map((p) => [p.k, p]));
 const TEMAS = {
   inm: {
     n: "Inmigración", c: "#5FB3E6", q: "¿Cómo se entra, quién se queda y cómo se convive?",
-    niv: ["Saber quién entra, salvar vidas en el mar, proteger a quien huye y cumplir la ley.", "Vías legales que funcionan, asilo en plazos razonables, retornos efectivos e integración con idioma y empleo.", "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias."],
+    niv: ["Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.", "Saber quién entra, salvar vidas en el mar, proteger a quien huye y cumplir la ley.", "Vías legales que funcionan, asilo en plazos razonables, retornos efectivos e integración con idioma y empleo.", "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias.", "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."],
     cap: "Arriba frente a abajo: cooperación con los países de origen frente a economía, demografía y pensiones. Derecha frente a izquierda: seguridad y retorno frente a asilo y derechos humanos. En diagonal: control de fronteras frente a integración, y convivencia y normas comunes frente a vías legales para venir a trabajar o estudiar. Los radios vecinos se completan entre sí.",
     ejes: [
       { l: ["Cooperación", "con origen"], n: "Cooperación con los países de origen y tránsito", d: "Que nadie tenga que jugarse la vida para salir de su país: acuerdos con los países de donde se sale y por donde se pasa.",
         p: "Acuerdos con Marruecos, Mauritania, Senegal y el Sahel que unan contratación en origen, inversión y readmisión de quien no tiene derecho a quedarse. Cada país que coopera recibe más visados de trabajo.", ya: ["psoe", "pp", "pnv"],
-        niv: ["Ayuda al desarrollo y acuerdos de readmisión.", "Acuerdos que unen contratación en origen, inversión y retornos.", "Alianzas estables con cada país de origen y tránsito, evaluadas por sus resultados y por el respeto de los derechos."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Ayuda al desarrollo y acuerdos de readmisión.", "Acuerdos que unen contratación en origen, inversión y retornos.", "Alianzas estables con cada país de origen y tránsito, evaluadas por sus resultados y por el respeto de los derechos.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Control de", "fronteras"], n: "Control de fronteras y lucha contra las mafias", d: "Saber quién entra, por dónde y cómo, y perseguir a las redes que trafican con personas.",
         p: "Una agencia única que registre e identifique en menos de 72 horas a toda persona que llega de forma irregular, salvamento marítimo reforzado y persecución del patrimonio de las redes de tráfico, dentro del Pacto Europeo de Migración y Asilo.", ya: ["pp", "junts", "pnv"],
-        niv: ["Registrar e identificar a quien llega.", "Una agencia única, salvamento reforzado y persecución de las redes de tráfico.", "Control integrado con Europa y los países de tránsito, con datos públicos de llegadas y de muertes en las rutas."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Registrar e identificar a quien llega.", "Una agencia única, salvamento reforzado y persecución de las redes de tráfico.", "Control integrado con Europa y los países de tránsito, con datos públicos de llegadas y de muertes en las rutas.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Seguridad", "y retorno"], n: "Seguridad y retorno", d: "Que quien no tiene derecho a quedarse vuelva, y que el delito tenga consecuencias.",
         p: "Retornos efectivos tras una decisión firme y con garantías, expulsión de quien acumula condenas por delitos graves, juicios rápidos, y datos públicos de delincuencia con su contexto para desmontar bulos en los dos sentidos.", ya: ["pp", "junts", "pnv", "vox"],
-        niv: ["Expulsar a quien comete delitos graves.", "Retornos efectivos tras una decisión firme, y juicios rápidos.", "Un retorno con garantías y acuerdos que funcionan, y datos públicos con contexto para desmontar bulos."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Expulsar a quien comete delitos graves.", "Retornos efectivos tras una decisión firme, y juicios rápidos.", "Un retorno con garantías y acuerdos que funcionan, y datos públicos con contexto para desmontar bulos.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Convivencia", "y normas"], n: "Convivencia y normas comunes", d: "Las mismas reglas para todos y barrios donde se viva bien juntos.",
         p: "Normas claras e iguales para todos (igualdad entre mujeres y hombres, libertad religiosa dentro de la ley), mediación vecinal, inversión en los barrios con más concentración y la misma firmeza contra el racismo que contra el delito.", ya: ["pp", "junts", "fa", "pnv"],
-        niv: ["Las mismas leyes para todos.", "Mediación vecinal e inversión en los barrios con más concentración.", "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Las mismas leyes para todos.", "Mediación vecinal e inversión en los barrios con más concentración.", "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Economía", "y pensiones"], n: "Economía, demografía y pensiones", d: "El papel de la migración en el empleo, la natalidad y las cuentas públicas.",
         p: "Un plan plurianual de necesidades de mano de obra pactado con empresas, sindicatos y comunidades; cotizar desde el primer día; y una política propia de natalidad (vivienda, conciliación) para no fiarlo todo a la inmigración.", ya: ["psoe", "pnv", "pp"],
-        niv: ["Reconocer el papel de la inmigración en el empleo.", "Un plan de necesidades de mano de obra pactado con empresas y sindicatos.", "Natalidad, empleo e inmigración planificados juntos a diez años."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Reconocer el papel de la inmigración en el empleo.", "Un plan de necesidades de mano de obra pactado con empresas y sindicatos.", "Natalidad, empleo e inmigración planificados juntos a diez años.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Integración", "e idioma"], n: "Integración: idioma, empleo, vivienda y escuela", d: "Que quien llega pueda formar parte de verdad.",
         p: "Un itinerario de acogida gratuito y obligatorio: castellano y la lengua cooficial, la Constitución, empleo y vivienda; repartido por el territorio para evitar guetos, y con la escuela como primera puerta.", ya: ["pp", "erc", "junts", "pnv", "bildu"],
-        niv: ["Escolarizar a los menores y ofrecer clases de idioma.", "Un itinerario de acogida con idioma, empleo y vivienda.", "Integración medida por resultados —empleo, escuela, convivencia— y repartida por el territorio para evitar guetos."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Escolarizar a los menores y ofrecer clases de idioma.", "Un itinerario de acogida con idioma, empleo y vivienda.", "Integración medida por resultados —empleo, escuela, convivencia— y repartida por el territorio para evitar guetos.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Asilo y", "derechos"], n: "Asilo y derechos humanos", d: "Proteger a quien huye de una guerra o de una persecución, y a los menores que llegan solos.",
         p: "Resolver el asilo en menos de seis meses con todas las garantías, y que la decisión se cumpla en los dos sentidos. Un sistema estable de acogida de menores, repartido de forma automática según la población y pagado por el Estado, que priorice la reunificación familiar cuando sea segura.", ya: ["psoe", "fa", "pod", "bildu", "pnv"],
-        niv: ["Cumplir el derecho de asilo y proteger a los menores.", "Resolver el asilo en meses, con garantías, y un reparto estable de los menores.", "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos."] },
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Cumplir el derecho de asilo y proteger a los menores.", "Resolver el asilo en meses, con garantías, y un reparto estable de los menores.", "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] },
       { l: ["Vías legales", "de trabajo"], n: "Vías legales para venir a trabajar o estudiar", d: "Puertas ordenadas para entrar con papeles.",
         p: "Un visado de búsqueda de empleo y cupos anuales por sectores con falta de mano de obra, títulos homologados en meses y no en años, y el arraigo por trabajo o formación como vía ordinaria y permanente, para no depender de regularizaciones extraordinarias.", ya: ["psoe", "pp", "fa", "pnv"],
-        niv: ["Mantener las vías de arraigo que ya existen.", "Visados para buscar empleo, cupos por sectores y títulos homologados en meses.", "Una entrada legal ágil y previsible que haga innecesarias las regularizaciones extraordinarias."] }
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Mantener las vías de arraigo que ya existen.", "Visados para buscar empleo, cupos por sectores y títulos homologados en meses.", "Una entrada legal ágil y previsible que haga innecesarias las regularizaciones extraordinarias.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."] }
     ],
     v: {
-      pp: [7, 8, 9, 8, 5, 6, 3, 6], psoe: [8, 6, 4, 4, 8, 6, 7, 8], vox: [4, 10, 10, 8, 2, 2, 1, 2],
-      fa: [6, 3, 2, 5, 7, 8, 9, 9], erc: [4, 4, 3, 7, 6, 8, 7, 7], junts: [3, 7, 7, 8, 5, 7, 3, 6],
-      bildu: [5, 3, 2, 6, 6, 8, 9, 8], pnv: [6, 5, 6, 6, 8, 8, 6, 8], pod: [4, 1, 1, 4, 6, 7, 10, 9]
+      pp: [2, 2, 2, 2, 1, 1, 0, 1], psoe: [2, 1, 1, 1, 2, 1, 2, 2], vox: [1, 3, 3, 2, 0, 0, 0, 0],
+      fa: [1, 0, 0, 1, 2, 2, 2, 2], erc: [1, 1, 0, 2, 1, 2, 2, 2], junts: [0, 2, 2, 2, 1, 2, 0, 1],
+      bildu: [1, 0, 0, 1, 1, 2, 2, 2], pnv: [1, 1, 1, 1, 2, 2, 1, 2], pod: [1, 0, 0, 1, 1, 2, 3, 2]
     },
     t: {
       pp: "Su Plan Nacional de Inmigración (2025) y su programa del 29-N: una autoridad única, identificar en siete días a quien entra de forma irregular, rechazo en frontera en Ceuta y Melilla, un visado por puntos con cupos ligados a que los países de origen acepten retornos, prohibir por ley las regularizaciones masivas, español y Constitución para renovar la residencia, expulsión como regla por delitos graves y multirreincidencia, y prohibir el burka y el nicab en la calle.",
@@ -2927,38 +2929,38 @@ const TEMAS = {
   },
   ser: {
     n: "Servicios", c: "#E07BAE", q: "¿Quién presta los servicios, y cómo se pagan?",
-    niv: ["Que todo el mundo tenga médico, escuela y cuidados, con esperas que no pongan en riesgo la salud.", "Profesionales suficientes, financiación estable y resultados medidos y publicados en cada centro.", "Una red universal que combina lo mejor de la gestión pública y la colaboración privada evaluada, con el mismo servicio en un pueblo que en una capital."],
+    niv: ["No proponer nada sobre sanidad, educación y cuidados, o romper la base: negar la atención a quien vive aquí, ocultar los datos o incumplir lo que la ley ya garantiza.", "Que todo el mundo tenga médico, escuela y cuidados, con esperas que no pongan en riesgo la salud.", "Profesionales suficientes, financiación estable y resultados medidos y publicados en cada centro.", "Una red universal que combina lo mejor de la gestión pública y la colaboración privada evaluada, con el mismo servicio en un pueblo que en una capital.", "Una sola red universal con las mismas reglas para todo centro: plazos máximos que se cumplen solos, datos abiertos de resultado y coste, elección real y dinero repartido según la necesidad, igual en un pueblo que en una capital."],
     cap: "Arriba frente a abajo: colaboración con centros privados frente a profesionales suficientes. Derecha frente a izquierda: libertad de elección frente a gestión pública y universalidad. En diagonal: contención del gasto frente a territorio y cercanía, y evaluación y resultados frente a financiación pública suficiente. Los radios vecinos se completan entre sí.",
     ejes: [
       { l: ["Colaboración", "privada"], n: "Colaboración con centros privados", d: "Usar centros privados pagados con dinero público.",
         p: "Conciertos solo donde mejoren el coste y el resultado medidos, con cláusula de reversión y prohibición de seleccionar a los pacientes o alumnos más rentables.", ya: ["pnv", "pp", "vox", "junts"],
-        niv: ["Conciertos puntuales para reducir esperas.", "Conciertos evaluados por coste y resultado.", "Colaboración solo donde mejora lo medido, con reversión y sin seleccionar a los pacientes o alumnos rentables."] },
+        niv: ["No decir nada sobre los conciertos, o romper la base: dar dinero público a centros sin control ni evaluación, o incumplir contratos ya firmados.", "Conciertos puntuales para reducir esperas.", "Conciertos evaluados por coste y resultado.", "Colaboración solo donde mejora lo medido, con reversión y sin seleccionar a los pacientes o alumnos rentables.", "Un único contrato para todo centro pagado con impuestos: mismo precio por el mismo servicio, cuentas abiertas, admisión sin filtros ni cuotas y no prórroga automática si dos evaluaciones seguidas salen peor que la red pública."], it: "Contrato único para todo centro pagado con impuestos", is: "contrato-unico-centros-pagados-con-impuestos" },
       { l: ["Contención", "fiscal"], n: "Contención del gasto y de los impuestos", d: "No gastar de más ni subir impuestos sin necesidad.",
         p: "Auditar el gasto, una central de compras común, digitalización y lucha contra el fraude antes de subir la presión fiscal media.", ya: ["pp", "vox", "pnv"],
-        niv: ["No gastar de más.", "Central de compras, digitalización y auditoría del gasto.", "Cada euro evaluado antes de subir la presión fiscal media."] },
+        niv: ["No proponer nada, o romper la base: gastar sin control ni cuentas, justificar el fraude o bajar impuestos sin decir qué servicio se deja de pagar.", "No gastar de más.", "Central de compras, digitalización y auditoría del gasto.", "Cada euro evaluado antes de subir la presión fiscal media.", "Revisar todo el gasto por turnos, con una opción de ahorro obligada; financiar solo lo que demuestra su valor; y no subir la presión fiscal media sin haber respondido antes, una a una y en público, a las propuestas de ahorro."], it: "Evaluar antes de gastar y antes de subir impuestos", is: "evaluar-antes-de-gastar-y-de-subir-impuestos" },
       { l: ["Libertad de", "elección"], n: "Libertad de elección", d: "Que cada persona elija médico, hospital o colegio.",
         p: "Elegir médico, hospital y colegio dentro de la red pagada con dinero público, con información de resultados para elegir bien, y decidir el futuro de MUFACE con una evaluación independiente.", ya: ["pp", "vox", "junts"],
-        niv: ["Elegir médico de cabecera.", "Elegir médico, hospital y colegio dentro de la red.", "Libertad de elección informada por datos públicos de resultados."] },
+        niv: ["No proponer nada, o romper la base: negar toda elección a la persona, o una «elección» en la que es el centro quien escoge a quién admite.", "Elegir médico de cabecera.", "Elegir médico, hospital y colegio dentro de la red.", "Libertad de elección informada por datos públicos de resultados.", "Elegir cualquier centro de la red pagada con dinero público en toda España, con el dinero siguiendo a la persona, un comparador oficial de resultados y un solo régimen sanitario, al que el mutualismo se incorpora por fases."], it: "Elección informada en toda la red y un solo régimen", is: "eleccion-informada-en-toda-la-red-y-un-solo-regimen" },
       { l: ["Evaluación y", "resultados"], n: "Evaluación y resultados", d: "Medir y publicar: listas de espera, calidad y coste.",
         p: "Indicadores públicos de resultados y de coste para cada centro, sea cual sea su gestión, y plazos máximos de espera garantizados por ley.", ya: ["psoe", "pp", "pnv"],
-        niv: ["Publicar las listas de espera.", "Indicadores públicos de calidad y coste por centro.", "Plazos máximos garantizados por ley y evaluación independiente de todos los centros, sea cual sea su gestión."] },
+        niv: ["No proponer nada, o romper la base: ocultar o maquillar las listas de espera y negarse a publicar los resultados de los centros.", "Publicar las listas de espera.", "Indicadores públicos de calidad y coste por centro.", "Plazos máximos garantizados por ley y evaluación independiente de todos los centros, sea cual sea su gestión.", "Plazos máximos que se cumplen solos: vencido el plazo, la persona es atendida en otro centro sin coste ni reclamación. Y un evaluador independiente que publica, centro a centro, resultados, coste y lo que cuentan los pacientes."], it: "Garantía de plazo automática y evaluador independiente", is: "garantia-de-plazo-automatica-y-evaluador-independiente" },
       { l: ["Profesionales", "suficientes"], n: "Profesionales suficientes", d: "Médicos, docentes y cuidadores suficientes, y con condiciones para quedarse.",
         p: "Plazas de formación (MIR, magisterio) según necesidades medidas, carrera profesional e incentivos claros para las plazas difíciles, sobre todo en atención primaria y en los pueblos.", ya: ["pp", "pnv", "fa", "pod"],
-        niv: ["Cubrir las plazas vacantes.", "Plazas de formación según necesidades y una carrera profesional.", "Plantillas calculadas por población y necesidad, con incentivos para quedarse en las plazas difíciles."] },
+        niv: ["No proponer nada, o romper la base: dejar plazas sin cubrir de forma indefinida o encadenar contratos temporales al margen de la ley.", "Cubrir las plazas vacantes.", "Plazas de formación según necesidades y una carrera profesional.", "Plantillas calculadas por población y necesidad, con incentivos para quedarse en las plazas difíciles.", "Un órgano independiente calcula cada tres años cuántos profesionales harán falta a 15 años vista; la formación se financia según ese cálculo, y las plazas difíciles llevan un plus que crece con la lejanía y la permanencia."], it: "Plantillas previstas a 15 años y plus por permanencia", is: "plantillas-a-15-anos-y-plus-por-lejania-y-permanencia" },
       { l: ["Territorio y", "cercanía"], n: "Territorio y cercanía", d: "Que el servicio llegue igual a un pueblo que a una capital, y que se decida cerca.",
         p: "Historia clínica y tarjeta sanitaria que funcionen en toda España, unidades móviles y telemedicina en el medio rural, y gestión cercana por comunidades con un fondo de nivelación.", ya: ["pp", "vox", "pnv", "junts", "erc", "bildu"],
-        niv: ["Un centro de salud y una escuela a una distancia razonable.", "Historia clínica común y telemedicina en el medio rural.", "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación."] },
+        niv: ["No proponer nada, o romper la base: cerrar consultorios y escuelas rurales sin alternativa, o negar la atención a quien viene de otra comunidad.", "Un centro de salud y una escuela a una distancia razonable.", "Historia clínica común y telemedicina en el medio rural.", "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación.", "Tiempos máximos de acceso fijados por ley (por ejemplo, un punto de atención a menos de 30 minutos), una historia clínica única que el paciente controla y que le sigue por España y la UE, y reparto territorial según la necesidad."], it: "Servicio a 30 minutos y reparto según la necesidad", is: "servicio-a-30-minutos-y-reparto-segun-la-necesidad" },
       { l: ["Gestión pública", "universal"], n: "Gestión pública y universalidad", d: "La misma cartera de servicios para todo el mundo, con la gestión pública como columna.",
         p: "Una cartera común garantizada a toda persona residente y la gestión pública como regla, con los conciertos como complemento evaluado y no como sustituto.", ya: ["psoe", "fa", "pod", "bildu", "pp"],
-        niv: ["Atención garantizada a toda persona residente.", "Una cartera común en toda España, con la gestión pública como columna.", "Universalidad completa y una gestión pública evaluada con las mismas reglas que cualquier otra."] },
+        niv: ["No proponer nada, o romper la base: negar la atención sanitaria o la escuela a personas que viven en España, o desmantelar la red pública.", "Atención garantizada a toda persona residente.", "Una cartera común en toda España, con la gestión pública como columna.", "Universalidad completa y una gestión pública evaluada con las mismas reglas que cualquier otra.", "Derecho efectivo por residencia, con un solo documento válido en toda España; una cartera común fijada por ley; y centros públicos con autonomía, dirección elegida por mérito y la misma evaluación que cualquier otro."], it: "Universalidad sin trámites y centros públicos autónomos", is: "universalidad-sin-tramites-y-centros-publicos-autonomos" },
       { l: ["Financiación", "pública"], n: "Financiación pública suficiente", d: "Cuánto dinero público se pone.",
         p: "Un suelo de gasto por habitante en sanidad, educación y dependencia, con fondos finalistas para primaria y dependencia, revisado cada año contra resultados.", ya: ["psoe", "fa", "erc", "pp"],
-        niv: ["Mantener el gasto ante el aumento de la demanda.", "Un suelo de gasto por habitante en sanidad, educación y dependencia.", "Financiación estable, finalista donde haga falta y revisada cada año contra resultados."] }
+        niv: ["No proponer nada, o romper la base: recortar por debajo de lo que la ley ya garantiza, o prometer servicios sin decir cómo se pagan.", "Mantener el gasto ante el aumento de la demanda.", "Un suelo de gasto por habitante en sanidad, educación y dependencia.", "Financiación estable, finalista donde haga falta y revisada cada año contra resultados.", "Un suelo de gasto por habitante ajustado por necesidad, fijado por ley para cuatro años y actualizado cada año con la demografía y los costes; con una parte reservada a primaria y dependencia, y revisado contra resultados."], it: "Suelo de gasto a cuatro años, por ley y por necesidad", is: "suelo-de-gasto-a-cuatro-anos-por-ley-y-por-necesidad" }
     ],
     v: {
-      pp: [8, 9, 8, 7, 7, 6, 6, 6], psoe: [3, 4, 3, 6, 6, 7, 9, 8], vox: [8, 8, 9, 6, 5, 5, 3, 5],
-      fa: [1, 2, 2, 6, 8, 6, 10, 9], erc: [4, 3, 3, 5, 6, 9, 8, 8], junts: [8, 6, 6, 6, 6, 9, 6, 7],
-      bildu: [2, 3, 2, 5, 7, 8, 9, 8], pnv: [6, 6, 5, 7, 7, 9, 7, 7], pod: [0, 1, 1, 4, 8, 5, 10, 9]
+      pp: [2, 2, 2, 2, 2, 1, 1, 1], psoe: [0, 1, 0, 1, 1, 2, 2, 2], vox: [2, 2, 2, 1, 1, 1, 0, 1],
+      fa: [0, 0, 0, 1, 2, 1, 3, 2], erc: [1, 0, 0, 1, 1, 2, 2, 2], junts: [2, 1, 1, 1, 1, 2, 1, 2],
+      bildu: [0, 0, 0, 1, 2, 2, 2, 2], pnv: [1, 1, 1, 2, 2, 2, 2, 2], pod: [0, 0, 0, 1, 2, 1, 3, 2]
     },
     t: {
       pp: "Programa del 29-N: un pacto de Estado por la sanidad pública, 4.500 médicos más en atención primaria, una historia clínica y social única, un pacto de dependencia, una auditoría del gasto y rebajas fiscales. Donde gobierna defiende la colaboración público-privada y la libertad de elección de médico, centro y colegio, entre la red pública, la concertada y la privada.",
@@ -2979,35 +2981,31 @@ const TEMAS = {
   eco: {
     n: "Economía", c: "#F2B33D", q: "¿Quién paga, cuánto, y en qué se gasta?",
     cap: "Arriba frente a abajo: déficit y deuda frente a lucha contra el fraude. En diagonal: pymes y autónomos frente a gasto e inversión pública, y bajar impuestos y competir frente a equidad fiscal.",
-    niv: [
-      "Cuentas que se sostienen: presupuestos aprobados a tiempo, impuestos que se pagan y una deuda que no crece sin control.",
-      "Un sistema que reparte la carga según lo que tiene cada uno, evalúa cada euro de gasto y deja crecer a las empresas pequeñas.",
-      "Un pacto fiscal de largo plazo: impuestos simples y progresivos, fraude mínimo, gasto evaluado en público y deuda a la baja, que no cambie con cada gobierno."
-    ],
+    niv: ["No presentar cuentas ni presupuestos, justificar el impago de impuestos o de la deuda, o prometer gasto y rebajas sin explicar quién los paga.", "Cuentas que se sostienen: presupuestos aprobados a tiempo, impuestos que se pagan y una deuda que no crece sin control.", "Un sistema que reparte la carga según lo que tiene cada uno, evalúa cada euro de gasto y deja crecer a las empresas pequeñas.", "Un pacto fiscal de largo plazo: impuestos simples y progresivos, fraude mínimo, gasto evaluado en público y deuda a la baja, que no cambie con cada gobierno.", "Un sistema que cualquiera entiende y puede comprobar: impuestos sencillos y a igual renta igual pago, fraude medido cada año, gasto que solo sigue si funciona y una regla que ahorra en la bonanza para proteger en la crisis."],
     ejes: [
       { l: ["Déficit", "y deuda"], n: "Déficit y deuda", d: "No gastar hoy lo que tendrán que pagar los que vienen.",
-        niv: ["Cumplir las reglas fiscales europeas.", "Una senda de reducción de la deuda pactada y vigilada por la AIReF.", "Una regla que ahorra en los años buenos para poder gastar en los malos, con la deuda bajando cada año respecto al PIB."],
+        niv: ["No aprobar presupuestos, ignorar las reglas fiscales europeas o defender que la deuda pública no se pague.", "Cumplir las reglas fiscales europeas.", "Una senda de reducción de la deuda pactada y vigilada por la AIReF.", "Una regla que ahorra en los años buenos para poder gastar en los malos, con la deuda bajando cada año respecto al PIB.", "Un freno de deuda en la ley: el gasto de cada año se liga a los ingresos de un año normal, lo que sobra en la bonanza va a una hucha para las crisis y cada desvío se devuelve con plazo. La deuda baja sin recortar inversión."], it: "Freno de deuda con hucha para las crisis", is: "freno-de-deuda-con-hucha-para-las-crisis",
         p: "Una regla de gasto que ahorre en los años buenos para gastar en los malos, una senda de deuda a la baja pactada por todos y vigilada por la AIReF, y presupuestos aprobados cada año a tiempo.", ya: ["pp", "pnv", "junts"] },
       { l: ["Pymes y", "autónomos"], n: "Pymes y autónomos", d: "Las empresas pequeñas, que dan la mayor parte del empleo.",
-        niv: ["Que la Administración pague a tiempo y pida menos papeles.", "Cuota de autónomos según ingresos reales, ventanilla única y crédito público para pymes.", "Medir el coste de cada norma nueva para las empresas pequeñas antes de aprobarla."],
+        niv: ["No proponer nada para pymes y autónomos, o dar por bueno que la Administración les pague tarde y sin intereses.", "Que la Administración pague a tiempo y pida menos papeles.", "Cuota de autónomos según ingresos reales, ventanilla única y crédito público para pymes.", "Medir el coste de cada norma nueva para las empresas pequeñas antes de aprobarla.", "Abrir, cambiar o cerrar una empresa en un día y por internet; la Administración no pide dos veces un dato que ya tiene, paga sola a 30 días con intereses, y el autónomo cotiza por lo que de verdad ingresa cada trimestre."], it: "Empresa en un día y papeles una sola vez", is: "empresa-en-un-dia-y-papeles-una-sola-vez",
         p: "Una ventanilla única digital para abrir y cerrar una empresa en días, pago de la Administración en 30 días con intereses automáticos si se retrasa, y medir el coste de cada norma nueva para las pymes antes de aprobarla.", ya: ["pp", "junts", "pnv", "vox"] },
       { l: ["Bajar", "impuestos"], n: "Bajar impuestos y competir", d: "Dejar más dinero a familias y empresas para que consuman, inviertan y contraten.",
-        niv: ["No subir impuestos sin necesidad y ajustar el IRPF a la inflación.", "Rebajas selectivas y evaluadas para rentas bajas y medias, y para invertir y contratar.", "Pocos tipos, pocas excepciones y reglas previsibles a diez años, que compitan con los países vecinos sin perder recaudación."],
+        niv: ["Prometer rebajas sin decir cómo se pagan, o cambiar impuestos de forma retroactiva o imprevisible, rompiendo la seguridad jurídica.", "No subir impuestos sin necesidad y ajustar el IRPF a la inflación.", "Rebajas selectivas y evaluadas para rentas bajas y medias, y para invertir y contratar.", "Pocos tipos, pocas excepciones y reglas previsibles a diez años, que compitan con los países vecinos sin perder recaudación.", "Impuestos de base ancha y tipos bajos: casi sin excepciones, ajustados solos a la inflación cada año, sin gravar el beneficio que la empresa reinvierte y con un calendario pactado a diez años. Toda rebaja dice de dónde sale."], it: "Impuestos sencillos, de base ancha y tipos bajos", is: "impuestos-sencillos-base-ancha-tipos-bajos",
         p: "Ajustar cada año el IRPF a la inflación para que nadie pague más solo porque suben los precios, y concentrar cualquier rebaja en las rentas bajas y medias y en la inversión productiva.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Lucha contra", "el fraude"], n: "Lucha contra el fraude", d: "Que pague quien tiene que pagar: fraude fiscal y economía sumergida.",
-        niv: ["Inspección suficiente y sanciones que se cobran.", "Cruce de datos, factura electrónica en todas las empresas y límites al efectivo.", "Una Agencia Tributaria con medios comparables a los de los países vecinos, cooperación europea contra los paraísos fiscales y una estimación oficial del fraude cada año."],
+        niv: ["Justificar no pagar impuestos o el dinero negro, defender amnistías fiscales o usar la inspección contra adversarios.", "Inspección suficiente y sanciones que se cobran.", "Cruce de datos, factura electrónica en todas las empresas y límites al efectivo.", "Una Agencia Tributaria con medios comparables a los de los países vecinos, cooperación europea contra los paraísos fiscales y una estimación oficial del fraude cada año.", "Que defraudar sea difícil y cumplir, fácil: cada factura llega a Hacienda al emitirse, Hacienda entrega hechas las declaraciones y un organismo independiente publica cada año cuánto se deja de ingresar, con objetivo de reducción."], it: "Fraude medido cada año y factura en tiempo real", is: "fraude-medido-cada-ano-y-factura-en-tiempo-real",
         p: "Factura electrónica en todas las empresas, más inspectores hasta acercarse a la media europea por contribuyente y una estimación oficial y anual de la economía sumergida para saber si se avanza.", ya: ["psoe", "fa", "pod", "pnv"] },
       { l: ["Gasto e", "inversión"], n: "Gasto e inversión pública", d: "Cuánto y en qué invierte el Estado: infraestructuras, ciencia, servicios.",
-        niv: ["Mantener la inversión que sostiene los servicios y las infraestructuras.", "Inversión a varios años en ciencia, digitalización e infraestructuras, sin depender solo de los fondos europeos.", "Cada gran gasto con una evaluación antes y después, publicada por un organismo independiente, y presupuestos por objetivos."],
+        niv: ["Gastar sin presupuesto ni control, adjudicar obra pública por afinidad o rechazar por principio toda inversión pública.", "Mantener la inversión que sostiene los servicios y las infraestructuras.", "Inversión a varios años en ciencia, digitalización e infraestructuras, sin depender solo de los fondos europeos.", "Cada gran gasto con una evaluación antes y después, publicada por un organismo independiente, y presupuestos por objetivos.", "Ningún gasto es para siempre: cada programa nace con objetivos y fecha de revisión, y solo sigue si una evaluación independiente y pública lo avala. Las grandes obras salen de una lista ordenada por su beneficio social."], it: "Ningún gasto sin evaluación ni fecha de revisión", is: "ningun-gasto-sin-evaluacion-ni-fecha-de-revision",
         p: "Una ley de evaluación que obligue a medir antes y después cada programa de más de 100 millones, con la AIReF como evaluador independiente, y un suelo estable de inversión en investigación.", ya: ["psoe", "fa", "pnv", "erc"] },
       { l: ["Equidad", "fiscal"], n: "Equidad fiscal", d: "Cómo se reparte el esfuerzo entre rentas, patrimonios y empresas.",
-        niv: ["Que el impuesto sobre la renta sea progresivo y se aplique de verdad en todos los tramos.", "Tratar parecido las rentas del trabajo y las del capital, y revisar las deducciones que favorecen sobre todo a quien más tiene.", "Un sistema progresivo en su conjunto, con datos públicos de cuánto paga cada décimo de la población y la evaluación anual de cada beneficio fiscal."],
+        niv: ["Defender privilegios fiscales a medida o la confiscación de patrimonios, o negar que deba contribuir quien puede hacerlo.", "Que el impuesto sobre la renta sea progresivo y se aplique de verdad en todos los tramos.", "Tratar parecido las rentas del trabajo y las del capital, y revisar las deducciones que favorecen sobre todo a quien más tiene.", "Un sistema progresivo en su conjunto, con datos públicos de cuánto paga cada décimo de la población y la evaluación anual de cada beneficio fiscal.", "A igual renta, igual impuesto, venga del trabajo o del capital. Un solo sistema que une impuestos y ayudas, sin beneficios fiscales que no se evalúen, y una tabla oficial anual de lo que paga y recibe cada décimo de la población."], it: "A igual renta, igual impuesto, con cuentas a la vista", is: "a-igual-renta-igual-impuesto-cuentas-a-la-vista",
         p: "Publicar cada año cuánto paga, en proporción a su renta, cada décimo de la población sumando todos los impuestos; suprimir los beneficios fiscales que no demuestren su efecto, y acercar la tributación de las rentas del capital a las del trabajo.", ya: ["psoe", "fa", "pod", "bildu", "erc"] }
     ],
     v: {
-      pp: [8, 8, 9, 5, 5, 3], psoe: [5, 6, 3, 7, 8, 8], vox: [6, 8, 10, 4, 3, 2],
-      fa: [2, 5, 1, 8, 9, 10], erc: [4, 5, 3, 6, 7, 8], junts: [6, 9, 8, 5, 6, 4],
-      bildu: [3, 6, 2, 7, 8, 9], pnv: [8, 8, 6, 7, 7, 6], pod: [1, 4, 1, 8, 9, 10]
+      pp: [2, 2, 2, 1, 1, 0], psoe: [1, 1, 0, 2, 2, 2], vox: [1, 2, 3, 1, 0, 0],
+      fa: [0, 1, 0, 2, 2, 3], erc: [1, 1, 0, 1, 2, 2], junts: [1, 2, 2, 1, 1, 1],
+      bildu: [0, 1, 0, 2, 2, 2], pnv: [2, 2, 1, 2, 2, 1], pod: [0, 1, 0, 2, 2, 3]
     },
     t: {
       pp: "Propone bajar impuestos, sobre todo el IRPF, auditar el gasto y reducir la deuda, y se presenta como el partido de autónomos y pymes. Picos en bajar impuestos, pymes y deuda; corta en equidad fiscal.",
@@ -3028,35 +3026,31 @@ const TEMAS = {
   tra: {
     n: "Trabajo", c: "#F0835A", q: "¿Cómo se trabaja, y de qué se vive al jubilarse?",
     cap: "Arriba frente a abajo: pensiones suficientes frente a formación y productividad. En diagonal: sostenibilidad de las pensiones frente a jornada y conciliación, y flexibilidad para contratar frente a empleo estable y salarios.",
-    niv: [
-      "Que trabajar saque de la pobreza y que la pensión mínima dé para vivir.",
-      "Contratos estables, jornada razonable, formación a lo largo de la vida y pensiones que no pierden poder de compra.",
-      "Un mercado de trabajo que da a la vez seguridad y movilidad, salarios que crecen con la productividad y unas pensiones con reglas pactadas para décadas."
-    ],
+    niv: ["No proponer nada sobre empleo o pensiones, o romper la base: prometer sin decir cómo se paga, amparar el trabajo sin contrato o no cumplir la ley laboral.", "Que trabajar saque de la pobreza y que la pensión mínima dé para vivir.", "Contratos estables, jornada razonable, formación a lo largo de la vida y pensiones que no pierden poder de compra.", "Un mercado de trabajo que da a la vez seguridad y movilidad, salarios que crecen con la productividad y unas pensiones con reglas pactadas para décadas.", "Trabajo estable y bien pagado, con libertad para contratar y cambiar; una pensión pública igual para todos, ligada al IPC y al salario mínimo, y una edad de jubilación que sigue por fórmula a la esperanza de vida."],
     ejes: [
       { l: ["Pensiones", "suficientes"], n: "Pensiones suficientes", d: "Que la pensión mantenga el poder de compra y saque de la pobreza.",
-        niv: ["Subir las pensiones con el IPC.", "Subir más las mínimas y las no contributivas, y cerrar la brecha de género.", "Que ninguna persona mayor caiga en la pobreza, con la suficiencia de las pensiones medida y publicada cada año."],
+        niv: ["No proponer nada sobre la cuantía de las pensiones, o plantear dejar de actualizarlas o de pagar las ya reconocidas.", "Subir las pensiones con el IPC.", "Subir más las mínimas y las no contributivas, y cerrar la brecha de género.", "Que ninguna persona mayor caiga en la pobreza, con la suficiencia de las pensiones medida y publicada cada año.", "Una pensión pública igual para todos los mayores residentes, por encima del umbral de pobreza, fijada como porcentaje del salario mínimo neto y con la garantía de no subir nunca menos que el IPC."], it: "Pensión básica igual para todos, ligada a IPC y SMI", is: "pension-basica-igual-ligada-ipc-y-salario-minimo",
         p: "Mantener la subida con el IPC, llevar las pensiones mínimas y no contributivas hasta el umbral de la pobreza y cerrar la brecha de género con el complemento por hijos.", ya: ["psoe", "fa", "pod", "pp", "bildu", "pnv"] },
       { l: ["Sostener las", "pensiones"], n: "Sostenibilidad de las pensiones", d: "Que se puedan seguir pagando dentro de 20 y de 40 años.",
-        niv: ["Reconocer el problema: el gasto en pensiones crece con el envejecimiento.", "Medidas de ingreso y de gasto evaluadas por la AIReF, con un ajuste automático si se desvían.", "Un Pacto de Toledo con reglas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo."],
+        niv: ["Negar que el envejecimiento encarece las pensiones, o proponer dejar de pagarlas o desmontar el sistema sin decir qué lo sustituye.", "Reconocer el problema: el gasto en pensiones crece con el envejecimiento.", "Medidas de ingreso y de gasto evaluadas por la AIReF, con un ajuste automático si se desvían.", "Un Pacto de Toledo con reglas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo.", "Una edad de jubilación que se mueve por fórmula con la esperanza de vida, revisada cada cinco años y avisada con 15 de antelación, y un balance público que activa ajustes pactados si cotizantes e ingresos no alcanzan."], it: "Edad de jubilación ligada a la demografía, por fórmula", is: "edad-jubilacion-ligada-esperanza-de-vida-y-balance",
         p: "Que la AIReF publique cada tres años si el sistema cumple, con una cláusula pactada que corrija las desviaciones, y jubilación flexible para quien quiera seguir trabajando.", ya: ["pnv", "pp", "junts", "psoe"] },
       { l: ["Flexibilidad", "para contratar"], n: "Flexibilidad para contratar", d: "Que contratar y adaptarse no sea un riesgo para la empresa.",
-        niv: ["Contratos sencillos y pocos trámites para contratar.", "Flexibilidad interna pactada (jornada, funciones) antes que el despido.", "Seguridad y movilidad a la vez: una indemnización que acompaña al trabajador de empresa en empresa, como la «mochila austriaca», y políticas de empleo que funcionan."],
+        niv: ["No proponer nada sobre contratación, o defender el despido sin causa ni compensación, o impedir a la empresa ajustar plantilla aunque peligre.", "Contratos sencillos y pocos trámites para contratar.", "Flexibilidad interna pactada (jornada, funciones) antes que el despido.", "Seguridad y movilidad a la vez: una indemnización que acompaña al trabajador de empresa en empresa, como la «mochila austriaca», y políticas de empleo que funcionan.", "Un solo contrato indefinido con un coste de salida conocido desde el primer día, parte de él en una cuenta que el trabajador se lleva de empresa en empresa. A cambio, un seguro de paro alto y una recolocación rápida y evaluada."], it: "Contrato único con cuenta portátil y red de seguridad", is: "contrato-unico-cuenta-portatil-y-seguro-de-recolocacion",
         p: "Estudiar una mochila de tipo austriaco —una cuenta que el trabajador conserva al cambiar de empresa—, reforzar la flexibilidad interna pactada y simplificar los tipos de contrato.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Formación y", "productividad"], n: "Formación y productividad", d: "Aprender toda la vida y producir más por hora trabajada.",
-        niv: ["Cursos de formación para quien busca empleo.", "FP dual en todo el país y formación continua conectada con las empresas.", "Una cuenta personal de formación para toda la vida y oficinas de empleo evaluadas por resultados."],
+        niv: ["No proponer nada sobre formación, o defender que reciclarse es asunto de cada uno y retirar la formación a quien está en paro.", "Cursos de formación para quien busca empleo.", "FP dual en todo el país y formación continua conectada con las empresas.", "Una cuenta personal de formación para toda la vida y oficinas de empleo evaluadas por resultados.", "Un derecho a formarse toda la vida: cuenta personal con saldo anual, mayor para quien tiene menos estudios, y un permiso pagado para reciclarse a mitad de carrera. Solo se financia lo que publica sus resultados de empleo."], it: "Formarse toda la vida, con resultados públicos", is: "derecho-formacion-toda-la-vida-con-resultados-publicos",
         p: "FP dual en todas las comarcas, una cuenta personal de formación que acompañe a cada trabajador y unas oficinas de empleo evaluadas por cuánta gente colocan.", ya: ["pp", "pnv", "psoe", "junts"] },
       { l: ["Jornada y", "conciliación"], n: "Jornada y conciliación", d: "Tiempo para vivir: horas de trabajo, cuidados y horarios.",
-        niv: ["Registro real de la jornada y horas extra pagadas.", "Permisos de cuidado retribuidos y horarios que permitan conciliar.", "Una jornada más corta pactada por sectores, horarios europeos y cuidados repartidos entre hombres y mujeres."],
+        niv: ["No proponer nada sobre horarios y cuidados, o justificar jornadas sin registro ni límite, horas extra sin pagar o la retirada de permisos.", "Registro real de la jornada y horas extra pagadas.", "Permisos de cuidado retribuidos y horarios que permitan conciliar.", "Una jornada más corta pactada por sectores, horarios europeos y cuidados repartidos entre hombres y mujeres.", "Menos horas a medida que sube la productividad, pactadas sector a sector y sin perder sueldo; permisos de cuidado iguales, pagados e intransferibles; y derecho a adaptar el horario salvo causa escrita de la empresa."], it: "Tiempo ganado con productividad y cuidados repartidos", is: "jornada-ligada-a-productividad-y-cuidados-repartidos",
         p: "Registro digital de la jornada en todas las empresas, permisos de cuidado retribuidos e iguales para padres y madres, y reducción de jornada pactada sector a sector según su productividad.", ya: ["fa", "psoe", "pod", "bildu"] },
       { l: ["Empleo estable", "y salarios"], n: "Empleo estable y salarios", d: "Contratos que duran y sueldos que dan para vivir.",
-        niv: ["Un salario mínimo suficiente y el contrato indefinido como norma.", "Menos temporalidad también en las administraciones y salarios que suben con los precios.", "Salarios que crecen con la productividad, negociados sector a sector, con datos públicos de temporalidad y brecha salarial por empresa."],
+        niv: ["No proponer nada sobre salarios, o defender suprimir el salario mínimo, tolerar el trabajo sin contrato o fijar los sueldos por decreto.", "Un salario mínimo suficiente y el contrato indefinido como norma.", "Menos temporalidad también en las administraciones y salarios que suben con los precios.", "Salarios que crecen con la productividad, negociados sector a sector, con datos públicos de temporalidad y brecha salarial por empresa.", "Un salario mínimo fijado por regla, a propuesta de una comisión independiente; salarios pactados por sector con la productividad; y temporalidad y brecha salarial publicadas por empresa y administración, con plan si se desvían."], it: "Salarios por regla y transparencia empresa a empresa", is: "salario-minimo-por-regla-y-transparencia-por-empresa",
         p: "Mantener el salario mínimo en torno al 60 % del salario medio, atacar la temporalidad en las administraciones públicas, donde hoy es más alta, y ligar las subidas pactadas a la productividad de cada sector.", ya: ["psoe", "fa", "pod", "bildu", "erc"] }
     ],
     v: {
-      pp: [7, 7, 8, 7, 4, 5], psoe: [9, 5, 3, 6, 8, 9], vox: [7, 4, 8, 5, 3, 4],
-      fa: [9, 3, 1, 5, 10, 10], erc: [8, 4, 3, 6, 7, 8], junts: [7, 6, 7, 7, 4, 5],
-      bildu: [9, 3, 2, 6, 8, 9], pnv: [7, 8, 6, 8, 6, 6], pod: [10, 2, 1, 4, 9, 10]
+      pp: [2, 2, 2, 2, 1, 1], psoe: [2, 1, 0, 1, 2, 2], vox: [2, 1, 2, 1, 0, 1],
+      fa: [2, 0, 0, 1, 3, 3], erc: [2, 1, 0, 1, 2, 2], junts: [2, 1, 2, 2, 1, 1],
+      bildu: [2, 0, 0, 1, 2, 2], pnv: [2, 2, 1, 2, 1, 1], pod: [3, 0, 0, 1, 2, 3]
     },
     t: {
       pp: "Votó contra la ley de las 37,5 horas, propone bajar cotizaciones para contratar y garantizar el poder de compra de las pensiones. Fuerte en flexibilidad, formación y pensiones; media en jornada.",
@@ -3077,35 +3071,31 @@ const TEMAS = {
   viv: {
     n: "Vivienda", c: "#C08BE0", q: "¿Puede uno permitirse un hogar?",
     cap: "Arriba frente a abajo: acceso a la compra frente a usar lo que ya hay. En diagonal: construir más frente a alquiler asequible, y seguridad para el propietario frente a vivienda pública y social.",
-    niv: [
-      "Que nadie se quede en la calle y que haya ayudas al alquiler para quien no llega.",
-      "Más vivienda asequible cada año —pública, social y privada— y reglas claras para inquilinos y propietarios.",
-      "Un parque de vivienda asequible permanente cercano a la media europea, suelo y licencias ágiles, y un alquiler que no se coma más del 30 % del sueldo."
-    ],
+    niv: ["No proponer nada sobre vivienda, o romper la base: justificar la ocupación de casas ajenas, no cumplir los desalojos firmes o dejar a familias en la calle.", "Que nadie se quede en la calle y que haya ayudas al alquiler para quien no llega.", "Más vivienda asequible cada año —pública, social y privada— y reglas claras para inquilinos y propietarios.", "Un parque de vivienda asequible permanente cercano a la media europea, suelo y licencias ágiles, y un alquiler que no se coma más del 30 % del sueldo.", "Que cualquier hogar con ingresos normales pueda elegir entre alquilar y comprar sin gastar más del 30 % de lo que gana: suelo suficiente por ley, propiedad segura y un parque asequible que nunca se vende."],
     ejes: [
       { l: ["Acceso a", "la compra"], n: "Acceso a la compra", d: "Poder comprar una casa sin depender de la familia.",
-        niv: ["Rebajar los impuestos de la primera vivienda.", "Avales públicos para la entrada de la hipoteca de los jóvenes.", "Fórmulas intermedias —alquiler con opción a compra, cooperativas en cesión de uso— para que la propiedad deje de ser todo o nada."],
+        niv: ["No proponer nada para quien quiere comprar, o tratar la propiedad de la vivienda como algo ilegítimo que hay que impedir o quitar sin compensación.", "Rebajar los impuestos de la primera vivienda.", "Avales públicos para la entrada de la hipoteca de los jóvenes.", "Fórmulas intermedias —alquiler con opción a compra, cooperativas en cesión de uso— para que la propiedad deje de ser todo o nada.", "Una escalera de propiedad: comprar la casa por partes desde el 10 %, pagar un alquiler asequible por el resto e ir subiendo, con ahorro previo bonificado y vivienda protegida que se revende a precio tasado."], it: "Escalera de propiedad: comprar la casa por partes", is: "escalera-de-propiedad-compra-por-partes",
         p: "Avales públicos para la entrada de jóvenes y familias, cooperativas en cesión de uso sobre suelo público y alquiler con opción a compra en la vivienda protegida.", ya: ["pp", "vox", "junts", "psoe"] },
       { l: ["Construir", "más"], n: "Construir más: suelo y licencias", d: "Que haya más viviendas donde la gente quiere vivir.",
-        niv: ["Liberar suelo público para vivienda.", "Licencias en semanas, no en años, y un planeamiento urbano más ágil.", "Construcción industrializada a gran escala y suelo con calendario, sin perder calidad urbana."],
+        niv: ["No proponer nada para que haya más vivienda, o saltarse la ley: recalificar a dedo, legalizar lo construido ilegalmente o bloquear toda obra nueva.", "Liberar suelo público para vivienda.", "Licencias en semanas, no en años, y un planeamiento urbano más ágil.", "Construcción industrializada a gran escala y suelo con calendario, sin perder calidad urbana.", "Suelo suficiente por obligación legal: cada ciudad mantiene capacidad edificable para la demanda prevista a 30 años más un margen, y lo que cumple un código claro obtiene licencia en plazo fijo, sin negociar caso a caso."], it: "Suelo por regla: capacidad obligatoria y licencia fija", is: "capacidad-obligatoria-de-suelo-y-licencia-por-regla",
         p: "Una ley de suelo que acorte los plazos del planeamiento, licencias por declaración responsable con control posterior y apoyo a la construcción industrializada para producir más rápido y más barato.", ya: ["pp", "vox", "junts", "pnv", "psoe"] },
       { l: ["Seguridad", "jurídica"], n: "Seguridad para el propietario", d: "Que alquilar no dé miedo: impagos y ocupaciones.",
-        niv: ["Desalojar rápido la ocupación ilegal de una vivienda.", "Juicios rápidos por impago y un registro de contratos.", "Un seguro de impago compartido y procedimientos que protejan a la vez al propietario y a la familia vulnerable, con alternativa de vivienda."],
+        niv: ["Justificar la ocupación de casas ajenas o no ejecutar los desalojos firmes; también amparar desalojos por la fuerza sin juez. O no proponer nada.", "Desalojar rápido la ocupación ilegal de una vivienda.", "Juicios rápidos por impago y un registro de contratos.", "Un seguro de impago compartido y procedimientos que protejan a la vez al propietario y a la familia vulnerable, con alternativa de vivienda.", "Plazos máximos garantizados por ley: la vivienda ocupada se devuelve en días y el impago se resuelve en pocos meses. Entretanto, un fondo público paga la renta al propietario y la administración realoja a la familia vulnerable."], it: "Propiedad garantizada: plazos fijos y renta asegurada", is: "plazos-fijos-de-desalojo-y-renta-garantizada",
         p: "Juicios rápidos por ocupación y por impago, con alternativa de vivienda garantizada por los servicios sociales a la familia vulnerable, y un seguro de impago compartido para los pequeños propietarios.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Vacías y", "turísticas"], n: "Usar lo que ya hay", d: "Vivienda vacía y pisos turísticos: que las casas sirvan para vivir.",
-        niv: ["Saber cuántas viviendas vacías y turísticas hay, y dónde.", "Un registro único de pisos turísticos y licencias limitadas en zonas tensionadas.", "Movilizar la vivienda vacía pagando su rehabilitación a cambio de alquilarla barata, e impuestos que distingan vivir de especular."],
+        niv: ["No querer saber cuántas casas están vacías o son turísticas, tolerar el alquiler turístico ilegal o quitar viviendas a sus dueños sin indemnizar.", "Saber cuántas viviendas vacías y turísticas hay, y dónde.", "Un registro único de pisos turísticos y licencias limitadas en zonas tensionadas.", "Movilizar la vivienda vacía pagando su rehabilitación a cambio de alquilarla barata, e impuestos que distingan vivir de especular.", "Cada vivienda con un uso conocido y un número de registro: la vacía sin causa paga un recargo que crece, la que se rehabilita para alquiler asequible recibe ayuda, y el piso turístico solo existe con licencia dentro de un cupo."], it: "Censo de usos: cada casa cuenta", is: "censo-de-usos-recargo-a-la-vacia-y-cupo-turistico",
         p: "Un registro único de pisos turísticos con licencias limitadas donde falte vivienda, rehabilitación pagada a cambio de alquilar barato durante años, y más impuestos solo a la vivienda vacía sin causa en zonas tensionadas.", ya: ["psoe", "fa", "erc", "bildu", "pnv"] },
       { l: ["Alquiler", "asequible"], n: "Alquiler asequible", d: "Que el alquiler no se coma el sueldo y que los contratos den estabilidad.",
-        niv: ["Ayudas al alquiler para jóvenes y rentas bajas.", "Contratos más largos, índices públicos de precios y avales para alquilar.", "Topes en zonas tensionadas con evaluación pública de su efecto sobre la oferta, y un seguro de impago que proteja a las dos partes."],
+        niv: ["No proponer nada sobre el alquiler, o romper las reglas: animar a dejar de pagar la renta o permitir subidas y expulsiones sin contrato ni juez.", "Ayudas al alquiler para jóvenes y rentas bajas.", "Contratos más largos, índices públicos de precios y avales para alquilar.", "Topes en zonas tensionadas con evaluación pública de su efecto sobre la oferta, y un seguro de impago que proteja a las dos partes.", "Un alquiler a coste como tercera vía: la renta cubre construir y mantener, sin beneficio, con contrato indefinido y subidas ligadas a la inflación. Y una ayuda como derecho para que nadie pague más del 30 % de sus ingresos."], it: "Alquiler a coste y el 30 % como derecho", is: "alquiler-a-coste-y-tope-del-30-por-ciento-de-ingresos",
         p: "Índices públicos de precios en todo el país, contratos largos con ventajas fiscales para quien alquile por debajo del índice, y evaluar con datos abiertos los topes allí donde se apliquen.", ya: ["psoe", "fa", "pod", "erc", "bildu"] },
       { l: ["Vivienda", "pública"], n: "Vivienda pública y social", d: "Viviendas de alquiler asequible que no se venden al cabo de unos años.",
-        niv: ["Conservar la vivienda pública que hay y no venderla.", "Construir y comprar vivienda pública de alquiler cada año, protegida para siempre.", "Un parque asequible permanente que se acerque a la media europea, gestionado por una entidad pública estable."],
+        niv: ["Vender la vivienda pública o dejar que se degrade, adjudicarla sin criterios públicos, negar techo a quien está en la calle, o no proponer nada.", "Conservar la vivienda pública que hay y no venderla.", "Construir y comprar vivienda pública de alquiler cada año, protegida para siempre.", "Un parque asequible permanente que se acerque a la media europea, gestionado por una entidad pública estable.", "Un parque asequible permanente por encima de la media europea, que nunca se vende y crece solo: las rentas de los edificios ya pagados financian los nuevos, con suelo reservado por ley y vivienda primero para quien no tiene hogar."], it: "Parque permanente que se financia y crece solo", is: "parque-asequible-permanente-con-fondo-rotatorio",
         p: "Que toda vivienda protegida lo sea para siempre, una entidad estatal que construya y compre junto con comunidades y ayuntamientos, y una meta pública de viviendas asequibles al año vigilada por un organismo independiente.", ya: ["psoe", "fa", "pod", "bildu", "erc", "pnv"] }
     ],
     v: {
-      pp: [9, 9, 9, 5, 2, 3], psoe: [6, 6, 4, 8, 8, 8], vox: [9, 8, 10, 3, 1, 1],
-      fa: [3, 5, 1, 9, 10, 10], erc: [4, 5, 3, 8, 9, 8], junts: [7, 7, 8, 6, 4, 4],
-      bildu: [3, 4, 2, 8, 9, 9], pnv: [6, 7, 6, 7, 6, 7], pod: [2, 3, 0, 9, 10, 10]
+      pp: [2, 2, 2, 1, 0, 0], psoe: [1, 1, 1, 2, 2, 2], vox: [2, 2, 3, 0, 0, 0],
+      fa: [0, 1, 0, 2, 3, 3], erc: [1, 1, 0, 2, 2, 2], junts: [2, 2, 2, 1, 1, 1],
+      bildu: [0, 1, 0, 2, 2, 2], pnv: [1, 2, 1, 2, 1, 2], pod: [0, 0, 0, 2, 3, 3]
     },
     t: {
       pp: "Promete derogar la Ley de Vivienda de 2023, liberar suelo, agilizar licencias, avales para jóvenes, rebajas fiscales a la compra y desalojos rápidos. Picos en construir, comprar y seguridad; corta en vivienda pública y alquiler.",
@@ -3126,35 +3116,31 @@ const TEMAS = {
   amb: {
     n: "Medio ambiente", c: "#4CC38A", q: "¿Cómo frenamos el cambio climático sin dejar a nadie atrás?",
     cap: "Arriba frente a abajo: agua y naturaleza frente al precio de la energía. En diagonal: campo y transición justa frente a renovables, redes y almacenamiento, y seguridad de suministro frente a reducir emisiones.",
-    niv: [
-      "Cumplir los compromisos europeos de clima y que la factura de la luz no corte la vida de nadie.",
-      "Un plan con objetivos anuales de emisiones, agua y precio de la energía, que llegue también al campo y a la industria.",
-      "Un sistema energético limpio, barato y seguro a la vez, con el agua y la naturaleza en las cuentas, y una transición que nadie paga solo."
-    ],
+    niv: ["Negar el problema o no proponer nada, incumplir los compromisos europeos de clima, o cerrar centrales y sectores sin alternativa para quien vive de ellos.", "Cumplir los compromisos europeos de clima y que la factura de la luz no corte la vida de nadie.", "Un plan con objetivos anuales de emisiones, agua y precio de la energía, que llegue también al campo y a la industria.", "Un sistema energético limpio, barato y seguro a la vez, con el agua y la naturaleza en las cuentas, y una transición que nadie paga solo.", "Una economía sin emisiones netas con reglas automáticas: presupuesto de carbono que se corrige solo, luz limpia, segura y a coste estable, agua repartida según la que hay y un campo que cobra por lo que cuida."],
     ejes: [
       { l: ["Agua y", "naturaleza"], n: "Agua y naturaleza", d: "Ríos, acuíferos, costas, bosques e incendios.",
-        niv: ["Respetar los caudales ecológicos y depurar las aguas.", "Gestión del agua por cuencas con datos públicos, reutilización y prevención de incendios todo el año.", "Un pacto del agua y la sequía, restauración de ríos y bosques, y pago por los servicios que da la naturaleza."],
+        niv: ["No proponer nada sobre el agua, tolerar pozos ilegales o vertidos sin depurar, o prometer agua que la cuenca no tiene.", "Respetar los caudales ecológicos y depurar las aguas.", "Gestión del agua por cuencas con datos públicos, reutilización y prevención de incendios todo el año.", "Un pacto del agua y la sequía, restauración de ríos y bosques, y pago por los servicios que da la naturaleza.", "Repartir cada año el agua que de verdad hay: derechos como porcentaje del agua disponible, medida con contador y publicada, con el caudal del río reservado primero y la naturaleza anotada en las cuentas públicas."], it: "Agua repartida según la que hay", is: "agua-repartida-segun-la-que-hay",
         p: "Un pacto del agua con datos abiertos por cuenca, reutilización y desalación donde haga falta, y prevención de incendios todo el año con empleo rural.", ya: ["pp", "psoe", "fa", "pnv"] },
       { l: ["Campo y", "transición"], n: "Campo y transición justa", d: "Que agricultores, ganaderos y la España rural no paguen solos la transición.",
-        niv: ["Ayudas a los sectores y comarcas afectados.", "Convenios de transición con empleo alternativo y normas más simples para el campo.", "Que la transición deje más renta en el mundo rural: energía local, pago por servicios ambientales y precios justos en la cadena alimentaria."],
+        niv: ["No proponer nada para el campo, cerrar centrales o explotaciones sin alternativa, o animar a incumplir las normas ambientales y sanitarias.", "Ayudas a los sectores y comarcas afectados.", "Convenios de transición con empleo alternativo y normas más simples para el campo.", "Que la transición deje más renta en el mundo rural: energía local, pago por servicios ambientales y precios justos en la cadena alimentaria.", "Que cada pueblo afectado tenga por ley su parte de la renta: un pago fijo por cada kWh renovable producido en su término, empleo firmado antes de cada cierre y pago al agricultor por los servicios ambientales medidos."], it: "Renta rural garantizada por ley en la transición", is: "renta-rural-garantizada-en-la-transicion",
         p: "Convenios de transición con empleo antes de cada cierre, que las renovables dejen renta en los pueblos que las acogen, y cumplir la ley de la cadena alimentaria para que nadie venda por debajo de coste.", ya: ["pp", "vox", "psoe", "pnv", "junts"] },
       { l: ["Seguridad de", "suministro"], n: "Seguridad de suministro", d: "Que no se vaya la luz: respaldo, nuclear, almacenamiento e interconexiones.",
-        niv: ["Mantener el respaldo necesario para evitar apagones.", "Decidir con datos el calendario nuclear y reforzar las interconexiones con Francia.", "Un plan de seguridad del sistema con margen en cada escenario, evaluado de forma independiente."],
+        niv: ["No proponer nada sobre el respaldo, o decidir cierres y aperturas de centrales por consigna, sin informes técnicos ni margen de seguridad.", "Mantener el respaldo necesario para evitar apagones.", "Decidir con datos el calendario nuclear y reforzar las interconexiones con Francia.", "Un plan de seguridad del sistema con margen en cada escenario, evaluado de forma independiente.", "Fijar por ley cuántas horas al año puede faltar potencia como máximo y que un organismo independiente lo compruebe cada año. Ninguna central cierra ni se prorroga sin ese informe, y la estabilidad de la red se contrata aparte."], it: "Norma legal de fiabilidad eléctrica", is: "norma-legal-de-fiabilidad-electrica",
         p: "Revisar el calendario de cierre nuclear con informes independientes del Consejo de Seguridad Nuclear y de Red Eléctrica, más interconexiones con Francia y servicios de estabilidad de la red tras el apagón de abril de 2025.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Precio de", "la energía"], n: "Precio de la energía", d: "Que la luz, el gas y el combustible sean asumibles para familias e industria.",
-        niv: ["Bono social para los hogares vulnerables.", "Rebajas fiscales temporales en las crisis y contratos a largo plazo para la industria.", "Un mercado eléctrico que pague cada tecnología por su coste, con precios estables para hogares e industria."],
+        niv: ["No proponer nada sobre la factura, prometer precios fijados por decreto sin decir quién paga, o dejar que se corte la luz a hogares vulnerables.", "Bono social para los hogares vulnerables.", "Rebajas fiscales temporales en las crisis y contratos a largo plazo para la industria.", "Un mercado eléctrico que pague cada tecnología por su coste, con precios estables para hogares e industria.", "Que la luz se pague a un coste estable: la energía con apoyo público cobra un precio fijo y devuelve lo que gane de más, ese dinero baja la factura, y la ayuda a los hogares vulnerables llega sola, sin solicitud."], it: "Luz a coste estable y ayuda automática", is: "luz-a-coste-estable-y-ayuda-automatica",
         p: "Reformar el mercado eléctrico para que la factura refleje el coste real de las renovables, contratos a largo plazo para la industria y un bono social automático, sin papeleo.", ya: ["pp", "vox", "junts", "pnv", "psoe"] },
       { l: ["Renovables", "y redes"], n: "Renovables, redes y almacenamiento", d: "Producir con sol, viento y agua, y llevar esa energía adonde se usa.",
-        niv: ["Seguir instalando renovables.", "Redes eléctricas y almacenamiento (baterías, bombeo) para no tirar la producción.", "Un sistema casi 100 % renovable con almacenamiento suficiente, autoconsumo y comunidades energéticas en cada pueblo."],
+        niv: ["No proponer nada sobre renovables, frenar toda instalación por principio, o autorizarlas sin red, sin almacenamiento y sin contar con el territorio.", "Seguir instalando renovables.", "Redes eléctricas y almacenamiento (baterías, bombeo) para no tirar la producción.", "Un sistema casi 100 % renovable con almacenamiento suficiente, autoconsumo y comunidades energéticas en cada pueblo.", "Planificar a la vez plantas, red y almacenamiento: zonas acordadas con los municipios donde el permiso es rápido, red construida antes de que haga falta y derecho de cada vecino a producir, compartir y guardar su energía."], it: "Renovables con red, almacén y vecinos primero", is: "renovables-con-red-almacen-y-vecinos",
         p: "Invertir en redes y almacenamiento al ritmo de las renovables, autoconsumo y comunidades energéticas con trámites mínimos, y planificar las plantas con los vecinos y el paisaje.", ya: ["psoe", "fa", "pnv", "erc", "bildu", "pp"] },
       { l: ["Reducir", "emisiones"], n: "Reducir emisiones", d: "Menos CO₂ en el transporte, la industria, las casas y el campo.",
-        niv: ["Cumplir los objetivos europeos de reducción de emisiones.", "Planes sector a sector con un presupuesto de carbono y seguimiento anual.", "Neutralidad climática antes de 2050 con un presupuesto de carbono público y vinculante, revisado por un comité científico independiente."],
+        niv: ["Negar el cambio climático, proponer salir de los acuerdos de clima, incumplir los objetivos europeos o no proponer nada.", "Cumplir los objetivos europeos de reducción de emisiones.", "Planes sector a sector con un presupuesto de carbono y seguimiento anual.", "Neutralidad climática antes de 2050 con un presupuesto de carbono público y vinculante, revisado por un comité científico independiente.", "Un presupuesto de carbono legal que se corrige solo: si un sector se pasa, el Gobierno debe aprobar medidas en un plazo fijo. Y un precio al carbono en todos los sectores cuya recaudación vuelve a los hogares a partes iguales."], it: "Presupuesto de carbono que se corrige solo", is: "presupuesto-de-carbono-que-se-corrige-solo",
         p: "Un presupuesto de carbono por sectores, publicado y vigilado por un comité científico independiente, con revisión anual en el Congreso.", ya: ["psoe", "fa", "pod", "erc", "bildu", "pnv"] }
     ],
     v: {
-      pp: [6, 8, 9, 8, 6, 5], psoe: [7, 6, 5, 6, 9, 9], vox: [5, 9, 9, 9, 2, 1],
-      fa: [9, 7, 2, 4, 10, 10], erc: [7, 6, 3, 5, 8, 8], junts: [6, 7, 7, 7, 7, 6],
-      bildu: [8, 7, 2, 4, 8, 9], pnv: [7, 6, 7, 7, 8, 7], pod: [9, 7, 1, 4, 9, 10]
+      pp: [1, 2, 2, 2, 1, 1], psoe: [2, 1, 1, 1, 2, 2], vox: [1, 2, 2, 2, 0, 0],
+      fa: [2, 2, 0, 1, 3, 3], erc: [2, 1, 0, 1, 2, 2], junts: [1, 2, 2, 2, 2, 1],
+      bildu: [2, 2, 0, 1, 2, 2], pnv: [2, 1, 2, 2, 2, 2], pod: [2, 2, 0, 1, 2, 3]
     },
     t: {
       pp: "Promete derogar el calendario de cierre nuclear en sus primeros cien días, bajar los impuestos de la energía y defender al campo; acepta los objetivos europeos de clima. Picos en suministro, precio y campo.",
@@ -3175,35 +3161,31 @@ const TEMAS = {
   ter: {
     n: "Territorio", c: "#8F9CF7", q: "¿Cómo convivimos las distintas partes de España?",
     cap: "Arriba frente a abajo: financiación transparente frente a autogobierno y competencias. En diagonal: lenguas y culturas propias frente a cooperación entre gobiernos, y cohesión frente a igualdad entre territorios.",
-    niv: [
-      "Que se cumplan la Constitución y los Estatutos y que cada administración pague a tiempo sus servicios.",
-      "Una financiación pactada y transparente, cooperación real entre gobiernos y respeto a la vez por las lenguas y por el mercado común.",
-      "Un modelo estable que equilibra autogobierno e igualdad: se sabe quién decide qué, cuánto se paga y cuánto se recibe, y las reglas no dependen de la aritmética de cada legislatura."
-    ],
+    niv: ["Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.", "Que se cumplan la Constitución y los Estatutos y que cada administración pague a tiempo sus servicios.", "Una financiación pactada y transparente, cooperación real entre gobiernos y respeto a la vez por las lenguas y por el mercado común.", "Un modelo estable que equilibra autogobierno e igualdad: se sabe quién decide qué, cuánto se paga y cuánto se recibe, y las reglas no dependen de la aritmética de cada legislatura.", "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."],
     ejes: [
       { l: ["Financiación", "transparente"], n: "Financiación transparente", d: "Cuánto recibe cada comunidad, y por qué.",
-        niv: ["Renovar el modelo de financiación, caducado desde 2014.", "Un modelo común con criterios públicos de población y de esfuerzo fiscal.", "Un modelo que cualquiera pueda calcular, con las balanzas fiscales publicadas y un límite pactado a las diferencias."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Renovar el modelo de financiación, caducado desde 2014.", "Un modelo común con criterios públicos de población y de esfuerzo fiscal.", "Un modelo que cualquiera pueda calcular, con las balanzas fiscales publicadas y un límite pactado a las diferencias.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Un modelo nuevo pactado en el Consejo de Política Fiscal y Financiera, con la fórmula y los datos publicados para que cualquiera compruebe cuánto aporta y recibe su comunidad.", ya: ["pp", "psoe", "erc", "junts", "pnv"] },
       { l: ["Lenguas y", "culturas"], n: "Lenguas y culturas propias", d: "El catalán, el euskera, el gallego y las demás lenguas y culturas.",
-        niv: ["Proteger las lenguas cooficiales en su territorio.", "Que el Estado las use y las promueva también en las instituciones comunes.", "Las lenguas oficiales como patrimonio de toda España, enseñadas y usadas sin que ninguna sea un arma contra otra."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Proteger las lenguas cooficiales en su territorio.", "Que el Estado las use y las promueva también en las instituciones comunes.", "Las lenguas oficiales como patrimonio de toda España, enseñadas y usadas sin que ninguna sea un arma contra otra.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Que las lenguas cooficiales se puedan usar en las instituciones comunes y estudiar como optativas en toda España, y que en cada comunidad nadie pierda el derecho a aprender y usar el castellano y la lengua propia.", ya: ["psoe", "erc", "junts", "bildu", "pnv", "fa"] },
       { l: ["Cohesión", "común"], n: "Cohesión: Constitución y mercado común", d: "Lo que es de todos: la ley común, el mercado único, la solidaridad.",
-        niv: ["Cumplir la Constitución y las sentencias.", "Unidad de mercado: que una empresa o un título valgan igual en toda España.", "Un Estado que todos los territorios sienten suyo, con reglas comunes que se viven como propias y no como impuestas."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Cumplir la Constitución y las sentencias.", "Unidad de mercado: que una empresa o un título valgan igual en toda España.", "Un Estado que todos los territorios sienten suyo, con reglas comunes que se viven como propias y no como impuestas.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Una ley de unidad de mercado que funcione, reconocimiento automático de títulos y licencias entre comunidades, y lealtad institucional con sentencias que se cumplen.", ya: ["pp", "vox", "psoe"] },
       { l: ["Autogobierno", "y competencias"], n: "Autogobierno y competencias", d: "Cuánto decide cada comunidad por sí misma.",
-        niv: ["Respetar las competencias de los Estatutos.", "Traspasar las competencias pendientes y reforzar la gestión propia de los impuestos.", "Un autogobierno pactado y estable: cada nivel con competencias claras e ingresos propios, sin invadirse."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Respetar las competencias de los Estatutos.", "Traspasar las competencias pendientes y reforzar la gestión propia de los impuestos.", "Un autogobierno pactado y estable: cada nivel con competencias claras e ingresos propios, sin invadirse.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Cerrar el mapa de competencias en una ley pactada, con los traspasos pendientes y un reparto claro de quién hace qué para que no se dupliquen gastos.", ya: ["pnv", "erc", "junts", "bildu", "psoe"] },
       { l: ["Cooperación", "y lealtad"], n: "Cooperación entre gobiernos", d: "Que el Estado y las comunidades trabajen juntos.",
-        niv: ["Reunir a menudo la Conferencia de Presidentes.", "Conferencias sectoriales con acuerdos vinculantes y un Senado territorial.", "Un modelo de cooperación con un Senado de las comunidades y lealtad en los dos sentidos."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Reunir a menudo la Conferencia de Presidentes.", "Conferencias sectoriales con acuerdos vinculantes y un Senado territorial.", "Un modelo de cooperación con un Senado de las comunidades y lealtad en los dos sentidos.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Reformar el Senado para que sea de verdad la cámara de las comunidades, conferencias sectoriales con acuerdos vinculantes y una Conferencia de Presidentes al menos dos veces al año.", ya: ["psoe", "fa", "pnv", "pp"] },
       { l: ["Igualdad entre", "territorios"], n: "Igualdad entre territorios", d: "Que vivir en una comunidad u otra no cambie tus derechos básicos.",
-        niv: ["Mínimos comunes en sanidad, educación y servicios sociales.", "Un fondo de nivelación que garantice un nivel parecido de servicios por habitante.", "Servicios equivalentes medidos y publicados por comunidad, con corrección cuando una se queda atrás."],
+        niv: ["No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.", "Mínimos comunes en sanidad, educación y servicios sociales.", "Un fondo de nivelación que garantice un nivel parecido de servicios por habitante.", "Servicios equivalentes medidos y publicados por comunidad, con corrección cuando una se queda atrás.", "El ideal de este aspecto está en preparación y se publicará en una próxima fase."],
         p: "Publicar cada año el gasto y los resultados por habitante en sanidad, educación y dependencia de cada comunidad, con un fondo de nivelación que corrija las diferencias.", ya: ["pp", "psoe", "vox", "fa"] }
     ],
     v: {
-      pp: [6, 4, 9, 3, 6, 9], psoe: [7, 7, 6, 7, 8, 7], vox: [3, 1, 10, 0, 3, 9],
-      fa: [7, 8, 4, 7, 8, 7], erc: [8, 10, 1, 10, 4, 3], junts: [7, 10, 1, 10, 3, 2],
-      bildu: [7, 10, 1, 10, 4, 3], pnv: [8, 9, 3, 10, 6, 4], pod: [6, 8, 3, 8, 6, 6]
+      pp: [1, 1, 2, 0, 1, 2], psoe: [2, 2, 1, 2, 2, 2], vox: [0, 0, 3, 0, 0, 2],
+      fa: [2, 2, 1, 2, 2, 2], erc: [2, 3, 0, 3, 1, 0], junts: [2, 3, 0, 3, 0, 0],
+      bildu: [2, 3, 0, 3, 1, 0], pnv: [2, 2, 0, 3, 1, 1], pod: [1, 2, 0, 2, 1, 1]
     },
     t: {
       pp: "Rechaza la financiación singular de Cataluña y la condonación de deuda, defiende un modelo de financiación común y la igualdad entre españoles, y quiere recuperar el delito de sedición. Picos en igualdad y cohesión; corta en autogobierno.",
@@ -3224,35 +3206,31 @@ const TEMAS = {
   der: {
     n: "Derechos", c: "#B9D45A", q: "¿Qué libertades protegemos, y cómo?",
     cap: "El dilema más duro está en la diagonal: protección de la vida frente a autonomía personal. Arriba frente a abajo: libertad de conciencia y de educación frente a libertad de expresión y de prensa. En diagonal también: familia y natalidad frente a igualdad y no discriminación.",
-    niv: [
-      "Que se cumplan los derechos que ya reconocen la Constitución y las leyes, sin discriminación.",
-      "Derechos que se pueden ejercer de verdad en todo el territorio, con apoyo a las familias y respeto a la conciencia de cada uno.",
-      "Libertades medidas y evaluadas —quién puede ejercer cada derecho en la práctica— y acuerdos amplios que no cambien con cada mayoría."
-    ],
+    niv: ["No proponer nada, o romper la base: imponer o perseguir creencias, castigar opiniones, incumplir las leyes vigentes o negar derechos a una parte de la población.", "Que se cumplan los derechos que ya reconocen la Constitución y las leyes, sin discriminación.", "Derechos que se pueden ejercer de verdad en todo el territorio, con apoyo a las familias y respeto a la conciencia de cada uno.", "Libertades medidas y evaluadas —quién puede ejercer cada derecho en la práctica— y acuerdos amplios que no cambien con cada mayoría.", "Libertades que se ejercen de verdad y en igualdad: apoyo real a quien decide en un sentido o en otro, conciencia respetada sin dejar a nadie sin servicio, datos públicos y pactos que no cambian con cada mayoría."],
     ejes: [
       { l: ["Libertad de", "conciencia"], n: "Libertad de conciencia y de educación", d: "Creencias, religión y la elección de la educación de los hijos.",
-        niv: ["Libertad religiosa y de culto dentro de la ley.", "Objeción de conciencia regulada y elección de centro educativo.", "Un Estado aconfesional que trata igual a todas las creencias y a quien no tiene ninguna, y respeta la conciencia sin dejar a nadie sin servicio."],
+        niv: ["No proponer nada, imponer o perseguir una creencia, o negar a los padres toda elección educativa y a los profesionales toda objeción.", "Libertad religiosa y de culto dentro de la ley.", "Objeción de conciencia regulada y elección de centro educativo.", "Un Estado aconfesional que trata igual a todas las creencias y a quien no tiene ninguna, y respeta la conciencia sin dejar a nadie sin servicio.", "Un solo marco para toda creencia y para quien no tiene ninguna: financiación solo por decisión del contribuyente, objeción personal con relevo garantizado y las mismas reglas para toda escuela pagada con dinero público."], it: "Estatuto común de la libertad de conciencia", is: "estatuto-comun-libertad-de-conciencia",
         p: "Acuerdos con todas las confesiones en pie de igualdad, objeción de conciencia regulada sin que nadie se quede sin servicio, y elección de centro dentro de la red pagada con dinero público.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Protección de", "la vida"], n: "Protección de la vida y apoyo a la maternidad", d: "Acompañar a la embarazada y a la persona enferma o dependiente para que ninguna decisión se tome por falta de ayuda.",
-        niv: ["Información y ayudas a la embarazada que quiera seguir adelante.", "Una red de apoyo a la maternidad y cuidados paliativos en toda España.", "Que nadie aborte ni pida la eutanasia por falta de recursos: apoyo económico, vivienda y cuidados garantizados."],
+        niv: ["No ofrecer ninguna ayuda a la embarazada ni a la persona enferma, o usar el apoyo para presionar, acosar o engañar a quien tiene que decidir.", "Información y ayudas a la embarazada que quiera seguir adelante.", "Una red de apoyo a la maternidad y cuidados paliativos en toda España.", "Que nadie aborte ni pida la eutanasia por falta de recursos: apoyo económico, vivienda y cuidados garantizados.", "Un derecho exigible al apoyo: toda embarazada y toda persona enferma o dependiente recibe en un plazo fijo ayuda económica, vivienda y cuidados, paliativos incluidos, antes de decidir y sin que nada la condicione."], it: "Derecho al apoyo antes de decidir", is: "derecho-al-apoyo-antes-de-decidir",
         p: "Una red de apoyo a la embarazada con ayuda económica y vivienda, y cuidados paliativos y a la dependencia garantizados, para que la decisión sea libre de verdad.", ya: ["pp", "vox", "junts", "pnv"] },
       { l: ["Familia y", "natalidad"], n: "Familia y natalidad", d: "Que quien quiera tener hijos pueda tenerlos.",
-        niv: ["Ayudas por hijo y permisos de nacimiento.", "Escuela infantil gratuita de 0 a 3 años, vivienda para familias jóvenes y una ayuda universal por crianza.", "Una política familiar estable, medida por la distancia entre los hijos que la gente quiere tener y los que tiene."],
+        niv: ["No proponer nada para quien quiere tener hijos, o dar las ayudas a unas familias y negarlas a otras por su forma, su origen o sus ideas.", "Ayudas por hijo y permisos de nacimiento.", "Escuela infantil gratuita de 0 a 3 años, vivienda para familias jóvenes y una ayuda universal por crianza.", "Una política familiar estable, medida por la distancia entre los hijos que la gente quiere tener y los que tiene.", "Prestación universal por hijo hasta los 18 años, plaza gratuita de escuela infantil garantizada al acabar el permiso y un pacto a 20 años con una sola meta: cerrar la distancia entre los hijos deseados y los que se tienen."], it: "Pacto de crianza a veinte años", is: "pacto-de-crianza-a-veinte-anos",
         p: "Una ayuda universal por crianza hasta la mayoría de edad, escuela infantil gratuita de 0 a 3 años y medir cada año la distancia entre los hijos deseados y los nacidos.", ya: ["pp", "vox", "psoe", "fa", "pnv", "junts"] },
       { l: ["Libertad de", "expresión"], n: "Libertad de expresión y de prensa", d: "Decir, publicar e informar sin miedo.",
-        niv: ["Proteger el periodismo y no perseguir opiniones.", "Revisar los delitos de opinión y repartir con transparencia la publicidad institucional.", "Medios públicos independientes del Gobierno, propiedad de los medios transparente y respuestas a la desinformación que no conviertan a ningún gobierno en árbitro de la verdad."],
+        niv: ["Pedir cárcel o cierre de medios por opiniones, señalar a periodistas o usar la publicidad institucional y los medios públicos como premio y castigo.", "Proteger el periodismo y no perseguir opiniones.", "Revisar los delitos de opinión y repartir con transparencia la publicidad institucional.", "Medios públicos independientes del Gobierno, propiedad de los medios transparente y respuestas a la desinformación que no conviertan a ningún gobierno en árbitro de la verdad.", "Ninguna pena de cárcel por opiniones que no inciten a la violencia, medios públicos dirigidos por concurso y sin mayoría de cargos políticos, publicidad institucional por reglas fijas y jueces, no gobiernos, ante los bulos."], it: "Palabra libre y medios sin dueño político", is: "palabra-libre-y-medios-sin-dueno-politico",
         p: "Revisar los delitos de opinión que ha cuestionado el Tribunal Europeo de Derechos Humanos, reparto transparente de la publicidad institucional y medios públicos dirigidos por mayorías amplias.", ya: ["fa", "pod", "erc", "bildu", "pp", "vox"] },
       { l: ["Autonomía", "personal"], n: "Autonomía personal: aborto y eutanasia", d: "Decidir sobre el propio cuerpo y sobre el final de la propia vida.",
-        niv: ["Mantener las leyes vigentes de aborto y eutanasia.", "Que se puedan ejercer en la sanidad pública de todas las comunidades, con la objeción de conciencia registrada.", "Acceso garantizado y evaluado en todo el territorio, junto con cuidados paliativos universales para que nadie elija por falta de alternativa."],
+        niv: ["Incumplir o bloquear desde un cargo público las leyes vigentes, o negar toda objeción de conciencia y castigar a quien no quiere participar.", "Mantener las leyes vigentes de aborto y eutanasia.", "Que se puedan ejercer en la sanidad pública de todas las comunidades, con la objeción de conciencia registrada.", "Acceso garantizado y evaluado en todo el territorio, junto con cuidados paliativos universales para que nadie elija por falta de alternativa.", "Mientras la ley las reconozca, estas prestaciones se dan en la sanidad pública de cada provincia y en plazo, con la objeción personal respetada, apoyo y paliativos ofrecidos antes y una evaluación pública cada año."], it: "Decisión libre con garantías para todos", is: "decision-libre-con-garantias-para-todos",
         p: "Garantizar el acceso en la sanidad pública de cada provincia con un registro de objetores que no lo bloquee, y cuidados paliativos universales para que la eutanasia nunca sea la única salida.", ya: ["psoe", "fa", "pod", "erc", "bildu", "pnv"] },
       { l: ["Igualdad y no", "discriminación"], n: "Igualdad y no discriminación", d: "Mujeres y hombres, personas LGTBI, origen, discapacidad.",
-        niv: ["Cumplir las leyes de igualdad y perseguir los delitos de odio.", "Brecha salarial medida por empresa, protección frente a la violencia machista y accesibilidad universal.", "Igualdad real medida con datos públicos, y leyes evaluadas y corregidas cuando producen efectos no buscados."],
+        niv: ["Negar la discriminación o la violencia contra las mujeres, justificar el odio, o saltarse la presunción de inocencia en nombre de la igualdad.", "Cumplir las leyes de igualdad y perseguir los delitos de odio.", "Brecha salarial medida por empresa, protección frente a la violencia machista y accesibilidad universal.", "Igualdad real medida con datos públicos, y leyes evaluadas y corregidas cuando producen efectos no buscados.", "Igualdad que se mide y se corrige: brecha salarial pública empresa a empresa, una autoridad independiente para cualquier persona discriminada, accesibilidad exigible y cada ley de igualdad evaluada a los dos años."], it: "Igualdad medida y corregida con datos", is: "igualdad-medida-y-corregida-con-datos",
         p: "Datos públicos de brecha salarial por empresa, un pacto de Estado contra la violencia de género renovado con todos, y evaluar cada ley de igualdad a los dos años para corregir lo que no funcione.", ya: ["psoe", "fa", "pod", "pp", "erc", "bildu", "pnv"] }
     ],
     v: {
-      pp: [8, 7, 8, 6, 4, 6], psoe: [5, 4, 6, 6, 9, 9], vox: [9, 10, 9, 7, 0, 2],
-      fa: [4, 2, 6, 8, 10, 10], erc: [4, 3, 5, 8, 9, 9], junts: [7, 6, 7, 6, 6, 6],
-      bildu: [3, 2, 5, 8, 9, 9], pnv: [7, 6, 7, 6, 7, 7], pod: [3, 1, 5, 7, 10, 10]
+      pp: [2, 2, 2, 1, 1, 1], psoe: [1, 1, 1, 1, 2, 2], vox: [2, 3, 2, 2, 0, 0],
+      fa: [1, 0, 1, 2, 3, 3], erc: [1, 0, 1, 2, 2, 2], junts: [2, 1, 2, 1, 1, 1],
+      bildu: [0, 0, 1, 2, 2, 2], pnv: [2, 1, 2, 1, 2, 2], pod: [0, 0, 1, 2, 3, 3]
     },
     t: {
       pp: "Acepta la ley de plazos del aborto, recurrió la ley de eutanasia ante el Constitucional, propone una ley de cuidados paliativos y defiende la libertad de elección educativa y la natalidad. Fuerte en familia y conciencia; media en autonomía personal.",
@@ -3273,35 +3251,31 @@ const TEMAS = {
   ins: {
     n: "Instituciones", c: "#4FC9C9", q: "¿Funcionan los contrapesos del poder?",
     cap: "Arriba frente a abajo: igualdad ante la ley frente a independencia judicial. En diagonal: justicia rápida y con medios frente a transparencia y lucha contra la corrupción, y convivencia y medidas de gracia frente a participación y calidad democrática.",
-    niv: [
-      "Que se cumplan las leyes y las sentencias, y que los órganos constitucionales se renueven a tiempo.",
-      "Jueces elegidos sin depender de los partidos, justicia en plazos razonables y corrupción perseguida con medios.",
-      "Instituciones que se ganan la confianza de todos: renovadas por mayorías amplias, justicia rápida y transparente, y contrapesos que no cambian con cada mayoría."
-    ],
+    niv: ["No proponer nada sobre los contrapesos, o justificar que se incumplan leyes y sentencias, se perdone a los afines o se señale a jueces por sus resoluciones.", "Que se cumplan las leyes y las sentencias, y que los órganos constitucionales se renueven a tiempo.", "Jueces elegidos sin depender de los partidos, justicia en plazos razonables y corrupción perseguida con medios.", "Instituciones que se ganan la confianza de todos: renovadas por mayorías amplias, justicia rápida y transparente, y contrapesos que no cambian con cada mayoría.", "Contrapesos que no dependen de quién gobierne: jueces elegidos por jueces, justicia con plazos garantizados, perdón sin autoindulto, cada contacto con el poder publicado y ciudadanos por sorteo con voz reglada."],
     ejes: [
       { l: ["Igualdad ante", "la ley"], n: "Igualdad ante la ley", d: "Las mismas reglas y las mismas penas para todos, también para los políticos.",
-        niv: ["Que las condenas se cumplan.", "Indultos motivados y públicos, que no beneficien a quien gobierna o lo sostiene.", "Ningún indulto ni amnistía por corrupción, y toda medida de gracia avalada por un órgano independiente."],
+        niv: ["No proponer nada, o justificar delitos o el incumplimiento de sentencias cuando el condenado es de los propios, sea del lado que sea.", "Que las condenas se cumplan.", "Indultos motivados y públicos, que no beneficien a quien gobierna o lo sostiene.", "Ningún indulto ni amnistía por corrupción, y toda medida de gracia avalada por un órgano independiente.", "Las mismas reglas para todos: fuero especial solo por actos del cargo, indultos solo con informe favorable de un órgano independiente y nunca por corrupción, y gracia colectiva solo por dos tercios."], it: "Ley igual para todos: sin fueros y sin autoindulto", is: "ley-igual-sin-aforamientos-ni-autoindulto",
         p: "Una nueva Ley del Indulto que obligue a motivar cada indulto y prohíba indultar la corrupción, y que cualquier medida de gracia colectiva necesite una mayoría reforzada.", ya: ["pp", "vox"] },
       { l: ["Justicia", "rápida"], n: "Justicia rápida y con medios", d: "Que un juicio no dure años.",
-        niv: ["Cubrir las plazas vacantes de jueces y funcionarios.", "Tribunales de instancia, expediente digital y mediación antes del juicio.", "Plazos máximos garantizados por tipo de procedimiento, datos públicos por juzgado y jueces por habitante en la media europea."],
+        niv: ["No proponer nada sobre los retrasos, o defender que, como la justicia es lenta, es legítimo saltársela o tomársela por la mano.", "Cubrir las plazas vacantes de jueces y funcionarios.", "Tribunales de instancia, expediente digital y mediación antes del juicio.", "Plazos máximos garantizados por tipo de procedimiento, datos públicos por juzgado y jueces por habitante en la media europea.", "Un plazo máximo legal por tipo de pleito con consecuencias si se incumple: refuerzo automático del juzgado y compensación al ciudadano. Plantilla de jueces ligada por ley a la mediana europea y a la carga de trabajo."], it: "Justicia con plazo garantizado y compensación", is: "justicia-con-plazo-garantizado-y-compensacion",
         p: "Más jueces hasta acercarse a la media europea por habitante, expediente digital en todos los juzgados, mediación antes de pleitear y datos públicos de duración por juzgado.", ya: ["psoe", "pp", "pnv", "junts"] },
       { l: ["Medidas", "de gracia"], n: "Convivencia y medidas de gracia", d: "Usar el perdón para cerrar conflictos políticos.",
-        niv: ["Indultos individuales motivados.", "Medidas de gracia ligadas a un compromiso de respetar la ley.", "Una reconciliación con verdad y reparación a las víctimas, pactada por mayorías amplias para que no sea de un solo bando."],
+        niv: ["No proponer nada, o justificar los delitos cometidos por una causa política propia y negar las sentencias, valga para la causa que valga.", "Indultos individuales motivados.", "Medidas de gracia ligadas a un compromiso de respetar la ley.", "Una reconciliación con verdad y reparación a las víctimas, pactada por mayorías amplias para que no sea de un solo bando.", "Un marco estable para cerrar conflictos: gracia solo por dos tercios y sin urgencia, condicionada a verdad, reparación a las víctimas y compromiso de actuar dentro de la ley, aplicada por jueces y revocable si se incumple."], it: "Reconciliación con reglas: verdad, reparación y pacto", is: "reconciliacion-con-verdad-reparacion-y-dos-tercios",
         p: "Que cualquier medida de gracia por un conflicto político se apruebe por mayoría reforzada, con reconocimiento a las víctimas y compromiso público de actuar dentro de la ley.", ya: ["psoe", "erc", "junts", "bildu", "pnv", "pod", "fa"] },
       { l: ["Independencia", "judicial"], n: "Independencia judicial", d: "Cómo se eligen los jueces que gobiernan la justicia.",
-        niv: ["Renovar a tiempo el Consejo General del Poder Judicial.", "Que los jueces elijan a parte de sus vocales, como recomienda la Comisión Europea.", "Un sistema de elección de jueces y fiscales que no dependa de ninguna mayoría, con una Fiscalía autónoma del Gobierno."],
+        niv: ["No proponer nada, o defender que el Gobierno o la mayoría controlen a jueces y fiscales, o señalar a jueces por sus sentencias.", "Renovar a tiempo el Consejo General del Poder Judicial.", "Que los jueces elijan a parte de sus vocales, como recomienda la Comisión Europea.", "Un sistema de elección de jueces y fiscales que no dependa de ninguna mayoría, con una Fiscalía autónoma del Gobierno.", "Vocales judiciales del CGPJ elegidos por todos los jueces con un voto que asegure pluralidad; vocales juristas por mayoría reforzada y sorteo si hay bloqueo; Fiscal General con mandato único, largo y sin órdenes del Gobierno."], it: "Un poder judicial que no depende de ninguna mayoría", is: "jueces-elegidos-por-jueces-y-fiscalia-autonoma",
         p: "Que los jueces elijan a la mayoría de los vocales judiciales del CGPJ, como recomienda la Comisión Europea, y una Fiscalía General con mandato largo, no renovable y separado del del Gobierno.", ya: ["pp", "vox"] },
       { l: ["Transparencia", "y corrupción"], n: "Transparencia y lucha contra la corrupción", d: "Saber quién influye en las leyes y perseguir a quien roba.",
-        niv: ["Perseguir la corrupción en los tribunales.", "Registro obligatorio de lobbies, agendas públicas y protección de quien denuncia.", "Una autoridad anticorrupción independiente con poder de investigar, y la huella de quién influyó en cada ley publicada."],
+        niv: ["No proponer nada, o restar importancia a la corrupción de los propios, atacar a quien la investiga o defender la opacidad de reuniones y cuentas.", "Perseguir la corrupción en los tribunales.", "Registro obligatorio de lobbies, agendas públicas y protección de quien denuncia.", "Una autoridad anticorrupción independiente con poder de investigar, y la huella de quién influyó en cada ley publicada.", "Todo contacto para influir en una norma, un contrato o una subvención queda publicado junto a la decisión; una autoridad independiente, con presupuesto propio, investiga y sanciona; quien denuncia queda protegido y resarcido."], it: "Poder a la vista: huella pública y autoridad propia", is: "huella-publica-y-autoridad-anticorrupcion-independiente",
         p: "Un registro obligatorio de grupos de interés con la huella de quién influyó en cada ley, una autoridad independiente contra la corrupción y protección real de quien denuncia.", ya: ["pp", "psoe", "fa", "pod", "pnv"] },
       { l: ["Participación", "ciudadana"], n: "Participación y calidad democrática", d: "Ley electoral, consultas y la voz de la ciudadanía entre elecciones.",
-        niv: ["Elecciones limpias y debates electorales garantizados.", "Iniciativas legislativas populares más fáciles y listas más abiertas.", "Una reforma electoral pactada por todos, consultas regladas y asambleas de ciudadanos elegidos por sorteo para los grandes temas."],
+        niv: ["No proponer nada, o poner en duda sin pruebas la limpieza de las elecciones, o defender saltarse las instituciones representativas.", "Elecciones limpias y debates electorales garantizados.", "Iniciativas legislativas populares más fáciles y listas más abiertas.", "Una reforma electoral pactada por todos, consultas regladas y asambleas de ciudadanos elegidos por sorteo para los grandes temas.", "Una asamblea ciudadana permanente por sorteo que fija temas y obliga al Congreso a responder y votar; iniciativas populares con debate garantizado; listas desbloqueadas y una ley electoral que solo cambia por consenso amplio."], it: "Democracia de tres voces: urna, sorteo y firma", is: "asamblea-ciudadana-permanente-e-iniciativa-con-voto",
         p: "Menos firmas para una iniciativa legislativa popular, listas desbloqueadas y asambleas ciudadanas por sorteo cuyas conclusiones se debatan y voten en el Congreso.", ya: ["fa", "pod", "erc", "bildu", "psoe"] }
     ],
     v: {
-      pp: [9, 7, 2, 9, 8, 4], psoe: [4, 7, 9, 5, 7, 6], vox: [10, 5, 0, 8, 7, 4],
-      fa: [5, 6, 8, 6, 8, 9], erc: [3, 5, 10, 5, 6, 8], junts: [2, 5, 10, 4, 5, 6],
-      bildu: [3, 5, 10, 4, 6, 8], pnv: [5, 7, 8, 6, 7, 6], pod: [5, 5, 8, 5, 8, 9]
+      pp: [2, 2, 0, 2, 2, 1], psoe: [1, 2, 2, 1, 2, 1], vox: [3, 1, 0, 2, 2, 1],
+      fa: [1, 1, 2, 1, 2, 2], erc: [0, 1, 3, 1, 1, 2], junts: [0, 1, 3, 1, 1, 1],
+      bildu: [0, 1, 3, 1, 1, 2], pnv: [1, 2, 2, 1, 2, 1], pod: [1, 1, 2, 1, 2, 2]
     },
     t: {
       pp: "Su programa del 29-N: derogar la ley de amnistía, recuperar el delito de sedición y las penas de malversación, una nueva Ley del Indulto, un registro de lobbies y que los jueces elijan el CGPJ. Picos en igualdad ante la ley e independencia; casi nada en medidas de gracia.",
@@ -3322,35 +3296,31 @@ const TEMAS = {
   ext: {
     n: "Exterior", c: "#A8B4C8", q: "¿Qué papel queremos tener en el mundo?",
     cap: "Arriba frente a abajo: comercio, industria e influencia frente a Unión Europea. En diagonal: defensa y seguridad frente a paz, diplomacia y desarme, y soberanía e intereses nacionales frente a cooperación y derechos humanos.",
-    niv: [
-      "Cumplir los compromisos internacionales firmados y proteger a los españoles en el exterior.",
-      "Una política exterior con objetivos claros, pactada con la oposición, que combina seguridad, Europa y derechos humanos.",
-      "Una política de Estado estable: defensa suficiente y europea, diplomacia activa por la paz y coherencia entre lo que se defiende y lo que se vende."
-    ],
+    niv: ["No tener política exterior, o proponer incumplir los tratados firmados, justificar agresiones o abusos según el bando, o desentenderse de los españoles en el exterior.", "Cumplir los compromisos internacionales firmados y proteger a los españoles en el exterior.", "Una política exterior con objetivos claros, pactada con la oposición, que combina seguridad, Europa y derechos humanos.", "Una política de Estado estable: defensa suficiente y europea, diplomacia activa por la paz y coherencia entre lo que se defiende y lo que se vende.", "Una política exterior de Estado, votada en el Congreso, que defiende lo propio dentro de la ley, decide más con Europa, sostiene una defensa suficiente y es coherente entre lo que vende, lo que ayuda y lo que defiende."],
     ejes: [
       { l: ["Comercio e", "influencia"], n: "Comercio, industria e influencia", d: "Abrir mercados y que las empresas españolas compitan fuera.",
-        niv: ["Apoyar a las empresas que exportan.", "Acuerdos comerciales con cláusulas sociales y ambientales, e industria tecnológica y de defensa propia.", "Un país con peso en Europa, Iberoamérica y el Mediterráneo, que use su fuerza económica y cultural con coherencia."],
+        niv: ["No proponer nada sobre comercio exterior, o plantear cerrar el país al comercio o incumplir los acuerdos y normas comerciales ya firmados.", "Apoyar a las empresas que exportan.", "Acuerdos comerciales con cláusulas sociales y ambientales, e industria tecnológica y de defensa propia.", "Un país con peso en Europa, Iberoamérica y el Mediterráneo, que use su fuerza económica y cultural con coherencia.", "Abrir mercados con acuerdos cuyas normas laborales, ambientales y sanitarias se puedan exigir con sanción, iguales para lo importado y lo producido aquí, y una estrategia de influencia económica y cultural votada en el Congreso."], it: "Comercio abierto con reglas iguales y exigibles", is: "comercio-abierto-con-reglas-iguales-y-exigibles",
         p: "Acuerdos comerciales con cláusulas de reciprocidad para el campo, apoyo a la industria tecnológica y de defensa europea, y el español como activo de influencia en el mundo.", ya: ["pp", "psoe", "junts", "pnv", "vox"] },
       { l: ["Defensa y", "seguridad"], n: "Defensa y seguridad", d: "Fuerzas armadas, gasto en defensa y compromisos con los aliados.",
-        niv: ["Unas fuerzas armadas preparadas que cumplen sus misiones.", "Una ley de programación del gasto en defensa a varios años, debatida en el Congreso.", "Una defensa suficiente y europea, con industria propia, gasto pactado a largo plazo y control parlamentario."],
+        niv: ["No proponer nada sobre defensa, o plantear desmantelar las fuerzas armadas, incumplir lo firmado con los aliados o usarlas al margen de la ley.", "Unas fuerzas armadas preparadas que cumplen sus misiones.", "Una ley de programación del gasto en defensa a varios años, debatida en el Congreso.", "Una defensa suficiente y europea, con industria propia, gasto pactado a largo plazo y control parlamentario.", "Una ley de defensa a diez años aprobada por mayoría reforzada, con el gasto ligado a capacidades comprobables y no solo a un porcentaje, compra conjunta europea por defecto y voto del Congreso para cada gran contrato."], it: "Defensa pactada a diez años y ligada a capacidades", is: "defensa-pactada-a-diez-anos-ligada-a-capacidades",
         p: "Una ley de programación de la defensa a diez años aprobada por mayoría amplia, con el gasto ligado a capacidades concretas y a la defensa europea común, y control parlamentario de cada gran compra.", ya: ["pp", "psoe", "vox", "pnv", "junts"] },
       { l: ["Soberanía", "nacional"], n: "Soberanía e intereses nacionales", d: "Defender lo propio: fronteras, Ceuta y Melilla, Gibraltar, pesca y campo.",
-        niv: ["Defender la integridad del territorio y los intereses de los sectores españoles.", "Una política con Marruecos, Gibraltar y el Sáhara pactada y explicada en el Congreso.", "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes partidos, que no cambie con cada gobierno."],
+        niv: ["Renunciar a defender el territorio y los intereses del país, o defenderlos saltándose el derecho internacional, los tratados firmados o el Parlamento.", "Defender la integridad del territorio y los intereses de los sectores españoles.", "Una política con Marruecos, Gibraltar y el Sáhara pactada y explicada en el Congreso.", "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes partidos, que no cambie con cada gobierno.", "Una estrategia de intereses permanentes votada por mayoría reforzada en el Congreso, que ningún gobierno cambie sin consulta previa a una comisión de todos los grupos y sin debate y voto, siempre dentro del derecho internacional."], it: "Intereses permanentes votados, sin giros por sorpresa", is: "intereses-permanentes-votados-sin-giros-por-sorpresa",
         p: "Una estrategia exterior pactada en el Congreso que fije los intereses permanentes —Ceuta y Melilla, Gibraltar, el Mediterráneo, Iberoamérica— y que cualquier giro, como el del Sáhara en 2022, pase antes por el Parlamento.", ya: ["pp", "vox", "pod", "fa"] },
       { l: ["Unión", "Europea"], n: "Unión Europea", d: "Cuánto decidimos juntos en Europa.",
-        niv: ["Cumplir las normas europeas y usar bien los fondos.", "Más integración en energía, defensa y migración.", "Una Europa con presupuesto propio, política exterior común y decisiones por mayoría."],
+        niv: ["No proponer nada sobre Europa, o plantear desobedecer las normas y sentencias europeas mientras se siguen recibiendo sus fondos.", "Cumplir las normas europeas y usar bien los fondos.", "Más integración en energía, defensa y migración.", "Una Europa con presupuesto propio, política exterior común y decisiones por mayoría.", "Promover que la UE decida su política exterior por mayoría cualificada con freno de emergencia, tenga recursos propios y deuda común para bienes comunes, y que el Congreso fije y controle la posición española."], it: "Una Europa que decide por mayoría y rinde cuentas", is: "europa-que-decide-por-mayoria-y-rinde-cuentas",
         p: "Impulsar en Europa la defensa común, un presupuesto europeo mayor y que la política exterior se decida por mayoría cualificada en lugar de por unanimidad.", ya: ["psoe", "pp", "pnv", "fa", "junts", "erc"] },
       { l: ["Paz y", "diplomacia"], n: "Paz, diplomacia y desarme", d: "Resolver los conflictos hablando antes que con las armas.",
-        niv: ["Apoyar las resoluciones de Naciones Unidas.", "Mediación activa en conflictos y control estricto de la venta de armas.", "Una diplomacia de paz con medios, que medie en conflictos y reduzca las armas en el mundo sin dejar indefenso a nadie."],
+        niv: ["No proponer nada sobre paz, o justificar guerras de agresión, ignorar las resoluciones de la ONU o vender armas sin ningún control.", "Apoyar las resoluciones de Naciones Unidas.", "Mediación activa en conflictos y control estricto de la venta de armas.", "Una diplomacia de paz con medios, que medie en conflictos y reduzca las armas en el mundo sin dejar indefenso a nadie.", "Un servicio de mediación permanente con presupuesto estable y respaldo de todos los grupos, licencias de armas publicadas una a una y denegadas ante riesgo grave, y cumplimiento sin excepciones de la justicia internacional."], it: "Diplomacia de paz profesional y armas bajo control", is: "diplomacia-de-paz-profesional-y-armas-bajo-control",
         p: "Un cuerpo de mediación con medios propios, control estricto y público de la venta de armas a países en guerra y apoyo a la Corte Penal Internacional.", ya: ["fa", "pod", "psoe", "bildu", "erc"] },
       { l: ["Cooperación", "y derechos"], n: "Cooperación y derechos humanos", d: "Ayuda al desarrollo y defensa de los derechos en el mundo.",
-        niv: ["Ayuda humanitaria en las emergencias.", "Ayuda al desarrollo camino del 0,7 % de la renta, como marca la ley de 2023.", "Una política exterior que condiciona comercio y alianzas al respeto de los derechos humanos, con criterios públicos."],
+        niv: ["No proponer nada, o negar la ayuda incluso en las emergencias y justificar violaciones de derechos humanos según quién las cometa.", "Ayuda humanitaria en las emergencias.", "Ayuda al desarrollo camino del 0,7 % de la renta, como marca la ley de 2023.", "Una política exterior que condiciona comercio y alianzas al respeto de los derechos humanos, con criterios públicos.", "Llegar al 0,7 % de la renta nacional con una senda anual obligatoria, medir la ayuda por sus resultados y aplicar los mismos criterios públicos de derechos humanos a todos los países en comercio, alianzas y venta de armas."], it: "Ayuda del 0,7 % garantizada y coherencia auditada", is: "ayuda-del-07-garantizada-y-coherencia-auditada",
         p: "Cumplir la ley de cooperación de 2023 —el 0,7 % de la renta nacional en 2030— y publicar cada año un informe de coherencia entre la ayuda, el comercio y la venta de armas.", ya: ["psoe", "fa", "pod", "erc", "bildu", "pnv"] }
     ],
     v: {
-      pp: [8, 9, 8, 8, 4, 5], psoe: [7, 6, 5, 9, 7, 8], vox: [6, 8, 10, 2, 3, 2],
-      fa: [4, 3, 6, 7, 9, 9], erc: [5, 4, 3, 7, 8, 8], junts: [7, 6, 4, 7, 6, 6],
-      bildu: [3, 2, 4, 5, 9, 9], pnv: [7, 7, 4, 9, 6, 7], pod: [2, 1, 6, 4, 10, 9]
+      pp: [2, 2, 2, 2, 1, 1], psoe: [2, 1, 1, 2, 2, 2], vox: [1, 2, 3, 0, 0, 0],
+      fa: [1, 0, 1, 2, 2, 2], erc: [1, 1, 0, 2, 2, 2], junts: [2, 1, 1, 2, 1, 1],
+      bildu: [0, 0, 1, 1, 2, 2], pnv: [2, 2, 1, 2, 1, 2], pod: [0, 0, 1, 1, 3, 2]
     },
     t: {
       pp: "Una ley de programación de la defensa, cumplir con la OTAN y críticas al giro sobre el Sáhara. Fuerte en defensa, Europa, soberanía y comercio.",
@@ -3392,30 +3362,40 @@ const ILUS = {
   const CX = 410, CY = 372, VW = 820, VH = 740;
   // R and K change on narrow screens: a smaller circle leaves room for bigger labels (K = text scale)
   let R = 226, K = 1;
-  // Tres círculos: lo básico, lo intermedio y lo avanzado (el círculo ideal), a un tercio, dos tercios y el borde
-  const NIV = ["Lo básico", "Lo intermedio", "Lo avanzado"];
-  // Nombres de las tres tarjetas bajo la figura (las medidas, no los círculos)
-  const NIV_TITULO = ["Medidas básicas", "Medidas intermedias", "Medidas avanzadas"];
-  const UMBRAL = [10 / 3, 20 / 3, 10];
-  const ORO = "#F6BE3B";
-  const alcanza = (x, k) => x >= UMBRAL[k] - 0.01;
-  const nivelDe = (x) => (alcanza(x, 2) ? 3 : alcanza(x, 1) ? 2 : alcanza(x, 0) ? 1 : 0);
-  const palabraNivel = (v) => (v >= 10 ? "avanzado" : v >= 7 ? "intermedio" : v >= 4 ? "básico" : "no llega a lo básico");
+  // CINCO NIVELES (2026-11-25, Eugenio: «que los puntitos coincidan con… antisistema, básico, intermedio, avanzado» y
+  // «un quinto nivel… ideal»). El valor de cada aspecto ES su nivel: 0 Antisistema (por debajo de lo básico: no proponer
+  // nada o romper la base), 1 Básico, 2 Intermedio, 3 Avanzado y 4 Ideal. Cinco círculos, a R/5 uno de otro; el de fuera,
+  // dorado, es el ideal. `niv` (del tema y de cada aspecto) lleva los cinco textos en ese orden.
+  // Antes la escala iba de 0 a 10 con tres círculos; las notas se pasaron con sus mismos umbrales (ver memory/03_DECISIONS.md).
+  const NIV = ["Antisistema", "Lo básico", "Lo intermedio", "Lo avanzado", "El ideal"];
+  // Nombres de las tarjetas bajo la figura (las medidas, no los círculos)
+  const NIV_TITULO = ["Antisistema", "Medidas básicas", "Medidas intermedias", "Medidas avanzadas", "Medidas ideales"];
+  const NIVEL_CORTO = ["Antisistema", "Básico", "Intermedio", "Avanzado", "Ideal"];
+  const NMAX = 4;
+  const UMBRAL = [0, 1, 2, 3, 4];
+  const ORO = "#F6BE3B", ROJO = "#E5484D";
+  const alcanza = (x, k) => x >= k - 0.01;
+  const nivelDe = (x) => Math.max(0, Math.min(NMAX, Math.floor(x + 0.01)));
+  const palabraNivel = (v) => NIVEL_CORTO[nivelDe(v)].toLowerCase();
+  // El sitio del radio que ocupa cada nivel, en la escala de 0 a 10 con la que se dibuja: 2, 4, 6, 8 y 10
+  const dec = (x) => (x + 1) * 2;
+  // La ficha del ideal de un aspecto: una página propia con el nombre de la propuesta (public/ideal/, scripts/geometria-ideal.mjs)
+  const enlaceIdeal = (e) => (e.is ? `<a class="geo-ideal-mas" href="/ideal/${e.is}/" target="_top">Más: ${e.it} →</a>` : "");
   const PALABRA = { 6: "seis", 8: "ocho" };
   // Readable names for the address bar (?tema=vivienda); the short keys are accepted too
   const SLUG = { inm: "inmigracion", ser: "servicios", eco: "economia", tra: "trabajo", viv: "vivienda", amb: "clima", ter: "territorio", der: "derechos", ins: "instituciones", ext: "exterior" };
   const DE_SLUG = Object.fromEntries(Object.entries(SLUG).map(([k, v]) => [v, k]));
   const ang = (i, n) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const P = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
-  const rr = (s) => (R * s) / 10;
+  const rr = (s) => (R * dec(s)) / 10;
   const clamp = (x) => Math.min(1, Math.max(0, x));
   // Cuánto se integran dos aspectos vecinos: 1 si los dos están bien cuidados y parejos (borde curvo).
-  const integ = (a, b) => clamp((Math.min(a, b) - 4) / 5) * clamp(1 - Math.abs(a - b) / 5);
+  const integ = (a, b) => { const x = dec(a), y = dec(b); return clamp((Math.min(x, y) - 4) / 5) * clamp(1 - Math.abs(x - y) / 5); };
   function geom(s, cx, cy, rad) {
     const n = s.length, step = (2 * Math.PI) / n, out = [];
     const Q = (a, r) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
     for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n, a0 = ang(i, n), r0 = (rad * s[i]) / 10, r1v = (rad * s[j]) / 10, k = integ(s[i], s[j]);
+      const j = (i + 1) % n, a0 = ang(i, n), r0 = (rad * dec(s[i])) / 10, r1v = (rad * dec(s[j])) / 10, k = integ(s[i], s[j]);
       const A = Q(a0, r0), B = Q(a0 + step, r1v);
       for (let t = 0; t < 16; t++) {
         const u = t / 16, E = Q(a0 + u * step, r0 + (r1v - r0) * u);
@@ -3443,13 +3423,15 @@ const ILUS = {
   if (!recargada && q.get("p") != null) st.sel = new Set(q.get("p").split(",").filter((k) => PMAP[k]));
   if (!recargada && PMAP[q.get("foco")]) { st.foco = q.get("foco"); st.sel.add(st.foco); }
   const T = () => TEMAS[st.tema];
-  const colorNivel = (k) => (k === 2 ? ORO : T().c);
+  const colorNivel = (k) => (k === NMAX ? ORO : k === 0 ? ROJO : T().c);
   const etiquetas = (arr) => arr.map((p) => `<span class="geo-tag" style="--pc:${p.c}">${p.n}</span>`).join("");
 
   /* ---- Tu figura: solo en este navegador ---- */
   // Tu figura guardada. Versión 2 (2026-11-19): los aspectos cambiaron de posición. ORDEN_ANTERIOR[k][p] es el índice
   // ANTIGUO del aspecto que hoy está en la posición p del tema k; la misma tabla está en public/geometria-figura/comun.js.
-  const LS = "politica.geo.tu.v2";
+  // Versión 3 (2026-11-25): cada valor es un nivel de 0 a 4. La versión 2 guardaba cifras de 0 a 10.
+  const LS = "politica.geo.tu.v3";
+  const LS_V2 = "politica.geo.tu.v2";
   const LS_V1 = "politica.geo.tu.v1";
   const ORDEN_ANTERIOR = {
     inm: [1, 0, 7, 6, 3, 5, 4, 2],
@@ -3466,25 +3448,38 @@ const ILUS = {
   // Convierte la figura guardada con el orden antiguo. Lo que no encaja se ignora (como antes con `valida`).
   function migrarTu() {
     try {
-      if (localStorage.getItem(LS)) return;
+      if (localStorage.getItem(LS) || localStorage.getItem(LS_V2)) return;
       const viejo = JSON.parse(localStorage.getItem(LS_V1) || "null");
       if (!viejo || typeof viejo !== "object") return;
       const nuevo = {};
       for (const k of Object.keys(viejo)) {
         if (ORDEN_ANTERIOR[k] && Array.isArray(viejo[k]) && viejo[k].length === ORDEN_ANTERIOR[k].length) nuevo[k] = ORDEN_ANTERIOR[k].map((o) => viejo[k][o]);
       }
-      localStorage.setItem(LS, JSON.stringify(nuevo));
+      localStorage.setItem(LS_V2, JSON.stringify(nuevo));
       localStorage.removeItem(LS_V1);
     } catch (e) { /* sin almacenamiento: se empieza de cero */ }
   }
   migrarTu();
+  // De la escala de 0 a 10 a los cinco niveles, con los umbrales de entonces: hasta 3, antisistema; 4 a 6, básico; 7 a 9, intermedio; 10, avanzado
+  function migrarNiveles() {
+    try {
+      if (localStorage.getItem(LS)) return;
+      const viejo = JSON.parse(localStorage.getItem(LS_V2) || "null");
+      if (!viejo || typeof viejo !== "object") return;
+      const nuevo = {};
+      for (const k of Object.keys(viejo)) if (Array.isArray(viejo[k])) nuevo[k] = viejo[k].map((x) => (x >= 10 ? 3 : x >= 7 ? 2 : x >= 4 ? 1 : 0));
+      localStorage.setItem(LS, JSON.stringify(nuevo));
+      localStorage.removeItem(LS_V2);
+    } catch (e) { /* sin almacenamiento: se empieza de cero */ }
+  }
+  migrarNiveles();
   let tu = {};
   try { const x = JSON.parse(localStorage.getItem(LS) || "{}"); if (x && typeof x === "object") tu = x; } catch (e) { /* sin almacenamiento */ }
   // A figure saved for a topic whose number of axes later changed is ignored, not misread
-  const valida = (k) => Array.isArray(tu[k]) && TEMAS[k] && tu[k].length === TEMAS[k].ejes.length;
+  const valida = (k) => Array.isArray(tu[k]) && TEMAS[k] && tu[k].length === TEMAS[k].ejes.length && tu[k].every((x) => Number.isInteger(x) && x >= 0 && x <= NMAX);
   const guardarTu = () => { try { localStorage.setItem(LS, JSON.stringify(tu)); } catch (e) { /* sin almacenamiento */ } };
-  const miFigura = () => (valida(st.tema) ? tu[st.tema] : T().ejes.map(() => 5));
-  const parecido = (a, b) => Math.round(100 - (a.reduce((d, x, i) => d + Math.abs(x - b[i]), 0) / a.length) * 10);
+  const miFigura = () => (valida(st.tema) ? tu[st.tema] : T().ejes.map(() => 2));
+  const parecido = (a, b) => Math.round(100 - (a.reduce((d, x, i) => d + Math.abs(x - b[i]), 0) / a.length) * 25);
 
   function medir() {
     const w = svg.getBoundingClientRect().width || VW, estrecho = w < 560;
@@ -3519,7 +3514,7 @@ const ILUS = {
     const [px, py] = P(ang(m.i, n), rr(m.max));
     const nada = m.max === 0, varios = m.quien.length > 1, muchos = m.quien.length >= 4;
     const cols = nada ? ["#EDEBE6"] : m.quien.map((p) => p.c);
-    const quienes = nada ? "ningún partido llega a lo básico" : `${unir(m.quien.map((p) => p.n))}, ${m.max} de 10`;
+    const quienes = nada ? "ningún partido llega a lo básico" : `${unir(m.quien.map((p) => p.n))}, ${NIVEL_CORTO[nivelDe(m.max)].toLowerCase()}`;
     // La etiqueta va hacia dentro del círculo, para no chocar con los nombres de los aspectos
     const L = Math.hypot(CX - px, CY - py) || 1, ux = (CX - px) / L, uy = (CY - py) / L;
     const lx = px + ux * 16 * K, ly = py + uy * 16 * K + 5 * K;
@@ -3534,7 +3529,7 @@ const ILUS = {
       etiquetas = rotulo(`${m.quien.length} empatan`, "#EDEBE6", ly);
     }
     // Zona de toque de unos 40 unidades de radio (44 px o más en móvil), y un halo dorado que aparece con el teclado o al fijarlo
-    return `<g class="geo-mejor${varios ? " empate" : ""}" data-mi="${m.i}" tabindex="0" role="button" aria-label="Nota más alta en ${t.ejes[m.i].n}: ${quienes}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(40 * K)}" fill="transparent"/>`
+    return `<g class="geo-mejor${varios ? " empate" : ""}" data-mi="${m.i}" tabindex="0" role="button" aria-label="Nivel más alto en ${t.ejes[m.i].n}: ${quienes}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(40 * K)}" fill="transparent"/>`
       + `<circle class="halo" cx="${r1(px)}" cy="${r1(py)}" r="${r1(15 * K)}" fill="none" stroke="${ORO}" stroke-width="2.5" pointer-events="none"/>`
       + `<g class="mdot">${puntoPartido(px, py, 8 * K, cols)}</g>`
       + etiquetas
@@ -3544,15 +3539,15 @@ const ILUS = {
   /* ---- Todos los temas: una sola figura, con una arista por tema ---- */
   // Nota media de un partido en un tema: la media de sus seis aspectos (valoración de este observatorio)
   const mediaTema = (tk, pk) => { const v = TEMAS[tk].v[pk]; return v.reduce((a, b) => a + b, 0) / v.length; };
-  const nivelMedia = (m) => { let lv = 0; [0, 1, 2].forEach((k) => { if (alcanza(m, k)) lv = k + 1; }); return lv; };
+  const nivelMedia = (m) => nivelDe(m);
   function dibujarTodos() {
     const n = KEYS.length, coma = (x) => x.toFixed(1).replace(".", ",");
     let s = `<defs><radialGradient id="geo-glow2"><stop offset="0" stop-color="#EDEBE6" stop-opacity="0"/><stop offset="1" stop-color="#EDEBE6" stop-opacity=".08"/></radialGradient></defs>`;
     s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="url(#geo-glow2)"/>`;
-    [0, 1].forEach((k) => { s += `<circle cx="${CX}" cy="${CY}" r="${r1(rr(UMBRAL[k]))}" fill="none" stroke="#8A93A6" stroke-opacity=".5" stroke-width="1.3" stroke-dasharray="4 5"/>`; });
+    [0, 1, 2, 3].forEach((k) => { s += `<circle cx="${CX}" cy="${CY}" r="${r1(rr(UMBRAL[k]))}" fill="none" stroke="${k ? "#8A93A6" : ROJO}" stroke-opacity=".5" stroke-width="1.3" stroke-dasharray="4 5"/>`; });
     s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ORO}" stroke-width="3"/>`;
     KEYS.forEach((k, i) => { const [x, y] = P(ang(i, n), R); s += `<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3A4660" stroke-width="1"/>`; });
-    UMBRAL.forEach((v, k) => { s += `<text x="${CX + 8}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === 2 ? ORO : "#8A93A6"}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`; });
+    UMBRAL.forEach((v, k) => { s += `<text x="${CX + 8}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === NMAX ? ORO : k ? "#8A93A6" : ROJO}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${NIVEL_CORTO[k].toUpperCase()}</text>`; });
     // Un nombre por arista; pulsarlo abre ese tema
     KEYS.forEach((k, i) => {
       const a = ang(i, n), [x, y] = P(a, R + 46 * K), c = Math.cos(a), anc = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
@@ -3565,9 +3560,9 @@ const ILUS = {
       KEYS.forEach((k, i) => { const [x, y] = pts[i]; s += `<g class="geo-tv" data-tvp="${p.k}" data-tvk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(14 * K)}" fill="transparent"/><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(5 * K)}" fill="${p.c}"/></g>`; });
       s += `</g>`;
     });
-    svg.setAttribute("aria-label", "Todos los temas: cada arista es un tema y cada partido, su nota media en ese tema");
+    svg.setAttribute("aria-label", "Todos los temas: cada arista es un tema y cada partido, su nivel medio en ese tema");
     svg.innerHTML = s;
-    $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es su nota media en los seis aspectos de ese tema, de 0 a 10 (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
+    $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es el nivel medio de sus aspectos en ese tema, de antisistema a ideal (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
     $("#geo-mejor-nota").hidden = true;
     $(".geo-partidos").classList.remove("en-mejor");
   }
@@ -3578,12 +3573,12 @@ const ILUS = {
     let s = `<defs><radialGradient id="geo-glow"><stop offset="0" stop-color="${t.c}" stop-opacity="0"/><stop offset=".6" stop-color="${t.c}" stop-opacity=".035"/><stop offset="1" stop-color="${t.c}" stop-opacity=".17"/></radialGradient></defs>`;
     // Fondo: un halo del color del tema que crece hacia el círculo ideal
     s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="url(#geo-glow)"/>`;
-    [0, 1].forEach((k) => { s += `<circle cx="${CX}" cy="${CY}" r="${r1(rr(UMBRAL[k]))}" fill="none" stroke="${t.c}" stroke-opacity=".38" stroke-width="1.3" stroke-dasharray="4 5"/>`; });
+    [0, 1, 2, 3].forEach((k) => { s += `<circle cx="${CX}" cy="${CY}" r="${r1(rr(UMBRAL[k]))}" fill="none" stroke="${k ? t.c : ROJO}" stroke-opacity="${k ? ".38" : ".6"}" stroke-width="1.3" stroke-dasharray="4 5"/>`; });
     s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${st.ideal ? ORO : "#3A4660"}" stroke-width="${st.ideal ? 3 : 1.5}"/>`;
     for (let i = 0; i < n; i++) { const [x, y] = P(ang(i, n), R); s += `<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3A4660" stroke-width="1"/>`; }
     // Nombre de cada círculo, junto al radio de arriba y justo por encima de su línea
     UMBRAL.forEach((v, k) => {
-      s += `<text x="${CX + 10}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === 2 ? ORO : t.c}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`;
+      s += `<text x="${CX + 10}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${colorNivel(k)}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${NIVEL_CORTO[k].toUpperCase()}</text>`;
     });
     if (st.mejor) {
       // La línea discontinua une los mejores valores con segmentos rectos: no es la figura de ningún partido
@@ -3598,9 +3593,9 @@ const ILUS = {
       v.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<g class="geo-pv" data-pv="${p.k}" data-pi="${i}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(14 * K)}" fill="transparent"/><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1((fo ? 5 : 3.5) * K)}" fill="${p.c}"/></g>`; });
       if (fo && !st.yo) {
         // Patas cojas: por debajo de lo básico
-        v.forEach((x, i) => { if (x <= 3) { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(11 * K)}" fill="none" stroke="${ORO}" stroke-width="2" stroke-dasharray="3 3"/>`; } });
+        v.forEach((x, i) => { if (x < 1) { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(11 * K)}" fill="none" stroke="${ORO}" stroke-width="2" stroke-dasharray="3 3"/>`; } });
         // El punto al que lo reduciría un test
-        let vx = 0, vy = 0; v.forEach((x, i) => { vx += x * Math.cos(ang(i, n)); vy += x * Math.sin(ang(i, n)); });
+        let vx = 0, vy = 0; v.forEach((x, i) => { vx += dec(x) * Math.cos(ang(i, n)); vy += dec(x) * Math.sin(ang(i, n)); });
         vx = (vx / n) * (R / 10) * 2.2; vy = (vy / n) * (R / 10) * 2.2;
         const L = Math.hypot(vx, vy), m = L > R * 0.9 ? (R * 0.9) / L : 1;
         const tx = CX + vx * m, ty = CY + vy * m;
@@ -3626,7 +3621,7 @@ const ILUS = {
         UMBRAL.forEach((v, k) => {
           const [x, y] = P(ang(i, n), rr(v));
           const dx = x - CX, dy = y - CY, L = Math.hypot(dx, dy) || 1, tx = x + (dx / L) * 17 * K, ty = y + (dy / L) * 17 * K;
-          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === 2 ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`
+          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === NMAX ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`
             + `<text class="geo-num" data-lk="${k}" x="${r1(tx)}" y="${r1(ty)}" text-anchor="middle" dominant-baseline="central" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(12 * K)}" fill="${colorNivel(k)}" stroke="#0C0F14" stroke-width="4" paint-order="stroke">${i + 1}</text>`;
         });
       }
@@ -3648,8 +3643,8 @@ const ILUS = {
         + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K * dibujado)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fsi)}" font-weight="${j ? 400 : 600}" fill="${color || (j ? "#C9CCD3" : "#EDEBE6")}">${l}</text>`).join("") + `</g>`;
     });
     const titulo = st.mejor
-      ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`
-      : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`;
+      ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: antisistema, básico, intermedio, avanzado e ideal`
+      : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con cinco niveles: antisistema, básico, intermedio, avanzado e ideal`;
     // Sin <title> dentro del SVG: el navegador lo mostraba como cuadro gris al pasar el ratón. El texto va en aria-label.
     svg.setAttribute("aria-label", titulo);
     svg.innerHTML = s;
@@ -3663,28 +3658,37 @@ const ILUS = {
   let tipClave = null;
   function htmlRing(k) {
     const t = T(), todos = PARTIDOS.filter((p) => t.v[p.k].every((x) => alcanza(x, k)));
-    return `<span class="lbl" style="color:${colorNivel(k)}">Círculo ${k + 1} · ${NIV[k]}${k === 2 ? " · el ideal" : ""}</span><p>${t.niv[k]}</p>`
-      + `<p class="who">${todos.length ? "Lo alcanzan en todos los aspectos: " + etiquetas(todos) : "Ningún partido lo alcanza en todos los aspectos."}</p>`;
+    const aqui = PARTIDOS.filter((p) => t.v[p.k].some((x) => nivelDe(x) === 0));
+    const quien = k === 0
+      ? (aqui.length ? "Se quedan aquí en algún aspecto, según la valoración de este observatorio: " + etiquetas(aqui) : "Ningún partido se queda aquí en ningún aspecto.")
+      : (todos.length ? "Lo alcanzan en todos los aspectos: " + etiquetas(todos) : "Ningún partido lo alcanza en todos los aspectos.");
+    return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]}${k === NMAX ? " · el círculo de fuera" : k === 0 ? " · por debajo de lo básico" : ""}</span><p>${t.niv[k]}</p><p class="who">${quien}</p>`;
   }
-  function htmlPunto(i, k) {
-    const t = T(), e = t.ejes[i], ya = PARTIDOS.filter((p) => alcanza(t.v[p.k][i], k));
+  function htmlPunto(i, k, fijo) {
+    const t = T(), e = t.ejes[i];
+    const ya = PARTIDOS.filter((p) => (k === 0 ? nivelDe(t.v[p.k][i]) === 0 : alcanza(t.v[p.k][i], k)));
+    const quien = k === 0
+      ? (ya.length ? "Se quedan aquí, según la valoración de este observatorio: " + etiquetas(ya) : "Ningún partido se queda aquí.")
+      : (ya.length ? "Llegan: " + etiquetas(ya) : "Ningún partido llega todavía.");
     return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]} · radio ${i + 1}</span><h5>${e.n}</h5><p>${e.niv[k]}</p>`
-      + `<p class="who">${ya.length ? "Llegan: " + etiquetas(ya) : "Ningún partido llega todavía."}</p>`;
+      + `<p class="who">${quien}</p>` + (k === NMAX && e.is ? (fijo
+        ? `<div class="geo-tip-acc">${enlaceIdeal(e)}<button class="geo-link" data-soltar>Cerrar</button></div>`
+        : `<p class="who"><small>Pulsa el punto y después «Más» para abrir la propuesta: «${e.it}».</small></p>`) : "");
   }
   // Un vértice de un partido: su nota, qué nivel le corresponde, y su postura en el tema.
   // Por aspecto no hay todavía un texto por partido que justifique la nota: se dice, en vez de inventarlo.
   function cuerpoPartido(pk, i, conBasico = true) {
-    const t = T(), e = t.ejes[i], p = PARTIDOS.find((q) => q.k === pk), x = t.v[pk][i], lvl = nivelDe(x);
-    const coma = (n) => n.toFixed(1).replace(".", ",");
+    const t = T(), e = t.ejes[i], p = PARTIDOS.find((q) => q.k === pk), lvl = nivelDe(t.v[pk][i]);
+    // En el nivel más bajo no se atribuye al partido el texto de ese nivel: la nota no dice si es por vacío o por ir contra lo básico
     const nivel = lvl
-      ? `<span class="medida" style="color:${colorNivel(lvl - 1)}">${NIV_TITULO[lvl - 1]}</span>Llega desde ${coma(UMBRAL[lvl - 1])} de 10.`
-      : `<span class="medida" style="color:#8A93A6">Sin medida</span>No llega a lo básico: hacen falta ${coma(UMBRAL[0])} de 10 para el primer círculo.`;
-    return `<p class="who">${p.n}: ${x} de 10 <small>(valoración de este observatorio)</small></p>`
+      ? `<span class="medida" style="color:${colorNivel(lvl)}">${NIV_TITULO[lvl]}</span>${e.niv[lvl]}`
+      : `<span class="medida" style="color:${ROJO}">Antisistema</span>No llega a lo básico en este aspecto: o no propone nada, o lo que propone va contra lo básico.`;
+    return `<p class="who">${p.n}: ${NIVEL_CORTO[lvl]} <small>(valoración de este observatorio)</small></p>`
       + `<p>${nivel}</p>`
-      + (conBasico ? `<p><b>Lo básico:</b> ${e.niv[0]}</p>` : "")
+      + (conBasico && lvl !== 1 ? `<p><b>Lo básico:</b> ${e.niv[1]}</p>` : "")
       + `<p><b>Postura de ${p.n} en todo el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`;
   }
-  const NOTA_ASPECTO = `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de cada partido que justifique la nota. Lo de arriba es su postura en el tema entero.</small></p>`;
+  const NOTA_ASPECTO = `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de cada partido que justifique su nivel. Lo de arriba es su postura en el tema entero.</small></p>`;
   function htmlPartido(pk, i) {
     const e = T().ejes[i], p = PARTIDOS.find((q) => q.k === pk);
     return `<span class="lbl" style="color:${p.c}">${p.n} · radio ${i + 1}</span><h5>${e.n}</h5>` + cuerpoPartido(pk, i) + NOTA_ASPECTO;
@@ -3693,16 +3697,14 @@ const ILUS = {
   function htmlPartidos(pks, i) {
     const e = T().ejes[i];
     // «Lo básico» es igual para todos los partidos en este aspecto: se dice una vez, arriba
-    return `<span class="lbl">${pks.length} partidos en este punto · radio ${i + 1}</span><h5>${e.n}</h5><p><b>Lo básico:</b> ${e.niv[0]}</p>`
+    return `<span class="lbl">${pks.length} partidos en este punto · radio ${i + 1}</span><h5>${e.n}</h5><p><b>Lo básico:</b> ${e.niv[1]}</p>`
       + pks.map((pk, j) => { const p = PARTIDOS.find((q) => q.k === pk); return `<div class="${j ? "geo-tip-sep" : ""}"><span class="lbl" style="color:${p.c}">${p.n}</span>${cuerpoPartido(pk, i, false)}</div>`; }).join("")
       + NOTA_ASPECTO;
   }
   function cuerpoTodos(pk, tk) {
-    const p = PARTIDOS.find((q) => q.k === pk), t = TEMAS[tk], m = mediaTema(tk, pk), lv = nivelMedia(m);
-    const coma = (x) => x.toFixed(1).replace(".", ",");
-    return `<p class="who">Nota media: ${coma(m)} de 10 <small>(seis aspectos, valoración de este observatorio)</small></p>`
-      + `<p class="medida" style="color:${lv ? colorNivel(lv - 1) : "#8A93A6"}">${lv ? NIV_TITULO[lv - 1] : "Sin medida"}</p>`
-      + `<p>${lv ? "La media llega a esta medida." : "La media no llega a lo básico: hacen falta " + coma(UMBRAL[0]) + " de 10."}</p>`
+    const p = PARTIDOS.find((q) => q.k === pk), t = TEMAS[tk], lv = nivelMedia(mediaTema(tk, pk));
+    return `<p class="who">Nivel medio: ${NIVEL_CORTO[lv]} <small>(media de sus aspectos en el tema, valoración de este observatorio)</small></p>`
+      + `<p class="medida" style="color:${lv === NMAX ? ORO : lv === 0 ? ROJO : t.c}">${NIV_TITULO[lv]}</p>`
       + `<p><b>Postura de ${p.n} en el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`;
   }
   function htmlTodos(pk, tk) {
@@ -3715,25 +3717,25 @@ const ILUS = {
       + pks.map((pk, j) => { const p = PARTIDOS.find((q) => q.k === pk); return `<div class="${j ? "geo-tip-sep" : ""}"><span class="lbl" style="color:${p.c}">${p.n}</span>${cuerpoTodos(pk, tk)}</div>`; }).join("");
   }
   function htmlMejor(i) {
-    const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max); // 0: no llega a lo básico; 1 a 3: círculo
-    const cab = `<span class="lbl" style="color:${lvl ? colorNivel(lvl - 1) : "#EDEBE6"}">Nota más alta</span><h5>${e.n}</h5>`;
+    const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max);
+    const cab = `<span class="lbl" style="color:${lvl ? colorNivel(lvl) : "#EDEBE6"}">Nivel más alto</span><h5>${e.n}</h5>`;
     if (!lvl) return cab + `<p class="who">Ningún partido llega a lo básico en este aspecto.</p>`;
     // Lo que dice el nivel es una definición general, igual para todos los partidos: se separa de la nota del partido
-    return cab + `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`
-      + `<p class="medida" style="color:${colorNivel(lvl - 1)}">${NIV_TITULO[lvl - 1]}</p><p>${e.niv[lvl - 1]}</p>`;
+    return cab + `<p class="who">${etiquetas(m.quien)} · ${NIVEL_CORTO[lvl]} <small>(valoración de este observatorio)</small></p>`
+      + `<p class="medida" style="color:${colorNivel(lvl)}">${NIV_TITULO[lvl]}</p><p>${e.niv[lvl]}</p>`;
   }
   // El detalle de un punto de «lo mejor», para la columna de la derecha
   function htmlMasMejor(i) {
     const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max);
-    const cab = `<span class="lbl">Nota más alta · radio ${i + 1} de ${t.ejes.length}</span><h4 class="geo-mas-h">${e.n}</h4>`;
+    const cab = `<span class="lbl">Nivel más alto · radio ${i + 1} de ${t.ejes.length}</span><h4 class="geo-mas-h">${e.n}</h4>`;
     const quien = m.max === 0
       ? `<p class="who">Ningún partido llega a lo básico en este aspecto.</p>`
-      : `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`;
-    const escalera = [2, 1, 0].map((k) => `<div class="geo-nv geo-nv-fijo${lvl === k + 1 ? " alcanzado" : ""}" style="--lc:${colorNivel(k)}"><b>${k + 1} · ${NIV[k]}${k === 2 ? " · ideal" : ""}</b>${e.niv[k]}</div>`).join("");
+      : `<p class="who">${etiquetas(m.quien)} · ${NIVEL_CORTO[lvl]} <small>(valoración de este observatorio)</small></p>`;
+    const escalera = [4, 3, 2, 1, 0].map((k) => `<div class="geo-nv geo-nv-fijo${lvl === k ? " alcanzado" : ""}" style="--lc:${colorNivel(k)}"><b>${NIV[k]}</b>${e.niv[k]}${k === NMAX ? enlaceIdeal(e) : ""}</div>`).join("");
     const posturas = m.quien.map((p) => `<details class="geo-postura"><summary>Qué propone ${p.n} en todo el tema</summary><p>${t.t[p.k]}</p></details>`).join("");
-    return `<div class="geo-mas">${cab}${quien}<p class="geo-mas-nota">Lo que dice cada nivel es igual para todos los partidos. La nota la pone este observatorio.</p>`
+    return `<div class="geo-mas">${cab}${quien}<p class="geo-mas-nota">Lo que dice cada nivel es igual para todos los partidos. El nivel de cada partido lo pone este observatorio.</p>`
       + `<div class="geo-nv-lista">${escalera}</div>${posturas}`
-      + `<button class="geo-link" data-volver-mas>Volver a los tres círculos</button></div>`;
+      + `<button class="geo-link" data-volver-mas>Volver a los cinco niveles</button></div>`;
   }
   function mostrar(clave, html, cx, cy) {
     if (clave !== tipClave) { tip.innerHTML = html; tipClave = clave; }
@@ -3758,6 +3760,14 @@ const ILUS = {
   function marcarMejor() {
     const activo = st.masVer != null ? st.masVer : st.fijado;
     $$(".geo-mejor", svg).forEach((g) => g.classList.toggle("on", +g.dataset.mi === activo));
+  }
+  // La tarjeta de un ideal, fija: así se puede pulsar su «Más». `st.fijado` lleva un texto para no confundirse con «lo mejor»
+  function fijarIdeal(i, nodo) {
+    st.fijado = "ideal-" + i;
+    const [x, y] = centro(nodo.querySelector(".dot"));
+    tipClave = null; tip.classList.remove("varios");
+    mostrar(`fi${st.tema}-${i}`, htmlPunto(i, NMAX, true), x + 14, y);
+    tip.classList.add("fijo");
   }
   function fijarMejor(i) {
     st.fijado = i;
@@ -3812,6 +3822,7 @@ const ILUS = {
     return true;
   }
   function leer(e) {
+    if (typeof st.fijado === "string") return true; // hay un ideal fijado: el paso del ratón no lo cambia
     if (st.yo) {
       // Mientras se arrastra, manda la lectura del arrastre; si no, el pase sobre tu punto muestra su medida más alta
       if (arrastre) return true;
@@ -3848,7 +3859,7 @@ const ILUS = {
     const b = svg.getBoundingClientRect();
     return [((e.clientX - b.left) * VW) / b.width - CX, ((e.clientY - b.top) * VH) / b.height - CY];
   }
-  const valorEnEje = (dx, dy, i) => { const a = ang(i, T().ejes.length); return Math.max(0, Math.min(10, Math.round(((dx * Math.cos(a) + dy * Math.sin(a)) / R) * 10))); };
+  const valorEnEje = (dx, dy, i) => { const a = ang(i, T().ejes.length); return Math.max(0, Math.min(NMAX, Math.round(((dx * Math.cos(a) + dy * Math.sin(a)) / R) * 5 - 1))); };
   function fijar(i, v) {
     const f = miFigura().slice();
     if (valida(st.tema) && f[i] === v) return;
@@ -3882,28 +3893,23 @@ const ILUS = {
     arrastre = null; st.arrI = null; ocultarLectura(); pintarMedida(null); dibujar();
   }));
 
-  // Mientras se arrastra un punto: la medida más alta que llega, en grande, y debajo los tres niveles con su check.
+  // Mientras se arrastra un punto: el nivel en el que queda, en grande, y debajo los niveles con su check.
   // «Qué mide» no va aquí: queda fijo debajo del dibujo (pintarMedida).
-  const NIVEL_CORTO = ["Básico", "Intermedio", "Avanzado"];
   function listaNiveles(a, nv) {
-    return `<ul class="geo-chk-lista">${[0, 1, 2].map((k) => {
-      const ok = nv > k;
+    return `<ul class="geo-chk-lista">${[1, 2, 3, 4].map((k) => {
+      const ok = nv >= k;
       return `<li class="${ok ? "ok" : ""}"><span class="chk" aria-hidden="true">${ok ? "✓" : ""}</span><span><b style="color:${colorNivel(k)}">${NIVEL_CORTO[k]}</b> · ${a.niv[k]}</span></li>`;
     }).join("")}</ul>`;
   }
+  const cabNivel = (a, nv) => `<span class="lbl" style="color:${colorNivel(nv)}">${NIV_TITULO[nv]}</span><p class="medida-grande">${a.niv[nv]}</p>`;
   function htmlArrastre(i, v) {
     const a = T().ejes[i], nv = nivelDe(v);
-    const cab = nv
-      ? `<span class="lbl" style="color:${colorNivel(nv - 1)}">${v} de 10 · ${NIV_TITULO[nv - 1]}</span><p class="medida-grande">${a.niv[nv - 1]}</p>`
-      : `<span class="lbl">${v} de 10 · sin medida todavía</span><p class="medida-grande sin">Todavía no llega a lo básico.</p>`;
-    return cab + listaNiveles(a, nv);
+    return cabNivel(a, nv) + listaNiveles(a, nv);
   }
-  // Pasar el ratón por tu punto: solo la medida más alta que llega, sin la lista de niveles
+  // Pasar el ratón por tu punto: solo el nivel en el que está, sin la lista
   function htmlTuMedida(i, v) {
     const a = T().ejes[i], nv = nivelDe(v);
-    return nv
-      ? `<span class="lbl" style="color:${colorNivel(nv - 1)}">${v} de 10 · ${NIV_TITULO[nv - 1]}</span><p class="medida-grande">${a.niv[nv - 1]}</p>`
-      : `<span class="lbl">${v} de 10 · sin medida todavía</span><p class="medida-grande sin">Todavía no llega a lo básico.</p>`;
+    return cabNivel(a, nv) + (nv === NMAX ? enlaceIdeal(a) : "");
   }
   // La caja fija bajo el dibujo: qué mide el aspecto que se arrastra. Con null, muestra la pista.
   function pintarMedida(i) {
@@ -3939,8 +3945,8 @@ const ILUS = {
   function panelYo() {
     const t = T(), fig = miFigura();
     $("#geo-panel").innerHTML = `<span class="lbl">Tu figura · ${t.n}</span><h4>¿Hasta dónde llegarías tú?</h4>
-      <p>Arrastra los puntos blancos sobre cada radio, o usa los deslizadores: 0 es no hacer nada en ese aspecto; 10, lo más avanzado. Tu figura se queda solo en este navegador.</p>
-      <div class="geo-yo-sl">${t.ejes.map((e, i) => `<label><span>${e.n}</span><output data-yo="${i}">${fig[i]} · ${palabraNivel(fig[i])}</output><input type="range" min="0" max="10" step="1" value="${fig[i]}" data-yi="${i}"></label>`).join("")}</div>
+      <p>Arrastra los puntos blancos sobre cada radio, o usa los deslizadores. Cada aspecto tiene cinco posiciones: antisistema, básico, intermedio, avanzado e ideal. Tu figura se queda solo en este navegador.</p>
+      <div class="geo-yo-sl">${t.ejes.map((e, i) => `<label><span>${e.n}</span><output data-yo="${i}">${NIVEL_CORTO[fig[i]]}</output><input type="range" min="0" max="${NMAX}" step="1" value="${fig[i]}" data-yi="${i}"></label>`).join("")}</div>
       <div id="geo-yo-rank">${htmlRank()}</div>
       <p class="tiny">Compara tu figura con la valoración de esta página: mide cuánto se separan las dos figuras, radio a radio. No es una recomendación de voto.</p>
       <div class="geo-yo-acc"><button class="geo-link" data-borrar-yo>Borrar mi figura de este tema</button><button class="geo-link" data-salir-yo>Volver a los partidos</button></div>`;
@@ -3949,7 +3955,7 @@ const ILUS = {
     if (!st.yo) return;
     const fig = miFigura(), el = $("#geo-panel");
     $$("[data-yi]", el).forEach((r) => { const i = +r.dataset.yi; if (+r.value !== fig[i]) r.value = fig[i]; });
-    $$("[data-yo]", el).forEach((o) => { const i = +o.dataset.yo; o.textContent = `${fig[i]} · ${palabraNivel(fig[i])}`; });
+    $$("[data-yo]", el).forEach((o) => { const i = +o.dataset.yo; o.textContent = NIVEL_CORTO[fig[i]]; });
     const rk = $("#geo-yo-rank"); if (rk) rk.innerHTML = htmlRank();
   }
   function modoYo(on) {
@@ -3961,7 +3967,7 @@ const ILUS = {
     ocultar(); dibujar(); panel(); niveles(); pintarMedida(null);
   }
 
-  /* ---- Leyenda de los tres círculos, también para teclado y pantallas táctiles ---- */
+  /* ---- Leyenda de los cinco niveles, también para teclado y pantallas táctiles ---- */
   function marcar(k) {
     $$(".geo-ring", svg).forEach((g) => g.classList.toggle("on", +g.dataset.ring === k));
     if (k == null) svg.removeAttribute("data-k"); else svg.setAttribute("data-k", String(k));
@@ -3971,16 +3977,21 @@ const ILUS = {
     if (st.mejor && st.masVer != null) { $("#geo-niveles").innerHTML = htmlMasMejor(st.masVer); return; }
     $("#geo-niveles").innerHTML = t.niv.map((txt, k) => {
       const todos = PARTIDOS.filter((p) => t.v[p.k].every((x) => alcanza(x, k)));
-      const mini = [4.3, 8.6, 12.6].map((r, j) => `<circle cx="14" cy="14" r="${r}" fill="none" stroke="${j === k ? colorNivel(k) : "#3A4660"}" stroke-width="${j === k ? 2.6 : 1.2}"/>`).join("");
-      const puntos = t.ejes.map((e, i) => `<li><span class="geo-num-k">${i + 1}</span><span><b>${e.n}</b>${e.niv[k]}</span></li>`).join("");
+      const aqui = PARTIDOS.filter((p) => t.v[p.k].some((x) => nivelDe(x) === 0));
+      const mini = [2.6, 5.1, 7.6, 10.1, 12.6].map((r, j) => `<circle cx="14" cy="14" r="${r}" fill="none" stroke="${j === k ? colorNivel(k) : "#3A4660"}" stroke-width="${j === k ? 2.6 : 1}"/>`).join("");
+      const puntos = t.ejes.map((e, i) => `<li><span class="geo-num-k">${i + 1}</span><span><b>${e.n}</b>${e.niv[k]}${k === NMAX ? enlaceIdeal(e) : ""}</span></li>`).join("");
+      const pie = k === 0
+        ? (aqui.length ? "Se quedan aquí en algún aspecto: " + aqui.map((p) => p.n).join(", ") : "Ningún partido se queda aquí")
+        : (todos.length ? "Lo alcanzan en todo el tema: " + todos.map((p) => p.n).join(", ") : "Ningún partido lo alcanza en todo el tema");
       return `<div class="geo-nv" role="button" tabindex="0" data-nv="${k}" aria-pressed="${st.ring === k}" style="--lc:${colorNivel(k)}">`
-        + `<div class="geo-nv-h"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg><span><b>${k + 1} · ${NIV_TITULO[k]}</b>${txt}</span></div>`
+        + `<div class="geo-nv-h"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg><span><b>${NIV_TITULO[k]}</b>${txt}</span></div>`
         + `<ol class="geo-nv-pts">${puntos}</ol>`
-        + `<small>${todos.length ? "Lo alcanzan en todo el tema: " + todos.map((p) => p.n).join(", ") : "Ningún partido lo alcanza en todo el tema"}</small></div>`;
+        + `<small>${pie}</small></div>`;
     }).join("");
   }
   const ley = $("#geo-niveles");
   ley.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return; // el enlace a la ficha de un ideal no pliega la tarjeta
     if (e.target.closest("[data-volver-mas]")) return cerrarMas();
     const b = e.target.closest("[data-nv]"); if (!b) return;
     const k = +b.dataset.nv; st.ring = st.ring === k ? null : k;
@@ -3993,17 +4004,18 @@ const ILUS = {
   ley.addEventListener("focusin", (e) => { const b = e.target.closest("[data-nv]"); if (b) marcar(+b.dataset.nv); });
   ley.addEventListener("focusout", () => marcar(st.ring));
 
-  const fuertes = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x >= 8).map(([, i]) => ejes[i].n);
-  const cojas = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x <= 3).map(([, i]) => ejes[i].n);
+  const fuertes = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x >= 3).map(([, i]) => ejes[i].n);
+  const cojas = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x < 1).map(([, i]) => ejes[i].n);
   function aristas(v, ejes) {
     const out = [], n = v.length;
-    for (let i = 0; i < n; i++) { const j = (i + 1) % n; if (Math.abs(v[i] - v[j]) >= 4) out.push(v[i] > v[j] ? [ejes[i].n, ejes[j].n] : [ejes[j].n, ejes[i].n]); }
+    for (let i = 0; i < n; i++) { const j = (i + 1) % n; if (Math.abs(v[i] - v[j]) >= 2) out.push(v[i] > v[j] ? [ejes[i].n, ejes[j].n] : [ejes[j].n, ejes[i].n]); }
     return out;
   }
   const lista = (arr) => arr.length ? arr.map((x) => x.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " y $1") : "";
   function hastaDonde(v) {
-    const c = [0, 0, 0, 0]; v.forEach((x) => c[nivelDe(x)]++);
+    const c = [0, 0, 0, 0, 0]; v.forEach((x) => c[nivelDe(x)]++);
     const partes = [];
+    if (c[4]) partes.push(`al ideal en ${c[4]}`);
     if (c[3]) partes.push(`a lo avanzado en ${c[3]}`);
     if (c[2]) partes.push(`a lo intermedio en ${c[2]}`);
     if (c[1]) partes.push(`solo a lo básico en ${c[1]}`);
@@ -4020,9 +4032,8 @@ const ILUS = {
       const banda = (lv) => vals.filter(([, x]) => nivelDe(x) === lv).map(([p]) => p);
       el.innerHTML = `<span class="lbl">Radio ${st.eje + 1} de ${n}</span><h4>${e.n}</h4><p>${e.d}</p>
         <span class="lbl" style="display:block;margin-top:14px">La escalera de este aspecto</span>
-        <ol class="geo-esc">${[2, 1, 0].map((k) => { const qq = banda(k + 1); return `<li style="--lc:${colorNivel(k)}"><span class="lbl">${NIV[k]}</span><p>${e.niv[k]}</p>${qq.length ? `<div class="who">${etiquetas(qq)}</div>` : `<div class="who vacio">Ningún partido se queda aquí</div>`}</li>`; }).join("")}
-        ${banda(0).length ? `<li class="bajo"><span class="lbl">No llegan a lo básico</span><div class="who">${etiquetas(banda(0))}</div></li>` : ""}</ol>
-        <div style="display:grid;gap:7px;margin:4px 0 14px">${vals.map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${x * 10}%;background:${p.c}"></i></span><b>${x}</b></div>`).join("")}</div>
+        <ol class="geo-esc">${[4, 3, 2, 1, 0].map((k) => { const qq = banda(k); return `<li style="--lc:${colorNivel(k)}"><span class="lbl">${NIV[k]}${k === 0 ? " · por debajo de lo básico" : ""}</span><p>${e.niv[k]}</p>${k === NMAX ? enlaceIdeal(e) : ""}${qq.length ? `<div class="who">${etiquetas(qq)}</div>` : `<div class="who vacio">Ningún partido se queda aquí</div>`}</li>`; }).join("")}</ol>
+        <div style="display:grid;gap:7px;margin:4px 0 14px">${vals.map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${dec(x) * 10}%;background:${p.c}"></i></span><b>${NIVEL_CORTO[x]}</b></div>`).join("")}</div>
         <span class="lbl" style="color:var(--warn)">Lo que haría el círculo</span><p style="margin-top:6px">${e.p}</p>
         <button class="geo-link" data-cerrar>Volver a la vista general</button>`;
       return;
@@ -4038,7 +4049,7 @@ const ILUS = {
     }
     const sel = PARTIDOS.filter((p) => st.sel.has(p.k));
     el.innerHTML = `<span class="lbl">${t.n}</span><h4>Pulsa una figura o un aspecto</h4>
-      <p>Pasa el ratón por los tres círculos y por sus puntos: el de dentro es lo básico de cada aspecto, el de fuera lo más avanzado. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
+      <p>Pasa el ratón por los cinco círculos y por sus puntos: el de dentro, en rojo, es antisistema (por debajo de lo básico) y el de fuera, dorado, el ideal. Pulsa un punto del ideal para abrir su propuesta. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
       <div class="geo-plist">${sel.map((p) => { const c = cojas(t.v[p.k], t.ejes); return `<button class="geo-pitem" data-ver="${p.k}" style="--pc:${p.c}"><i></i><span><b>${p.n}</b> · ${c.length ? "no llega a lo básico en " + lista(c) : "llega a lo básico en todo"}</span></button>`; }).join("") || `<p class="tiny">Elige al menos un partido arriba.</p>`}</div>`;
   }
 
@@ -4052,13 +4063,13 @@ const ILUS = {
     $("#geo-obj").innerHTML = t.obj.map(([h, p]) => `<div><span class="lbl">${h}</span><p>${p}</p></div>`).join("")
       + `<div style="grid-column:1 / -1;border-style:solid;border-color:var(--warn)"><span class="lbl" style="color:var(--warn)">Por qué un círculo</span><p>El círculo no elimina esas discusiones: las ordena. Obliga a decir qué se hace en cada radio en lugar de ganar el debate con el radio que más conviene a cada uno.</p></div>`;
     $("#geo-tabla").innerHTML = `<table><thead><tr><th scope="col">Partido</th>${t.ejes.map((e) => `<th scope="col">${e.l.join(" ")}</th>`).join("")}</tr></thead><tbody>`
-      + PARTIDOS.map((p) => `<tr><td>${p.n}</td>${t.v[p.k].map((x) => `<td>${x}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+      + PARTIDOS.map((p) => `<tr><td>${p.n}</td>${t.v[p.k].map((x) => `<td>${NIVEL_CORTO[x]}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
   }
 
   /* ---- Los diez temas de un vistazo: cada partido (y tu figura) en cada tema ---- */
   function mini(v, c, rayas) {
     const r = (x) => r1(x);
-    return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="8.7" fill="none" stroke="#3A4660" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="26" fill="none" stroke="${ORO}" stroke-opacity=".6" stroke-width="1.3"/>`
+    return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="10.4" fill="none" stroke="#3A4660" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="26" fill="none" stroke="${ORO}" stroke-opacity=".6" stroke-width="1.3"/>`
       + (v ? `<path d="M${geom(v, 32, 32, 26).map((p) => `${r(p[0])},${r(p[1])}`).join("L")}Z" fill="${c}" fill-opacity=".28" stroke="${c}" stroke-width="1.7" stroke-linejoin="round" ${rayas ? 'stroke-dasharray="3 2"' : ""}/>` : "")
       + `</svg>`;
   }
@@ -4070,7 +4081,7 @@ const ILUS = {
       + `<button class="gm-t gm-todos" data-todos-go style="--tc:#EDEBE6" aria-label="Ver todos los temas en una sola figura"><span class="ill" aria-hidden="true">${TODOS_ICO}</span>Todos los temas</button>`
       + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-t${k === st.tema ? " on" : ""}" data-mt="${k}" style="--tc:${t.c}" aria-label="Abrir ${t.n}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span>${t.n}</button>`; }).join("");
     PARTIDOS.forEach((p) => {
-      const basico = KEYS.reduce((a, k) => a + TEMAS[k].v[p.k].filter((x) => alcanza(x, 0)).length, 0);
+      const basico = KEYS.reduce((a, k) => a + TEMAS[k].v[p.k].filter((x) => alcanza(x, 1)).length, 0);
       h += `<div class="gm-p" style="--pc:${p.c}"><span><i></i>${p.n}</span><small>Lo básico en ${basico} de ${TOTAL} aspectos</small></div>`
         + `<button class="gm-c gm-tot" data-todos-go data-mp="${p.k}" style="--tc:${p.c}" aria-label="${p.n} en todos los temas">${mini(KEYS.map((k) => mediaTema(k, p.k)), p.c)}</button>`
         + KEYS.map((k) => { const t = TEMAS[k], v = t.v[p.k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-mp="${p.k}" style="--tc:${t.c}" aria-label="${p.n} en ${t.n}: ${hastaDonde(v)}">${mini(v, p.c)}</button>`; }).join("");
@@ -4232,6 +4243,9 @@ const ILUS = {
     const mj = e.target.closest("[data-mi]");
     if (mj) { const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); return; }
     if (st.fijado != null) soltar();
+    // Un punto del ideal deja fija su tarjeta, con «Más»: el enlace a la página de esa propuesta
+    const idl = e.target.closest(`[data-lk="${NMAX}"]`);
+    if (idl) return fijarIdeal(+idl.dataset.li, idl);
     // En pantallas táctiles, tocar un círculo o un punto muestra su explicación
     if (leer(e)) return;
     ocultar();

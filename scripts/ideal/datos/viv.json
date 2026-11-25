@@ -1,0 +1,393 @@
+{
+  "clave": "viv",
+  "anti_tema": "No proponer nada sobre vivienda, o romper la base: justificar la ocupación de casas ajenas, no cumplir los desalojos firmes o dejar a familias en la calle.",
+  "ideal_tema": "Que cualquier hogar con ingresos normales pueda elegir entre alquilar y comprar sin gastar más del 30 % de lo que gana: suelo suficiente por ley, propiedad segura y un parque asequible que nunca se vende.",
+  "aspectos": [
+    {
+      "i": 0,
+      "anti": "No proponer nada para quien quiere comprar, o tratar la propiedad de la vivienda como algo ilegítimo que hay que impedir o quitar sin compensación.",
+      "ideal": "Una escalera de propiedad: comprar la casa por partes desde el 10 %, pagar un alquiler asequible por el resto e ir subiendo, con ahorro previo bonificado y vivienda protegida que se revende a precio tasado.",
+      "titulo": "Escalera de propiedad: comprar la casa por partes",
+      "slug": "escalera-de-propiedad-compra-por-partes",
+      "resumen": "Lo avanzado ofrece fórmulas intermedias sueltas. El ideal las ordena en un solo camino con peldaños: ahorrar con ayuda, entrar con una parte pequeña, ampliar cuando se pueda y, si se vende, dejar la vivienda protegida al siguiente al mismo precio. Comprar deja de depender de que la familia ponga la entrada, y la ayuda pública no se pierde en la primera reventa.",
+      "medidas": [
+        "Propiedad compartida en toda la vivienda protegida nueva: se entra comprando desde el 10 % de la casa, se paga un alquiler asequible por el resto y se tiene derecho a comprar más partes cuando se pueda.",
+        "Cuenta de ahorro para la primera vivienda en la que el Estado añade una cantidad proporcional a lo que el hogar ahorra cada año, con un máximo anual.",
+        "Aval público de la entrada solo para vivienda habitual y con precio máximo por zona, para que la ayuda no empuje los precios hacia arriba.",
+        "Vivienda protegida en propiedad con años mínimos de residencia y reventa a precio tasado a un comprador inscrito en un registro público: la ayuda pasa al siguiente, no se convierte en plusvalía.",
+        "Cooperativas en cesión de uso y propiedad temporal sobre suelo público: el suelo sigue siendo de todos y la casa cuesta lo que cuesta construirla.",
+        "Impuestos reducidos en la compra solo para la primera vivienda habitual y hasta un precio máximo."
+      ],
+      "supone": {
+        "personas": "Quien tiene un sueldo estable pero no tiene ahorros ni padres que pongan la entrada puede empezar a ser propietario con una parte pequeña y ampliarla con los años. A cambio, quien compra vivienda protegida acepta vivir en ella y no hacer negocio al venderla.",
+        "cuentas": "El dinero público se queda inmovilizado en la parte de cada casa que aún no se ha vendido y en el suelo; se recupera cuando el hogar compra más partes. La bonificación del ahorro y los avales son gasto directo. No hay una estimación oficial verificada de lo que costaría en España.",
+        "puesta_en_marcha": "La propiedad compartida y la temporal existen en el Código civil de Cataluña desde 2015. Habría que llevarlas a la ley estatal, hacer posible hipotecar una parte de la casa y pactar con las comunidades, que gestionan la vivienda protegida, que esta conserve siempre su precio tasado."
+      },
+      "integra": "Recoge lo que pide la derecha: ser propietario, premiar el ahorro y el esfuerzo propio y dar seguridad a quien compra. Y lo que pide la izquierda: que comprar no dependa de la familia de origen y que la ayuda pública no acabe en ganancia privada ni en precios más altos.",
+      "referencias": [
+        {
+          "lugar": "Inglaterra (Reino Unido)",
+          "que": "El programa Shared Ownership permite comprar entre el 10 % y el 75 % del valor de una vivienda y pagar alquiler al casero por la parte restante. Después se pueden comprar más partes, y el alquiler baja según crece la parte propia.",
+          "url": "https://www.gov.uk/shared-ownership-scheme/how-it-works"
+        },
+        {
+          "lugar": "Cataluña (España)",
+          "que": "La Ley 19/2015 creó la propiedad compartida: el comprador recibe una cuota inicial y el uso exclusivo, adquiere el resto poco a poco y paga por la parte que aún no es suya. También creó la propiedad temporal, de 10 a 99 años en inmuebles.",
+          "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-9678"
+        },
+        {
+          "lugar": "Singapur",
+          "que": "Quien compra un piso público debe residir en él un periodo mínimo: 5 años en los pisos estándar y 10 en los mejor situados. Solo pasado ese plazo puede alquilarlo entero, con permiso, o invertir en vivienda privada.",
+          "url": "https://www.hdb.gov.sg/residential/buying-a-flat/conditions-after-buying?anchor=mop"
+        },
+        {
+          "lugar": "Reino Unido",
+          "que": "La cuenta Lifetime ISA admite hasta 4.000 libras al año y el Estado añade un 25 %, con un máximo de 1.000 libras anuales. Sirve para la primera vivienda o para la jubilación y hay que hacer la primera aportación antes de cumplir 40 años.",
+          "url": "https://www.gov.uk/lifetime-isa"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Las ayudas a la compra, si no crece la oferta, acaban subiendo los precios y benefician al vendedor.",
+          "r": "Por eso las ayudas se concentran en vivienda protegida de precio tasado y van unidas al ideal de construir más. En el aval sobre vivienda libre el riesgo sigue existiendo, y por eso lleva un precio máximo."
+        },
+        {
+          "o": "La propiedad compartida puede atrapar: se paga alquiler, comunidad y reparaciones por una casa que solo es tuya en parte.",
+          "r": "Es un riesgo real del modelo. Se acota por ley: tope al alquiler de la parte ajena, gastos repartidos según la cuota de cada uno y derecho a vender la parte propia a precio tasado en cualquier momento."
+        },
+        {
+          "o": "La reventa a precio tasado impide ganar con la casa y puede fomentar pagos en dinero negro.",
+          "r": "Quien compra con ayuda pública renuncia a la plusvalía, no a lo que pagó, que recupera actualizado. Para evitar sobreprecios ocultos, la reventa pasa por un registro público de compradores. No los elimina del todo."
+        }
+      ],
+      "fuentes": [
+        { "t": "GOV.UK — Shared ownership homes: how it works", "url": "https://www.gov.uk/shared-ownership-scheme/how-it-works" },
+        { "t": "BOE — Ley 19/2015, de 29 de julio, de incorporación de la propiedad temporal y de la propiedad compartida al Código civil de Cataluña", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-9678" },
+        { "t": "HDB (Singapur) — Conditions after buying: Minimum Occupation Period", "url": "https://www.hdb.gov.sg/residential/buying-a-flat/conditions-after-buying?anchor=mop" },
+        { "t": "CPF Board (Singapur) — A guide to Enhanced CPF Housing Grant and Proximity Housing Grant", "url": "https://www.cpf.gov.sg/member/infohub/educational-resources/a-guide-to-enhanced-cpf-housing-and-proximity-grant" },
+        { "t": "GOV.UK — Lifetime ISA", "url": "https://www.gov.uk/lifetime-isa" },
+        { "t": "Autoridad finlandesa de Competencia y Consumo (KKV) — Right-of-occupancy flats", "url": "https://kkv.fi/en/consumer-affairs/housing/right-of-occupancy-flats" }
+      ]
+    },
+    {
+      "i": 1,
+      "anti": "No proponer nada para que haya más vivienda, o saltarse la ley: recalificar a dedo, legalizar lo construido ilegalmente o bloquear toda obra nueva.",
+      "ideal": "Suelo suficiente por obligación legal: cada ciudad mantiene capacidad edificable para la demanda prevista a 30 años más un margen, y lo que cumple un código claro obtiene licencia en plazo fijo, sin negociar caso a caso.",
+      "titulo": "Suelo por regla: capacidad obligatoria y licencia fija",
+      "slug": "capacidad-obligatoria-de-suelo-y-licencia-por-regla",
+      "resumen": "Lo avanzado pone calendario al suelo e industrializa la obra. El ideal cambia quién tiene que demostrar qué: es la ciudad la que debe probar, con números públicos, que hay sitio para las viviendas que harán falta, y la licencia deja de ser una decisión discrecional para ser la comprobación de que el proyecto cumple unas reglas conocidas de antemano.",
+      "medidas": [
+        "Obligación legal de cada área urbana de tener en todo momento capacidad edificable para la demanda prevista a 3, 10 y 30 años, con un margen adicional, y de publicar el cálculo.",
+        "Código urbanístico con pocas categorías de zona, iguales en todo el país: lo que cumple la norma se autoriza y no se negocia proyecto a proyecto.",
+        "Licencia en un plazo máximo fijado por ley, con declaración responsable y control posterior; si la administración no contesta a tiempo, el permiso se entiende concedido, salvo en suelo protegido.",
+        "Más altura permitida por norma junto a las estaciones de metro, tren y tranvía, y fin de la obligación de construir un mínimo de plazas de aparcamiento.",
+        "Suelo con calendario: quien tiene suelo urbanizable con licencia posible edifica en plazo o lo pone a disposición de quien sí lo haga.",
+        "Construcción industrializada con proyectos tipo homologados una sola vez para todo el país y encargos públicos estables, con las mismas exigencias de calidad y de energía que la obra tradicional."
+      ],
+      "supone": {
+        "personas": "Más viviendas donde hay trabajo y transporte, y menos años de espera entre comprar un suelo y entregar las llaves. Los vecinos opinan cuando se aprueba el plan del barrio, no edificio a edificio: pierden capacidad de frenar una obra concreta que cumple las reglas.",
+        "cuentas": "Cambiar normas cuesta poco dinero público; el gasto está en reforzar las oficinas técnicas municipales y en llevar transporte y servicios a los barrios nuevos. En Auckland, un estudio académico atribuye a la reforma de 2016 unas 21.800 viviendas autorizadas de más en cinco años.",
+        "puesta_en_marcha": "Una ley estatal de suelo con las obligaciones básicas y, sobre todo, leyes autonómicas: el urbanismo es competencia de las comunidades. Los planes municipales necesitarían un plazo para adaptarse. Sin pacto entre Estado, comunidades y ayuntamientos, la norma se queda en principios."
+      },
+      "integra": "De la derecha recoge más oferta, menos trámites y reglas previsibles para quien invierte. De la izquierda, que la ciudad crezca junto al transporte y no dispersa, que se proteja el suelo valioso, que nadie retenga suelo para especular y que la rapidez no rebaje la calidad.",
+      "referencias": [
+        {
+          "lugar": "Nueva Zelanda",
+          "que": "La Declaración Nacional de Desarrollo Urbano (2020) obliga a los municipios a ofrecer en todo momento capacidad suficiente para la demanda de vivienda a 3, 10 y 30 años, con un margen extra del 20 % (15 % a largo plazo), y prohíbe exigir aparcamiento mínimo.",
+          "url": "https://environment.govt.nz/assets/publications/National-Policy-Statement-Urban-Development-2020-11May2022-v2.pdf"
+        },
+        {
+          "lugar": "Auckland (Nueva Zelanda)",
+          "que": "En 2016 la ciudad permitió más densidad en cerca de tres cuartas partes de su suelo residencial. Un estudio publicado en el Journal of Urban Economics atribuye a esa reforma 21.808 viviendas autorizadas adicionales en los cinco años siguientes.",
+          "url": "https://cowles.yale.edu/sites/default/files/2024-02/p1863.pdf"
+        },
+        {
+          "lugar": "Japón",
+          "que": "El folleto del ministerio (2003) describe doce categorías de zona que regulan uso, volumen y altura de los edificios y se aplican de manera uniforme en todo el país; solo un distrito especial aprobado por el municipio puede modificarlas.",
+          "url": "https://www.gdrc.org/uem/observatory/dig-lib/000234477.pdf"
+        },
+        {
+          "lugar": "Alemania",
+          "que": "El «Bau-Turbo», en vigor desde el 30 de octubre de 2025 y hasta finales de 2030, deja a los municipios autorizar viviendas sin aprobar ni cambiar el plan urbanístico. Si el municipio decide usarlo, el proyecto se aprueba tras un examen de tres meses.",
+          "url": "https://www.bundesregierung.de/breg-de/bundesregierung/bundeskanzleramt/wohnungsbau-turbo-2354894"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Construir por regla quita a ayuntamientos y vecinos la capacidad de decidir cómo crece su ciudad.",
+          "r": "La decisión se toma antes y a la vista de todos, al aprobar el plan y el código. Lo que desaparece es el veto proyecto a proyecto. Es una pérdida real de control local, y es deliberada."
+        },
+        {
+          "o": "Más suelo y más altura no garantizan vivienda barata: puede acabar en pisos caros o en suelo retenido a la espera de que suba.",
+          "r": "Por eso el suelo lleva calendario de edificación y el ideal de vivienda pública reserva una parte para asequible. Aun así, más oferta sola no basta a corto plazo: el efecto sobre los precios llega despacio."
+        },
+        {
+          "o": "España ya vivió una burbuja inmobiliaria: facilitar suelo puede repetirla y dañar el territorio.",
+          "r": "La capacidad se liga a la demanda prevista de hogares, no a la expectativa de precios, y se concentra junto al transporte. El suelo protegido queda fuera. El riesgo de sobreconstruir depende de que ese cálculo sea honesto."
+        }
+      ],
+      "fuentes": [
+        { "t": "Ministry for the Environment (Nueva Zelanda) — National Policy Statement on Urban Development 2020 (texto actualizado en mayo de 2022)", "url": "https://environment.govt.nz/assets/publications/National-Policy-Statement-Urban-Development-2020-11May2022-v2.pdf" },
+        { "t": "Greenaway-McGrevy y Phillips — The Impact of Upzoning on Housing Construction in Auckland (Journal of Urban Economics, 2023)", "url": "https://cowles.yale.edu/sites/default/files/2024-02/p1863.pdf" },
+        { "t": "Yale Department of Economics — ficha del estudio sobre Auckland", "url": "https://economics.yale.edu/research/cfp-1863-impact-upzoning-housing-construction-auckland" },
+        { "t": "Ministerio de Territorio, Infraestructuras y Transporte de Japón — Urban Land Use Planning System in Japan (2003)", "url": "https://www.gdrc.org/uem/observatory/dig-lib/000234477.pdf" },
+        { "t": "Oficina del Gabinete de Japón — Building Standards Law: confirmación e inspección de obras", "url": "https://www8.cao.go.jp/kisei-kaikaku/oto/otodb/english/houseido/hou/lh_06010.html" },
+        { "t": "Gobierno federal de Alemania — Schneller Wohnungen bauen dank «Bau-Turbo»", "url": "https://www.bundesregierung.de/breg-de/bundesregierung/bundeskanzleramt/wohnungsbau-turbo-2354894" }
+      ]
+    },
+    {
+      "i": 2,
+      "anti": "Justificar la ocupación de casas ajenas o no ejecutar los desalojos firmes; también amparar desalojos por la fuerza sin juez. O no proponer nada.",
+      "ideal": "Plazos máximos garantizados por ley: la vivienda ocupada se devuelve en días y el impago se resuelve en pocos meses. Entretanto, un fondo público paga la renta al propietario y la administración realoja a la familia vulnerable.",
+      "titulo": "Propiedad garantizada: plazos fijos y renta asegurada",
+      "slug": "plazos-fijos-de-desalojo-y-renta-garantizada",
+      "resumen": "Lo avanzado promete juicios rápidos, seguro de impago y alternativa de vivienda. El ideal lo convierte en garantía: plazos máximos escritos en la ley, renta cobrada desde el primer mes de impago y realojo a cargo de la administración. El propietario deja de pagar el retraso de la justicia y la familia vulnerable deja de depender de que el proceso se alargue.",
+      "medidas": [
+        "Ocupación ilegal: decisión sobre el desalojo en 48 horas desde que el dueño acredita que la vivienda es suya, y ejecución en un máximo de 7 días, sea vivienda habitual, segunda residencia o piso vacío.",
+        "Impago de alquiler: plazo máximo legal para todo el procedimiento, con juzgados especializados y medios para cumplirlo. Si se supera, el Estado compensa al propietario por el retraso.",
+        "Garantía pública gratuita de rentas en los contratos registrados: si el inquilino deja de pagar, el fondo paga al propietario desde el primer mes y después reclama la deuda a quien pueda pagarla.",
+        "La vulnerabilidad la atiende la administración, no el propietario: los servicios sociales realojan dentro del mismo plazo, y si no hay vivienda disponible la administración paga la renta mientras tanto.",
+        "Registro público de contratos de alquiler y fianzas, obligatorio para acceder a la garantía y a las ventajas fiscales.",
+        "Ningún desalojo al margen del juez: quien coacciona o echa a alguien por la fuerza responde ante la ley, sea quien sea el ocupante."
+      ],
+      "supone": {
+        "personas": "El pequeño propietario sabe cuánto puede tardar como máximo en recuperar su casa y que cobrará mientras tanto, así que alquilar da menos miedo y salen más pisos al mercado. La familia que no puede pagar no acaba en la calle, pero tampoco se queda en la casa de otro.",
+        "cuentas": "El fondo de garantía y el realojo son gasto público. En Francia, la garantía Visale, gratuita para el casero, cubre hasta 36 mensualidades impagadas en el alquiler privado. No hay estimación verificada para España: depende de cuánto impago haya y de cuánta deuda se recupere después.",
+        "puesta_en_marcha": "Reformar las leyes procesales civil y penal y la de arrendamientos, y dotar de más medios a los juzgados. Desde abril de 2025 el allanamiento y la usurpación ya pueden ir por juicio rápido. Faltaría fijar plazos máximos también en el impago y crear el fondo con comunidades y ayuntamientos."
+      },
+      "integra": "De la derecha recoge la defensa de la propiedad, el cumplimiento rápido de la ley y de las sentencias y la protección del pequeño propietario. De la izquierda, que nadie quede en la calle y que la vulnerabilidad se atienda con dinero público, no a costa de un particular.",
+      "referencias": [
+        {
+          "lugar": "Francia",
+          "que": "La ley de 27 de julio de 2023 da al prefecto 48 horas para decidir sobre el desalojo de una vivienda ocupada. El plazo para salir no baja de 24 horas (7 días si no es el domicilio de quien lo pide) y vale también para viviendas vacías.",
+          "url": "https://www.anil.org/aj-occupation-illicite-logement/"
+        },
+        {
+          "lugar": "Inglaterra y Gales (Reino Unido)",
+          "que": "El dueño puede pedir una orden provisional de posesión en los 28 días siguientes a descubrir la ocupación. Una vez notificada, los ocupantes deben salir en 24 horas y no volver en 12 meses; si no, se exponen a prisión.",
+          "url": "https://www.gov.uk/squatting-law/remove-squatters"
+        },
+        {
+          "lugar": "España",
+          "que": "La Ley Orgánica 1/2025 añadió el allanamiento de morada y la usurpación de inmuebles a los delitos que pueden tramitarse por juicio rápido (artículo 795 de la Ley de Enjuiciamiento Criminal). La Fiscalía fijó criterios en su Circular 1/2025.",
+          "url": "https://www.boe.es/boe/dias/2025/08/25/pdfs/BOE-A-2025-17153.pdf"
+        },
+        {
+          "lugar": "Francia (Action Logement)",
+          "que": "La garantía Visale es gratuita para el propietario: Action Logement le paga hasta 36 mensualidades de alquiler impagadas en el parque privado y cubre también los desperfectos y los procedimientos judiciales.",
+          "url": "https://www.actionlogement.fr/garantie-visale-proprietaire"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Desalojos tan rápidos pueden dejar en la calle a familias con niños antes de que nadie valore su situación.",
+          "r": "El plazo obliga también a la administración: el realojo corre en paralelo. El límite es real: sin vivienda social suficiente, ese plazo solo se cumple pagando alojamiento temporal, que es caro."
+        },
+        {
+          "o": "Un fondo público que paga los impagos anima a no pagar y a alquilar sin mirar a quién; al final lo pagan los contribuyentes.",
+          "r": "El fondo reclama la deuda al inquilino que puede pagar y solo cubre contratos registrados y rentas hasta un tope. Aun así habrá pérdidas: es el precio que se acepta para que más pisos salgan al alquiler."
+        },
+        {
+          "o": "Decidir un desalojo en 48 horas puede chocar con la inviolabilidad del domicilio y con el derecho a defenderse ante un juez.",
+          "r": "En España entrar en un domicilio exige autorización judicial. El plazo tendría que cumplirlo un juez de guardia, con audiencia breve al ocupante, y no una orden administrativa como la francesa. Exige más juzgados."
+        }
+      ],
+      "fuentes": [
+        { "t": "ANIL (Francia) — Protéger les logements contre l'occupation illicite: análisis de la ley de 27 de julio de 2023", "url": "https://www.anil.org/aj-occupation-illicite-logement/" },
+        { "t": "GOV.UK — Squatting and the law: remove squatters", "url": "https://www.gov.uk/squatting-law/remove-squatters" },
+        { "t": "GOV.UK — Squatting and the law", "url": "https://www.gov.uk/squatting-law" },
+        { "t": "BOE — Circular 1/2025 de la Fiscalía General del Estado, sobre los delitos de usurpación y allanamiento de morada", "url": "https://www.boe.es/boe/dias/2025/08/25/pdfs/BOE-A-2025-17153.pdf" },
+        { "t": "BOE — Ley Orgánica 1/2025, de 2 de enero, de medidas en materia de eficiencia del Servicio Público de Justicia", "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2025-76" },
+        { "t": "Action Logement — Garantie Visale para el propietario", "url": "https://www.actionlogement.fr/garantie-visale-proprietaire" }
+      ]
+    },
+    {
+      "i": 3,
+      "anti": "No querer saber cuántas casas están vacías o son turísticas, tolerar el alquiler turístico ilegal o quitar viviendas a sus dueños sin indemnizar.",
+      "ideal": "Cada vivienda con un uso conocido y un número de registro: la vacía sin causa paga un recargo que crece, la que se rehabilita para alquiler asequible recibe ayuda, y el piso turístico solo existe con licencia dentro de un cupo.",
+      "titulo": "Censo de usos: cada casa cuenta",
+      "slug": "censo-de-usos-recargo-a-la-vacia-y-cupo-turistico",
+      "resumen": "Lo avanzado paga la rehabilitación a cambio de alquiler barato y distingue con impuestos vivir de especular. El ideal lo hace sistema: un censo que dice cada año para qué se usa cada vivienda, una regla automática para la vacía sin causa, una oferta pública para ponerla en uso y un cupo turístico por barrio. Nadie pierde su casa: lo que cambia es el coste de tenerla sin uso.",
+      "medidas": [
+        "Censo público del uso de cada vivienda (habitual, alquiler, segunda residencia, turística o vacía), cruzando padrón, catastro y consumos de agua y luz, y actualizado cada año.",
+        "Recargo anual a la vivienda vacía sin causa durante más de un año en zonas con falta de vivienda, mayor desde el segundo año. Exentas las que están en obras, en venta o alquiler a precio de mercado, o no son habitables.",
+        "Ayuda a fondo perdido para rehabilitar viviendas vacías, con la condición de vivir en ellas o alquilarlas a precio asequible durante un plazo largo; si se incumple, se devuelve.",
+        "Gestión pública voluntaria: el dueño cede el piso vacío a una agencia pública que lo reforma, lo alquila a precio asequible y le garantiza el cobro.",
+        "Piso turístico solo con número de registro que las plataformas muestran y comprueban, y con envío mensual de los datos de reservas a la administración. Anuncio sin número, anuncio retirado.",
+        "Cupo de licencias turísticas por barrio fijado por cada ayuntamiento según la tensión del alquiler, con licencias temporales que se renuevan o se extinguen."
+      ],
+      "supone": {
+        "personas": "Más pisos para vivir en las ciudades sin esperar a que se construyan. El dueño de un piso vacío recibe una oferta clara: ayuda y cobro garantizado si lo pone en uso, o recargo si lo deja cerrado sin motivo. La segunda residencia declarada no se considera vacía.",
+        "cuentas": "En Francia el recargo es del 17 % del valor de alquiler de la vivienda el primer año y del 34 % después, y lo recaudado va a la agencia estatal de mejora de la vivienda. Irlanda paga hasta 50.000 € por vivienda vacía rehabilitada, 70.000 si está en ruina. No hay cifra verificada de cuántas se movilizarían en España.",
+        "puesta_en_marcha": "Hace falta una definición legal única de vivienda vacía y permiso para cruzar padrón, catastro y suministros. El recargo iría en el impuesto municipal de bienes inmuebles. Las reglas europeas de transparencia del alquiler turístico se aplican desde el 20 de mayo de 2026; el cupo es decisión municipal y autonómica."
+      },
+      "integra": "Respeta lo que pide la derecha: no expropia, solo grava la vivienda vacía sin causa, paga la rehabilitación y da reglas claras al turismo legal. Y lo que pide la izquierda: que las casas sirvan para vivir y que tener un piso cerrado donde falta vivienda no salga gratis.",
+      "referencias": [
+        {
+          "lugar": "Francia",
+          "que": "La tasa sobre viviendas vacías grava las que llevan al menos un año sin uso en zonas urbanas de más de 50.000 habitantes con falta de vivienda: 17 % del valor de alquiler el primer año y 34 % los siguientes. Exime la vacía por causas ajenas al dueño.",
+          "url": "https://www.impots.gouv.fr/particulier/questions/taxe-sur-les-logements-vacants-tlv-et-taxe-dhabitation-sur-les-logements"
+        },
+        {
+          "lugar": "Irlanda",
+          "que": "La ayuda para rehabilitar viviendas vacías da hasta 50.000 € (hasta 70.000 € si el inmueble está en ruina) por convertir en hogar permanente o en vivienda de alquiler un inmueble vacío al menos dos años y construido antes de 2008.",
+          "url": "https://www.gov.ie/en/department-of-housing-local-government-and-heritage/services/vacant-property-refurbishment-grant"
+        },
+        {
+          "lugar": "Unión Europea",
+          "que": "Desde el 20 de mayo de 2026, donde haya registro, cada alojamiento de corta estancia recibe un identificador único que las plataformas deben mostrar y comprobar. Los datos de reservas llegan cada mes a las autoridades por una ventanilla digital única.",
+          "url": "https://transition-pathways.europa.eu/construction/news-publications/short-term-rentals-eu-transparency-rules-now-force"
+        },
+        {
+          "lugar": "Vancouver (Canadá)",
+          "que": "El impuesto municipal a las viviendas vacías grava con el 3 % del valor fiscal de la propiedad las viviendas declaradas o consideradas vacías durante el año de referencia 2025.",
+          "url": "https://vancouver.ca/home-property-development/empty-homes-tax.aspx"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Mucha vivienda vacía está donde nadie quiere vivir o no es habitable: gravarla no crea oferta en las ciudades.",
+          "r": "Cierto. Por eso el recargo solo rige en zonas con falta de vivienda y exime la inhabitable. Movilizar lo vacío ayuda, pero no sustituye a construir: es un complemento del ideal de suelo."
+        },
+        {
+          "o": "Cruzar padrón y consumos para saber qué casa está vacía invade la intimidad y trata al propietario como sospechoso.",
+          "r": "El cruce se limita a saber si la vivienda tiene uso, no quién vive ni cuánto consume, y el dueño puede alegar antes de cualquier recargo. Aun así es una cesión de privacidad que la ley debe acotar."
+        },
+        {
+          "o": "Limitar los pisos turísticos quita ingresos a familias y a municipios que viven del turismo.",
+          "r": "El cupo lo fija cada ayuntamiento según su tensión de alquiler: donde sobra vivienda puede ser amplio. Lo que no cabe en ningún sitio es la oferta sin registrar. Quien pierda la licencia pierde ingresos, y se reconoce."
+        }
+      ],
+      "fuentes": [
+        { "t": "impots.gouv.fr — Taxe sur les logements vacants (TLV) et taxe d'habitation sur les logements vacants (THLV)", "url": "https://www.impots.gouv.fr/particulier/questions/taxe-sur-les-logements-vacants-tlv-et-taxe-dhabitation-sur-les-logements" },
+        { "t": "Gobierno de Irlanda — Vacant Property Refurbishment Grant", "url": "https://www.gov.ie/en/department-of-housing-local-government-and-heritage/services/vacant-property-refurbishment-grant" },
+        { "t": "Comisión Europea — Short-term rentals: EU transparency rules now in force", "url": "https://transition-pathways.europa.eu/construction/news-publications/short-term-rentals-eu-transparency-rules-now-force" },
+        { "t": "Comisión Europea — EU Regulation on data collection and sharing for short-term accommodation rentals", "url": "https://transition-pathways.europa.eu/tourism/legislation/eu-regulation-data-collection-and-sharing-short-term-accommodation-rentals" },
+        { "t": "City of Vancouver — Empty Homes Tax", "url": "https://vancouver.ca/home-property-development/empty-homes-tax.aspx" }
+      ]
+    },
+    {
+      "i": 4,
+      "anti": "No proponer nada sobre el alquiler, o romper las reglas: animar a dejar de pagar la renta o permitir subidas y expulsiones sin contrato ni juez.",
+      "ideal": "Un alquiler a coste como tercera vía: la renta cubre construir y mantener, sin beneficio, con contrato indefinido y subidas ligadas a la inflación. Y una ayuda como derecho para que nadie pague más del 30 % de sus ingresos.",
+      "titulo": "Alquiler a coste y el 30 % como derecho",
+      "slug": "alquiler-a-coste-y-tope-del-30-por-ciento-de-ingresos",
+      "resumen": "Lo avanzado limita precios en zonas tensionadas y lo evalúa. El ideal añade lo que falta para no depender de los topes: un sector entero de alquiler cuya renta se fija por lo que cuesta la vivienda y no por lo que aguanta el mercado, una ayuda que es un derecho y no una convocatoria que se agota, y una garantía pública que sustituye al aval de los padres.",
+      "medidas": [
+        "Sector de alquiler a coste, público o sin ánimo de lucro: la renta se calcula sobre lo que cuesta construir, financiar y mantener el edificio a muy largo plazo, sin beneficio del promotor.",
+        "Contratos indefinidos en el alquiler a coste y contratos largos en el privado, con subidas anuales ligadas a un índice público y conocidas de antemano.",
+        "Ayuda al alquiler como derecho y no como convocatoria: cubre la diferencia entre el 30 % de los ingresos del hogar y una renta de referencia de la zona, se pida cuando se pida.",
+        "Garantía pública gratuita que sustituye al aval familiar y a los meses extra de fianza: quien no tiene padres avalistas alquila igual, y el propietario cobra seguro.",
+        "Índice público de precios en todo el país, hecho con contratos reales, y ventaja fiscal para quien alquile por debajo del índice.",
+        "Topes de renta solo en zonas tensionadas, temporales y con evaluación pública anual de su efecto sobre la oferta: se mantienen si funcionan y se retiran si la reducen."
+      ],
+      "supone": {
+        "personas": "Quien alquila sabe que su casa no vence a los pocos años y cuánto subirá la renta. Las rentas medias que no entran en vivienda social tienen una opción por debajo del mercado. Y un mal mes no significa perder la casa: la ayuda llega por derecho, sin esperar a que se abra un plazo.",
+        "cuentas": "El alquiler a coste se paga con sus propias rentas a muy largo plazo; al principio necesita suelo y crédito público barato. En Irlanda la renta debe quedar al menos un 25 % por debajo del mercado. La ayuda como derecho es el gasto mayor y crece si suben los alquileres. No hay estimación verificada para España.",
+        "puesta_en_marcha": "Una ley estatal que cree la figura del alquiler a coste y su financiación y convierta la ayuda en un derecho exigible; la gestión es de comunidades y ayuntamientos. El parque a coste tarda años en levantarse: hasta entonces, lo que alivia son la ayuda y la garantía pública."
+      },
+      "integra": "De la izquierda recoge un alquiler estable y fuera de la especulación, y el 30 % como derecho. De la derecha, que no se interviene con carácter general el precio del pequeño propietario, que este cobra seguro, y que los topes se miden con datos y se retiran si dañan la oferta.",
+      "referencias": [
+        {
+          "lugar": "Irlanda",
+          "que": "En el «cost rental» la renta se basa en el coste de construir, gestionar y mantener la vivienda a 40 años o más, sin beneficio del promotor, y debe quedar al menos un 25 % bajo el mercado. Tras seis meses, el inquilino puede quedarse sin límite de tiempo.",
+          "url": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/"
+        },
+        {
+          "lugar": "Finlandia",
+          "que": "En el «derecho de ocupación» el residente paga normalmente el 15 % del precio del piso y una cuota mensual que no puede superar el alquiler de pisos similares del municipio. No puede comprarlo; al irse recupera lo pagado, actualizado con un índice de costes.",
+          "url": "https://kkv.fi/en/consumer-affairs/housing/right-of-occupancy-flats"
+        },
+        {
+          "lugar": "Francia (Action Logement)",
+          "que": "Con la garantía Visale, Action Logement actúa como avalista del inquilino sin coste para el propietario y responde de hasta 36 mensualidades impagadas en el alquiler privado.",
+          "url": "https://www.actionlogement.fr/garantie-visale-proprietaire"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "Una ayuda que cubre la diferencia hasta el 30 % puede acabar en el bolsillo del casero: si el Estado paga, el alquiler sube.",
+          "r": "El riesgo es real. Se acota calculando la ayuda sobre una renta de referencia y no sobre la pactada: lo que supere el índice lo paga el inquilino. Solo se contiene del todo si además crece la oferta."
+        },
+        {
+          "o": "El alquiler a coste tarda décadas en tener tamaño y compite por el mismo suelo y el mismo dinero que la vivienda social.",
+          "r": "Es cierto que no resuelve la urgencia. Se dirige a rentas medias que no entran en vivienda social y se sostiene con sus rentas, no con subvención permanente. El reparto del suelo entre ambos es una decisión política."
+        },
+        {
+          "o": "Los topes de renta reducen la oferta y deterioran las viviendas, aunque sean temporales.",
+          "r": "El ideal no los da por buenos: los somete a evaluación pública con datos abiertos y obliga a retirarlos si la oferta cae. La regla es medir antes de mantenerlos, y aceptar el resultado."
+        }
+      ],
+      "fuentes": [
+        { "t": "Citizens Information (Irlanda) — Cost rental housing", "url": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/" },
+        { "t": "Autoridad finlandesa de Competencia y Consumo (KKV) — Right-of-occupancy flats", "url": "https://kkv.fi/en/consumer-affairs/housing/right-of-occupancy-flats" },
+        { "t": "Housing2030 — Right of occupancy housing in Finland", "url": "https://www.housing2030.org/project/right-of-occupancy-housing-in-finland/" },
+        { "t": "Action Logement — Garantie Visale para el propietario", "url": "https://www.actionlogement.fr/garantie-visale-proprietaire" }
+      ]
+    },
+    {
+      "i": 5,
+      "anti": "Vender la vivienda pública o dejar que se degrade, adjudicarla sin criterios públicos, negar techo a quien está en la calle, o no proponer nada.",
+      "ideal": "Un parque asequible permanente por encima de la media europea, que nunca se vende y crece solo: las rentas de los edificios ya pagados financian los nuevos, con suelo reservado por ley y vivienda primero para quien no tiene hogar.",
+      "titulo": "Parque permanente que se financia y crece solo",
+      "slug": "parque-asequible-permanente-con-fondo-rotatorio",
+      "resumen": "Lo avanzado aspira a acercarse a la media europea con una entidad pública estable. El ideal apunta más alto y resuelve de dónde sale el dinero después: nada se vende, las rentas de lo ya pagado construyen lo siguiente y la ley reserva suelo en cada desarrollo nuevo. El parque deja de depender del presupuesto de cada año y del gobierno de turno.",
+      "medidas": [
+        "Blindaje legal: ninguna vivienda pública o protegida se vende al mercado libre ni pierde su protección; solo puede pasar a otra entidad pública o sin ánimo de lucro.",
+        "Fondo rotatorio: cuando un edificio termina de pagar su préstamo, la renta no baja de golpe; la parte que ya no va al banco entra en un fondo que rehabilita y construye más viviendas.",
+        "Reserva de suelo por ley: en los nuevos desarrollos de las ciudades con falta de vivienda, la mayor parte de la superficie residencial se destina a vivienda asequible permanente.",
+        "Meta anual pública de viviendas por territorio, con una entidad estatal estable que construye y compra junto a comunidades y ayuntamientos, y un organismo independiente que audita si se cumple.",
+        "Mezcla de rentas en cada edificio y adjudicación por lista pública con criterios conocidos; quien mejora de ingresos no pierde la casa, paga una renta mayor.",
+        "Vivienda primero: a la persona sin hogar se le ofrece una vivienda estable con apoyo social desde el primer día, no al final de un recorrido por albergues."
+      ],
+      "supone": {
+        "personas": "Una parte amplia de la población, y no solo la más pobre, puede vivir de alquiler asequible sin fecha de caducidad. Quien entra no teme que su edificio se venda. Y quien duerme en la calle recibe primero una casa y después la ayuda que necesite.",
+        "cuentas": "Es la medida más cara del tema: suelo, obra y décadas de constancia. Viena reúne unas 220.000 viviendas municipales y unas 200.000 subvencionadas. El fondo rotatorio reduce con el tiempo la dependencia del presupuesto, pero los primeros años los paga el Estado. No hay cifra verificada para España.",
+        "puesta_en_marcha": "Una ley estatal que fije la protección permanente y la meta anual, un pacto de financiación a largo plazo con comunidades y ayuntamientos, que tienen la competencia, y la reserva de suelo en las leyes urbanísticas. El plazo realista se mide en décadas, no en legislaturas."
+      },
+      "integra": "De la izquierda recoge la vivienda como derecho y un parque público amplio que no se privatiza. De la derecha, que el dinero público no se pierde: queda como patrimonio, se audita, tiende a financiarse solo, lo construyen empresas por concurso y no se interviene la vivienda privada.",
+      "referencias": [
+        {
+          "lugar": "Viena (Austria)",
+          "que": "La ciudad cuenta con unas 220.000 viviendas municipales y otras 200.000 de cooperativas construidas con subvención municipal. Alrededor de la mitad de los vieneses vive en unas u otras.",
+          "url": "https://socialhousing.wien/"
+        },
+        {
+          "lugar": "Viena (Austria): política de suelo",
+          "que": "Desde noviembre de 2018 existe la categoría urbanística «vivienda subvencionada»: por regla general, dos tercios de la superficie útil residencial deben ser vivienda subvencionada. El fondo municipal de vivienda guarda unos 3,1 millones de m² de suelo.",
+          "url": "https://socialhousing.wien/tools/urban-development-and-land-policy"
+        },
+        {
+          "lugar": "Singapur",
+          "que": "A finales de marzo de 2026, el 75,7 % de la población residente vivía en pisos del organismo público de vivienda (HDB). Casi todos son pisos vendidos a sus ocupantes (72,7 % de la población), no de alquiler: es un modelo de propiedad, no de parque en alquiler.",
+          "url": "https://www.hdb.gov.sg/-/media/hdb-pulse/reports/annual-reports-and-financial-statements/HDB-KeyStats-2026.pdf"
+        },
+        {
+          "lugar": "Irlanda",
+          "que": "El Gobierno se ha fijado el objetivo de 18.000 viviendas de alquiler a coste para 2030. Las ofrecen entidades de vivienda aprobadas, ayuntamientos y la agencia pública de suelo (Land Development Agency).",
+          "url": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/"
+        }
+      ],
+      "objeciones": [
+        {
+          "o": "El coste es enorme y el resultado lento: España parte de muy lejos y el dinero público es limitado.",
+          "r": "No hay atajo: un parque así se levanta durante décadas. Prohibir la venta y reinvertir las rentas evita que el esfuerzo se pierda, como ocurrió con la vivienda protegida que pasó al mercado libre al cabo de unos años."
+        },
+        {
+          "o": "Los grandes parques públicos pueden acabar en guetos, viviendas degradadas y listas de espera poco claras.",
+          "r": "La mezcla de rentas, la lista pública, la auditoría independiente y los gestores sin ánimo de lucro reducen ese riesgo; no lo eliminan. Exige gastar en mantenimiento cada año, no solo en inaugurar."
+        },
+        {
+          "o": "El Estado como promotor desplaza a la iniciativa privada y compite con ventaja por el suelo.",
+          "r": "La obra la hacen empresas privadas por concurso, y la reserva afecta a los desarrollos nuevos, no a lo ya edificado. Sí reduce el margen del promotor en ese suelo: es una elección consciente."
+        }
+      ],
+      "fuentes": [
+        { "t": "Ciudad de Viena — Social Housing in Vienna", "url": "https://socialhousing.wien/" },
+        { "t": "Ciudad de Viena — Urban development and land policy", "url": "https://socialhousing.wien/tools/urban-development-and-land-policy" },
+        { "t": "HDB (Singapur) — Key Statistics 2026", "url": "https://www.hdb.gov.sg/-/media/hdb-pulse/reports/annual-reports-and-financial-statements/HDB-KeyStats-2026.pdf" },
+        { "t": "Citizens Information (Irlanda) — Cost rental housing", "url": "https://www.citizensinformation.ie/en/housing/renting-a-home/cost-rental-housing/" }
+      ]
+    }
+  ]
+}

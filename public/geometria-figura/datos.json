@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "origen": "public/observatorio-polarizacion/index.html (PARTIDOS y TEMAS)",
   "partidos": [
     {
@@ -55,9 +55,11 @@
       "q": "¿Cómo se entra, quién se queda y cómo se convive?",
       "c": "#5FB3E6",
       "niv": [
+        "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
         "Saber quién entra, salvar vidas en el mar, proteger a quien huye y cumplir la ley.",
         "Vías legales que funcionan, asilo en plazos razonables, retornos efectivos e integración con idioma y empleo.",
-        "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias."
+        "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias.",
+        "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."
       ],
       "ejes": [
         {
@@ -68,9 +70,11 @@
           "n": "Cooperación con los países de origen y tránsito",
           "d": "Que nadie tenga que jugarse la vida para salir de su país: acuerdos con los países de donde se sale y por donde se pasa.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Ayuda al desarrollo y acuerdos de readmisión.",
             "Acuerdos que unen contratación en origen, inversión y retornos.",
-            "Alianzas estables con cada país de origen y tránsito, evaluadas por sus resultados y por el respeto de los derechos."
+            "Alianzas estables con cada país de origen y tránsito, evaluadas por sus resultados y por el respeto de los derechos.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -81,9 +85,11 @@
           "n": "Control de fronteras y lucha contra las mafias",
           "d": "Saber quién entra, por dónde y cómo, y perseguir a las redes que trafican con personas.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Registrar e identificar a quien llega.",
             "Una agencia única, salvamento reforzado y persecución de las redes de tráfico.",
-            "Control integrado con Europa y los países de tránsito, con datos públicos de llegadas y de muertes en las rutas."
+            "Control integrado con Europa y los países de tránsito, con datos públicos de llegadas y de muertes en las rutas.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -94,9 +100,11 @@
           "n": "Seguridad y retorno",
           "d": "Que quien no tiene derecho a quedarse vuelva, y que el delito tenga consecuencias.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Expulsar a quien comete delitos graves.",
             "Retornos efectivos tras una decisión firme, y juicios rápidos.",
-            "Un retorno con garantías y acuerdos que funcionan, y datos públicos con contexto para desmontar bulos."
+            "Un retorno con garantías y acuerdos que funcionan, y datos públicos con contexto para desmontar bulos.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -107,9 +115,11 @@
           "n": "Convivencia y normas comunes",
           "d": "Las mismas reglas para todos y barrios donde se viva bien juntos.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Las mismas leyes para todos.",
             "Mediación vecinal e inversión en los barrios con más concentración.",
-            "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito."
+            "Barrios mixtos donde se convive bien, con la misma firmeza contra el racismo que contra el delito.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -120,9 +130,11 @@
           "n": "Economía, demografía y pensiones",
           "d": "El papel de la migración en el empleo, la natalidad y las cuentas públicas.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Reconocer el papel de la inmigración en el empleo.",
             "Un plan de necesidades de mano de obra pactado con empresas y sindicatos.",
-            "Natalidad, empleo e inmigración planificados juntos a diez años."
+            "Natalidad, empleo e inmigración planificados juntos a diez años.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -133,9 +145,11 @@
           "n": "Integración: idioma, empleo, vivienda y escuela",
           "d": "Que quien llega pueda formar parte de verdad.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Escolarizar a los menores y ofrecer clases de idioma.",
             "Un itinerario de acogida con idioma, empleo y vivienda.",
-            "Integración medida por resultados —empleo, escuela, convivencia— y repartida por el territorio para evitar guetos."
+            "Integración medida por resultados —empleo, escuela, convivencia— y repartida por el territorio para evitar guetos.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -146,9 +160,11 @@
           "n": "Asilo y derechos humanos",
           "d": "Proteger a quien huye de una guerra o de una persecución, y a los menores que llegan solos.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Cumplir el derecho de asilo y proteger a los menores.",
             "Resolver el asilo en meses, con garantías, y un reparto estable de los menores.",
-            "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos."
+            "Un sistema de protección rápido, justo y europeo, en el que la decisión se cumple en los dos sentidos.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -159,102 +175,104 @@
           "n": "Vías legales para venir a trabajar o estudiar",
           "d": "Puertas ordenadas para entrar con papeles.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Mantener las vías de arraigo que ya existen.",
             "Visados para buscar empleo, cupos por sectores y títulos homologados en meses.",
-            "Una entrada legal ágil y previsible que haga innecesarias las regularizaciones extraordinarias."
+            "Una entrada legal ágil y previsible que haga innecesarias las regularizaciones extraordinarias.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         }
       ],
       "v": {
         "pp": [
-          7,
-          8,
-          9,
-          8,
-          5,
-          6,
-          3,
-          6
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          0,
+          1
         ],
         "psoe": [
-          8,
-          6,
-          4,
-          4,
-          8,
-          6,
-          7,
-          8
+          2,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2,
+          2
         ],
         "vox": [
-          4,
-          10,
-          10,
-          8,
+          1,
+          3,
+          3,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fa": [
+          1,
+          0,
+          0,
+          1,
+          2,
+          2,
+          2,
+          2
+        ],
+        "erc": [
+          1,
+          1,
+          0,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "junts": [
+          0,
+          2,
+          2,
+          2,
+          1,
+          2,
+          0,
+          1
+        ],
+        "bildu": [
+          1,
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          2
+        ],
+        "pnv": [
+          1,
+          1,
+          1,
+          1,
           2,
           2,
           1,
           2
         ],
-        "fa": [
-          6,
-          3,
-          2,
-          5,
-          7,
-          8,
-          9,
-          9
-        ],
-        "erc": [
-          4,
-          4,
-          3,
-          7,
-          6,
-          8,
-          7,
-          7
-        ],
-        "junts": [
-          3,
-          7,
-          7,
-          8,
-          5,
-          7,
-          3,
-          6
-        ],
-        "bildu": [
-          5,
-          3,
-          2,
-          6,
-          6,
-          8,
-          9,
-          8
-        ],
-        "pnv": [
-          6,
-          5,
-          6,
-          6,
-          8,
-          8,
-          6,
-          8
-        ],
         "pod": [
-          4,
+          1,
+          0,
+          0,
           1,
           1,
-          4,
-          6,
-          7,
-          10,
-          9
+          2,
+          3,
+          2
         ]
       }
     },
@@ -264,9 +282,11 @@
       "q": "¿Quién presta los servicios, y cómo se pagan?",
       "c": "#E07BAE",
       "niv": [
+        "No proponer nada sobre sanidad, educación y cuidados, o romper la base: negar la atención a quien vive aquí, ocultar los datos o incumplir lo que la ley ya garantiza.",
         "Que todo el mundo tenga médico, escuela y cuidados, con esperas que no pongan en riesgo la salud.",
         "Profesionales suficientes, financiación estable y resultados medidos y publicados en cada centro.",
-        "Una red universal que combina lo mejor de la gestión pública y la colaboración privada evaluada, con el mismo servicio en un pueblo que en una capital."
+        "Una red universal que combina lo mejor de la gestión pública y la colaboración privada evaluada, con el mismo servicio en un pueblo que en una capital.",
+        "Una sola red universal con las mismas reglas para todo centro: plazos máximos que se cumplen solos, datos abiertos de resultado y coste, elección real y dinero repartido según la necesidad, igual en un pueblo que en una capital."
       ],
       "ejes": [
         {
@@ -277,10 +297,14 @@
           "n": "Colaboración con centros privados",
           "d": "Usar centros privados pagados con dinero público.",
           "niv": [
+            "No decir nada sobre los conciertos, o romper la base: dar dinero público a centros sin control ni evaluación, o incumplir contratos ya firmados.",
             "Conciertos puntuales para reducir esperas.",
             "Conciertos evaluados por coste y resultado.",
-            "Colaboración solo donde mejora lo medido, con reversión y sin seleccionar a los pacientes o alumnos rentables."
-          ]
+            "Colaboración solo donde mejora lo medido, con reversión y sin seleccionar a los pacientes o alumnos rentables.",
+            "Un único contrato para todo centro pagado con impuestos: mismo precio por el mismo servicio, cuentas abiertas, admisión sin filtros ni cuotas y no prórroga automática si dos evaluaciones seguidas salen peor que la red pública."
+          ],
+          "it": "Contrato único para todo centro pagado con impuestos",
+          "is": "contrato-unico-centros-pagados-con-impuestos"
         },
         {
           "l": [
@@ -290,10 +314,14 @@
           "n": "Contención del gasto y de los impuestos",
           "d": "No gastar de más ni subir impuestos sin necesidad.",
           "niv": [
+            "No proponer nada, o romper la base: gastar sin control ni cuentas, justificar el fraude o bajar impuestos sin decir qué servicio se deja de pagar.",
             "No gastar de más.",
             "Central de compras, digitalización y auditoría del gasto.",
-            "Cada euro evaluado antes de subir la presión fiscal media."
-          ]
+            "Cada euro evaluado antes de subir la presión fiscal media.",
+            "Revisar todo el gasto por turnos, con una opción de ahorro obligada; financiar solo lo que demuestra su valor; y no subir la presión fiscal media sin haber respondido antes, una a una y en público, a las propuestas de ahorro."
+          ],
+          "it": "Evaluar antes de gastar y antes de subir impuestos",
+          "is": "evaluar-antes-de-gastar-y-de-subir-impuestos"
         },
         {
           "l": [
@@ -303,10 +331,14 @@
           "n": "Libertad de elección",
           "d": "Que cada persona elija médico, hospital o colegio.",
           "niv": [
+            "No proponer nada, o romper la base: negar toda elección a la persona, o una «elección» en la que es el centro quien escoge a quién admite.",
             "Elegir médico de cabecera.",
             "Elegir médico, hospital y colegio dentro de la red.",
-            "Libertad de elección informada por datos públicos de resultados."
-          ]
+            "Libertad de elección informada por datos públicos de resultados.",
+            "Elegir cualquier centro de la red pagada con dinero público en toda España, con el dinero siguiendo a la persona, un comparador oficial de resultados y un solo régimen sanitario, al que el mutualismo se incorpora por fases."
+          ],
+          "it": "Elección informada en toda la red y un solo régimen",
+          "is": "eleccion-informada-en-toda-la-red-y-un-solo-regimen"
         },
         {
           "l": [
@@ -316,10 +348,14 @@
           "n": "Evaluación y resultados",
           "d": "Medir y publicar: listas de espera, calidad y coste.",
           "niv": [
+            "No proponer nada, o romper la base: ocultar o maquillar las listas de espera y negarse a publicar los resultados de los centros.",
             "Publicar las listas de espera.",
             "Indicadores públicos de calidad y coste por centro.",
-            "Plazos máximos garantizados por ley y evaluación independiente de todos los centros, sea cual sea su gestión."
-          ]
+            "Plazos máximos garantizados por ley y evaluación independiente de todos los centros, sea cual sea su gestión.",
+            "Plazos máximos que se cumplen solos: vencido el plazo, la persona es atendida en otro centro sin coste ni reclamación. Y un evaluador independiente que publica, centro a centro, resultados, coste y lo que cuentan los pacientes."
+          ],
+          "it": "Garantía de plazo automática y evaluador independiente",
+          "is": "garantia-de-plazo-automatica-y-evaluador-independiente"
         },
         {
           "l": [
@@ -329,10 +365,14 @@
           "n": "Profesionales suficientes",
           "d": "Médicos, docentes y cuidadores suficientes, y con condiciones para quedarse.",
           "niv": [
+            "No proponer nada, o romper la base: dejar plazas sin cubrir de forma indefinida o encadenar contratos temporales al margen de la ley.",
             "Cubrir las plazas vacantes.",
             "Plazas de formación según necesidades y una carrera profesional.",
-            "Plantillas calculadas por población y necesidad, con incentivos para quedarse en las plazas difíciles."
-          ]
+            "Plantillas calculadas por población y necesidad, con incentivos para quedarse en las plazas difíciles.",
+            "Un órgano independiente calcula cada tres años cuántos profesionales harán falta a 15 años vista; la formación se financia según ese cálculo, y las plazas difíciles llevan un plus que crece con la lejanía y la permanencia."
+          ],
+          "it": "Plantillas previstas a 15 años y plus por permanencia",
+          "is": "plantillas-a-15-anos-y-plus-por-lejania-y-permanencia"
         },
         {
           "l": [
@@ -342,10 +382,14 @@
           "n": "Territorio y cercanía",
           "d": "Que el servicio llegue igual a un pueblo que a una capital, y que se decida cerca.",
           "niv": [
+            "No proponer nada, o romper la base: cerrar consultorios y escuelas rurales sin alternativa, o negar la atención a quien viene de otra comunidad.",
             "Un centro de salud y una escuela a una distancia razonable.",
             "Historia clínica común y telemedicina en el medio rural.",
-            "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación."
-          ]
+            "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación.",
+            "Tiempos máximos de acceso fijados por ley (por ejemplo, un punto de atención a menos de 30 minutos), una historia clínica única que el paciente controla y que le sigue por España y la UE, y reparto territorial según la necesidad."
+          ],
+          "it": "Servicio a 30 minutos y reparto según la necesidad",
+          "is": "servicio-a-30-minutos-y-reparto-segun-la-necesidad"
         },
         {
           "l": [
@@ -355,10 +399,14 @@
           "n": "Gestión pública y universalidad",
           "d": "La misma cartera de servicios para todo el mundo, con la gestión pública como columna.",
           "niv": [
+            "No proponer nada, o romper la base: negar la atención sanitaria o la escuela a personas que viven en España, o desmantelar la red pública.",
             "Atención garantizada a toda persona residente.",
             "Una cartera común en toda España, con la gestión pública como columna.",
-            "Universalidad completa y una gestión pública evaluada con las mismas reglas que cualquier otra."
-          ]
+            "Universalidad completa y una gestión pública evaluada con las mismas reglas que cualquier otra.",
+            "Derecho efectivo por residencia, con un solo documento válido en toda España; una cartera común fijada por ley; y centros públicos con autonomía, dirección elegida por mérito y la misma evaluación que cualquier otro."
+          ],
+          "it": "Universalidad sin trámites y centros públicos autónomos",
+          "is": "universalidad-sin-tramites-y-centros-publicos-autonomos"
         },
         {
           "l": [
@@ -368,102 +416,106 @@
           "n": "Financiación pública suficiente",
           "d": "Cuánto dinero público se pone.",
           "niv": [
+            "No proponer nada, o romper la base: recortar por debajo de lo que la ley ya garantiza, o prometer servicios sin decir cómo se pagan.",
             "Mantener el gasto ante el aumento de la demanda.",
             "Un suelo de gasto por habitante en sanidad, educación y dependencia.",
-            "Financiación estable, finalista donde haga falta y revisada cada año contra resultados."
-          ]
+            "Financiación estable, finalista donde haga falta y revisada cada año contra resultados.",
+            "Un suelo de gasto por habitante ajustado por necesidad, fijado por ley para cuatro años y actualizado cada año con la demografía y los costes; con una parte reservada a primaria y dependencia, y revisado contra resultados."
+          ],
+          "it": "Suelo de gasto a cuatro años, por ley y por necesidad",
+          "is": "suelo-de-gasto-a-cuatro-anos-por-ley-y-por-necesidad"
         }
       ],
       "v": {
         "pp": [
-          8,
-          9,
-          8,
-          7,
-          7,
-          6,
-          6,
-          6
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          1,
+          1
         ],
         "psoe": [
-          3,
-          4,
-          3,
-          6,
-          6,
-          7,
-          9,
-          8
-        ],
-        "vox": [
-          8,
-          8,
-          9,
-          6,
-          5,
-          5,
-          3,
-          5
-        ],
-        "fa": [
+          0,
           1,
-          2,
-          2,
-          6,
-          8,
-          6,
-          10,
-          9
-        ],
-        "erc": [
-          4,
-          3,
-          3,
-          5,
-          6,
-          9,
-          8,
-          8
-        ],
-        "junts": [
-          8,
-          6,
-          6,
-          6,
-          6,
-          9,
-          6,
-          7
-        ],
-        "bildu": [
-          2,
-          3,
-          2,
-          5,
-          7,
-          8,
-          9,
-          8
-        ],
-        "pnv": [
-          6,
-          6,
-          5,
-          7,
-          7,
-          9,
-          7,
-          7
-        ],
-        "pod": [
           0,
           1,
           1,
-          4,
-          8,
-          5,
-          10,
-          9
+          2,
+          2,
+          2
+        ],
+        "vox": [
+          2,
+          2,
+          2,
+          1,
+          1,
+          1,
+          0,
+          1
+        ],
+        "fa": [
+          0,
+          0,
+          0,
+          1,
+          2,
+          1,
+          3,
+          2
+        ],
+        "erc": [
+          1,
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          2
+        ],
+        "junts": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2
+        ],
+        "bildu": [
+          0,
+          0,
+          0,
+          1,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pnv": [
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "pod": [
+          0,
+          0,
+          0,
+          1,
+          2,
+          1,
+          3,
+          2
         ]
       }
     },
@@ -473,9 +525,11 @@
       "q": "¿Quién paga, cuánto, y en qué se gasta?",
       "c": "#F2B33D",
       "niv": [
+        "No presentar cuentas ni presupuestos, justificar el impago de impuestos o de la deuda, o prometer gasto y rebajas sin explicar quién los paga.",
         "Cuentas que se sostienen: presupuestos aprobados a tiempo, impuestos que se pagan y una deuda que no crece sin control.",
         "Un sistema que reparte la carga según lo que tiene cada uno, evalúa cada euro de gasto y deja crecer a las empresas pequeñas.",
-        "Un pacto fiscal de largo plazo: impuestos simples y progresivos, fraude mínimo, gasto evaluado en público y deuda a la baja, que no cambie con cada gobierno."
+        "Un pacto fiscal de largo plazo: impuestos simples y progresivos, fraude mínimo, gasto evaluado en público y deuda a la baja, que no cambie con cada gobierno.",
+        "Un sistema que cualquiera entiende y puede comprobar: impuestos sencillos y a igual renta igual pago, fraude medido cada año, gasto que solo sigue si funciona y una regla que ahorra en la bonanza para proteger en la crisis."
       ],
       "ejes": [
         {
@@ -486,10 +540,14 @@
           "n": "Déficit y deuda",
           "d": "No gastar hoy lo que tendrán que pagar los que vienen.",
           "niv": [
+            "No aprobar presupuestos, ignorar las reglas fiscales europeas o defender que la deuda pública no se pague.",
             "Cumplir las reglas fiscales europeas.",
             "Una senda de reducción de la deuda pactada y vigilada por la AIReF.",
-            "Una regla que ahorra en los años buenos para poder gastar en los malos, con la deuda bajando cada año respecto al PIB."
-          ]
+            "Una regla que ahorra en los años buenos para poder gastar en los malos, con la deuda bajando cada año respecto al PIB.",
+            "Un freno de deuda en la ley: el gasto de cada año se liga a los ingresos de un año normal, lo que sobra en la bonanza va a una hucha para las crisis y cada desvío se devuelve con plazo. La deuda baja sin recortar inversión."
+          ],
+          "it": "Freno de deuda con hucha para las crisis",
+          "is": "freno-de-deuda-con-hucha-para-las-crisis"
         },
         {
           "l": [
@@ -499,10 +557,14 @@
           "n": "Pymes y autónomos",
           "d": "Las empresas pequeñas, que dan la mayor parte del empleo.",
           "niv": [
+            "No proponer nada para pymes y autónomos, o dar por bueno que la Administración les pague tarde y sin intereses.",
             "Que la Administración pague a tiempo y pida menos papeles.",
             "Cuota de autónomos según ingresos reales, ventanilla única y crédito público para pymes.",
-            "Medir el coste de cada norma nueva para las empresas pequeñas antes de aprobarla."
-          ]
+            "Medir el coste de cada norma nueva para las empresas pequeñas antes de aprobarla.",
+            "Abrir, cambiar o cerrar una empresa en un día y por internet; la Administración no pide dos veces un dato que ya tiene, paga sola a 30 días con intereses, y el autónomo cotiza por lo que de verdad ingresa cada trimestre."
+          ],
+          "it": "Empresa en un día y papeles una sola vez",
+          "is": "empresa-en-un-dia-y-papeles-una-sola-vez"
         },
         {
           "l": [
@@ -512,10 +574,14 @@
           "n": "Bajar impuestos y competir",
           "d": "Dejar más dinero a familias y empresas para que consuman, inviertan y contraten.",
           "niv": [
+            "Prometer rebajas sin decir cómo se pagan, o cambiar impuestos de forma retroactiva o imprevisible, rompiendo la seguridad jurídica.",
             "No subir impuestos sin necesidad y ajustar el IRPF a la inflación.",
             "Rebajas selectivas y evaluadas para rentas bajas y medias, y para invertir y contratar.",
-            "Pocos tipos, pocas excepciones y reglas previsibles a diez años, que compitan con los países vecinos sin perder recaudación."
-          ]
+            "Pocos tipos, pocas excepciones y reglas previsibles a diez años, que compitan con los países vecinos sin perder recaudación.",
+            "Impuestos de base ancha y tipos bajos: casi sin excepciones, ajustados solos a la inflación cada año, sin gravar el beneficio que la empresa reinvierte y con un calendario pactado a diez años. Toda rebaja dice de dónde sale."
+          ],
+          "it": "Impuestos sencillos, de base ancha y tipos bajos",
+          "is": "impuestos-sencillos-base-ancha-tipos-bajos"
         },
         {
           "l": [
@@ -525,10 +591,14 @@
           "n": "Lucha contra el fraude",
           "d": "Que pague quien tiene que pagar: fraude fiscal y economía sumergida.",
           "niv": [
+            "Justificar no pagar impuestos o el dinero negro, defender amnistías fiscales o usar la inspección contra adversarios.",
             "Inspección suficiente y sanciones que se cobran.",
             "Cruce de datos, factura electrónica en todas las empresas y límites al efectivo.",
-            "Una Agencia Tributaria con medios comparables a los de los países vecinos, cooperación europea contra los paraísos fiscales y una estimación oficial del fraude cada año."
-          ]
+            "Una Agencia Tributaria con medios comparables a los de los países vecinos, cooperación europea contra los paraísos fiscales y una estimación oficial del fraude cada año.",
+            "Que defraudar sea difícil y cumplir, fácil: cada factura llega a Hacienda al emitirse, Hacienda entrega hechas las declaraciones y un organismo independiente publica cada año cuánto se deja de ingresar, con objetivo de reducción."
+          ],
+          "it": "Fraude medido cada año y factura en tiempo real",
+          "is": "fraude-medido-cada-ano-y-factura-en-tiempo-real"
         },
         {
           "l": [
@@ -538,10 +608,14 @@
           "n": "Gasto e inversión pública",
           "d": "Cuánto y en qué invierte el Estado: infraestructuras, ciencia, servicios.",
           "niv": [
+            "Gastar sin presupuesto ni control, adjudicar obra pública por afinidad o rechazar por principio toda inversión pública.",
             "Mantener la inversión que sostiene los servicios y las infraestructuras.",
             "Inversión a varios años en ciencia, digitalización e infraestructuras, sin depender solo de los fondos europeos.",
-            "Cada gran gasto con una evaluación antes y después, publicada por un organismo independiente, y presupuestos por objetivos."
-          ]
+            "Cada gran gasto con una evaluación antes y después, publicada por un organismo independiente, y presupuestos por objetivos.",
+            "Ningún gasto es para siempre: cada programa nace con objetivos y fecha de revisión, y solo sigue si una evaluación independiente y pública lo avala. Las grandes obras salen de una lista ordenada por su beneficio social."
+          ],
+          "it": "Ningún gasto sin evaluación ni fecha de revisión",
+          "is": "ningun-gasto-sin-evaluacion-ni-fecha-de-revision"
         },
         {
           "l": [
@@ -551,84 +625,88 @@
           "n": "Equidad fiscal",
           "d": "Cómo se reparte el esfuerzo entre rentas, patrimonios y empresas.",
           "niv": [
+            "Defender privilegios fiscales a medida o la confiscación de patrimonios, o negar que deba contribuir quien puede hacerlo.",
             "Que el impuesto sobre la renta sea progresivo y se aplique de verdad en todos los tramos.",
             "Tratar parecido las rentas del trabajo y las del capital, y revisar las deducciones que favorecen sobre todo a quien más tiene.",
-            "Un sistema progresivo en su conjunto, con datos públicos de cuánto paga cada décimo de la población y la evaluación anual de cada beneficio fiscal."
-          ]
+            "Un sistema progresivo en su conjunto, con datos públicos de cuánto paga cada décimo de la población y la evaluación anual de cada beneficio fiscal.",
+            "A igual renta, igual impuesto, venga del trabajo o del capital. Un solo sistema que une impuestos y ayudas, sin beneficios fiscales que no se evalúen, y una tabla oficial anual de lo que paga y recibe cada décimo de la población."
+          ],
+          "it": "A igual renta, igual impuesto, con cuentas a la vista",
+          "is": "a-igual-renta-igual-impuesto-cuentas-a-la-vista"
         }
       ],
       "v": {
         "pp": [
-          8,
-          8,
-          9,
-          5,
-          5,
-          3
+          2,
+          2,
+          2,
+          1,
+          1,
+          0
         ],
         "psoe": [
-          5,
-          6,
-          3,
-          7,
-          8,
-          8
-        ],
-        "vox": [
-          6,
-          8,
-          10,
-          4,
-          3,
+          1,
+          1,
+          0,
+          2,
+          2,
           2
         ],
-        "fa": [
-          2,
-          5,
+        "vox": [
           1,
-          8,
-          9,
-          10
+          2,
+          3,
+          1,
+          0,
+          0
+        ],
+        "fa": [
+          0,
+          1,
+          0,
+          2,
+          2,
+          3
         ],
         "erc": [
-          4,
-          5,
-          3,
-          6,
-          7,
-          8
+          1,
+          1,
+          0,
+          1,
+          2,
+          2
         ],
         "junts": [
-          6,
-          9,
-          8,
-          5,
-          6,
-          4
+          1,
+          2,
+          2,
+          1,
+          1,
+          1
         ],
         "bildu": [
-          3,
-          6,
+          0,
+          1,
+          0,
           2,
-          7,
-          8,
-          9
+          2,
+          2
         ],
         "pnv": [
-          8,
-          8,
-          6,
-          7,
-          7,
-          6
+          2,
+          2,
+          1,
+          2,
+          2,
+          1
         ],
         "pod": [
+          0,
           1,
-          4,
-          1,
-          8,
-          9,
-          10
+          0,
+          2,
+          2,
+          3
         ]
       }
     },
@@ -638,9 +716,11 @@
       "q": "¿Cómo se trabaja, y de qué se vive al jubilarse?",
       "c": "#F0835A",
       "niv": [
+        "No proponer nada sobre empleo o pensiones, o romper la base: prometer sin decir cómo se paga, amparar el trabajo sin contrato o no cumplir la ley laboral.",
         "Que trabajar saque de la pobreza y que la pensión mínima dé para vivir.",
         "Contratos estables, jornada razonable, formación a lo largo de la vida y pensiones que no pierden poder de compra.",
-        "Un mercado de trabajo que da a la vez seguridad y movilidad, salarios que crecen con la productividad y unas pensiones con reglas pactadas para décadas."
+        "Un mercado de trabajo que da a la vez seguridad y movilidad, salarios que crecen con la productividad y unas pensiones con reglas pactadas para décadas.",
+        "Trabajo estable y bien pagado, con libertad para contratar y cambiar; una pensión pública igual para todos, ligada al IPC y al salario mínimo, y una edad de jubilación que sigue por fórmula a la esperanza de vida."
       ],
       "ejes": [
         {
@@ -651,10 +731,14 @@
           "n": "Pensiones suficientes",
           "d": "Que la pensión mantenga el poder de compra y saque de la pobreza.",
           "niv": [
+            "No proponer nada sobre la cuantía de las pensiones, o plantear dejar de actualizarlas o de pagar las ya reconocidas.",
             "Subir las pensiones con el IPC.",
             "Subir más las mínimas y las no contributivas, y cerrar la brecha de género.",
-            "Que ninguna persona mayor caiga en la pobreza, con la suficiencia de las pensiones medida y publicada cada año."
-          ]
+            "Que ninguna persona mayor caiga en la pobreza, con la suficiencia de las pensiones medida y publicada cada año.",
+            "Una pensión pública igual para todos los mayores residentes, por encima del umbral de pobreza, fijada como porcentaje del salario mínimo neto y con la garantía de no subir nunca menos que el IPC."
+          ],
+          "it": "Pensión básica igual para todos, ligada a IPC y SMI",
+          "is": "pension-basica-igual-ligada-ipc-y-salario-minimo"
         },
         {
           "l": [
@@ -664,10 +748,14 @@
           "n": "Sostenibilidad de las pensiones",
           "d": "Que se puedan seguir pagando dentro de 20 y de 40 años.",
           "niv": [
+            "Negar que el envejecimiento encarece las pensiones, o proponer dejar de pagarlas o desmontar el sistema sin decir qué lo sustituye.",
             "Reconocer el problema: el gasto en pensiones crece con el envejecimiento.",
             "Medidas de ingreso y de gasto evaluadas por la AIReF, con un ajuste automático si se desvían.",
-            "Un Pacto de Toledo con reglas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo."
-          ]
+            "Un Pacto de Toledo con reglas para varias legislaturas, jubilación flexible y más cotizantes gracias al empleo.",
+            "Una edad de jubilación que se mueve por fórmula con la esperanza de vida, revisada cada cinco años y avisada con 15 de antelación, y un balance público que activa ajustes pactados si cotizantes e ingresos no alcanzan."
+          ],
+          "it": "Edad de jubilación ligada a la demografía, por fórmula",
+          "is": "edad-jubilacion-ligada-esperanza-de-vida-y-balance"
         },
         {
           "l": [
@@ -677,10 +765,14 @@
           "n": "Flexibilidad para contratar",
           "d": "Que contratar y adaptarse no sea un riesgo para la empresa.",
           "niv": [
+            "No proponer nada sobre contratación, o defender el despido sin causa ni compensación, o impedir a la empresa ajustar plantilla aunque peligre.",
             "Contratos sencillos y pocos trámites para contratar.",
             "Flexibilidad interna pactada (jornada, funciones) antes que el despido.",
-            "Seguridad y movilidad a la vez: una indemnización que acompaña al trabajador de empresa en empresa, como la «mochila austriaca», y políticas de empleo que funcionan."
-          ]
+            "Seguridad y movilidad a la vez: una indemnización que acompaña al trabajador de empresa en empresa, como la «mochila austriaca», y políticas de empleo que funcionan.",
+            "Un solo contrato indefinido con un coste de salida conocido desde el primer día, parte de él en una cuenta que el trabajador se lleva de empresa en empresa. A cambio, un seguro de paro alto y una recolocación rápida y evaluada."
+          ],
+          "it": "Contrato único con cuenta portátil y red de seguridad",
+          "is": "contrato-unico-cuenta-portatil-y-seguro-de-recolocacion"
         },
         {
           "l": [
@@ -690,10 +782,14 @@
           "n": "Formación y productividad",
           "d": "Aprender toda la vida y producir más por hora trabajada.",
           "niv": [
+            "No proponer nada sobre formación, o defender que reciclarse es asunto de cada uno y retirar la formación a quien está en paro.",
             "Cursos de formación para quien busca empleo.",
             "FP dual en todo el país y formación continua conectada con las empresas.",
-            "Una cuenta personal de formación para toda la vida y oficinas de empleo evaluadas por resultados."
-          ]
+            "Una cuenta personal de formación para toda la vida y oficinas de empleo evaluadas por resultados.",
+            "Un derecho a formarse toda la vida: cuenta personal con saldo anual, mayor para quien tiene menos estudios, y un permiso pagado para reciclarse a mitad de carrera. Solo se financia lo que publica sus resultados de empleo."
+          ],
+          "it": "Formarse toda la vida, con resultados públicos",
+          "is": "derecho-formacion-toda-la-vida-con-resultados-publicos"
         },
         {
           "l": [
@@ -703,10 +799,14 @@
           "n": "Jornada y conciliación",
           "d": "Tiempo para vivir: horas de trabajo, cuidados y horarios.",
           "niv": [
+            "No proponer nada sobre horarios y cuidados, o justificar jornadas sin registro ni límite, horas extra sin pagar o la retirada de permisos.",
             "Registro real de la jornada y horas extra pagadas.",
             "Permisos de cuidado retribuidos y horarios que permitan conciliar.",
-            "Una jornada más corta pactada por sectores, horarios europeos y cuidados repartidos entre hombres y mujeres."
-          ]
+            "Una jornada más corta pactada por sectores, horarios europeos y cuidados repartidos entre hombres y mujeres.",
+            "Menos horas a medida que sube la productividad, pactadas sector a sector y sin perder sueldo; permisos de cuidado iguales, pagados e intransferibles; y derecho a adaptar el horario salvo causa escrita de la empresa."
+          ],
+          "it": "Tiempo ganado con productividad y cuidados repartidos",
+          "is": "jornada-ligada-a-productividad-y-cuidados-repartidos"
         },
         {
           "l": [
@@ -716,84 +816,88 @@
           "n": "Empleo estable y salarios",
           "d": "Contratos que duran y sueldos que dan para vivir.",
           "niv": [
+            "No proponer nada sobre salarios, o defender suprimir el salario mínimo, tolerar el trabajo sin contrato o fijar los sueldos por decreto.",
             "Un salario mínimo suficiente y el contrato indefinido como norma.",
             "Menos temporalidad también en las administraciones y salarios que suben con los precios.",
-            "Salarios que crecen con la productividad, negociados sector a sector, con datos públicos de temporalidad y brecha salarial por empresa."
-          ]
+            "Salarios que crecen con la productividad, negociados sector a sector, con datos públicos de temporalidad y brecha salarial por empresa.",
+            "Un salario mínimo fijado por regla, a propuesta de una comisión independiente; salarios pactados por sector con la productividad; y temporalidad y brecha salarial publicadas por empresa y administración, con plan si se desvían."
+          ],
+          "it": "Salarios por regla y transparencia empresa a empresa",
+          "is": "salario-minimo-por-regla-y-transparencia-por-empresa"
         }
       ],
       "v": {
         "pp": [
-          7,
-          7,
-          8,
-          7,
-          4,
-          5
+          2,
+          2,
+          2,
+          2,
+          1,
+          1
         ],
         "psoe": [
-          9,
-          5,
-          3,
-          6,
-          8,
-          9
+          2,
+          1,
+          0,
+          1,
+          2,
+          2
         ],
         "vox": [
-          7,
-          4,
-          8,
-          5,
-          3,
-          4
+          2,
+          1,
+          2,
+          1,
+          0,
+          1
         ],
         "fa": [
-          9,
-          3,
+          2,
+          0,
+          0,
           1,
-          5,
-          10,
-          10
+          3,
+          3
         ],
         "erc": [
-          8,
-          4,
-          3,
-          6,
-          7,
-          8
-        ],
-        "junts": [
-          7,
-          6,
-          7,
-          7,
-          4,
-          5
-        ],
-        "bildu": [
-          9,
-          3,
-          2,
-          6,
-          8,
-          9
-        ],
-        "pnv": [
-          7,
-          8,
-          6,
-          8,
-          6,
-          6
-        ],
-        "pod": [
-          10,
           2,
           1,
-          4,
-          9,
-          10
+          0,
+          1,
+          2,
+          2
+        ],
+        "junts": [
+          2,
+          1,
+          2,
+          2,
+          1,
+          1
+        ],
+        "bildu": [
+          2,
+          0,
+          0,
+          1,
+          2,
+          2
+        ],
+        "pnv": [
+          2,
+          2,
+          1,
+          2,
+          1,
+          1
+        ],
+        "pod": [
+          3,
+          0,
+          0,
+          1,
+          2,
+          3
         ]
       }
     },
@@ -803,9 +907,11 @@
       "q": "¿Puede uno permitirse un hogar?",
       "c": "#C08BE0",
       "niv": [
+        "No proponer nada sobre vivienda, o romper la base: justificar la ocupación de casas ajenas, no cumplir los desalojos firmes o dejar a familias en la calle.",
         "Que nadie se quede en la calle y que haya ayudas al alquiler para quien no llega.",
         "Más vivienda asequible cada año —pública, social y privada— y reglas claras para inquilinos y propietarios.",
-        "Un parque de vivienda asequible permanente cercano a la media europea, suelo y licencias ágiles, y un alquiler que no se coma más del 30 % del sueldo."
+        "Un parque de vivienda asequible permanente cercano a la media europea, suelo y licencias ágiles, y un alquiler que no se coma más del 30 % del sueldo.",
+        "Que cualquier hogar con ingresos normales pueda elegir entre alquilar y comprar sin gastar más del 30 % de lo que gana: suelo suficiente por ley, propiedad segura y un parque asequible que nunca se vende."
       ],
       "ejes": [
         {
@@ -816,10 +922,14 @@
           "n": "Acceso a la compra",
           "d": "Poder comprar una casa sin depender de la familia.",
           "niv": [
+            "No proponer nada para quien quiere comprar, o tratar la propiedad de la vivienda como algo ilegítimo que hay que impedir o quitar sin compensación.",
             "Rebajar los impuestos de la primera vivienda.",
             "Avales públicos para la entrada de la hipoteca de los jóvenes.",
-            "Fórmulas intermedias —alquiler con opción a compra, cooperativas en cesión de uso— para que la propiedad deje de ser todo o nada."
-          ]
+            "Fórmulas intermedias —alquiler con opción a compra, cooperativas en cesión de uso— para que la propiedad deje de ser todo o nada.",
+            "Una escalera de propiedad: comprar la casa por partes desde el 10 %, pagar un alquiler asequible por el resto e ir subiendo, con ahorro previo bonificado y vivienda protegida que se revende a precio tasado."
+          ],
+          "it": "Escalera de propiedad: comprar la casa por partes",
+          "is": "escalera-de-propiedad-compra-por-partes"
         },
         {
           "l": [
@@ -829,10 +939,14 @@
           "n": "Construir más: suelo y licencias",
           "d": "Que haya más viviendas donde la gente quiere vivir.",
           "niv": [
+            "No proponer nada para que haya más vivienda, o saltarse la ley: recalificar a dedo, legalizar lo construido ilegalmente o bloquear toda obra nueva.",
             "Liberar suelo público para vivienda.",
             "Licencias en semanas, no en años, y un planeamiento urbano más ágil.",
-            "Construcción industrializada a gran escala y suelo con calendario, sin perder calidad urbana."
-          ]
+            "Construcción industrializada a gran escala y suelo con calendario, sin perder calidad urbana.",
+            "Suelo suficiente por obligación legal: cada ciudad mantiene capacidad edificable para la demanda prevista a 30 años más un margen, y lo que cumple un código claro obtiene licencia en plazo fijo, sin negociar caso a caso."
+          ],
+          "it": "Suelo por regla: capacidad obligatoria y licencia fija",
+          "is": "capacidad-obligatoria-de-suelo-y-licencia-por-regla"
         },
         {
           "l": [
@@ -842,10 +956,14 @@
           "n": "Seguridad para el propietario",
           "d": "Que alquilar no dé miedo: impagos y ocupaciones.",
           "niv": [
+            "Justificar la ocupación de casas ajenas o no ejecutar los desalojos firmes; también amparar desalojos por la fuerza sin juez. O no proponer nada.",
             "Desalojar rápido la ocupación ilegal de una vivienda.",
             "Juicios rápidos por impago y un registro de contratos.",
-            "Un seguro de impago compartido y procedimientos que protejan a la vez al propietario y a la familia vulnerable, con alternativa de vivienda."
-          ]
+            "Un seguro de impago compartido y procedimientos que protejan a la vez al propietario y a la familia vulnerable, con alternativa de vivienda.",
+            "Plazos máximos garantizados por ley: la vivienda ocupada se devuelve en días y el impago se resuelve en pocos meses. Entretanto, un fondo público paga la renta al propietario y la administración realoja a la familia vulnerable."
+          ],
+          "it": "Propiedad garantizada: plazos fijos y renta asegurada",
+          "is": "plazos-fijos-de-desalojo-y-renta-garantizada"
         },
         {
           "l": [
@@ -855,10 +973,14 @@
           "n": "Usar lo que ya hay",
           "d": "Vivienda vacía y pisos turísticos: que las casas sirvan para vivir.",
           "niv": [
+            "No querer saber cuántas casas están vacías o son turísticas, tolerar el alquiler turístico ilegal o quitar viviendas a sus dueños sin indemnizar.",
             "Saber cuántas viviendas vacías y turísticas hay, y dónde.",
             "Un registro único de pisos turísticos y licencias limitadas en zonas tensionadas.",
-            "Movilizar la vivienda vacía pagando su rehabilitación a cambio de alquilarla barata, e impuestos que distingan vivir de especular."
-          ]
+            "Movilizar la vivienda vacía pagando su rehabilitación a cambio de alquilarla barata, e impuestos que distingan vivir de especular.",
+            "Cada vivienda con un uso conocido y un número de registro: la vacía sin causa paga un recargo que crece, la que se rehabilita para alquiler asequible recibe ayuda, y el piso turístico solo existe con licencia dentro de un cupo."
+          ],
+          "it": "Censo de usos: cada casa cuenta",
+          "is": "censo-de-usos-recargo-a-la-vacia-y-cupo-turistico"
         },
         {
           "l": [
@@ -868,10 +990,14 @@
           "n": "Alquiler asequible",
           "d": "Que el alquiler no se coma el sueldo y que los contratos den estabilidad.",
           "niv": [
+            "No proponer nada sobre el alquiler, o romper las reglas: animar a dejar de pagar la renta o permitir subidas y expulsiones sin contrato ni juez.",
             "Ayudas al alquiler para jóvenes y rentas bajas.",
             "Contratos más largos, índices públicos de precios y avales para alquilar.",
-            "Topes en zonas tensionadas con evaluación pública de su efecto sobre la oferta, y un seguro de impago que proteja a las dos partes."
-          ]
+            "Topes en zonas tensionadas con evaluación pública de su efecto sobre la oferta, y un seguro de impago que proteja a las dos partes.",
+            "Un alquiler a coste como tercera vía: la renta cubre construir y mantener, sin beneficio, con contrato indefinido y subidas ligadas a la inflación. Y una ayuda como derecho para que nadie pague más del 30 % de sus ingresos."
+          ],
+          "it": "Alquiler a coste y el 30 % como derecho",
+          "is": "alquiler-a-coste-y-tope-del-30-por-ciento-de-ingresos"
         },
         {
           "l": [
@@ -881,84 +1007,88 @@
           "n": "Vivienda pública y social",
           "d": "Viviendas de alquiler asequible que no se venden al cabo de unos años.",
           "niv": [
+            "Vender la vivienda pública o dejar que se degrade, adjudicarla sin criterios públicos, negar techo a quien está en la calle, o no proponer nada.",
             "Conservar la vivienda pública que hay y no venderla.",
             "Construir y comprar vivienda pública de alquiler cada año, protegida para siempre.",
-            "Un parque asequible permanente que se acerque a la media europea, gestionado por una entidad pública estable."
-          ]
+            "Un parque asequible permanente que se acerque a la media europea, gestionado por una entidad pública estable.",
+            "Un parque asequible permanente por encima de la media europea, que nunca se vende y crece solo: las rentas de los edificios ya pagados financian los nuevos, con suelo reservado por ley y vivienda primero para quien no tiene hogar."
+          ],
+          "it": "Parque permanente que se financia y crece solo",
+          "is": "parque-asequible-permanente-con-fondo-rotatorio"
         }
       ],
       "v": {
         "pp": [
-          9,
-          9,
-          9,
-          5,
           2,
-          3
+          2,
+          2,
+          1,
+          0,
+          0
         ],
         "psoe": [
-          6,
-          6,
-          4,
-          8,
-          8,
-          8
+          1,
+          1,
+          1,
+          2,
+          2,
+          2
         ],
         "vox": [
-          9,
-          8,
-          10,
-          3,
-          1,
-          1
-        ],
-        "fa": [
-          3,
-          5,
-          1,
-          9,
-          10,
-          10
-        ],
-        "erc": [
-          4,
-          5,
-          3,
-          8,
-          9,
-          8
-        ],
-        "junts": [
-          7,
-          7,
-          8,
-          6,
-          4,
-          4
-        ],
-        "bildu": [
-          3,
-          4,
           2,
-          8,
-          9,
-          9
-        ],
-        "pnv": [
-          6,
-          7,
-          6,
-          7,
-          6,
-          7
-        ],
-        "pod": [
           2,
           3,
           0,
-          9,
-          10,
-          10
+          0,
+          0
+        ],
+        "fa": [
+          0,
+          1,
+          0,
+          2,
+          3,
+          3
+        ],
+        "erc": [
+          1,
+          1,
+          0,
+          2,
+          2,
+          2
+        ],
+        "junts": [
+          2,
+          2,
+          2,
+          1,
+          1,
+          1
+        ],
+        "bildu": [
+          0,
+          1,
+          0,
+          2,
+          2,
+          2
+        ],
+        "pnv": [
+          1,
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "pod": [
+          0,
+          0,
+          0,
+          2,
+          3,
+          3
         ]
       }
     },
@@ -968,9 +1098,11 @@
       "q": "¿Cómo frenamos el cambio climático sin dejar a nadie atrás?",
       "c": "#4CC38A",
       "niv": [
+        "Negar el problema o no proponer nada, incumplir los compromisos europeos de clima, o cerrar centrales y sectores sin alternativa para quien vive de ellos.",
         "Cumplir los compromisos europeos de clima y que la factura de la luz no corte la vida de nadie.",
         "Un plan con objetivos anuales de emisiones, agua y precio de la energía, que llegue también al campo y a la industria.",
-        "Un sistema energético limpio, barato y seguro a la vez, con el agua y la naturaleza en las cuentas, y una transición que nadie paga solo."
+        "Un sistema energético limpio, barato y seguro a la vez, con el agua y la naturaleza en las cuentas, y una transición que nadie paga solo.",
+        "Una economía sin emisiones netas con reglas automáticas: presupuesto de carbono que se corrige solo, luz limpia, segura y a coste estable, agua repartida según la que hay y un campo que cobra por lo que cuida."
       ],
       "ejes": [
         {
@@ -981,10 +1113,14 @@
           "n": "Agua y naturaleza",
           "d": "Ríos, acuíferos, costas, bosques e incendios.",
           "niv": [
+            "No proponer nada sobre el agua, tolerar pozos ilegales o vertidos sin depurar, o prometer agua que la cuenca no tiene.",
             "Respetar los caudales ecológicos y depurar las aguas.",
             "Gestión del agua por cuencas con datos públicos, reutilización y prevención de incendios todo el año.",
-            "Un pacto del agua y la sequía, restauración de ríos y bosques, y pago por los servicios que da la naturaleza."
-          ]
+            "Un pacto del agua y la sequía, restauración de ríos y bosques, y pago por los servicios que da la naturaleza.",
+            "Repartir cada año el agua que de verdad hay: derechos como porcentaje del agua disponible, medida con contador y publicada, con el caudal del río reservado primero y la naturaleza anotada en las cuentas públicas."
+          ],
+          "it": "Agua repartida según la que hay",
+          "is": "agua-repartida-segun-la-que-hay"
         },
         {
           "l": [
@@ -994,10 +1130,14 @@
           "n": "Campo y transición justa",
           "d": "Que agricultores, ganaderos y la España rural no paguen solos la transición.",
           "niv": [
+            "No proponer nada para el campo, cerrar centrales o explotaciones sin alternativa, o animar a incumplir las normas ambientales y sanitarias.",
             "Ayudas a los sectores y comarcas afectados.",
             "Convenios de transición con empleo alternativo y normas más simples para el campo.",
-            "Que la transición deje más renta en el mundo rural: energía local, pago por servicios ambientales y precios justos en la cadena alimentaria."
-          ]
+            "Que la transición deje más renta en el mundo rural: energía local, pago por servicios ambientales y precios justos en la cadena alimentaria.",
+            "Que cada pueblo afectado tenga por ley su parte de la renta: un pago fijo por cada kWh renovable producido en su término, empleo firmado antes de cada cierre y pago al agricultor por los servicios ambientales medidos."
+          ],
+          "it": "Renta rural garantizada por ley en la transición",
+          "is": "renta-rural-garantizada-en-la-transicion"
         },
         {
           "l": [
@@ -1007,10 +1147,14 @@
           "n": "Seguridad de suministro",
           "d": "Que no se vaya la luz: respaldo, nuclear, almacenamiento e interconexiones.",
           "niv": [
+            "No proponer nada sobre el respaldo, o decidir cierres y aperturas de centrales por consigna, sin informes técnicos ni margen de seguridad.",
             "Mantener el respaldo necesario para evitar apagones.",
             "Decidir con datos el calendario nuclear y reforzar las interconexiones con Francia.",
-            "Un plan de seguridad del sistema con margen en cada escenario, evaluado de forma independiente."
-          ]
+            "Un plan de seguridad del sistema con margen en cada escenario, evaluado de forma independiente.",
+            "Fijar por ley cuántas horas al año puede faltar potencia como máximo y que un organismo independiente lo compruebe cada año. Ninguna central cierra ni se prorroga sin ese informe, y la estabilidad de la red se contrata aparte."
+          ],
+          "it": "Norma legal de fiabilidad eléctrica",
+          "is": "norma-legal-de-fiabilidad-electrica"
         },
         {
           "l": [
@@ -1020,10 +1164,14 @@
           "n": "Precio de la energía",
           "d": "Que la luz, el gas y el combustible sean asumibles para familias e industria.",
           "niv": [
+            "No proponer nada sobre la factura, prometer precios fijados por decreto sin decir quién paga, o dejar que se corte la luz a hogares vulnerables.",
             "Bono social para los hogares vulnerables.",
             "Rebajas fiscales temporales en las crisis y contratos a largo plazo para la industria.",
-            "Un mercado eléctrico que pague cada tecnología por su coste, con precios estables para hogares e industria."
-          ]
+            "Un mercado eléctrico que pague cada tecnología por su coste, con precios estables para hogares e industria.",
+            "Que la luz se pague a un coste estable: la energía con apoyo público cobra un precio fijo y devuelve lo que gane de más, ese dinero baja la factura, y la ayuda a los hogares vulnerables llega sola, sin solicitud."
+          ],
+          "it": "Luz a coste estable y ayuda automática",
+          "is": "luz-a-coste-estable-y-ayuda-automatica"
         },
         {
           "l": [
@@ -1033,10 +1181,14 @@
           "n": "Renovables, redes y almacenamiento",
           "d": "Producir con sol, viento y agua, y llevar esa energía adonde se usa.",
           "niv": [
+            "No proponer nada sobre renovables, frenar toda instalación por principio, o autorizarlas sin red, sin almacenamiento y sin contar con el territorio.",
             "Seguir instalando renovables.",
             "Redes eléctricas y almacenamiento (baterías, bombeo) para no tirar la producción.",
-            "Un sistema casi 100 % renovable con almacenamiento suficiente, autoconsumo y comunidades energéticas en cada pueblo."
-          ]
+            "Un sistema casi 100 % renovable con almacenamiento suficiente, autoconsumo y comunidades energéticas en cada pueblo.",
+            "Planificar a la vez plantas, red y almacenamiento: zonas acordadas con los municipios donde el permiso es rápido, red construida antes de que haga falta y derecho de cada vecino a producir, compartir y guardar su energía."
+          ],
+          "it": "Renovables con red, almacén y vecinos primero",
+          "is": "renovables-con-red-almacen-y-vecinos"
         },
         {
           "l": [
@@ -1046,84 +1198,88 @@
           "n": "Reducir emisiones",
           "d": "Menos CO₂ en el transporte, la industria, las casas y el campo.",
           "niv": [
+            "Negar el cambio climático, proponer salir de los acuerdos de clima, incumplir los objetivos europeos o no proponer nada.",
             "Cumplir los objetivos europeos de reducción de emisiones.",
             "Planes sector a sector con un presupuesto de carbono y seguimiento anual.",
-            "Neutralidad climática antes de 2050 con un presupuesto de carbono público y vinculante, revisado por un comité científico independiente."
-          ]
+            "Neutralidad climática antes de 2050 con un presupuesto de carbono público y vinculante, revisado por un comité científico independiente.",
+            "Un presupuesto de carbono legal que se corrige solo: si un sector se pasa, el Gobierno debe aprobar medidas en un plazo fijo. Y un precio al carbono en todos los sectores cuya recaudación vuelve a los hogares a partes iguales."
+          ],
+          "it": "Presupuesto de carbono que se corrige solo",
+          "is": "presupuesto-de-carbono-que-se-corrige-solo"
         }
       ],
       "v": {
         "pp": [
-          6,
-          8,
-          9,
-          8,
-          6,
-          5
+          1,
+          2,
+          2,
+          2,
+          1,
+          1
         ],
         "psoe": [
-          7,
-          6,
-          5,
-          6,
-          9,
-          9
+          2,
+          1,
+          1,
+          1,
+          2,
+          2
         ],
         "vox": [
-          5,
-          9,
-          9,
-          9,
+          1,
+          2,
+          2,
+          2,
+          0,
+          0
+        ],
+        "fa": [
+          2,
+          2,
+          0,
+          1,
+          3,
+          3
+        ],
+        "erc": [
+          2,
+          1,
+          0,
+          1,
+          2,
+          2
+        ],
+        "junts": [
+          1,
+          2,
+          2,
+          2,
           2,
           1
         ],
-        "fa": [
-          9,
-          7,
-          2,
-          4,
-          10,
-          10
-        ],
-        "erc": [
-          7,
-          6,
-          3,
-          5,
-          8,
-          8
-        ],
-        "junts": [
-          6,
-          7,
-          7,
-          7,
-          7,
-          6
-        ],
         "bildu": [
-          8,
-          7,
           2,
-          4,
-          8,
-          9
+          2,
+          0,
+          1,
+          2,
+          2
         ],
         "pnv": [
-          7,
-          6,
-          7,
-          7,
-          8,
-          7
+          2,
+          1,
+          2,
+          2,
+          2,
+          2
         ],
         "pod": [
-          9,
-          7,
+          2,
+          2,
+          0,
           1,
-          4,
-          9,
-          10
+          2,
+          3
         ]
       }
     },
@@ -1133,9 +1289,11 @@
       "q": "¿Cómo convivimos las distintas partes de España?",
       "c": "#8F9CF7",
       "niv": [
+        "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
         "Que se cumplan la Constitución y los Estatutos y que cada administración pague a tiempo sus servicios.",
         "Una financiación pactada y transparente, cooperación real entre gobiernos y respeto a la vez por las lenguas y por el mercado común.",
-        "Un modelo estable que equilibra autogobierno e igualdad: se sabe quién decide qué, cuánto se paga y cuánto se recibe, y las reglas no dependen de la aritmética de cada legislatura."
+        "Un modelo estable que equilibra autogobierno e igualdad: se sabe quién decide qué, cuánto se paga y cuánto se recibe, y las reglas no dependen de la aritmética de cada legislatura.",
+        "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto."
       ],
       "ejes": [
         {
@@ -1146,9 +1304,11 @@
           "n": "Financiación transparente",
           "d": "Cuánto recibe cada comunidad, y por qué.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Renovar el modelo de financiación, caducado desde 2014.",
             "Un modelo común con criterios públicos de población y de esfuerzo fiscal.",
-            "Un modelo que cualquiera pueda calcular, con las balanzas fiscales publicadas y un límite pactado a las diferencias."
+            "Un modelo que cualquiera pueda calcular, con las balanzas fiscales publicadas y un límite pactado a las diferencias.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -1159,9 +1319,11 @@
           "n": "Lenguas y culturas propias",
           "d": "El catalán, el euskera, el gallego y las demás lenguas y culturas.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Proteger las lenguas cooficiales en su territorio.",
             "Que el Estado las use y las promueva también en las instituciones comunes.",
-            "Las lenguas oficiales como patrimonio de toda España, enseñadas y usadas sin que ninguna sea un arma contra otra."
+            "Las lenguas oficiales como patrimonio de toda España, enseñadas y usadas sin que ninguna sea un arma contra otra.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -1172,9 +1334,11 @@
           "n": "Cohesión: Constitución y mercado común",
           "d": "Lo que es de todos: la ley común, el mercado único, la solidaridad.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Cumplir la Constitución y las sentencias.",
             "Unidad de mercado: que una empresa o un título valgan igual en toda España.",
-            "Un Estado que todos los territorios sienten suyo, con reglas comunes que se viven como propias y no como impuestas."
+            "Un Estado que todos los territorios sienten suyo, con reglas comunes que se viven como propias y no como impuestas.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -1185,9 +1349,11 @@
           "n": "Autogobierno y competencias",
           "d": "Cuánto decide cada comunidad por sí misma.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Respetar las competencias de los Estatutos.",
             "Traspasar las competencias pendientes y reforzar la gestión propia de los impuestos.",
-            "Un autogobierno pactado y estable: cada nivel con competencias claras e ingresos propios, sin invadirse."
+            "Un autogobierno pactado y estable: cada nivel con competencias claras e ingresos propios, sin invadirse.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -1198,9 +1364,11 @@
           "n": "Cooperación entre gobiernos",
           "d": "Que el Estado y las comunidades trabajen juntos.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Reunir a menudo la Conferencia de Presidentes.",
             "Conferencias sectoriales con acuerdos vinculantes y un Senado territorial.",
-            "Un modelo de cooperación con un Senado de las comunidades y lealtad en los dos sentidos."
+            "Un modelo de cooperación con un Senado de las comunidades y lealtad en los dos sentidos.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         },
         {
@@ -1211,84 +1379,86 @@
           "n": "Igualdad entre territorios",
           "d": "Que vivir en una comunidad u otra no cambie tus derechos básicos.",
           "niv": [
+            "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
             "Mínimos comunes en sanidad, educación y servicios sociales.",
             "Un fondo de nivelación que garantice un nivel parecido de servicios por habitante.",
-            "Servicios equivalentes medidos y publicados por comunidad, con corrección cuando una se queda atrás."
+            "Servicios equivalentes medidos y publicados por comunidad, con corrección cuando una se queda atrás.",
+            "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
           ]
         }
       ],
       "v": {
         "pp": [
-          6,
-          4,
-          9,
-          3,
-          6,
-          9
-        ],
-        "psoe": [
-          7,
-          7,
-          6,
-          7,
-          8,
-          7
-        ],
-        "vox": [
-          3,
           1,
-          10,
+          1,
+          2,
           0,
-          3,
-          9
-        ],
-        "fa": [
-          7,
-          8,
-          4,
-          7,
-          8,
-          7
-        ],
-        "erc": [
-          8,
-          10,
           1,
-          10,
-          4,
-          3
-        ],
-        "junts": [
-          7,
-          10,
-          1,
-          10,
-          3,
           2
         ],
-        "bildu": [
-          7,
-          10,
+        "psoe": [
+          2,
+          2,
           1,
-          10,
-          4,
-          3
+          2,
+          2,
+          2
+        ],
+        "vox": [
+          0,
+          0,
+          3,
+          0,
+          0,
+          2
+        ],
+        "fa": [
+          2,
+          2,
+          1,
+          2,
+          2,
+          2
+        ],
+        "erc": [
+          2,
+          3,
+          0,
+          3,
+          1,
+          0
+        ],
+        "junts": [
+          2,
+          3,
+          0,
+          3,
+          0,
+          0
+        ],
+        "bildu": [
+          2,
+          3,
+          0,
+          3,
+          1,
+          0
         ],
         "pnv": [
-          8,
-          9,
+          2,
+          2,
+          0,
           3,
-          10,
-          6,
-          4
+          1,
+          1
         ],
         "pod": [
-          6,
-          8,
-          3,
-          8,
-          6,
-          6
+          1,
+          2,
+          0,
+          2,
+          1,
+          1
         ]
       }
     },
@@ -1298,9 +1468,11 @@
       "q": "¿Qué libertades protegemos, y cómo?",
       "c": "#B9D45A",
       "niv": [
+        "No proponer nada, o romper la base: imponer o perseguir creencias, castigar opiniones, incumplir las leyes vigentes o negar derechos a una parte de la población.",
         "Que se cumplan los derechos que ya reconocen la Constitución y las leyes, sin discriminación.",
         "Derechos que se pueden ejercer de verdad en todo el territorio, con apoyo a las familias y respeto a la conciencia de cada uno.",
-        "Libertades medidas y evaluadas —quién puede ejercer cada derecho en la práctica— y acuerdos amplios que no cambien con cada mayoría."
+        "Libertades medidas y evaluadas —quién puede ejercer cada derecho en la práctica— y acuerdos amplios que no cambien con cada mayoría.",
+        "Libertades que se ejercen de verdad y en igualdad: apoyo real a quien decide en un sentido o en otro, conciencia respetada sin dejar a nadie sin servicio, datos públicos y pactos que no cambian con cada mayoría."
       ],
       "ejes": [
         {
@@ -1311,10 +1483,14 @@
           "n": "Libertad de conciencia y de educación",
           "d": "Creencias, religión y la elección de la educación de los hijos.",
           "niv": [
+            "No proponer nada, imponer o perseguir una creencia, o negar a los padres toda elección educativa y a los profesionales toda objeción.",
             "Libertad religiosa y de culto dentro de la ley.",
             "Objeción de conciencia regulada y elección de centro educativo.",
-            "Un Estado aconfesional que trata igual a todas las creencias y a quien no tiene ninguna, y respeta la conciencia sin dejar a nadie sin servicio."
-          ]
+            "Un Estado aconfesional que trata igual a todas las creencias y a quien no tiene ninguna, y respeta la conciencia sin dejar a nadie sin servicio.",
+            "Un solo marco para toda creencia y para quien no tiene ninguna: financiación solo por decisión del contribuyente, objeción personal con relevo garantizado y las mismas reglas para toda escuela pagada con dinero público."
+          ],
+          "it": "Estatuto común de la libertad de conciencia",
+          "is": "estatuto-comun-libertad-de-conciencia"
         },
         {
           "l": [
@@ -1324,10 +1500,14 @@
           "n": "Protección de la vida y apoyo a la maternidad",
           "d": "Acompañar a la embarazada y a la persona enferma o dependiente para que ninguna decisión se tome por falta de ayuda.",
           "niv": [
+            "No ofrecer ninguna ayuda a la embarazada ni a la persona enferma, o usar el apoyo para presionar, acosar o engañar a quien tiene que decidir.",
             "Información y ayudas a la embarazada que quiera seguir adelante.",
             "Una red de apoyo a la maternidad y cuidados paliativos en toda España.",
-            "Que nadie aborte ni pida la eutanasia por falta de recursos: apoyo económico, vivienda y cuidados garantizados."
-          ]
+            "Que nadie aborte ni pida la eutanasia por falta de recursos: apoyo económico, vivienda y cuidados garantizados.",
+            "Un derecho exigible al apoyo: toda embarazada y toda persona enferma o dependiente recibe en un plazo fijo ayuda económica, vivienda y cuidados, paliativos incluidos, antes de decidir y sin que nada la condicione."
+          ],
+          "it": "Derecho al apoyo antes de decidir",
+          "is": "derecho-al-apoyo-antes-de-decidir"
         },
         {
           "l": [
@@ -1337,10 +1517,14 @@
           "n": "Familia y natalidad",
           "d": "Que quien quiera tener hijos pueda tenerlos.",
           "niv": [
+            "No proponer nada para quien quiere tener hijos, o dar las ayudas a unas familias y negarlas a otras por su forma, su origen o sus ideas.",
             "Ayudas por hijo y permisos de nacimiento.",
             "Escuela infantil gratuita de 0 a 3 años, vivienda para familias jóvenes y una ayuda universal por crianza.",
-            "Una política familiar estable, medida por la distancia entre los hijos que la gente quiere tener y los que tiene."
-          ]
+            "Una política familiar estable, medida por la distancia entre los hijos que la gente quiere tener y los que tiene.",
+            "Prestación universal por hijo hasta los 18 años, plaza gratuita de escuela infantil garantizada al acabar el permiso y un pacto a 20 años con una sola meta: cerrar la distancia entre los hijos deseados y los que se tienen."
+          ],
+          "it": "Pacto de crianza a veinte años",
+          "is": "pacto-de-crianza-a-veinte-anos"
         },
         {
           "l": [
@@ -1350,10 +1534,14 @@
           "n": "Libertad de expresión y de prensa",
           "d": "Decir, publicar e informar sin miedo.",
           "niv": [
+            "Pedir cárcel o cierre de medios por opiniones, señalar a periodistas o usar la publicidad institucional y los medios públicos como premio y castigo.",
             "Proteger el periodismo y no perseguir opiniones.",
             "Revisar los delitos de opinión y repartir con transparencia la publicidad institucional.",
-            "Medios públicos independientes del Gobierno, propiedad de los medios transparente y respuestas a la desinformación que no conviertan a ningún gobierno en árbitro de la verdad."
-          ]
+            "Medios públicos independientes del Gobierno, propiedad de los medios transparente y respuestas a la desinformación que no conviertan a ningún gobierno en árbitro de la verdad.",
+            "Ninguna pena de cárcel por opiniones que no inciten a la violencia, medios públicos dirigidos por concurso y sin mayoría de cargos políticos, publicidad institucional por reglas fijas y jueces, no gobiernos, ante los bulos."
+          ],
+          "it": "Palabra libre y medios sin dueño político",
+          "is": "palabra-libre-y-medios-sin-dueno-politico"
         },
         {
           "l": [
@@ -1363,10 +1551,14 @@
           "n": "Autonomía personal: aborto y eutanasia",
           "d": "Decidir sobre el propio cuerpo y sobre el final de la propia vida.",
           "niv": [
+            "Incumplir o bloquear desde un cargo público las leyes vigentes, o negar toda objeción de conciencia y castigar a quien no quiere participar.",
             "Mantener las leyes vigentes de aborto y eutanasia.",
             "Que se puedan ejercer en la sanidad pública de todas las comunidades, con la objeción de conciencia registrada.",
-            "Acceso garantizado y evaluado en todo el territorio, junto con cuidados paliativos universales para que nadie elija por falta de alternativa."
-          ]
+            "Acceso garantizado y evaluado en todo el territorio, junto con cuidados paliativos universales para que nadie elija por falta de alternativa.",
+            "Mientras la ley las reconozca, estas prestaciones se dan en la sanidad pública de cada provincia y en plazo, con la objeción personal respetada, apoyo y paliativos ofrecidos antes y una evaluación pública cada año."
+          ],
+          "it": "Decisión libre con garantías para todos",
+          "is": "decision-libre-con-garantias-para-todos"
         },
         {
           "l": [
@@ -1376,84 +1568,88 @@
           "n": "Igualdad y no discriminación",
           "d": "Mujeres y hombres, personas LGTBI, origen, discapacidad.",
           "niv": [
+            "Negar la discriminación o la violencia contra las mujeres, justificar el odio, o saltarse la presunción de inocencia en nombre de la igualdad.",
             "Cumplir las leyes de igualdad y perseguir los delitos de odio.",
             "Brecha salarial medida por empresa, protección frente a la violencia machista y accesibilidad universal.",
-            "Igualdad real medida con datos públicos, y leyes evaluadas y corregidas cuando producen efectos no buscados."
-          ]
+            "Igualdad real medida con datos públicos, y leyes evaluadas y corregidas cuando producen efectos no buscados.",
+            "Igualdad que se mide y se corrige: brecha salarial pública empresa a empresa, una autoridad independiente para cualquier persona discriminada, accesibilidad exigible y cada ley de igualdad evaluada a los dos años."
+          ],
+          "it": "Igualdad medida y corregida con datos",
+          "is": "igualdad-medida-y-corregida-con-datos"
         }
       ],
       "v": {
         "pp": [
-          8,
-          7,
-          8,
-          6,
-          4,
-          6
+          2,
+          2,
+          2,
+          1,
+          1,
+          1
         ],
         "psoe": [
-          5,
-          4,
-          6,
-          6,
-          9,
-          9
-        ],
-        "vox": [
-          9,
-          10,
-          9,
-          7,
-          0,
+          1,
+          1,
+          1,
+          1,
+          2,
           2
         ],
-        "fa": [
-          4,
+        "vox": [
           2,
-          6,
-          8,
-          10,
-          10
+          3,
+          2,
+          2,
+          0,
+          0
+        ],
+        "fa": [
+          1,
+          0,
+          1,
+          2,
+          3,
+          3
         ],
         "erc": [
-          4,
-          3,
-          5,
-          8,
-          9,
-          9
+          1,
+          0,
+          1,
+          2,
+          2,
+          2
         ],
         "junts": [
-          7,
-          6,
-          7,
-          6,
-          6,
-          6
+          2,
+          1,
+          2,
+          1,
+          1,
+          1
         ],
         "bildu": [
-          3,
+          0,
+          0,
+          1,
           2,
-          5,
-          8,
-          9,
-          9
+          2,
+          2
         ],
         "pnv": [
-          7,
-          6,
-          7,
-          6,
-          7,
-          7
+          2,
+          1,
+          2,
+          1,
+          2,
+          2
         ],
         "pod": [
-          3,
+          0,
+          0,
           1,
-          5,
-          7,
-          10,
-          10
+          2,
+          3,
+          3
         ]
       }
     },
@@ -1463,9 +1659,11 @@
       "q": "¿Funcionan los contrapesos del poder?",
       "c": "#4FC9C9",
       "niv": [
+        "No proponer nada sobre los contrapesos, o justificar que se incumplan leyes y sentencias, se perdone a los afines o se señale a jueces por sus resoluciones.",
         "Que se cumplan las leyes y las sentencias, y que los órganos constitucionales se renueven a tiempo.",
         "Jueces elegidos sin depender de los partidos, justicia en plazos razonables y corrupción perseguida con medios.",
-        "Instituciones que se ganan la confianza de todos: renovadas por mayorías amplias, justicia rápida y transparente, y contrapesos que no cambian con cada mayoría."
+        "Instituciones que se ganan la confianza de todos: renovadas por mayorías amplias, justicia rápida y transparente, y contrapesos que no cambian con cada mayoría.",
+        "Contrapesos que no dependen de quién gobierne: jueces elegidos por jueces, justicia con plazos garantizados, perdón sin autoindulto, cada contacto con el poder publicado y ciudadanos por sorteo con voz reglada."
       ],
       "ejes": [
         {
@@ -1476,10 +1674,14 @@
           "n": "Igualdad ante la ley",
           "d": "Las mismas reglas y las mismas penas para todos, también para los políticos.",
           "niv": [
+            "No proponer nada, o justificar delitos o el incumplimiento de sentencias cuando el condenado es de los propios, sea del lado que sea.",
             "Que las condenas se cumplan.",
             "Indultos motivados y públicos, que no beneficien a quien gobierna o lo sostiene.",
-            "Ningún indulto ni amnistía por corrupción, y toda medida de gracia avalada por un órgano independiente."
-          ]
+            "Ningún indulto ni amnistía por corrupción, y toda medida de gracia avalada por un órgano independiente.",
+            "Las mismas reglas para todos: fuero especial solo por actos del cargo, indultos solo con informe favorable de un órgano independiente y nunca por corrupción, y gracia colectiva solo por dos tercios."
+          ],
+          "it": "Ley igual para todos: sin fueros y sin autoindulto",
+          "is": "ley-igual-sin-aforamientos-ni-autoindulto"
         },
         {
           "l": [
@@ -1489,10 +1691,14 @@
           "n": "Justicia rápida y con medios",
           "d": "Que un juicio no dure años.",
           "niv": [
+            "No proponer nada sobre los retrasos, o defender que, como la justicia es lenta, es legítimo saltársela o tomársela por la mano.",
             "Cubrir las plazas vacantes de jueces y funcionarios.",
             "Tribunales de instancia, expediente digital y mediación antes del juicio.",
-            "Plazos máximos garantizados por tipo de procedimiento, datos públicos por juzgado y jueces por habitante en la media europea."
-          ]
+            "Plazos máximos garantizados por tipo de procedimiento, datos públicos por juzgado y jueces por habitante en la media europea.",
+            "Un plazo máximo legal por tipo de pleito con consecuencias si se incumple: refuerzo automático del juzgado y compensación al ciudadano. Plantilla de jueces ligada por ley a la mediana europea y a la carga de trabajo."
+          ],
+          "it": "Justicia con plazo garantizado y compensación",
+          "is": "justicia-con-plazo-garantizado-y-compensacion"
         },
         {
           "l": [
@@ -1502,10 +1708,14 @@
           "n": "Convivencia y medidas de gracia",
           "d": "Usar el perdón para cerrar conflictos políticos.",
           "niv": [
+            "No proponer nada, o justificar los delitos cometidos por una causa política propia y negar las sentencias, valga para la causa que valga.",
             "Indultos individuales motivados.",
             "Medidas de gracia ligadas a un compromiso de respetar la ley.",
-            "Una reconciliación con verdad y reparación a las víctimas, pactada por mayorías amplias para que no sea de un solo bando."
-          ]
+            "Una reconciliación con verdad y reparación a las víctimas, pactada por mayorías amplias para que no sea de un solo bando.",
+            "Un marco estable para cerrar conflictos: gracia solo por dos tercios y sin urgencia, condicionada a verdad, reparación a las víctimas y compromiso de actuar dentro de la ley, aplicada por jueces y revocable si se incumple."
+          ],
+          "it": "Reconciliación con reglas: verdad, reparación y pacto",
+          "is": "reconciliacion-con-verdad-reparacion-y-dos-tercios"
         },
         {
           "l": [
@@ -1515,10 +1725,14 @@
           "n": "Independencia judicial",
           "d": "Cómo se eligen los jueces que gobiernan la justicia.",
           "niv": [
+            "No proponer nada, o defender que el Gobierno o la mayoría controlen a jueces y fiscales, o señalar a jueces por sus sentencias.",
             "Renovar a tiempo el Consejo General del Poder Judicial.",
             "Que los jueces elijan a parte de sus vocales, como recomienda la Comisión Europea.",
-            "Un sistema de elección de jueces y fiscales que no dependa de ninguna mayoría, con una Fiscalía autónoma del Gobierno."
-          ]
+            "Un sistema de elección de jueces y fiscales que no dependa de ninguna mayoría, con una Fiscalía autónoma del Gobierno.",
+            "Vocales judiciales del CGPJ elegidos por todos los jueces con un voto que asegure pluralidad; vocales juristas por mayoría reforzada y sorteo si hay bloqueo; Fiscal General con mandato único, largo y sin órdenes del Gobierno."
+          ],
+          "it": "Un poder judicial que no depende de ninguna mayoría",
+          "is": "jueces-elegidos-por-jueces-y-fiscalia-autonoma"
         },
         {
           "l": [
@@ -1528,10 +1742,14 @@
           "n": "Transparencia y lucha contra la corrupción",
           "d": "Saber quién influye en las leyes y perseguir a quien roba.",
           "niv": [
+            "No proponer nada, o restar importancia a la corrupción de los propios, atacar a quien la investiga o defender la opacidad de reuniones y cuentas.",
             "Perseguir la corrupción en los tribunales.",
             "Registro obligatorio de lobbies, agendas públicas y protección de quien denuncia.",
-            "Una autoridad anticorrupción independiente con poder de investigar, y la huella de quién influyó en cada ley publicada."
-          ]
+            "Una autoridad anticorrupción independiente con poder de investigar, y la huella de quién influyó en cada ley publicada.",
+            "Todo contacto para influir en una norma, un contrato o una subvención queda publicado junto a la decisión; una autoridad independiente, con presupuesto propio, investiga y sanciona; quien denuncia queda protegido y resarcido."
+          ],
+          "it": "Poder a la vista: huella pública y autoridad propia",
+          "is": "huella-publica-y-autoridad-anticorrupcion-independiente"
         },
         {
           "l": [
@@ -1541,84 +1759,88 @@
           "n": "Participación y calidad democrática",
           "d": "Ley electoral, consultas y la voz de la ciudadanía entre elecciones.",
           "niv": [
+            "No proponer nada, o poner en duda sin pruebas la limpieza de las elecciones, o defender saltarse las instituciones representativas.",
             "Elecciones limpias y debates electorales garantizados.",
             "Iniciativas legislativas populares más fáciles y listas más abiertas.",
-            "Una reforma electoral pactada por todos, consultas regladas y asambleas de ciudadanos elegidos por sorteo para los grandes temas."
-          ]
+            "Una reforma electoral pactada por todos, consultas regladas y asambleas de ciudadanos elegidos por sorteo para los grandes temas.",
+            "Una asamblea ciudadana permanente por sorteo que fija temas y obliga al Congreso a responder y votar; iniciativas populares con debate garantizado; listas desbloqueadas y una ley electoral que solo cambia por consenso amplio."
+          ],
+          "it": "Democracia de tres voces: urna, sorteo y firma",
+          "is": "asamblea-ciudadana-permanente-e-iniciativa-con-voto"
         }
       ],
       "v": {
         "pp": [
-          9,
-          7,
           2,
-          9,
-          8,
-          4
+          2,
+          0,
+          2,
+          2,
+          1
         ],
         "psoe": [
-          4,
-          7,
-          9,
-          5,
-          7,
-          6
+          1,
+          2,
+          2,
+          1,
+          2,
+          1
         ],
         "vox": [
-          10,
-          5,
+          3,
+          1,
           0,
-          8,
-          7,
-          4
+          2,
+          2,
+          1
         ],
         "fa": [
-          5,
-          6,
-          8,
-          6,
-          8,
-          9
+          1,
+          1,
+          2,
+          1,
+          2,
+          2
         ],
         "erc": [
+          0,
+          1,
           3,
-          5,
-          10,
-          5,
-          6,
-          8
+          1,
+          1,
+          2
         ],
         "junts": [
-          2,
-          5,
-          10,
-          4,
-          5,
-          6
+          0,
+          1,
+          3,
+          1,
+          1,
+          1
         ],
         "bildu": [
+          0,
+          1,
           3,
-          5,
-          10,
-          4,
-          6,
-          8
+          1,
+          1,
+          2
         ],
         "pnv": [
-          5,
-          7,
-          8,
-          6,
-          7,
-          6
+          1,
+          2,
+          2,
+          1,
+          2,
+          1
         ],
         "pod": [
-          5,
-          5,
-          8,
-          5,
-          8,
-          9
+          1,
+          1,
+          2,
+          1,
+          2,
+          2
         ]
       }
     },
@@ -1628,9 +1850,11 @@
       "q": "¿Qué papel queremos tener en el mundo?",
       "c": "#A8B4C8",
       "niv": [
+        "No tener política exterior, o proponer incumplir los tratados firmados, justificar agresiones o abusos según el bando, o desentenderse de los españoles en el exterior.",
         "Cumplir los compromisos internacionales firmados y proteger a los españoles en el exterior.",
         "Una política exterior con objetivos claros, pactada con la oposición, que combina seguridad, Europa y derechos humanos.",
-        "Una política de Estado estable: defensa suficiente y europea, diplomacia activa por la paz y coherencia entre lo que se defiende y lo que se vende."
+        "Una política de Estado estable: defensa suficiente y europea, diplomacia activa por la paz y coherencia entre lo que se defiende y lo que se vende.",
+        "Una política exterior de Estado, votada en el Congreso, que defiende lo propio dentro de la ley, decide más con Europa, sostiene una defensa suficiente y es coherente entre lo que vende, lo que ayuda y lo que defiende."
       ],
       "ejes": [
         {
@@ -1641,10 +1865,14 @@
           "n": "Comercio, industria e influencia",
           "d": "Abrir mercados y que las empresas españolas compitan fuera.",
           "niv": [
+            "No proponer nada sobre comercio exterior, o plantear cerrar el país al comercio o incumplir los acuerdos y normas comerciales ya firmados.",
             "Apoyar a las empresas que exportan.",
             "Acuerdos comerciales con cláusulas sociales y ambientales, e industria tecnológica y de defensa propia.",
-            "Un país con peso en Europa, Iberoamérica y el Mediterráneo, que use su fuerza económica y cultural con coherencia."
-          ]
+            "Un país con peso en Europa, Iberoamérica y el Mediterráneo, que use su fuerza económica y cultural con coherencia.",
+            "Abrir mercados con acuerdos cuyas normas laborales, ambientales y sanitarias se puedan exigir con sanción, iguales para lo importado y lo producido aquí, y una estrategia de influencia económica y cultural votada en el Congreso."
+          ],
+          "it": "Comercio abierto con reglas iguales y exigibles",
+          "is": "comercio-abierto-con-reglas-iguales-y-exigibles"
         },
         {
           "l": [
@@ -1654,10 +1882,14 @@
           "n": "Defensa y seguridad",
           "d": "Fuerzas armadas, gasto en defensa y compromisos con los aliados.",
           "niv": [
+            "No proponer nada sobre defensa, o plantear desmantelar las fuerzas armadas, incumplir lo firmado con los aliados o usarlas al margen de la ley.",
             "Unas fuerzas armadas preparadas que cumplen sus misiones.",
             "Una ley de programación del gasto en defensa a varios años, debatida en el Congreso.",
-            "Una defensa suficiente y europea, con industria propia, gasto pactado a largo plazo y control parlamentario."
-          ]
+            "Una defensa suficiente y europea, con industria propia, gasto pactado a largo plazo y control parlamentario.",
+            "Una ley de defensa a diez años aprobada por mayoría reforzada, con el gasto ligado a capacidades comprobables y no solo a un porcentaje, compra conjunta europea por defecto y voto del Congreso para cada gran contrato."
+          ],
+          "it": "Defensa pactada a diez años y ligada a capacidades",
+          "is": "defensa-pactada-a-diez-anos-ligada-a-capacidades"
         },
         {
           "l": [
@@ -1667,10 +1899,14 @@
           "n": "Soberanía e intereses nacionales",
           "d": "Defender lo propio: fronteras, Ceuta y Melilla, Gibraltar, pesca y campo.",
           "niv": [
+            "Renunciar a defender el territorio y los intereses del país, o defenderlos saltándose el derecho internacional, los tratados firmados o el Parlamento.",
             "Defender la integridad del territorio y los intereses de los sectores españoles.",
             "Una política con Marruecos, Gibraltar y el Sáhara pactada y explicada en el Congreso.",
-            "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes partidos, que no cambie con cada gobierno."
-          ]
+            "Una estrategia de intereses nacionales a largo plazo, pactada entre los grandes partidos, que no cambie con cada gobierno.",
+            "Una estrategia de intereses permanentes votada por mayoría reforzada en el Congreso, que ningún gobierno cambie sin consulta previa a una comisión de todos los grupos y sin debate y voto, siempre dentro del derecho internacional."
+          ],
+          "it": "Intereses permanentes votados, sin giros por sorpresa",
+          "is": "intereses-permanentes-votados-sin-giros-por-sorpresa"
         },
         {
           "l": [
@@ -1680,10 +1916,14 @@
           "n": "Unión Europea",
           "d": "Cuánto decidimos juntos en Europa.",
           "niv": [
+            "No proponer nada sobre Europa, o plantear desobedecer las normas y sentencias europeas mientras se siguen recibiendo sus fondos.",
             "Cumplir las normas europeas y usar bien los fondos.",
             "Más integración en energía, defensa y migración.",
-            "Una Europa con presupuesto propio, política exterior común y decisiones por mayoría."
-          ]
+            "Una Europa con presupuesto propio, política exterior común y decisiones por mayoría.",
+            "Promover que la UE decida su política exterior por mayoría cualificada con freno de emergencia, tenga recursos propios y deuda común para bienes comunes, y que el Congreso fije y controle la posición española."
+          ],
+          "it": "Una Europa que decide por mayoría y rinde cuentas",
+          "is": "europa-que-decide-por-mayoria-y-rinde-cuentas"
         },
         {
           "l": [
@@ -1693,10 +1933,14 @@
           "n": "Paz, diplomacia y desarme",
           "d": "Resolver los conflictos hablando antes que con las armas.",
           "niv": [
+            "No proponer nada sobre paz, o justificar guerras de agresión, ignorar las resoluciones de la ONU o vender armas sin ningún control.",
             "Apoyar las resoluciones de Naciones Unidas.",
             "Mediación activa en conflictos y control estricto de la venta de armas.",
-            "Una diplomacia de paz con medios, que medie en conflictos y reduzca las armas en el mundo sin dejar indefenso a nadie."
-          ]
+            "Una diplomacia de paz con medios, que medie en conflictos y reduzca las armas en el mundo sin dejar indefenso a nadie.",
+            "Un servicio de mediación permanente con presupuesto estable y respaldo de todos los grupos, licencias de armas publicadas una a una y denegadas ante riesgo grave, y cumplimiento sin excepciones de la justicia internacional."
+          ],
+          "it": "Diplomacia de paz profesional y armas bajo control",
+          "is": "diplomacia-de-paz-profesional-y-armas-bajo-control"
         },
         {
           "l": [
@@ -1706,84 +1950,88 @@
           "n": "Cooperación y derechos humanos",
           "d": "Ayuda al desarrollo y defensa de los derechos en el mundo.",
           "niv": [
+            "No proponer nada, o negar la ayuda incluso en las emergencias y justificar violaciones de derechos humanos según quién las cometa.",
             "Ayuda humanitaria en las emergencias.",
             "Ayuda al desarrollo camino del 0,7 % de la renta, como marca la ley de 2023.",
-            "Una política exterior que condiciona comercio y alianzas al respeto de los derechos humanos, con criterios públicos."
-          ]
+            "Una política exterior que condiciona comercio y alianzas al respeto de los derechos humanos, con criterios públicos.",
+            "Llegar al 0,7 % de la renta nacional con una senda anual obligatoria, medir la ayuda por sus resultados y aplicar los mismos criterios públicos de derechos humanos a todos los países en comercio, alianzas y venta de armas."
+          ],
+          "it": "Ayuda del 0,7 % garantizada y coherencia auditada",
+          "is": "ayuda-del-07-garantizada-y-coherencia-auditada"
         }
       ],
       "v": {
         "pp": [
-          8,
-          9,
-          8,
-          8,
-          4,
-          5
-        ],
-        "psoe": [
-          7,
-          6,
-          5,
-          9,
-          7,
-          8
-        ],
-        "vox": [
-          6,
-          8,
-          10,
           2,
-          3,
-          2
-        ],
-        "fa": [
-          4,
-          3,
-          6,
-          7,
-          9,
-          9
-        ],
-        "erc": [
-          5,
-          4,
-          3,
-          7,
-          8,
-          8
-        ],
-        "junts": [
-          7,
-          6,
-          4,
-          7,
-          6,
-          6
-        ],
-        "bildu": [
-          3,
           2,
-          4,
-          5,
-          9,
-          9
-        ],
-        "pnv": [
-          7,
-          7,
-          4,
-          9,
-          6,
-          7
-        ],
-        "pod": [
+          2,
           2,
           1,
-          6,
-          4,
-          10,
-          9
+          1
+        ],
+        "psoe": [
+          2,
+          1,
+          1,
+          2,
+          2,
+          2
+        ],
+        "vox": [
+          1,
+          2,
+          3,
+          0,
+          0,
+          0
+        ],
+        "fa": [
+          1,
+          0,
+          1,
+          2,
+          2,
+          2
+        ],
+        "erc": [
+          1,
+          1,
+          0,
+          2,
+          2,
+          2
+        ],
+        "junts": [
+          2,
+          1,
+          1,
+          2,
+          1,
+          1
+        ],
+        "bildu": [
+          0,
+          0,
+          1,
+          1,
+          2,
+          2
+        ],
+        "pnv": [
+          2,
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "pod": [
+          0,
+          0,
+          1,
+          1,
+          3,
+          2
         ]
       }
     }
