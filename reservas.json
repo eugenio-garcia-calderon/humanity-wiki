@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Geometría fase 2: ideales inm/ter y razones del nivel 0",
+      "desde": "2026-11-25T14:02:46.174Z"
+    }
+  ]
 }
