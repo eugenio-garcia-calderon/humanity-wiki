@@ -13361,6 +13361,10 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - `scripts/geometria-medidas.mjs --verificar|--aplicar` validates (lengths, counts, banned labels and party names, figures need meta/fuente, no repeated names) and builds `public/geometria-figura/medidas.json` (278 KB, loaded after the page).
 - The page shows summary + bullets in the test cards, the level side panel, and (names only) when hovering the test figure. Without the file it falls back to the short level text.
 
+### 2026-11-25 — luzhumanidad.com: sector «Innovación en Agricultura»
+- Eugenio: «añade innovación en Agricultura… y añade ahí el proyecto de agricultura sintrópica, que ahora está en informática».
+- Migración `0242_sector_agricultura_luz.sql`: nuevo sector en `sitio.sectores` de `KWMUO4S4V663` (áreas Alimentación, Agricultura, Agroecología; a todo el ancho), entre Vivienda y Cultura. El proyecto tenía el área «Alimentación», que ningún sector recogía.
+- `VistaProyectosSitio`: color lima para el icono «Agricultura».
 ## 2026-11-25 — Agricultura sintrópica: spacing between plants, and a menu of its own for the base pattern
 
 > «Permite ajustar el espacio entre plantas, no solo los pasillos y bloques.» Then: «permite modificar el patrón base de manera sencilla con un menú entero solo para ese patrón base.»
