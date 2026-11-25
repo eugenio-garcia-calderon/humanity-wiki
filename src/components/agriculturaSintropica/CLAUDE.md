@@ -10,8 +10,11 @@ Also shown on luzhumanidad.com through `APLICACIONES` in `SubpaginaSitio.tsx` (m
 | `modelo.ts` | Pure functions: plot layout, size of a plant at year t, the 30-year indicators, the advisor, the steps |
 | `Escena3D.tsx` | R3F scene: two InstancedMeshes (crowns, trunks); only matrices change with the year |
 | `EditorModulo.tsx` | The module from above, draggable, with its neighbours faded |
+| `PanelPatron.tsx` | The «Patrón» tab: every tool that edits the base pattern (templates, size, spacing, ring, symmetry, snapping, typed positions) |
 | `exportar.ts` | SVG plan, module sheet with distances, DXF R12, planting CSV, nursery list |
 | `FichaEspecie.tsx`, `Grafica.tsx`, `Proyecto.tsx` | Species card, small line chart, the explanatory tab |
+
+Positions: `huecosBase(p)` is what is drawn and stored; `huecosDe(p)` is what is planted (spacing factor applied). Edit the first, display the second; `aBase` converts a dragged position back.
 
 ## Before you change this, decide
 

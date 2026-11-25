@@ -28,6 +28,8 @@ export interface Parametros {
   huecos: Hueco[] | null;        // positions moved by hand in the module editor (null = the design's)
   ancho: number; largo: number;  // plot (m)
   modAncho: number; modLargo: number;
+  separacion: number;            // auxiliaries' distance to the key, as a factor of the design's (1 = as drawn)
+  marcoDenso: number;            // grid of the dense designs (smile, tree lines), m
   bloqueX: number; bloqueY: number;
   pasillo: number;               // path width (m)
   franja: 'zanja' | 'pavimento';
@@ -42,7 +44,7 @@ export function porDefecto(dis = 'modulo', clave = 'almendro'): Parametros {
   const d = diseno(dis);
   return {
     diseno: d.id, clave, asign: d.asignar(clave), huecos: null,
-    ancho: 100, largo: 100, modAncho: d.ancho, modLargo: d.largo,
+    ancho: 100, largo: 100, modAncho: d.ancho, modLargo: d.largo, separacion: 1, marcoDenso: d.marco?.defecto ?? 1,
     bloqueX: d.parcela.bloqueX, bloqueY: d.parcela.bloqueY, pasillo: 2, franja: d.parcela.franja, franjaAncho: 1, zanjaProf: 0.5,
     zona: 'MS', lluvia: 400, pendiente: 3, riego: 0, mo0: 1,
     poda: true, anuales: true, anosAnuales: 2, maquina: 'estrecho',
@@ -55,7 +57,52 @@ export interface Rect { x0: number; y0: number; x1: number; y1: number; tipo: 'p
 export interface Luna { cx: number; cy: number; r1: number; r2: number; a0: number; a1: number }
 export interface Parcela { plantas: Planta[]; rects: Rect[]; lunas: Luna[]; modulos: number; ancho: number; largo: number; zanjaLargo: number }
 
-export const huecosDe = (p: Parametros) => p.huecos ?? diseno(p.diseno).huecos(p.modAncho, p.modLargo);
+/** Positions as drawn (the design's, or the ones moved by hand), before the spacing factor. */
+export const huecosBase = (p: Parametros): Hueco[] => p.huecos ?? diseno(p.diseno).huecos(p.modAncho, p.modLargo, p.marcoDenso);
+
+const limitar = (x: number) => Math.max(-0.5, Math.min(0.4999, x));
+function claveCercana(h: Hueco, claves: Hueco[], W: number, H: number) {
+  return claves.reduce<Hueco | null>((b, k) => !b || Math.hypot((h.u - k.u) * W, (h.v - k.v) * H) < Math.hypot((h.u - b.u) * W, (h.v - b.v) * H) ? k : b, null);
+}
+/** Positions actually planted: every auxiliary moved towards or away from its nearest key by
+ *  `separacion` (2026-11-25, Eugenio: «permite ajustar el espacio entre plantas»). */
+export function huecosDe(p: Parametros): Hueco[] {
+  const base = huecosBase(p), f = p.separacion ?? 1;
+  if (Math.abs(f - 1) < 1e-6) return base;
+  const claves = base.filter(h => rol(h.etiqueta) === 1);
+  return base.map(h => {
+    const k = rol(h.etiqueta) === 1 ? null : claveCercana(h, claves, p.modAncho, p.modLargo);
+    return k ? { ...h, u: limitar(k.u + (h.u - k.u) * f), v: limitar(k.v + (h.v - k.v) * f) } : h;
+  });
+}
+/** The drawn position that ends up at (u, v) once the spacing factor is applied: for dragging. */
+export function aBase(p: Parametros, i: number, u: number, v: number): { u: number; v: number } {
+  const base = huecosBase(p), f = p.separacion ?? 1, h = base[i];
+  if (!h || rol(h.etiqueta) === 1 || Math.abs(f - 1) < 1e-6) return { u, v };
+  const k = claveCercana(h, base.filter(x => rol(x.etiqueta) === 1), p.modAncho, p.modLargo);
+  return k ? { u: limitar(k.u + (u - k.u) / f), v: limitar(k.v + (v - k.v) / f) } : { u, v };
+}
+
+/** The spacing that results, in metres: keys, nearest auxiliary to a key, and the two closest plants. */
+export function distancias(p: Parametros) {
+  const pls = vecindario(p), claves = pls.filter(x => rol(x.etiqueta) === 1), centro = pls.filter(x => x.mod === 0);
+  let dx = Infinity, dy = Infinity, auxClave = Infinity, minima = Infinity;
+  for (const a of claves) for (const b of claves) {
+    if (a === b) continue;
+    const ex = Math.abs(a.x - b.x), ey = Math.abs(a.y - b.y);
+    if (ey < 0.05 && ex > 0.05) dx = Math.min(dx, ex);
+    if (ex < 0.05 && ey > 0.05) dy = Math.min(dy, ey);
+  }
+  for (const a of centro) for (const b of pls) {
+    if (a === b) continue;
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (d < 0.01) continue;
+    minima = Math.min(minima, d);
+    if (rol(a.etiqueta) === 1 && rol(b.etiqueta) !== 1) auxClave = Math.min(auxClave, d);
+  }
+  const fin = (x: number) => Number.isFinite(x) ? x : null;
+  return { claveX: fin(dx), claveY: fin(dy), auxClave: fin(auxClave), minima: fin(minima) };
+}
 
 function elegir(lista: string[] | undefined, n: number): Especie | null {
   const l = (lista ?? []).filter(id => ESPECIE[id]);
