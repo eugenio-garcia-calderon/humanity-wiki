@@ -300,20 +300,56 @@ export function registerStripeRoutes(app: Express, db: any) {
         mode: 'subscription',
         line_items: [{ price_data: { currency: 'eur', product_data: { name: `${nombre} · cada mes` }, unit_amount: cents, recurring: { interval: 'month' } }, quantity: 1 }],
         metadata, subscription_data: { metadata },
-        success_url: `${base}${ruta}?donacion=gracias`,
+        success_url: `${base}${ruta}?donacion=gracias&sesion={CHECKOUT_SESSION_ID}`,
         cancel_url: `${base}${ruta}?donacion=cancelada`,
       } : {
         mode: 'payment',
         submit_type: 'donate',
         line_items: [{ price_data: { currency: 'eur', product_data: { name: nombre }, unit_amount: cents }, quantity: 1 }],
         metadata,
-        success_url: `${base}${ruta}?donacion=gracias`,
+        success_url: `${base}${ruta}?donacion=gracias&sesion={CHECKOUT_SESSION_ID}`,
         cancel_url: `${base}${ruta}?donacion=cancelada`,
       });
       res.json({ url: session.url });
     } catch (e: any) {
       console.error('checkout donacion error:', e);
       res.status(500).json({ error: 'No se ha podido abrir el pago.' });
+    }
+  });
+
+  // LA PÁGINA DE GRACIAS (2026-11-25, Eugenio: «no ha habido thank you page; créala, que sea muy elegante y que
+  // confirme la donación»). Stripe vuelve con `?donacion=gracias&sesion=cs_…`; la página pregunta aquí qué se ha
+  // pagado. Solo lo sabe quien tiene el id de la sesión (largo e imposible de adivinar), y aun así se devuelve lo
+  // justo: el importe, si es cada mes, la causa, el nombre de pila y el correo a medias, para decirle dónde le llega
+  // el justificante. Solo sesiones de donación.
+  app.get('/api/stripe/donacion/confirmar', async (req: Request, res: Response) => {
+    res.set('Cache-Control', 'no-store');
+    const id = String(req.query.sesion || '');
+    if (!/^cs_(live|test)_[A-Za-z0-9]{10,250}$/.test(id)) return res.status(400).json({ error: 'Falta la sesión de pago.' });
+    try {
+      const s = await getStripe().checkout.sessions.retrieve(id);
+      const tipo = String(s.metadata?.kind || '');
+      if (tipo !== 'donacion' && tipo !== 'donacion_mensual') return res.status(404).json({ error: 'Esa sesión no es una donación.' });
+      let causa: string | null = null;
+      const paginaId = String(s.metadata?.pagina_id || '');
+      if (paginaId) {
+        const r = (await db.execute(sql`SELECT title FROM knowledge_windows WHERE id = ${paginaId} AND deleted_at IS NULL`)).rows[0] as any;
+        if (r?.title) causa = String(r.title).slice(0, 120);
+      }
+      const nombre = String(s.customer_details?.name || '').trim().split(/\s+/)[0] || null;
+      const correo = String(s.customer_details?.email || '');
+      const enmascarado = correo.includes('@') ? correo.replace(/^(.)[^@]*(@.*)$/, (_m, a, b) => `${a}•••${b}`) : null;
+      const ref = String((typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent?.id) || (typeof s.subscription === 'string' ? s.subscription : s.subscription?.id) || s.id);
+      res.json({
+        pagada: s.status === 'complete' && (s.payment_status === 'paid' || s.payment_status === 'no_payment_required'),
+        importe: s.amount_total ?? null, moneda: (s.currency || 'eur').toUpperCase(), mensual: tipo === 'donacion_mensual',
+        causa, nombre: nombre ? nombre.slice(0, 40) : null, correo: enmascarado, fecha: s.created ? new Date(s.created * 1000).toISOString() : null,
+        referencia: ref.slice(-8).toUpperCase(), real: s.livemode === true,
+      });
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.code === 'resource_missing') return res.status(404).json({ error: 'No encontramos ese pago.' });
+      console.error('confirmar donacion error:', e);
+      res.status(500).json({ error: 'No se ha podido confirmar el pago.' });
     }
   });
 

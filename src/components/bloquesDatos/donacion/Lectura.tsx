@@ -93,7 +93,7 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center">
           <Heart className="mx-auto h-8 w-8 text-rose-600" fill="currentColor" />
           <p className="mt-2 text-xl font-black text-slate-900">¡Gracias por tu donación!</p>
-          <p className="mt-1 text-sm text-slate-600">Recibirás el justificante por correo electrónico.</p>
+          <p className="mt-1 text-sm text-slate-600">Recibirás el recibo por correo electrónico.</p>
         </div>
       </div>
     );
