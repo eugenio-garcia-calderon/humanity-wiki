@@ -13244,3 +13244,10 @@ Eugenio: «haz lo mismo que has hecho de los submenus y componentes del RODAJE, 
 - On `aeromovil.org` the Luz & Humanidad bar is gone. The rule is general: a project page served on a domain that is not the project's own parent site and not `*.humanity.wiki` draws no parent bar, no breadcrumb line. `luzhumanidad.com`, `solarcrowd.com`, `wikiproducts` and every `*.humanity.wiki` address keep theirs (checked against the production `dominios_paginas` rows).
 - New public endpoint `GET /api/dominios/propias?ids=a,b,c` → `{ pageId: domain }` (active, not redirecting, not a platform subdomain; cached 60 s).
 - Files: `src/server/dominios.ts`, `src/components/sitio/barraDelSitio.ts` (new), `src/components/sitio/VistaPagina.tsx`, `src/pages/SubpaginaSitio.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`, `scripts/web-propia.ts` (11 checks).
+
+### 2026-11-25 — Donaciones: sin el entorno de prueba de Stripe para el público (prog8)
+Eugenio: «elimina el entorno de prueba de las donaciones de Stripe Checkout».
+- El servidor seguía con una clave `sk_test_` (no hay `STRIPE_*` en los secretos de GitHub): quien «donaba» acababa en el Checkout de pruebas y no pagaba nada.
+- `POST /api/stripe/checkout/donacion` ya no abre un pago de pruebas a quien no ha iniciado sesión (503 «Las donaciones con tarjeta se abren muy pronto»). El bloque «Donación» (también en Sol Solidario) enseña ese aviso al público; el equipo con sesión sigue pudiendo probar con la 4242 y ve un aviso de que solo lo ve él.
+- Con la clave real (`gh secret set STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` y desplegar) todo se abre solo, sin tocar código.
+- `useAuthOpcional` en `AuthContext`: la sesión sin romper donde no hay proveedor.
