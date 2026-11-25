@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
+import MontarGraciasDonacion from './components/bloquesDatos/donacion/MontarGraciasDonacion';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProveedorSitio, sitioConAnfitrion } from './components/sitio/ContextoSitio';
 import PaginaDeDominio, { type Resuelto } from './pages/PaginaDeDominio';
@@ -86,6 +87,7 @@ export default function AplicacionDeDominio({ host }: { host: string }) {
 
   return (
     <BrowserRouter>
+      <MontarGraciasDonacion />
       <ProveedorSitio sitio={sitioConAnfitrion(raizId)}>
           <Routes>
             {/* LAS SUBPÁGINAS SE QUEDAN EN EL DOMINIO (2026-09-30). Antes todo

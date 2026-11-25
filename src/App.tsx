@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+import MontarGraciasDonacion from './components/bloquesDatos/donacion/MontarGraciasDonacion';
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import { subdominioDeUsuario } from './utils/subdominio';
@@ -235,6 +236,7 @@ function AplicacionDeEspacio({ handle }: { handle: string }) {
     <AuthProvider>
     <DataProvider>
     <BrowserRouter>
+      <MontarGraciasDonacion />
       <Suspense fallback={<Esperando />}>
         <Routes>
           <Route path="/" element={<PortadaEspacio handle={handle} />} />
@@ -323,6 +325,7 @@ export default function App() {
     <SettingsProvider>
     <AuthProvider>
             <BrowserRouter>
+      <MontarGraciasDonacion />
             {/* UNA SOLA FRONTERA DE ESPERA PARA TODAS LAS RUTAS. Envolver cada
                 una por separado serían 51 copias del mismo envoltorio, y la
                 primera que se olvidara dejaría una pantalla en blanco sin que

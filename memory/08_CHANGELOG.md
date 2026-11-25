@@ -13251,3 +13251,9 @@ Eugenio: «elimina el entorno de prueba de las donaciones de Stripe Checkout».
 - `POST /api/stripe/checkout/donacion` ya no abre un pago de pruebas a quien no ha iniciado sesión (503 «Las donaciones con tarjeta se abren muy pronto»). El bloque «Donación» (también en Sol Solidario) enseña ese aviso al público; el equipo con sesión sigue pudiendo probar con la 4242 y ve un aviso de que solo lo ve él.
 - Con la clave real (`gh secret set STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` y desplegar) todo se abre solo, sin tocar código.
 - `useAuthOpcional` en `AuthContext`: la sesión sin romper donde no hay proveedor.
+
+### 2026-11-25 — La página de gracias de las donaciones (prog8)
+Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que sea muy elegante y que confirme la donación».
+- Stripe vuelve con `?donacion=gracias&sesion={CHECKOUT_SESSION_ID}`. `MontarGraciasDonacion` (en las tres raíces: plataforma, espacio y dominio propio) abre `GraciasDonacion`, una pantalla entera encima de la página: un sol, «Gracias, <nombre>.», el importe y la causa, un recibo (importe, frecuencia, destino, fecha, referencia, correo a medias), «Volver a…» e «Invita a alguien». Al cerrar se limpia la dirección.
+- `GET /api/stripe/donacion/confirmar?sesion=cs_…`: solo sesiones de donación; devuelve lo justo (nombre de pila, correo enmascarado).
+- En Stripe se han activado los recibos por correo de los pagos completados (estaban apagados).
