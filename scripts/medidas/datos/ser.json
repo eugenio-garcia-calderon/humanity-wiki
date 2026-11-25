@@ -51,50 +51,471 @@
           "nivel": 0,
           "resumen": "Sin postura sobre los conciertos, o dinero público a centros privados sin contrato claro, sin control de resultados ni de cobros.",
           "medidas": [
-            { "nombre": "Sin plan propio", "texto": "No dice si usará centros privados ni para qué, de modo que cada concierto se decide caso a caso, sin un criterio conocido ni comparación con la red pública." },
-            { "nombre": "Dinero sin control", "texto": "Se paga a centros privados sin indicadores de resultado, sin inspección y sin publicar cuánto cobran ni qué hacen con ese dinero público." },
-            { "nombre": "Contratos rotos o eternos", "texto": "Se rompen conciertos vigentes sin indemnizar ni preparar la alternativa, o se prorrogan siempre de forma automática, sin mirar cómo funcionan." }
+            {
+              "nombre": "Sin plan propio",
+              "texto": "No dice si usará centros privados ni para qué, de modo que cada concierto se decide caso a caso, sin un criterio conocido ni comparación con la red pública.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administración que decide sin criterio publicado"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de centros concertados",
+                    "centros privados sin reglas a las que atenerse"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dinero sin control",
+              "texto": "Se paga a centros privados sin indicadores de resultado, sin inspección y sin publicar cuánto cobran ni qué hacen con ese dinero público.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros concertados que cobran sin rendir cuentas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes",
+                    "usuarios de servicios sin calidad vigilada"
+                  ],
+                  "indirecto": [
+                    "centros concertados que sí cumplen"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contratos rotos o eternos",
+              "texto": "Se rompen conciertos vigentes sin indemnizar ni preparar la alternativa, o se prorrogan siempre de forma automática, sin mirar cómo funcionan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros con prórroga automática asegurada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios atendidos en centros concertados",
+                    "trabajadores de centros concertados"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan indemnizaciones"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Conciertos con contrato escrito, precio público y control mínimo, para cubrir lo que la red pública no llega a atender.",
           "medidas": [
-            { "nombre": "Contrato escrito y publicado", "texto": "Cada concierto sanitario, educativo o de cuidados se firma con precio, servicios incluidos y duración, y se publica en el portal de contratación de la comunidad." },
-            { "nombre": "Derivar lo que pasa del plazo", "texto": "En sanidad, la comunidad deriva a centros privados las pruebas y operaciones que superan el plazo, respetando la misma lista de espera y el mismo orden de prioridad." },
-            { "nombre": "Gratuidad garantizada", "texto": "Lo pagado con dinero público no se cobra otra vez a la familia, al paciente o a la persona dependiente; la inspección atiende las quejas y ordena devolver lo cobrado." },
-            { "nombre": "Inspección de requisitos", "texto": "Antes de concertar, la comunidad comprueba personal, instalaciones y seguridad del centro, y repite la inspección mientras dura el contrato." }
+            {
+              "nombre": "Contrato escrito y publicado",
+              "texto": "Cada concierto sanitario, educativo o de cuidados se firma con precio, servicios incluidos y duración, y se publica en el portal de contratación de la comunidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "usuarios de centros concertados"
+                  ],
+                  "indirecto": [
+                    "centros privados que compiten con reglas claras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que se benefician de contratos opacos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Derivar lo que pasa del plazo",
+              "texto": "En sanidad, la comunidad deriva a centros privados las pruebas y operaciones que superan el plazo, respetando la misma lista de espera y el mismo orden de prioridad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes en lista de espera fuera de plazo"
+                  ],
+                  "indirecto": [
+                    "clínicas privadas con capacidad libre"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la derivación"
+                  ],
+                  "indirecto": [
+                    "hospitales públicos que pierden actividad y presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gratuidad garantizada",
+              "texto": "Lo pagado con dinero público no se cobra otra vez a la familia, al paciente o a la persona dependiente; la inspección atiende las quejas y ordena devolver lo cobrado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos en colegios concertados",
+                    "personas dependientes en plazas concertadas"
+                  ],
+                  "indirecto": [
+                    "familias de rentas bajas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados que cobran cuotas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si sube el precio del concierto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inspección de requisitos",
+              "texto": "Antes de concertar, la comunidad comprueba personal, instalaciones y seguridad del centro, y repite la inspección mientras dura el contrato.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros concertados"
+                  ],
+                  "indirecto": [
+                    "centros que ya cumplen los requisitos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con personal o instalaciones insuficientes"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la inspección"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Conciertos evaluados por coste y resultado, comparados con la red pública y renovados solo si la evaluación lo justifica.",
           "medidas": [
-            { "nombre": "Indicadores en cada contrato", "texto": "Cada concierto fija indicadores de resultado (complicaciones, reingresos, progreso del alumnado, calidad de los cuidados) y de coste, medidos cada año." },
-            { "nombre": "Comparación con la red pública", "texto": "La comunidad publica cada año el coste y los resultados de los centros concertados junto a los de los públicos de su zona, con el mismo método." },
-            { "nombre": "Renovar solo tras evaluar", "texto": "Ningún concierto se renueva sin un informe que compare su coste y su resultado con la alternativa pública; el informe se publica antes de firmar." },
-            { "nombre": "Admisión por la misma oficina", "texto": "Las plazas concertadas en colegios y residencias se adjudican con los mismos criterios y por la misma oficina que las públicas, nunca por el propio centro." }
+            {
+              "nombre": "Indicadores en cada contrato",
+              "texto": "Cada concierto fija indicadores de resultado (complicaciones, reingresos, progreso del alumnado, calidad de los cuidados) y de coste, medidos cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros concertados",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "centros concertados con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados con malos resultados"
+                  ],
+                  "indirecto": [
+                    "profesionales con más carga administrativa"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comparación con la red pública",
+              "texto": "La comunidad publica cada año el coste y los resultados de los centros concertados junto a los de los públicos de su zona, con el mismo método.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "familias y pacientes que eligen centro"
+                  ],
+                  "indirecto": [
+                    "centros con buenos resultados de ambas redes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros públicos y concertados con peores resultados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Renovar solo tras evaluar",
+              "texto": "Ningún concierto se renueva sin un informe que compare su coste y su resultado con la alternativa pública; el informe se publica antes de firmar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios concertados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados con peor coste o resultado"
+                  ],
+                  "indirecto": [
+                    "trabajadores de centros que no se renuevan"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Admisión por la misma oficina",
+              "texto": "Las plazas concertadas en colegios y residencias se adjudican con los mismos criterios y por la misma oficina que las públicas, nunca por el propio centro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias sin contactos ni información",
+                    "alumnado con necesidades de apoyo"
+                  ],
+                  "indirecto": [
+                    "colegios públicos que hoy concentran alumnado vulnerable"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que hoy eligen a su alumnado"
+                  ],
+                  "indirecto": [
+                    "familias que hoy logran plaza por trato directo"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Colaboración solo donde mejora lo medido, con precio ajustado por dificultad, reversión pactada y sin elegir a los usuarios rentables.",
           "medidas": [
-            { "nombre": "Concertar solo con ventaja medida", "texto": "Un concierto nuevo solo se firma si un estudio público muestra que mejora el plazo, el resultado o el coste frente a ampliar la red pública." },
-            { "nombre": "Precio ajustado por dificultad", "texto": "El precio por paciente, alumno o persona dependiente sube con la gravedad o la necesidad de apoyo, para que no compense quedarse con los casos fáciles." },
-            { "nombre": "Reserva de plazas para más necesidad", "texto": "Todo centro concertado reserva plazas para alumnado con necesidad de apoyo y para pacientes o residentes complejos, y la inspección comprueba que se ocupan." },
-            { "nombre": "Cláusula de reversión pactada", "texto": "El contrato prevé desde el inicio cómo vuelve el servicio a la red pública si sale peor: plazos, personal, bienes y cálculo de lo que se debe cada parte." }
+            {
+              "nombre": "Concertar solo con ventaja medida",
+              "texto": "Un concierto nuevo solo se firma si un estudio público muestra que mejora el plazo, el resultado o el coste frente a ampliar la red pública.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de la red pública"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que aspiran a nuevos conciertos"
+                  ],
+                  "indirecto": [
+                    "pacientes que esperan mientras se hace el estudio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Precio ajustado por dificultad",
+              "texto": "El precio por paciente, alumno o persona dependiente sube con la gravedad o la necesidad de apoyo, para que no compense quedarse con los casos fáciles.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes graves",
+                    "alumnado con necesidades de apoyo",
+                    "personas con gran dependencia"
+                  ],
+                  "indirecto": [
+                    "centros que hoy atienden los casos difíciles"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que viven de los casos fáciles"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si sube el coste total"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Reserva de plazas para más necesidad",
+              "texto": "Todo centro concertado reserva plazas para alumnado con necesidad de apoyo y para pacientes o residentes complejos, y la inspección comprueba que se ocupan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado con necesidades de apoyo",
+                    "pacientes y residentes complejos"
+                  ],
+                  "indirecto": [
+                    "centros públicos que hoy concentran esos casos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados con usuarios seleccionados"
+                  ],
+                  "indirecto": [
+                    "familias que pierden plaza por la reserva"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cláusula de reversión pactada",
+              "texto": "El contrato prevé desde el inicio cómo vuelve el servicio a la red pública si sale peor: plazos, personal, bienes y cálculo de lo que se debe cada parte.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios del servicio concertado",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "trabajadores del centro concertado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas que pierden margen para negociar al final del contrato"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Un contrato tipo por ley para todo centro pagado con impuestos: mismo precio, mismos indicadores, cuentas abiertas y sin prórroga si sale peor.",
           "medidas": [
-            { "nombre": "Ley de contrato tipo", "texto": "Una ley básica estatal fija el contrato tipo de conciertos sanitarios, educativos y de cuidados; las comunidades lo aplican al renovar cada uno y respetan los vigentes hasta su fin." },
-            { "nombre": "Cuentas abiertas", "texto": "El centro concertado publica en qué gasta el dinero público que recibe y qué beneficio obtiene de él, con una auditoría externa cada año." },
-            { "nombre": "Sin cuotas encubiertas", "texto": "Prohibidas las cuotas, las aportaciones «voluntarias» y los servicios de pago obligatorios en lo que financia el dinero público, con inspección y devolución a las familias." },
-            { "nombre": "Sin prórroga tras dos malas evaluaciones", "texto": "Si el centro sale peor que la red pública comparable en dos evaluaciones seguidas, no se prorroga; si sale mejor, puede ampliarse. Lo compara un evaluador independiente." },
-            { "nombre": "Plaza pública si falta oferta", "texto": "Si con el precio común no hay centros dispuestos a concertar, la plaza la crea la red pública; nunca se paga más por atender casos más fáciles." }
+            {
+              "nombre": "Ley de contrato tipo",
+              "texto": "Una ley básica estatal fija el contrato tipo de conciertos sanitarios, educativos y de cuidados; las comunidades lo aplican al renovar cada uno y respetan los vigentes hasta su fin.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros concertados de todas las comunidades"
+                  ],
+                  "indirecto": [
+                    "centros concertados que buscan reglas estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que pierden margen para fijar condiciones propias",
+                    "centros con contratos más ventajosos que el tipo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cuentas abiertas",
+              "texto": "El centro concertado publica en qué gasta el dinero público que recibe y qué beneficio obtiene de él, con una auditoría externa cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "familias que eligen centro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados con beneficios altos",
+                    "centros que pagan la auditoría anual"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sin cuotas encubiertas",
+              "texto": "Prohibidas las cuotas, las aportaciones «voluntarias» y los servicios de pago obligatorios en lo que financia el dinero público, con inspección y devolución a las familias.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos en colegios concertados",
+                    "familias de rentas bajas"
+                  ],
+                  "indirecto": [
+                    "alumnado que hoy no entra por no poder pagar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que se financian con cuotas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si el concierto sube para compensar",
+                    "alumnado que pierde actividades pagadas con cuotas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sin prórroga tras dos malas evaluaciones",
+              "texto": "Si el centro sale peor que la red pública comparable en dos evaluaciones seguidas, no se prorroga; si sale mejor, puede ampliarse. Lo compara un evaluador independiente.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros con malos resultados"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros concertados con malos resultados",
+                    "trabajadores de centros no prorrogados"
+                  ],
+                  "indirecto": [
+                    "usuarios que deben cambiar de centro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plaza pública si falta oferta",
+              "texto": "Si con el precio común no hay centros dispuestos a concertar, la plaza la crea la red pública; nunca se paga más por atender casos más fáciles.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas sin plaza en su zona"
+                  ],
+                  "indirecto": [
+                    "casos difíciles que ningún centro quería atender"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que pedían un precio más alto"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la nueva plaza pública"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -107,50 +528,450 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre el gasto, o gastar sin control ni cuentas, tolerar el fraude o bajar impuestos sin decir qué se deja de pagar.",
           "medidas": [
-            { "nombre": "Gasto sin cuentas", "texto": "Programas que se crean y se mantienen sin un objetivo medible, sin un coste conocido y sin que nadie revise si funcionan." },
-            { "nombre": "Rebajas sin financiar", "texto": "Bajadas de impuestos que no dicen qué servicio o qué partida se recorta para pagarlas, ni cómo se notará en hospitales, colegios o residencias." },
-            { "nombre": "Tolerar el fraude", "texto": "Amnistías fiscales o falta de inspección que dejan sin cobrar lo que el resto de contribuyentes sí paga." }
+            {
+              "nombre": "Gasto sin cuentas",
+              "texto": "Programas que se crean y se mantienen sin un objetivo medible, sin un coste conocido y sin que nadie revise si funcionan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "beneficiarios de programas que no se revisan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios que se quedan sin dinero"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Rebajas sin financiar",
+              "texto": "Bajadas de impuestos que no dicen qué servicio o qué partida se recorta para pagarlas, ni cómo se notará en hospitales, colegios o residencias.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que pagan menos a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de hospitales, colegios y residencias"
+                  ],
+                  "indirecto": [
+                    "generaciones futuras que heredan la deuda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tolerar el fraude",
+              "texto": "Amnistías fiscales o falta de inspección que dejan sin cobrar lo que el resto de contribuyentes sí paga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "defraudadores fiscales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que cumplen"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos",
+                    "empresas que compiten con quien defrauda"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Presupuestos que se cumplen y se publican: cada servicio sabe cuánto gasta, en qué y si se ha desviado de lo previsto.",
           "medidas": [
-            { "nombre": "Ejecución publicada cada trimestre", "texto": "Estado y comunidades publican cada trimestre lo gastado en sanidad, educación y cuidados frente a lo presupuestado, con cada desviación explicada." },
-            { "nombre": "Pagar a proveedores en plazo", "texto": "Pagar facturas dentro del plazo legal, porque pagar tarde encarece las compras y genera intereses; el periodo medio de pago se publica cada mes." },
-            { "nombre": "Memoria de coste de lo nuevo", "texto": "Toda ley o programa nuevo de servicios dice, antes de aprobarse, cuánto cuesta, cómo se paga y qué objetivo debe alcanzar." },
-            { "nombre": "Cruce de datos contra el fraude", "texto": "Hacienda, Seguridad Social y comunidades cruzan sus datos para detectar fraude fiscal y en prestaciones, y publican cada año lo detectado y lo recuperado." }
+            {
+              "nombre": "Ejecución publicada cada trimestre",
+              "texto": "Estado y comunidades publican cada trimestre lo gastado en sanidad, educación y cuidados frente a lo presupuestado, con cada desviación explicada.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores con desviaciones sin explicar"
+                  ],
+                  "indirecto": [
+                    "personal técnico con más trabajo de informe"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pagar a proveedores en plazo",
+              "texto": "Pagar facturas dentro del plazo legal, porque pagar tarde encarece las compras y genera intereses; el periodo medio de pago se publica cada mes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "proveedores de la administración",
+                    "pequeñas empresas que suministran a servicios públicos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que dejan de pagar intereses de demora"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "La factura se debe igual; pagarla a tiempo solo evita intereses y sobreprecios, sin quitar a nadie nada que le corresponda."
+              }
+            },
+            {
+              "nombre": "Memoria de coste de lo nuevo",
+              "texto": "Toda ley o programa nuevo de servicios dice, antes de aprobarse, cuánto cuesta, cómo se paga y qué objetivo debe alcanzar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios con financiación asegurada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "beneficiarios de programas que se retrasan por el estudio previo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cruce de datos contra el fraude",
+              "texto": "Hacienda, Seguridad Social y comunidades cruzan sus datos para detectar fraude fiscal y en prestaciones, y publican cada año lo detectado y lo recuperado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que cumplen"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "defraudadores fiscales y de prestaciones"
+                  ],
+                  "indirecto": [
+                    "personas con errores en sus datos que sufren revisiones"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Comprar mejor y revisar lo que se gasta: central de compras, administración digital y auditoría de los grandes programas.",
           "medidas": [
-            { "nombre": "Central de compras común", "texto": "Estado y comunidades compran juntos medicamentos, material sanitario y suministros de uso común, y publican los precios adjudicados." },
-            { "nombre": "Administración digital sin papeles repetidos", "texto": "Citas, recetas, matrícula y solicitud de la dependencia por internet, con datos compartidos entre administraciones y sin pedir lo que ya tienen; con atención presencial para quien la necesite." },
-            { "nombre": "Auditoría de los grandes programas", "texto": "El Tribunal de Cuentas y los órganos de control de las comunidades auditan cada año los mayores programas de gasto en servicios y publican sus conclusiones." },
-            { "nombre": "Revisiones de gasto independientes", "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) revisa programas concretos y el Gobierno responde a cada propuesta: la aplica o explica por qué no." }
+            {
+              "nombre": "Central de compras común",
+              "texto": "Estado y comunidades compran juntos medicamentos, material sanitario y suministros de uso común, y publican los precios adjudicados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "comunidades pequeñas con poco poder de compra"
+                  ],
+                  "indirecto": [
+                    "pacientes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "proveedores que vendían más caro por separado"
+                  ],
+                  "indirecto": [
+                    "pequeños proveedores locales que no llegan a grandes lotes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Administración digital sin papeles repetidos",
+              "texto": "Citas, recetas, matrícula y solicitud de la dependencia por internet, con datos compartidos entre administraciones y sin pedir lo que ya tienen; con atención presencial para quien la necesite.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que hacen trámites con la administración",
+                    "familias que piden matrícula o dependencia"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empleados públicos dedicados a tareas en papel"
+                  ],
+                  "indirecto": [
+                    "gestorías que viven de trámites repetidos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Auditoría de los grandes programas",
+              "texto": "El Tribunal de Cuentas y los órganos de control de las comunidades auditan cada año los mayores programas de gasto en servicios y publican sus conclusiones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de programas mal ejecutados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Revisiones de gasto independientes",
+              "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) revisa programas concretos y el Gobierno responde a cada propuesta: la aplica o explica por qué no.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios de programas que la revisión recorta"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Cada euro evaluado antes de subir la presión fiscal media: lo nuevo se evalúa antes de pagarlo y lo que no aporta se retira.",
           "medidas": [
-            { "nombre": "Evaluar lo nuevo antes de pagarlo", "texto": "Medicamentos, tecnologías y programas nuevos se financian tras una evaluación pública de lo que aportan frente a lo que cuestan." },
-            { "nombre": "Retirar lo que no aporta", "texto": "Una lista pública de prácticas de poco valor (pruebas repetidas, tratamientos sin beneficio probado) que se dejan de pagar, revisada cada año con los profesionales." },
-            { "nombre": "Presupuesto por resultados", "texto": "Cada programa de servicios lleva en el presupuesto objetivos medibles, y al cerrar el año se publica si se alcanzaron." },
-            { "nombre": "Informe antes de subir impuestos", "texto": "Antes de subir la presión fiscal media, el Gobierno publica qué ahorros evaluados ha aplicado, cuáles no y por qué." }
+            {
+              "nombre": "Evaluar lo nuevo antes de pagarlo",
+              "texto": "Medicamentos, tecnologías y programas nuevos se financian tras una evaluación pública de lo que aportan frente a lo que cuestan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "pacientes que reciben tratamientos de valor probado"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "fabricantes de medicamentos de poco valor añadido"
+                  ],
+                  "indirecto": [
+                    "pacientes que esperan más un tratamiento nuevo"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Retirar lo que no aporta",
+              "texto": "Una lista pública de prácticas de poco valor (pruebas repetidas, tratamientos sin beneficio probado) que se dejan de pagar, revisada cada año con los profesionales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que evitan pruebas innecesarias",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "pacientes en lista de espera"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes acostumbrados a esas pruebas",
+                    "empresas que venden esas pruebas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Presupuesto por resultados",
+              "texto": "Cada programa de servicios lleva en el presupuesto objetivos medibles, y al cerrar el año se publica si se alcanzaron.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores de programas que no alcanzan sus objetivos"
+                  ],
+                  "indirecto": [
+                    "personal técnico con más carga de medición"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Informe antes de subir impuestos",
+              "texto": "Antes de subir la presión fiscal media, el Gobierno publica qué ahorros evaluados ha aplicado, cuáles no y por qué.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios que esperan más financiación mientras llega el informe"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Todo el gasto revisado por turnos con una opción de ahorro obligada, solo se paga lo que demuestra su valor y lo ahorrado vuelve al servicio.",
           "medidas": [
-            { "nombre": "Revisión de todo el gasto por turnos", "texto": "Cada gran partida se revisa al menos una vez cada cinco años, con presidente independiente y al menos una opción que ahorre del 10 al 20 %, como hacen los Países Bajos.", "meta": true, "fuente": "https://www.rijksfinancien.nl/sites/default/files/extrainfo/ibos/Spending%20Reviews%20in%20the%20Netherlands.pdf" },
-            { "nombre": "Cumplir o explicar por ley", "texto": "Con rango de ley y también para comunidades y ayuntamientos: cada propuesta se aplica o se rechaza por escrito, en público y con plazo; sin responder a todas, no se sube la presión fiscal media." },
-            { "nombre": "Umbral público de coste y beneficio", "texto": "Un umbral conocido de coste por año de vida ganado con buena salud decide qué tratamientos nuevos se pagan, apoyado en la evaluación clínica conjunta de la UE y con excepciones tasadas.", "fuente": "https://health.ec.europa.eu/health-technology-assessment/implementation-regulation-health-technology-assessment_en" },
-            { "nombre": "Lo ahorrado vuelve al servicio", "texto": "Lo ahorrado en una revisión se destina primero al servicio evaluado (menos espera, más profesionales) y solo después a otros fines." },
-            { "nombre": "Excepción de emergencia con control", "texto": "En una crisis grave se puede subir ingresos sin completar las revisiones, con la obligación de responder después ante el Parlamento." }
+            {
+              "nombre": "Revisión de todo el gasto por turnos",
+              "texto": "Cada gran partida se revisa al menos una vez cada cinco años, con presidente independiente y al menos una opción que ahorre del 10 al 20 %, como hacen los Países Bajos.",
+              "meta": true,
+              "fuente": "https://www.rijksfinancien.nl/sites/default/files/extrainfo/ibos/Spending%20Reviews%20in%20the%20Netherlands.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de los servicios revisados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios de partidas que resultan recortadas"
+                  ],
+                  "indirecto": [
+                    "personal de las administraciones revisadas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cumplir o explicar por ley",
+              "texto": "Con rango de ley y también para comunidades y ayuntamientos: cada propuesta se aplica o se rechaza por escrito, en público y con plazo; sin responder a todas, no se sube la presión fiscal media.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios que necesitan más gasto y esperan las respuestas"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos pequeños con poco personal técnico"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Umbral público de coste y beneficio",
+              "texto": "Un umbral conocido de coste por año de vida ganado con buena salud decide qué tratamientos nuevos se pagan, apoyado en la evaluación clínica conjunta de la UE y con excepciones tasadas.",
+              "fuente": "https://health.ec.europa.eu/health-technology-assessment/implementation-regulation-health-technology-assessment_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que reciben tratamientos eficaces",
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "pacientes de enfermedades comunes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes de tratamientos caros con poco beneficio",
+                    "fabricantes de fármacos de precio alto"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Lo ahorrado vuelve al servicio",
+              "texto": "Lo ahorrado en una revisión se destina primero al servicio evaluado (menos espera, más profesionales) y solo después a otros fines.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios del servicio evaluado",
+                    "profesionales del servicio evaluado"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": [
+                    "usuarios de otros servicios que no reciben lo ahorrado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Excepción de emergencia con control",
+              "texto": "En una crisis grave se puede subir ingresos sin completar las revisiones, con la obligación de responder después ante el Parlamento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas afectadas por la crisis"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la subida"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -163,50 +984,447 @@
           "nivel": 0,
           "resumen": "Sin propuesta sobre la elección, o ninguna elección para la persona, o una en la que es el centro quien escoge a quién admite.",
           "medidas": [
-            { "nombre": "Asignación sin salida", "texto": "Centro de salud, hospital y colegio asignados solo por el domicilio, sin posibilidad de cambiar ni de reclamar." },
-            { "nombre": "Elige el centro, no la persona", "texto": "Colegios o residencias pagados con dinero público que deciden a quién admiten mediante entrevistas, cuotas o requisitos que filtran." },
-            { "nombre": "Elegir a ciegas", "texto": "Se permite elegir pero sin ningún dato de esperas ni de resultados, de modo que solo elige bien quien tiene información por su cuenta." }
+            {
+              "nombre": "Asignación sin salida",
+              "texto": "Centro de salud, hospital y colegio asignados solo por el domicilio, sin posibilidad de cambiar ni de reclamar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros con usuarios asegurados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes y familias sin poder cambiar de centro"
+                  ],
+                  "indirecto": [
+                    "profesionales sin señal de qué mejorar"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Elige el centro, no la persona",
+              "texto": "Colegios o residencias pagados con dinero público que deciden a quién admiten mediante entrevistas, cuotas o requisitos que filtran.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros que seleccionan alumnado o residentes"
+                  ],
+                  "indirecto": [
+                    "familias que pasan el filtro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias de rentas bajas",
+                    "alumnado con necesidades de apoyo"
+                  ],
+                  "indirecto": [
+                    "colegios públicos que concentran los casos difíciles"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Elegir a ciegas",
+              "texto": "Se permite elegir pero sin ningún dato de esperas ni de resultados, de modo que solo elige bien quien tiene información por su cuenta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con información por su cuenta"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas sin redes ni información"
+                  ],
+                  "indirecto": [
+                    "centros buenos que no se dan a conocer"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Elegir y cambiar de médico de familia, pediatra y colegio en la propia zona, con un trámite sencillo y criterios públicos.",
           "medidas": [
-            { "nombre": "Médico de familia y pediatra", "texto": "Toda persona puede elegir y cambiar de médico de familia y de pediatra en su zona, por internet o en el centro, sin justificar el motivo." },
-            { "nombre": "Solicitud de colegio por preferencias", "texto": "La familia pide varios colegios por orden de preferencia y las plazas se asignan con criterios publicados de antemano, como la cercanía, los hermanos o la renta." },
-            { "nombre": "Segunda opinión médica", "texto": "Derecho a una segunda opinión ante diagnósticos graves, regulado igual en todas las comunidades." },
-            { "nombre": "Respuesta motivada", "texto": "Si no se atiende la elección pedida, la administración responde por escrito y con motivos dentro de plazo, y la persona puede recurrir." }
+            {
+              "nombre": "Médico de familia y pediatra",
+              "texto": "Toda persona puede elegir y cambiar de médico de familia y de pediatra en su zona, por internet o en el centro, sin justificar el motivo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes",
+                    "familias con hijos pequeños"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "médicos cuyo cupo crece por demanda"
+                  ],
+                  "indirecto": [
+                    "pacientes de los cupos más solicitados"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Solicitud de colegio por preferencias",
+              "texto": "La familia pide varios colegios por orden de preferencia y las plazas se asignan con criterios publicados de antemano, como la cercanía, los hermanos o la renta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias con hijos en edad escolar"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que no obtienen su primera opción",
+                    "familias que hoy logran plaza sin criterios públicos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Segunda opinión médica",
+              "texto": "Derecho a una segunda opinión ante diagnósticos graves, regulado igual en todas las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes con diagnósticos graves"
+                  ],
+                  "indirecto": [
+                    "pacientes de comunidades sin este derecho"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las consultas extra"
+                  ],
+                  "indirecto": [
+                    "pacientes en lista de espera del especialista"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Respuesta motivada",
+              "texto": "Si no se atiende la elección pedida, la administración responde por escrito y con motivos dentro de plazo, y la persona puede recurrir.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas a las que se niega su elección"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personal administrativo con más trabajo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Elegir médico, especialista, hospital, colegio y tipo de cuidado en toda la red de la comunidad, sin que el centro filtre.",
           "medidas": [
-            { "nombre": "Hospital y especialista en la comunidad", "texto": "Elegir cualquier hospital y centro de especialidades de la comunidad para consultas y operaciones programadas, no solo el que toca por zona." },
-            { "nombre": "Zonas escolares amplias", "texto": "La comunidad amplía las zonas de admisión para que la familia pueda pedir cualquier centro sostenido con fondos públicos de su municipio o comarca." },
-            { "nombre": "Elegir el tipo de cuidado", "texto": "La persona dependiente elige entre residencia, centro de día o ayuda a domicilio, y entre los centros acreditados, dentro de lo que se le ha reconocido." },
-            { "nombre": "Sorteo si hay más demanda que plazas", "texto": "Cuando un colegio o una residencia tiene más solicitudes que plazas, se aplican los criterios legales y se desempata por sorteo público; el centro nunca selecciona." }
+            {
+              "nombre": "Hospital y especialista en la comunidad",
+              "texto": "Elegir cualquier hospital y centro de especialidades de la comunidad para consultas y operaciones programadas, no solo el que toca por zona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes con consultas u operaciones programadas"
+                  ],
+                  "indirecto": [
+                    "hospitales con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "hospitales que pierden pacientes"
+                  ],
+                  "indirecto": [
+                    "pacientes de hospitales muy elegidos que esperan más"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Zonas escolares amplias",
+              "texto": "La comunidad amplía las zonas de admisión para que la familia pueda pedir cualquier centro sostenido con fondos públicos de su municipio o comarca.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias que quieren un colegio fuera de su barrio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que viven junto a colegios muy pedidos"
+                  ],
+                  "indirecto": [
+                    "colegios de barrios con menos demanda"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Elegir el tipo de cuidado",
+              "texto": "La persona dependiente elige entre residencia, centro de día o ayuda a domicilio, y entre los centros acreditados, dentro de lo que se le ha reconocido.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes",
+                    "familias cuidadoras"
+                  ],
+                  "indirecto": [
+                    "empresas acreditadas de ayuda a domicilio"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "residencias con plazas menos elegidas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes si la opción elegida es más cara"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sorteo si hay más demanda que plazas",
+              "texto": "Cuando un colegio o una residencia tiene más solicitudes que plazas, se aplican los criterios legales y se desempata por sorteo público; el centro nunca selecciona.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "familias sin contactos ni ventajas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "familias que hoy logran plaza por relación con el centro",
+                    "centros que hoy seleccionan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Elección informada: antes de elegir se ven las esperas y los resultados de cada centro, y elegir no depende de la renta.",
           "medidas": [
-            { "nombre": "Datos en el momento de elegir", "texto": "La espera, la calificación y los resultados de cada centro se muestran al pedir la cita o la plaza, no en un informe aparte." },
-            { "nombre": "Orientación para quien no usa internet", "texto": "Oficinas y teléfono de orientación para quien no usa internet o no domina el idioma, para que la información no favorezca solo a quien ya sabe moverse." },
-            { "nombre": "Otro centro si la espera se pasa", "texto": "Si la espera supera el plazo garantizado, la persona puede pedir otro centro de la red, también en otra comunidad." },
-            { "nombre": "Plan de mejora para el centro que pierde", "texto": "El centro que pierde usuarios de forma sostenida recibe inspección y un plan de mejora con apoyo, no solo menos dinero." }
+            {
+              "nombre": "Datos en el momento de elegir",
+              "texto": "La espera, la calificación y los resultados de cada centro se muestran al pedir la cita o la plaza, no en un informe aparte.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes y familias que eligen centro"
+                  ],
+                  "indirecto": [
+                    "centros con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con peores resultados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Orientación para quien no usa internet",
+              "texto": "Oficinas y teléfono de orientación para quien no usa internet o no domina el idioma, para que la información no favorezca solo a quien ya sabe moverse.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas mayores sin soltura digital",
+                    "personas que no dominan el idioma"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las oficinas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Otro centro si la espera se pasa",
+              "texto": "Si la espera supera el plazo garantizado, la persona puede pedir otro centro de la red, también en otra comunidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes con espera fuera de plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes del centro de destino que esperan más"
+                  ],
+                  "indirecto": [
+                    "comunidades que pagan la atención en otra"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan de mejora para el centro que pierde",
+              "texto": "El centro que pierde usuarios de forma sostenida recibe inspección y un plan de mejora con apoyo, no solo menos dinero.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios del centro que pierde usuarios",
+                    "profesionales de ese centro"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "dirección del centro que pierde usuarios"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el apoyo"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Elegir cualquier centro pagado con dinero público en toda España, con el dinero siguiendo a la persona y un solo régimen sanitario.",
           "medidas": [
-            { "nombre": "Elección en toda España", "texto": "Elegir médico de familia, hospital y centro de especialidades entre todos los que tienen financiación pública, en cualquier comunidad y sin autorización previa." },
-            { "nombre": "Comparador oficial único", "texto": "Un solo comparador, acordado entre el Estado y las comunidades, con la espera, los resultados y la calificación de cada centro sanitario, escolar y de cuidados." },
-            { "nombre": "El dinero sigue a la persona", "texto": "El centro que atiende a más personas recibe más financiación, y la comunidad de origen compensa a la de destino de forma automática." },
-            { "nombre": "Transporte para quien lo necesita", "texto": "Ayuda de transporte para quien cambia de centro por espera excesiva o falta de servicio cerca, para que elegir no dependa de tener coche o dinero." },
-            { "nombre": "Un solo régimen sanitario", "texto": "El mutualismo de los funcionarios se integra por fases en el sistema común, condicionado a reforzar antes la sanidad pública y bajar las esperas, como aconseja la AIReF.", "fuente": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf" }
+            {
+              "nombre": "Elección en toda España",
+              "texto": "Elegir médico de familia, hospital y centro de especialidades entre todos los que tienen financiación pública, en cualquier comunidad y sin autorización previa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes que quieren atención en otra comunidad"
+                  ],
+                  "indirecto": [
+                    "hospitales con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que pierden pacientes y deben compensar"
+                  ],
+                  "indirecto": [
+                    "pacientes de los hospitales más pedidos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Comparador oficial único",
+              "texto": "Un solo comparador, acordado entre el Estado y las comunidades, con la espera, los resultados y la calificación de cada centro sanitario, escolar y de cuidados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que eligen centro"
+                  ],
+                  "indirecto": [
+                    "centros con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con peores resultados"
+                  ],
+                  "indirecto": [
+                    "comunidades que pierden el control de sus propios datos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "El dinero sigue a la persona",
+              "texto": "El centro que atiende a más personas recibe más financiación, y la comunidad de origen compensa a la de destino de forma automática.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que eligen centro",
+                    "centros que atraen a más personas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que pierden usuarios"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas cuyo centro se queda sin fondos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Transporte para quien lo necesita",
+              "texto": "Ayuda de transporte para quien cambia de centro por espera excesiva o falta de servicio cerca, para que elegir no dependa de tener coche o dinero.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas sin coche o sin dinero para viajar"
+                  ],
+                  "indirecto": [
+                    "vecinos del medio rural"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Un solo régimen sanitario",
+              "texto": "El mutualismo de los funcionarios se integra por fases en el sistema común, condicionado a reforzar antes la sanidad pública y bajar las esperas, como aconseja la AIReF.",
+              "fuente": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "funcionarios que prefieren la sanidad pública"
+                  ],
+                  "indirecto": [
+                    "pacientes de una sanidad pública reforzada"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "funcionarios mutualistas que prefieren la privada",
+                    "aseguradoras que atienden a mutualistas"
+                  ],
+                  "indirecto": [
+                    "profesionales de clínicas concertadas con mutuas"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -219,50 +1437,438 @@
           "nivel": 0,
           "resumen": "Sin propuesta de evaluación, o listas de espera ocultas o maquilladas y resultados de los centros que no se publican.",
           "medidas": [
-            { "nombre": "Listas de espera maquilladas", "texto": "Sacar pacientes de la lista, contar desde fechas tardías o no contar a quien espera una prueba, para que la espera parezca menor." },
-            { "nombre": "Resultados en secreto", "texto": "Negarse a publicar los resultados de hospitales, colegios o residencias, o publicarlos sin un método común para que no se puedan comparar." },
-            { "nombre": "Evaluarse a uno mismo", "texto": "Que la misma administración que gestiona los centros sea la única que los evalúa, sin ningún control externo." }
+            {
+              "nombre": "Listas de espera maquilladas",
+              "texto": "Sacar pacientes de la lista, contar desde fechas tardías o no contar a quien espera una prueba, para que la espera parezca menor.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "gestores que presentan mejores cifras"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes en espera real"
+                  ],
+                  "indirecto": [
+                    "ciudadanos que juzgan la gestión con datos falsos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Resultados en secreto",
+              "texto": "Negarse a publicar los resultados de hospitales, colegios o residencias, o publicarlos sin un método común para que no se puedan comparar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros con malos resultados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes y familias que eligen centro"
+                  ],
+                  "indirecto": [
+                    "centros con buenos resultados que no se reconocen"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Evaluarse a uno mismo",
+              "texto": "Que la misma administración que gestiona los centros sea la única que los evalúa, sin ningún control externo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administración que gestiona los centros"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de los centros"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Listas de espera publicadas con un método común y un calendario fijo, por especialidad, centro y comunidad, también en dependencia.",
           "medidas": [
-            { "nombre": "Esperas con método común", "texto": "Todas las comunidades publican la espera de consultas, pruebas y operaciones con el mismo método y las mismas fechas, por especialidad y por hospital." },
-            { "nombre": "Espera de la dependencia", "texto": "Publicar cuántas personas esperan la valoración y la ayuda de la dependencia, y cuánto tiempo, por comunidad." },
-            { "nombre": "Datos abiertos y descargables", "texto": "Los datos se publican en un formato abierto que cualquiera puede descargar y reutilizar, no solo en informes en imagen o en papel." },
-            { "nombre": "Calendario fijo de publicación", "texto": "Publicar con una periodicidad conocida de antemano, para que nadie elija el momento según le convenga." }
+            {
+              "nombre": "Esperas con método común",
+              "texto": "Todas las comunidades publican la espera de consultas, pruebas y operaciones con el mismo método y las mismas fechas, por especialidad y por hospital.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes en lista de espera"
+                  ],
+                  "indirecto": [
+                    "investigadores y periodistas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con esperas peores de lo que declaran"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Espera de la dependencia",
+              "texto": "Publicar cuántas personas esperan la valoración y la ayuda de la dependencia, y cuánto tiempo, por comunidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes que esperan ayuda",
+                    "familias cuidadoras"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con largas esperas en dependencia"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Datos abiertos y descargables",
+              "texto": "Los datos se publican en un formato abierto que cualquiera puede descargar y reutilizar, no solo en informes en imagen o en papel.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "investigadores, periodistas y asociaciones de pacientes"
+                  ],
+                  "indirecto": [
+                    "pacientes y familias"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Los datos ya existen; publicarlos en formato abierto cuesta poco y no quita a nadie ningún servicio ni derecho."
+              }
+            },
+            {
+              "nombre": "Calendario fijo de publicación",
+              "texto": "Publicar con una periodicidad conocida de antemano, para que nadie elija el momento según le convenga.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que siguen la gestión pública"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "responsables que elegían el momento de publicar"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Indicadores públicos de calidad y coste por centro, con el mismo método en hospitales, centros de salud, colegios y residencias.",
           "medidas": [
-            { "nombre": "Indicadores de calidad por centro", "texto": "Cada hospital, centro de salud, colegio y residencia publica indicadores de calidad (complicaciones, reingresos, abandono escolar, caídas) con definiciones comunes." },
-            { "nombre": "Coste por servicio", "texto": "Coste por paciente atendido, por alumno y por plaza de cuidados en cada centro, calculado con el mismo método contable." },
-            { "nombre": "Encuestas comunes de satisfacción", "texto": "Encuestas a pacientes, familias y personas cuidadas con el mismo cuestionario en toda España, con resultados por centro." },
-            { "nombre": "Inspecciones de residencias publicadas", "texto": "Los informes de inspección de residencias y centros de día se publican, con las sanciones impuestas y su seguimiento." }
+            {
+              "nombre": "Indicadores de calidad por centro",
+              "texto": "Cada hospital, centro de salud, colegio y residencia publica indicadores de calidad (complicaciones, reingresos, abandono escolar, caídas) con definiciones comunes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes, familias y residentes"
+                  ],
+                  "indirecto": [
+                    "centros con buenos resultados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con peores resultados"
+                  ],
+                  "indirecto": [
+                    "profesionales con más carga de registro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Coste por servicio",
+              "texto": "Coste por paciente atendido, por alumno y por plaza de cuidados en cada centro, calculado con el mismo método contable.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con costes altos sin explicar"
+                  ],
+                  "indirecto": [
+                    "personal de gestión con más trabajo contable"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Encuestas comunes de satisfacción",
+              "texto": "Encuestas a pacientes, familias y personas cuidadas con el mismo cuestionario en toda España, con resultados por centro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes, familias y personas cuidadas"
+                  ],
+                  "indirecto": [
+                    "centros que quieren mejorar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros mal valorados"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan las encuestas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Inspecciones de residencias publicadas",
+              "texto": "Los informes de inspección de residencias y centros de día se publican, con las sanciones impuestas y su seguimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "residentes y sus familias"
+                  ],
+                  "indirecto": [
+                    "residencias que cumplen"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "residencias sancionadas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Plazos máximos garantizados por ley para todo el recorrido y evaluación independiente de todos los centros, sea cual sea su gestión.",
           "medidas": [
-            { "nombre": "Plazos por ley para todo el recorrido", "texto": "Plazos máximos para primaria, diagnóstico, especialista y operación, y para la valoración y la ayuda de la dependencia; hoy el decreto de 2011 solo cubre cinco operaciones.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2011-14190" },
-            { "nombre": "Registro único de esperas auditado", "texto": "Un registro que cuenta desde que el médico indica la prueba o la operación, sin pacientes fuera de la lista y auditado desde fuera." },
-            { "nombre": "Evaluador independiente", "texto": "Una agencia independiente del Gobierno y de las comunidades evalúa todos los centros, públicos y concertados, con la misma vara." },
-            { "nombre": "Progreso del alumnado", "texto": "En educación se publica el progreso que logra cada centro teniendo en cuenta el punto de partida del alumnado, no solo la nota media." }
+            {
+              "nombre": "Plazos por ley para todo el recorrido",
+              "texto": "Plazos máximos para primaria, diagnóstico, especialista y operación, y para la valoración y la ayuda de la dependencia; hoy el decreto de 2011 solo cubre cinco operaciones.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2011-14190",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes en espera",
+                    "personas que esperan la ayuda de la dependencia"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la capacidad extra"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Registro único de esperas auditado",
+              "texto": "Un registro que cuenta desde que el médico indica la prueba o la operación, sin pacientes fuera de la lista y auditado desde fuera.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes en espera"
+                  ],
+                  "indirecto": [
+                    "investigadores y periodistas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gestores con listas maquilladas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Evaluador independiente",
+              "texto": "Una agencia independiente del Gobierno y de las comunidades evalúa todos los centros, públicos y concertados, con la misma vara.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros públicos y concertados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "consejerías que hoy se evalúan a sí mismas"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la nueva agencia"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Progreso del alumnado",
+              "texto": "En educación se publica el progreso que logra cada centro teniendo en cuenta el punto de partida del alumnado, no solo la nota media.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "colegios con alumnado de entornos desfavorecidos",
+                    "familias que eligen colegio"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "colegios con buena nota media y poco progreso"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Plazos que se cumplen solos: vencido el plazo, se atiende en otro centro sin coste ni reclamación; y calificación pública de cada centro.",
           "medidas": [
-            { "nombre": "Garantía de plazo automática", "texto": "Vencido el plazo, el sistema ofrece otro centro público o concertado y paga el desplazamiento, sin que la persona tenga que reclamar, como en Dinamarca y Suecia.", "fuente": "https://www.1177.se/en/Vastra-Gotaland/other-languages/other-languages/regler-och-rattigheter---andra-sprak/vardgaranti-andra-sprak-vgr/" },
-            { "nombre": "Calificación visible en cada centro", "texto": "La agencia da a cada centro una calificación pública en pocos niveles, que se muestra en su entrada y en su web, como hace el inspector público inglés.", "fuente": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings" },
-            { "nombre": "Lo que cuentan los pacientes", "texto": "Medir cómo está la persona tras el tratamiento y si lo entiende, con encuestas comparables entre países como las de la Organización para la Cooperación y el Desarrollo Económicos (OCDE).", "fuente": "https://www.oecd.org/en/about/programmes/patient-reported-indicator-surveys-paris.html" },
-            { "nombre": "Indicadores ajustados y revisados", "texto": "Resultados ajustados por la gravedad del paciente o el punto de partida del alumno, combinados con inspección presencial y revisados cada pocos años para evitar trampas." },
-            { "nombre": "Garantía por fases unida a capacidad", "texto": "La garantía empieza por lo más grave y se amplía a medida que crecen profesionales y financiación, para que no quede en papel mojado." }
+            {
+              "nombre": "Garantía de plazo automática",
+              "texto": "Vencido el plazo, el sistema ofrece otro centro público o concertado y paga el desplazamiento, sin que la persona tenga que reclamar, como en Dinamarca y Suecia.",
+              "fuente": "https://www.1177.se/en/Vastra-Gotaland/other-languages/other-languages/regler-och-rattigheter---andra-sprak/vardgaranti-andra-sprak-vgr/",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes con espera fuera de plazo"
+                  ],
+                  "indirecto": [
+                    "centros con capacidad libre"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan atención y desplazamiento"
+                  ],
+                  "indirecto": [
+                    "hospitales que pierden pacientes y actividad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Calificación visible en cada centro",
+              "texto": "La agencia da a cada centro una calificación pública en pocos niveles, que se muestra en su entrada y en su web, como hace el inspector público inglés.",
+              "fuente": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios que eligen centro"
+                  ],
+                  "indirecto": [
+                    "centros bien calificados"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros mal calificados",
+                    "profesionales de centros mal calificados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Lo que cuentan los pacientes",
+              "texto": "Medir cómo está la persona tras el tratamiento y si lo entiende, con encuestas comparables entre países como las de la Organización para la Cooperación y el Desarrollo Económicos (OCDE).",
+              "fuente": "https://www.oecd.org/en/about/programmes/patient-reported-indicator-surveys-paris.html",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes"
+                  ],
+                  "indirecto": [
+                    "profesionales que quieren mejorar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las encuestas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Indicadores ajustados y revisados",
+              "texto": "Resultados ajustados por la gravedad del paciente o el punto de partida del alumno, combinados con inspección presencial y revisados cada pocos años para evitar trampas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "centros que atienden casos graves",
+                    "colegios con alumnado de punto de partida bajo"
+                  ],
+                  "indirecto": [
+                    "pacientes graves que los centros dejan de evitar"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que ganaban puntos atendiendo casos fáciles"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Garantía por fases unida a capacidad",
+              "texto": "La garantía empieza por lo más grave y se amplía a medida que crecen profesionales y financiación, para que no quede en papel mojado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes graves"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes de lo menos grave que esperan su turno"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -275,50 +1881,458 @@
           "nivel": 0,
           "resumen": "Sin plan de plantillas, o plazas vacías durante años y contratos temporales encadenados al margen de la ley.",
           "medidas": [
-            { "nombre": "Plazas vacías sin plan", "texto": "Consultorios, aulas y residencias sin profesional durante meses, sin un plan para cubrirlos ni datos públicos de cuántas plazas faltan." },
-            { "nombre": "Temporalidad encadenada", "texto": "Encadenar interinidades y contratos temporales para puestos que son estables, en contra de lo que exigen la ley española y la europea." },
-            { "nombre": "Recortar plantilla a ciegas", "texto": "Congelar la reposición de profesionales sin calcular la necesidad, aunque crezca o envejezca la población a la que se atiende." }
+            {
+              "nombre": "Plazas vacías sin plan",
+              "texto": "Consultorios, aulas y residencias sin profesional durante meses, sin un plan para cubrirlos ni datos públicos de cuántas plazas faltan.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administraciones que ahorran en sueldos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes y alumnado sin profesional",
+                    "profesionales que cubren el trabajo de las vacantes"
+                  ],
+                  "indirecto": [
+                    "vecinos de zonas rurales"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Temporalidad encadenada",
+              "texto": "Encadenar interinidades y contratos temporales para puestos que son estables, en contra de lo que exigen la ley española y la europea.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "administraciones que ahorran en estabilidad"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales interinos y temporales"
+                  ],
+                  "indirecto": [
+                    "pacientes y alumnado sin continuidad"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Recortar plantilla a ciegas",
+              "texto": "Congelar la reposición de profesionales sin calcular la necesidad, aunque crezca o envejezca la población a la que se atiende.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de servicios con menos personal",
+                    "profesionales con más carga"
+                  ],
+                  "indirecto": [
+                    "jóvenes que se forman sin plazas"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Cubrir las vacantes con oposiciones regulares, sustituciones rápidas y un registro público de las plazas sin cubrir.",
           "medidas": [
-            { "nombre": "Oposiciones cada año", "texto": "Convocar cada año las plazas estables vacantes de sanidad, educación y servicios sociales, con fechas conocidas de antemano." },
-            { "nombre": "Bolsas de sustitución ágiles", "texto": "Una bolsa de empleo única y abierta en cada comunidad para cubrir bajas y vacaciones en días, no en semanas." },
-            { "nombre": "Registro público de vacantes", "texto": "Cada comunidad publica cuántas plazas están sin cubrir, por centro y por categoría, y cuánto tiempo llevan así." },
-            { "nombre": "Títulos extranjeros reconocidos en plazo", "texto": "Homologar los títulos de profesionales formados fuera de España con plazos máximos y criterios claros, sin rebajar la exigencia." }
+            {
+              "nombre": "Oposiciones cada año",
+              "texto": "Convocar cada año las plazas estables vacantes de sanidad, educación y servicios sociales, con fechas conocidas de antemano.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "aspirantes a empleo público",
+                    "profesionales interinos"
+                  ],
+                  "indirecto": [
+                    "pacientes y alumnado"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "interinos que no superan la oposición"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Bolsas de sustitución ágiles",
+              "texto": "Una bolsa de empleo única y abierta en cada comunidad para cubrir bajas y vacaciones en días, no en semanas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes y alumnado durante las bajas",
+                    "profesionales en paro de la comunidad"
+                  ],
+                  "indirecto": [
+                    "profesionales que ya no cubren a compañeros"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las sustituciones"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Registro público de vacantes",
+              "texto": "Cada comunidad publica cuántas plazas están sin cubrir, por centro y por categoría, y cuánto tiempo llevan así.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que siguen la gestión",
+                    "profesionales que buscan plaza"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "consejerías con muchas plazas sin cubrir"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Títulos extranjeros reconocidos en plazo",
+              "texto": "Homologar los títulos de profesionales formados fuera de España con plazos máximos y criterios claros, sin rebajar la exigencia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales formados fuera de España"
+                  ],
+                  "indirecto": [
+                    "pacientes de zonas con falta de médicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales que compiten por las mismas plazas"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Plazas de formación según las necesidades previstas y una carrera profesional que premia experiencia, formación y resultados.",
           "medidas": [
-            { "nombre": "Formación según la necesidad", "texto": "Las plazas de especialización sanitaria (como el médico interno residente, MIR), de magisterio y de cuidados se fijan con un estudio de necesidades, no por inercia." },
-            { "nombre": "Carrera profesional común", "texto": "Niveles de carrera con subida de sueldo por experiencia, formación y evaluación, iguales en lo básico en todas las comunidades." },
-            { "nombre": "Tiempo protegido para formarse", "texto": "Horas reservadas dentro de la jornada para la formación continua y la docencia, que no se pierden por la presión asistencial." },
-            { "nombre": "Profesionalizar los cuidados", "texto": "Formación y acreditación oficial para auxiliares de residencia y ayuda a domicilio, con un salario y un convenio acordes a ese trabajo." }
+            {
+              "nombre": "Formación según la necesidad",
+              "texto": "Las plazas de especialización sanitaria (como el médico interno residente, MIR), de magisterio y de cuidados se fijan con un estudio de necesidades, no por inercia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes de especialidades con déficit"
+                  ],
+                  "indirecto": [
+                    "pacientes y alumnado del futuro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "aspirantes a especialidades con menos plazas"
+                  ],
+                  "indirecto": [
+                    "hospitales que pierden plazas de residentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Carrera profesional común",
+              "texto": "Niveles de carrera con subida de sueldo por experiencia, formación y evaluación, iguales en lo básico en todas las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales de sanidad, educación y cuidados"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios con plantillas estables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan las subidas"
+                  ],
+                  "indirecto": [
+                    "comunidades que pierden margen salarial propio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Tiempo protegido para formarse",
+              "texto": "Horas reservadas dentro de la jornada para la formación continua y la docencia, que no se pierden por la presión asistencial.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales de sanidad, educación y cuidados"
+                  ],
+                  "indirecto": [
+                    "pacientes y alumnado a largo plazo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que esperan más mientras el profesional se forma"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan sustitutos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Profesionalizar los cuidados",
+              "texto": "Formación y acreditación oficial para auxiliares de residencia y ayuda a domicilio, con un salario y un convenio acordes a ese trabajo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "auxiliares de residencia y ayuda a domicilio",
+                    "personas dependientes"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "empresas de cuidados con márgenes bajos",
+                    "cuidadores sin título que deben acreditarse"
+                  ],
+                  "indirecto": [
+                    "familias que pagan el copago de la residencia",
+                    "contribuyentes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Plantillas calculadas por población y necesidad, con ratios máximas e incentivos para quedarse en las plazas difíciles.",
           "medidas": [
-            { "nombre": "Plantilla según población y necesidad", "texto": "Cada centro tiene una plantilla calculada según la población que atiende, su edad y su estado de salud o sus necesidades educativas." },
-            { "nombre": "Ratios máximas por norma", "texto": "Máximos de pacientes por médico y por enfermera, de alumnos por docente y de personas por cuidador, fijados por norma y publicados por centro." },
-            { "nombre": "Incentivos para plazas difíciles", "texto": "Plus salarial, ayuda de vivienda y puntos para el traslado en plazas rurales o de difícil cobertura." },
-            { "nombre": "Primaria que compite con el hospital", "texto": "Medicina de familia y pediatría con un cupo máximo de pacientes, tiempo suficiente por consulta y una carrera propia." }
+            {
+              "nombre": "Plantilla según población y necesidad",
+              "texto": "Cada centro tiene una plantilla calculada según la población que atiende, su edad y su estado de salud o sus necesidades educativas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de zonas con población envejecida o enferma"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros con más personal del que les toca"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ratios máximas por norma",
+              "texto": "Máximos de pacientes por médico y por enfermera, de alumnos por docente y de personas por cuidador, fijados por norma y publicados por centro.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes, alumnado y personas cuidadas",
+                    "profesionales sobrecargados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el personal extra",
+                    "residencias privadas que deben contratar más"
+                  ],
+                  "indirecto": [
+                    "usuarios de residencias privadas si sube el precio"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Incentivos para plazas difíciles",
+              "texto": "Plus salarial, ayuda de vivienda y puntos para el traslado en plazas rurales o de difícil cobertura.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales en plazas rurales",
+                    "vecinos de zonas rurales"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "profesionales urbanos con menos puntos para el traslado"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Primaria que compite con el hospital",
+              "texto": "Medicina de familia y pediatría con un cupo máximo de pacientes, tiempo suficiente por consulta y una carrera propia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "médicos de familia y pediatras",
+                    "pacientes de atención primaria"
+                  ],
+                  "indirecto": [
+                    "hospitales con menos urgencias evitables"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan cupos más pequeños"
+                  ],
+                  "indirecto": [
+                    "especialidades hospitalarias que reciben menos residentes"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Previsión independiente a 15 años, revisada cada tres; formación financiada según ella y un plus común que crece con lejanía y permanencia.",
           "medidas": [
-            { "nombre": "Previsión independiente a 15 años", "texto": "Un órgano independiente publica cada tres años cuántos profesionales harán falta por especialidad y territorio a 15 años vista, como hacen los Países Bajos.", "meta": true, "fuente": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3465184" },
-            { "nombre": "Formación financiada según la previsión", "texto": "Las plazas de formación sanitaria, de enfermería y de magisterio siguen esa previsión; si el Gobierno ofrece menos, lo justifica por escrito ante el Parlamento." },
-            { "nombre": "Plus común por lejanía y permanencia", "texto": "Un mapa oficial de plazas difíciles por niveles de lejanía y un plus común en toda España que crece con el nivel y con los años de permanencia, como en Australia.", "fuente": "https://www.health.gov.au/our-work/workforce-incentive-program/doctor-stream/payment-amounts" },
-            { "nombre": "Contrato al acabar la residencia", "texto": "Contrato de varios años, al terminar la formación, para quien se queda en una zona con déficit de profesionales." },
-            { "nombre": "Ratios revisadas con cada previsión", "texto": "Las ratios máximas se revisan con cada previsión y su coste entra en el suelo de gasto, para que no queden en una promesa sin dinero." }
+            {
+              "nombre": "Previsión independiente a 15 años",
+              "texto": "Un órgano independiente publica cada tres años cuántos profesionales harán falta por especialidad y territorio a 15 años vista, como hacen los Países Bajos.",
+              "meta": true,
+              "fuente": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3465184",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes que eligen carrera"
+                  ],
+                  "indirecto": [
+                    "pacientes y alumnado del futuro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan el órgano"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Formación financiada según la previsión",
+              "texto": "Las plazas de formación sanitaria, de enfermería y de magisterio siguen esa previsión; si el Gobierno ofrece menos, lo justifica por escrito ante el Parlamento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "estudiantes de sanidad y magisterio"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios del futuro"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "universidades con plazas sin demanda prevista"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plus común por lejanía y permanencia",
+              "texto": "Un mapa oficial de plazas difíciles por niveles de lejanía y un plus común en toda España que crece con el nivel y con los años de permanencia, como en Australia.",
+              "fuente": "https://www.health.gov.au/our-work/workforce-incentive-program/doctor-stream/payment-amounts",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales en zonas aisladas",
+                    "vecinos de zonas aisladas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "comunidades que pierden margen para fijar sus propios pluses"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Contrato al acabar la residencia",
+              "texto": "Contrato de varios años, al terminar la formación, para quien se queda en una zona con déficit de profesionales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales recién formados",
+                    "pacientes de zonas con déficit"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "profesionales veteranos que optan a esas plazas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Ratios revisadas con cada previsión",
+              "texto": "Las ratios máximas se revisan con cada previsión y su coste entra en el suelo de gasto, para que no queden en una promesa sin dinero.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de servicios",
+                    "profesionales sobrecargados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de otros servicios sin suelo de gasto"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -331,50 +2345,439 @@
           "nivel": 0,
           "resumen": "Sin propuesta para el medio rural, o cerrar consultorios y escuelas sin alternativa, o negar la atención a quien viene de otra comunidad.",
           "medidas": [
-            { "nombre": "Cierres sin alternativa", "texto": "Cerrar consultorios, escuelas o centros de día rurales sin transporte, unidad móvil ni teleconsulta que los sustituya." },
-            { "nombre": "Fronteras entre comunidades", "texto": "Negar o retrasar la atención a quien vive en otra comunidad, o no reconocer sus recetas ni sus informes." },
-            { "nombre": "Reparto que ignora la distancia", "texto": "Repartir los recursos solo por número de habitantes, sin reconocer que atender a una población dispersa o envejecida cuesta más." }
+            {
+              "nombre": "Cierres sin alternativa",
+              "texto": "Cerrar consultorios, escuelas o centros de día rurales sin transporte, unidad móvil ni teleconsulta que los sustituya.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de pueblos pequeños",
+                    "personas mayores sin coche"
+                  ],
+                  "indirecto": [
+                    "comercios rurales que pierden población"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fronteras entre comunidades",
+              "texto": "Negar o retrasar la atención a quien vive en otra comunidad, o no reconocer sus recetas ni sus informes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades que ahorran atención a no residentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas desplazadas por trabajo o estudios",
+                    "residentes de temporada"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reparto que ignora la distancia",
+              "texto": "Repartir los recursos solo por número de habitantes, sin reconocer que atender a una población dispersa o envejecida cuesta más.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades con población concentrada"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con población dispersa o envejecida",
+                    "vecinos del medio rural"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Centro de salud, escuela y atención social a una distancia razonable, con transporte o atención a domicilio donde no los hay.",
           "medidas": [
-            { "nombre": "Consultorio y escuela cercanos", "texto": "Mantener el consultorio local y la escuela rural, aunque sea con aulas de varias edades, mientras haya población que los use." },
-            { "nombre": "Transporte escolar y sanitario", "texto": "Transporte gratuito al colegio, al centro de salud y al hospital para quien vive lejos y no tiene ese servicio en su pueblo." },
-            { "nombre": "Atención en otra comunidad", "texto": "La receta electrónica y la atención urgente funcionan igual fuera de la comunidad de residencia, sin trámites añadidos." },
-            { "nombre": "Cuidados en casa", "texto": "Enfermería, ayuda a domicilio y teleasistencia llegan a las personas mayores o dependientes que viven solas en los pueblos." }
+            {
+              "nombre": "Consultorio y escuela cercanos",
+              "texto": "Mantener el consultorio local y la escuela rural, aunque sea con aulas de varias edades, mientras haya población que los use.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de pueblos pequeños",
+                    "familias con hijos en el medio rural"
+                  ],
+                  "indirecto": [
+                    "comercios y servicios del pueblo"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan un coste por usuario mayor"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Transporte escolar y sanitario",
+              "texto": "Transporte gratuito al colegio, al centro de salud y al hospital para quien vive lejos y no tiene ese servicio en su pueblo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado y pacientes que viven lejos"
+                  ],
+                  "indirecto": [
+                    "familias del medio rural"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Atención en otra comunidad",
+              "texto": "La receta electrónica y la atención urgente funcionan igual fuera de la comunidad de residencia, sin trámites añadidos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas desplazadas por trabajo, estudios o vacaciones"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades turísticas con más demanda"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cuidados en casa",
+              "texto": "Enfermería, ayuda a domicilio y teleasistencia llegan a las personas mayores o dependientes que viven solas en los pueblos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas mayores que viven solas",
+                    "personas dependientes en pueblos"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Historia clínica común entre comunidades, telemedicina, unidades móviles y escuelas rurales agrupadas.",
           "medidas": [
-            { "nombre": "Historia clínica compartida", "texto": "Cualquier profesional autorizado de cualquier comunidad consulta la historia clínica del paciente, y queda registrado quién ha entrado." },
-            { "nombre": "Teleconsulta desde el pueblo", "texto": "Consulta por vídeo con el especialista desde el consultorio del pueblo, con el médico o la enfermera local presentes cuando haga falta." },
-            { "nombre": "Unidades móviles con calendario", "texto": "Unidades móviles de pruebas (mamografías, análisis, revisión de la vista) y de servicios sociales que recorren los pueblos con un calendario fijo y público." },
-            { "nombre": "Escuelas rurales agrupadas", "texto": "Colegios rurales agrupados que comparten entre varios pueblos docentes especialistas, transporte y materiales." }
+            {
+              "nombre": "Historia clínica compartida",
+              "texto": "Cualquier profesional autorizado de cualquier comunidad consulta la historia clínica del paciente, y queda registrado quién ha entrado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes atendidos en varias comunidades"
+                  ],
+                  "indirecto": [
+                    "profesionales sanitarios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que temen por la privacidad de sus datos"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la integración"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Teleconsulta desde el pueblo",
+              "texto": "Consulta por vídeo con el especialista desde el consultorio del pueblo, con el médico o la enfermera local presentes cuando haga falta.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes del medio rural"
+                  ],
+                  "indirecto": [
+                    "especialistas con menos desplazamientos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que necesitan exploración presencial"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Unidades móviles con calendario",
+              "texto": "Unidades móviles de pruebas (mamografías, análisis, revisión de la vista) y de servicios sociales que recorren los pueblos con un calendario fijo y público.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de pueblos sin centro de salud"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Escuelas rurales agrupadas",
+              "texto": "Colegios rurales agrupados que comparten entre varios pueblos docentes especialistas, transporte y materiales.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado del medio rural"
+                  ],
+                  "indirecto": [
+                    "docentes rurales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "alumnado con trayectos más largos"
+                  ],
+                  "indirecto": [
+                    "pueblos que pierden su propia escuela"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación que paga el coste de la dispersión.",
           "medidas": [
-            { "nombre": "Fondo de nivelación", "texto": "Un fondo estatal compensa a comunidades y diputaciones el coste extra de servir a población dispersa, envejecida o insular." },
-            { "nombre": "Gestión cercana", "texto": "Comunidades y municipios organizan el servicio en su territorio; el Estado fija el mínimo común y los datos que todos deben publicar." },
-            { "nombre": "Mapa de acceso publicado", "texto": "Un mapa oficial con el tiempo de viaje de cada pueblo a su centro de salud, urgencias, colegio y servicios sociales, actualizado cada año." },
-            { "nombre": "Puntos de servicio compartidos", "texto": "Sanidad, servicios sociales y trámites en un mismo local en los pueblos, con personal presencial y apoyo digital." }
+            {
+              "nombre": "Fondo de nivelación",
+              "texto": "Un fondo estatal compensa a comunidades y diputaciones el coste extra de servir a población dispersa, envejecida o insular.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades con población dispersa, envejecida o insular"
+                  ],
+                  "indirecto": [
+                    "vecinos del medio rural"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con población concentrada que aportan más"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gestión cercana",
+              "texto": "Comunidades y municipios organizan el servicio en su territorio; el Estado fija el mínimo común y los datos que todos deben publicar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades y municipios"
+                  ],
+                  "indirecto": [
+                    "vecinos con servicios a su medida"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "ministerios que pierden capacidad de gestión"
+                  ],
+                  "indirecto": [
+                    "vecinos de municipios con poca capacidad técnica"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Mapa de acceso publicado",
+              "texto": "Un mapa oficial con el tiempo de viaje de cada pueblo a su centro de salud, urgencias, colegio y servicios sociales, actualizado cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de pueblos alejados"
+                  ],
+                  "indirecto": [
+                    "planificadores de servicios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Es información hecha con datos que ya existen; publicarla cuesta poco y no quita a nadie ningún servicio."
+              }
+            },
+            {
+              "nombre": "Puntos de servicio compartidos",
+              "texto": "Sanidad, servicios sociales y trámites en un mismo local en los pueblos, con personal presencial y apoyo digital.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de pueblos pequeños"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que comparten locales"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "trabajadores públicos que se desplazan entre pueblos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Tiempos máximos de acceso fijados por ley, una historia clínica que controla el paciente y que le sigue por la UE, y reparto según la necesidad.",
           "medidas": [
-            { "nombre": "Tiempos máximos de acceso por ley", "texto": "Una ley básica fija el tiempo máximo hasta urgencias, primaria, escuela y servicios; por ejemplo, un punto de atención a menos de 30 minutos, como busca Francia.", "meta": true, "fuente": "https://www.banquedesterritoires.fr/programme-france-services" },
-            { "nombre": "Alternativa obligada donde no se llega", "texto": "Donde no se cumple el tiempo máximo, la administración responsable pone unidad móvil, transporte o teleconsulta, sin que la persona tenga que pedirlo." },
-            { "nombre": "Historia clínica que controla el paciente", "texto": "El paciente ve quién ha consultado sus datos y puede bloquear accesos, como ya ocurre en Estonia.", "fuente": "https://www.coe.int/en/web/bioethics/-/estonia-digital-health-system" },
-            { "nombre": "Datos que viajan por la UE", "texto": "Resumen de paciente y receta en el formato del Espacio Europeo de Datos de Salud, válidos en toda la UE antes de las fechas que fija esa norma.", "fuente": "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en" },
-            { "nombre": "Fórmula pública según la necesidad", "texto": "El dinero se reparte entre comunidades según población, necesidad sanitaria y social, dispersión, insularidad y envejecimiento, recalculado cada año, como en Finlandia.", "fuente": "https://vm.fi/en/funding-of-wellbeing-services-counties" }
+            {
+              "nombre": "Tiempos máximos de acceso por ley",
+              "texto": "Una ley básica fija el tiempo máximo hasta urgencias, primaria, escuela y servicios; por ejemplo, un punto de atención a menos de 30 minutos, como busca Francia.",
+              "meta": true,
+              "fuente": "https://www.banquedesterritoires.fr/programme-france-services",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de zonas alejadas"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la red necesaria"
+                  ],
+                  "indirecto": [
+                    "comunidades con mucho territorio disperso"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Alternativa obligada donde no se llega",
+              "texto": "Donde no se cumple el tiempo máximo, la administración responsable pone unidad móvil, transporte o teleconsulta, sin que la persona tenga que pedirlo.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos fuera del tiempo máximo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "ayuntamientos pequeños con poco presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Historia clínica que controla el paciente",
+              "texto": "El paciente ve quién ha consultado sus datos y puede bloquear accesos, como ya ocurre en Estonia.",
+              "fuente": "https://www.coe.int/en/web/bioethics/-/estonia-digital-health-system",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "profesionales sin información si el paciente bloquea"
+                  ],
+                  "indirecto": [
+                    "pacientes que bloquean datos útiles para su atención"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Datos que viajan por la UE",
+              "texto": "Resumen de paciente y receta en el formato del Espacio Europeo de Datos de Salud, válidos en toda la UE antes de las fechas que fija esa norma.",
+              "fuente": "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que viajan o viven en otro país de la UE"
+                  ],
+                  "indirecto": [
+                    "profesionales que atienden a pacientes de otros países"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la adaptación"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Fórmula pública según la necesidad",
+              "texto": "El dinero se reparte entre comunidades según población, necesidad sanitaria y social, dispersión, insularidad y envejecimiento, recalculado cada año, como en Finlandia.",
+              "fuente": "https://vm.fi/en/funding-of-wellbeing-services-counties",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades con más necesidad, dispersión o envejecimiento"
+                  ],
+                  "indirecto": [
+                    "vecinos de esas comunidades"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que reciben más de lo que la fórmula les da"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]
@@ -387,49 +2790,418 @@
           "nivel": 0,
           "resumen": "Sin propuesta, o negar la sanidad o la escuela a personas que viven en España, o desmantelar la red pública.",
           "medidas": [
-            { "nombre": "Excluir a quien vive aquí", "texto": "Dejar sin atención sanitaria o sin escuela a personas que viven en España por su situación administrativa." },
-            { "nombre": "Desmantelar la red pública", "texto": "Vender o cerrar centros públicos sin evaluación ni alternativa, o dejarlos sin inversión hasta que dejan de funcionar." },
-            { "nombre": "Derechos según el código postal", "texto": "Que lo que cubre el sistema dependa por completo de la comunidad en la que se vive, sin un mínimo común garantizado." }
+            {
+              "nombre": "Excluir a quien vive aquí",
+              "texto": "Dejar sin atención sanitaria o sin escuela a personas que viven en España por su situación administrativa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que ahorran a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas en situación administrativa irregular",
+                    "menores de familias sin papeles"
+                  ],
+                  "indirecto": [
+                    "población general por contagios sin tratar",
+                    "urgencias que atienden más tarde y más caro"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Desmantelar la red pública",
+              "texto": "Vender o cerrar centros públicos sin evaluación ni alternativa, o dejarlos sin inversión hasta que dejan de funcionar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "empresas que compran centros o ganan cuota"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de la red pública",
+                    "trabajadores públicos"
+                  ],
+                  "indirecto": [
+                    "personas sin dinero para la privada"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Derechos según el código postal",
+              "texto": "Que lo que cubre el sistema dependa por completo de la comunidad en la que se vive, sin un mínimo común garantizado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "comunidades que deciden sin mínimo común"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "vecinos de comunidades con menor cartera"
+                  ],
+                  "indirecto": [
+                    "personas que se mudan entre comunidades"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Atención sanitaria, escuela y valoración de la dependencia garantizadas a toda persona que vive en España, como ya fija la ley.",
           "medidas": [
-            { "nombre": "Atención a toda persona residente", "texto": "Aplicar en todas las comunidades el derecho a la atención sanitaria del decreto-ley de 2018, también a las personas extranjeras que cumplen sus requisitos.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-10752" },
-            { "nombre": "Escuela para todo menor", "texto": "Todo menor que vive en España se escolariza, sea cual sea la situación administrativa de su familia." },
-            { "nombre": "Urgencias, embarazo y menores siempre", "texto": "La atención urgente, la de las embarazadas y la de los menores se presta en cualquier caso, sin trámites previos." },
-            { "nombre": "Sin pagos por adelantado", "texto": "Ningún centro público pide pago ni depósito antes de atender lo que cubre la cartera común de servicios." }
+            {
+              "nombre": "Atención a toda persona residente",
+              "texto": "Aplicar en todas las comunidades el derecho a la atención sanitaria del decreto-ley de 2018, también a las personas extranjeras que cumplen sus requisitos.",
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-10752",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas residentes sin cobertura sanitaria"
+                  ],
+                  "indirecto": [
+                    "población general por prevención de contagios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes que pagan la atención"
+                  ],
+                  "indirecto": [
+                    "pacientes en lista de espera"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Escuela para todo menor",
+              "texto": "Todo menor que vive en España se escolariza, sea cual sea la situación administrativa de su familia.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "menores de familias en situación irregular"
+                  ],
+                  "indirecto": [
+                    "vecinos de barrios que evitan la exclusión futura"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Urgencias, embarazo y menores siempre",
+              "texto": "La atención urgente, la de las embarazadas y la de los menores se presta en cualquier caso, sin trámites previos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "embarazadas",
+                    "menores",
+                    "personas con una urgencia sin documentación en regla"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sin pagos por adelantado",
+              "texto": "Ningún centro público pide pago ni depósito antes de atender lo que cubre la cartera común de servicios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes sin dinero disponible"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros que deben reclamar después a terceros pagadores"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Una cartera común de servicios en toda España, con una red pública capaz de cubrirla por sí misma en cada territorio.",
           "medidas": [
-            { "nombre": "Cartera común con suelo estatal", "texto": "Una lista de prestaciones sanitarias, educativas y de dependencia que el Estado garantiza en todas las comunidades; cada comunidad puede añadir, nunca quitar." },
-            { "nombre": "Red pública como base", "texto": "La red pública puede atender por sí misma la cartera común en cada territorio; los conciertos cubren picos y carencias, no la base." },
-            { "nombre": "Plan de mantenimiento de centros", "texto": "Un plan de varios años para renovar edificios y equipos de los centros públicos, para que no se degraden por falta de inversión." },
-            { "nombre": "Cerrar los huecos de la cartera", "texto": "Incluir con un calendario público lo que hoy queda fuera o cubre poco y es básico, como la salud dental, la salud mental y la educación de cero a tres años." }
+            {
+              "nombre": "Cartera común con suelo estatal",
+              "texto": "Una lista de prestaciones sanitarias, educativas y de dependencia que el Estado garantiza en todas las comunidades; cada comunidad puede añadir, nunca quitar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "vecinos de comunidades con menor cartera"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que deben ampliar su cartera"
+                  ],
+                  "indirecto": [
+                    "contribuyentes de esas comunidades"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Red pública como base",
+              "texto": "La red pública puede atender por sí misma la cartera común en cada territorio; los conciertos cubren picos y carencias, no la base.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de la red pública"
+                  ],
+                  "indirecto": [
+                    "trabajadores públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros privados que viven de conciertos estables"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan la ampliación"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan de mantenimiento de centros",
+              "texto": "Un plan de varios años para renovar edificios y equipos de los centros públicos, para que no se degraden por falta de inversión.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios y trabajadores de centros públicos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Cerrar los huecos de la cartera",
+              "texto": "Incluir con un calendario público lo que hoy queda fuera o cubre poco y es básico, como la salud dental, la salud mental y la educación de cero a tres años.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas con problemas de salud mental",
+                    "familias con hijos de cero a tres años",
+                    "personas que no pueden pagar el dentista"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "dentistas y escuelas infantiles privadas"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Universalidad sin huecos y una gestión pública evaluada con las mismas reglas que cualquier otra, con consecuencias.",
           "medidas": [
-            { "nombre": "Mismas reglas de evaluación", "texto": "Los centros públicos se evalúan con los mismos indicadores, la misma inspección y la misma publicación que los concertados." },
-            { "nombre": "Consecuencias también en lo público", "texto": "Si un centro público sale mal en dos evaluaciones seguidas, cambia la dirección y aplica un plan de mejora con seguimiento público." },
-            { "nombre": "Sin exclusiones por trámite", "texto": "Revisar cada año quién se queda fuera por papeles (recién llegados, personas sin domicilio fijo) y corregir el procedimiento que lo causa." },
-            { "nombre": "Ampliar la cartera solo tras evaluar", "texto": "Lo que entra en la cartera común entra tras una evaluación pública de coste y beneficio, y a la vez para todas las comunidades." }
+            {
+              "nombre": "Mismas reglas de evaluación",
+              "texto": "Los centros públicos se evalúan con los mismos indicadores, la misma inspección y la misma publicación que los concertados.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros públicos"
+                  ],
+                  "indirecto": [
+                    "centros concertados que piden trato igual"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "centros públicos con malos resultados"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Consecuencias también en lo público",
+              "texto": "Si un centro público sale mal en dos evaluaciones seguidas, cambia la dirección y aplica un plan de mejora con seguimiento público.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros públicos con malos resultados"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "direcciones de centros públicos mal evaluados"
+                  ],
+                  "indirecto": [
+                    "profesionales de esos centros con más supervisión"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Sin exclusiones por trámite",
+              "texto": "Revisar cada año quién se queda fuera por papeles (recién llegados, personas sin domicilio fijo) y corregir el procedimiento que lo causa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "recién llegados",
+                    "personas sin domicilio fijo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Ampliar la cartera solo tras evaluar",
+              "texto": "Lo que entra en la cartera común entra tras una evaluación pública de coste y beneficio, y a la vez para todas las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes",
+                    "vecinos de todas las comunidades a la vez"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "pacientes que esperan la evaluación de una prestación"
+                  ],
+                  "indirecto": [
+                    "comunidades que querían ampliar antes por su cuenta"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Derecho por residencia con un solo documento en toda España, cartera común por ley y centros públicos autónomos dirigidos por mérito.",
           "medidas": [
-            { "nombre": "Documento único en toda España", "texto": "Un único documento sanitario, válido en toda España, para toda persona que vive aquí y cumple la ley, con el mismo procedimiento en todas las comunidades." },
-            { "nombre": "Cartera común con rango de ley", "texto": "La cartera común pasa a fijarse por ley estatal, no por decreto, para que no pueda recortarse sin debate en el Parlamento." },
-            { "nombre": "Dirección elegida por mérito", "texto": "Directores de hospitales, centros de salud y colegios públicos elegidos por concurso de mérito, con contrato de objetivos y evaluación pública al final del mandato." },
-            { "nombre": "Autonomía de gestión del centro público", "texto": "Presupuesto propio y capacidad de organizar plantilla y horarios, a cambio de rendir cuentas con los mismos indicadores que un concertado." }
+            {
+              "nombre": "Documento único en toda España",
+              "texto": "Un único documento sanitario, válido en toda España, para toda persona que vive aquí y cumple la ley, con el mismo procedimiento en todas las comunidades.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas que se mudan entre comunidades",
+                    "residentes con trámites complejos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades que pierden su propia tarjeta"
+                  ],
+                  "indirecto": [
+                    "contribuyentes que pagan el cambio de sistema"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Cartera común con rango de ley",
+              "texto": "La cartera común pasa a fijarse por ley estatal, no por decreto, para que no pueda recortarse sin debate en el Parlamento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de la sanidad pública"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos que pierden flexibilidad para ajustar la cartera"
+                  ],
+                  "indirecto": [
+                    "pacientes que esperan más la inclusión de prestaciones nuevas"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dirección elegida por mérito",
+              "texto": "Directores de hospitales, centros de salud y colegios públicos elegidos por concurso de mérito, con contrato de objetivos y evaluación pública al final del mandato.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de centros públicos",
+                    "profesionales con buena trayectoria de gestión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "directivos nombrados por confianza"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Autonomía de gestión del centro público",
+              "texto": "Presupuesto propio y capacidad de organizar plantilla y horarios, a cambio de rendir cuentas con los mismos indicadores que un concertado.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "direcciones y equipos de centros públicos"
+                  ],
+                  "indirecto": [
+                    "usuarios de esos centros"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "personal con condiciones fijadas hoy por la consejería"
+                  ],
+                  "indirecto": [
+                    "centros pequeños con poca capacidad de gestión"
+                  ]
+                }
+              }
+            }
           ]
         }
       ]
@@ -442,49 +3214,421 @@
           "nivel": 0,
           "resumen": "Sin propuesta de financiación, o recortar por debajo de lo que la ley garantiza, o prometer servicios sin decir cómo se pagan.",
           "medidas": [
-            { "nombre": "Recortes por debajo de la ley", "texto": "Presupuestos que no cubren lo que la ley ya garantiza, como las ayudas de dependencia reconocidas o la gratuidad de la enseñanza obligatoria." },
-            { "nombre": "Promesas sin financiar", "texto": "Anunciar servicios nuevos sin decir cuánto cuestan ni de dónde sale el dinero para pagarlos." },
-            { "nombre": "Recortar en plena crisis", "texto": "Recortar los servicios justo en las recesiones, cuando más personas los necesitan y menos alternativas tienen." }
+            {
+              "nombre": "Recortes por debajo de la ley",
+              "texto": "Presupuestos que no cubren lo que la ley ya garantiza, como las ayudas de dependencia reconocidas o la gratuidad de la enseñanza obligatoria.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas dependientes con ayuda reconocida sin cobrar",
+                    "familias del alumnado"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Promesas sin financiar",
+              "texto": "Anunciar servicios nuevos sin decir cuánto cuestan ni de dónde sale el dinero para pagarlos.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "beneficiarios anunciados a corto plazo"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes futuros que pagan la deuda"
+                  ],
+                  "indirecto": [
+                    "usuarios de otros servicios que se recortan después"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Recortar en plena crisis",
+              "texto": "Recortar los servicios justo en las recesiones, cuando más personas los necesitan y menos alternativas tienen.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes que evitan subidas en la crisis"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "personas que pierden ingresos en la crisis",
+                    "usuarios de servicios públicos"
+                  ],
+                  "indirecto": [
+                    "profesionales despedidos o sin reposición"
+                  ]
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 1,
           "resumen": "Mantener el gasto por habitante cuando crece la demanda: más población, más edad o más dependencia, más presupuesto.",
           "medidas": [
-            { "nombre": "Gasto que sigue a la demanda", "texto": "El presupuesto de sanidad, educación y dependencia crece al menos al ritmo de la población atendida y de su envejecimiento." },
-            { "nombre": "Pagar primero lo ya reconocido", "texto": "Financiar las ayudas de dependencia ya reconocidas, y que la persona aún no recibe, antes de aprobar prestaciones nuevas." },
-            { "nombre": "Sin recortes por presupuesto prorrogado", "texto": "Si no se aprueba presupuesto, los servicios mantienen al menos el gasto real del año anterior, ajustado por la demanda." },
-            { "nombre": "Gasto por habitante publicado", "texto": "Publicar cada año el gasto por habitante en cada servicio y en cada comunidad, con el mismo método, para poder comparar." }
+            {
+              "nombre": "Gasto que sigue a la demanda",
+              "texto": "El presupuesto de sanidad, educación y dependencia crece al menos al ritmo de la población atendida y de su envejecimiento.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas mayores y dependientes",
+                    "usuarios de servicios públicos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de otras partidas del presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Pagar primero lo ya reconocido",
+              "texto": "Financiar las ayudas de dependencia ya reconocidas, y que la persona aún no recibe, antes de aprobar prestaciones nuevas.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes con ayuda reconocida sin recibir"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios de prestaciones nuevas que se retrasan"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Sin recortes por presupuesto prorrogado",
+              "texto": "Si no se aprueba presupuesto, los servicios mantienen al menos el gasto real del año anterior, ajustado por la demanda.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de servicios públicos"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios de otras partidas que absorben el ajuste"
+                  ],
+                  "indirecto": [
+                    "contribuyentes"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Gasto por habitante publicado",
+              "texto": "Publicar cada año el gasto por habitante en cada servicio y en cada comunidad, con el mismo método, para poder comparar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "ciudadanos que comparan comunidades"
+                  ],
+                  "indirecto": [
+                    "investigadores y periodistas"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [],
+                  "indirecto": []
+                },
+                "sin_perjuicio": "Publicar un dato con método común cuesta poco y no quita ni dinero ni servicio a nadie."
+              }
+            }
           ]
         },
         {
           "nivel": 2,
           "resumen": "Un suelo de gasto por habitante en sanidad, educación y dependencia que ninguna administración puede rebajar.",
           "medidas": [
-            { "nombre": "Suelo de gasto por habitante", "texto": "Una ley fija un gasto mínimo por habitante en sanidad, educación y dependencia, que ni el Estado ni las comunidades pueden rebajar." },
-            { "nombre": "Plan de gasto educativo cumplido", "texto": "Cumplir el plan que manda la ley de educación de 2020 para subir el gasto público educativo hasta un mínimo del 5 % del producto interior bruto.", "meta": true, "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-17264" },
-            { "nombre": "Parte estatal de la dependencia suficiente", "texto": "El Estado paga su parte del nivel mínimo de la dependencia con una cuantía que se actualiza cada año con el coste real de los servicios." }
+            {
+              "nombre": "Suelo de gasto por habitante",
+              "texto": "Una ley fija un gasto mínimo por habitante en sanidad, educación y dependencia, que ni el Estado ni las comunidades pueden rebajar.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de sanidad, educación y dependencia"
+                  ],
+                  "indirecto": [
+                    "profesionales de esos servicios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas sin suelo, como vivienda o transporte"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Plan de gasto educativo cumplido",
+              "texto": "Cumplir el plan que manda la ley de educación de 2020 para subir el gasto público educativo hasta un mínimo del 5 % del producto interior bruto.",
+              "meta": true,
+              "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-17264",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "alumnado",
+                    "docentes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de otras partidas del presupuesto"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Parte estatal de la dependencia suficiente",
+              "texto": "El Estado paga su parte del nivel mínimo de la dependencia con una cuantía que se actualiza cada año con el coste real de los servicios.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "personas dependientes",
+                    "comunidades autónomas"
+                  ],
+                  "indirecto": [
+                    "familias cuidadoras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 3,
           "resumen": "Financiación estable y a varios años, finalista donde haga falta y revisada cada año contra resultados.",
           "medidas": [
-            { "nombre": "Compromisos a varios años", "texto": "Compromisos de gasto a varios años para los servicios, para que plantillas e inversiones se planifiquen sin depender del presupuesto de cada año." },
-            { "nombre": "Dinero finalista donde haga falta", "texto": "Partidas que solo pueden usarse para su fin (atención primaria, dependencia, educación de cero a tres años) donde hay riesgo de que se desvíen a otra cosa." },
-            { "nombre": "Aumentos ligados a objetivos", "texto": "Cada aumento sobre el suelo se liga a objetivos medidos (esperas, abandono escolar, plazas de cuidados) y se revisa al cabo de un año." },
-            { "nombre": "Reasignar si no hay resultado", "texto": "Si el aumento no logra su objetivo, el dinero pasa a otro programa del mismo servicio que sí funcione, no sale del servicio." }
+            {
+              "nombre": "Compromisos a varios años",
+              "texto": "Compromisos de gasto a varios años para los servicios, para que plantillas e inversiones se planifiquen sin depender del presupuesto de cada año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "profesionales con plantillas planificadas"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "gobiernos futuros con menos margen de decisión"
+                  ],
+                  "indirecto": [
+                    "usuarios de otras partidas sin compromiso"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Dinero finalista donde haga falta",
+              "texto": "Partidas que solo pueden usarse para su fin (atención primaria, dependencia, educación de cero a tres años) donde hay riesgo de que se desvíen a otra cosa.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de atención primaria, dependencia y escuelas infantiles"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "comunidades con menos libertad para usar su dinero"
+                  ],
+                  "indirecto": [
+                    "usuarios de partidas que pierden ese margen"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Aumentos ligados a objetivos",
+              "texto": "Cada aumento sobre el suelo se liga a objetivos medidos (esperas, abandono escolar, plazas de cuidados) y se revisa al cabo de un año.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de servicios públicos"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "equipos de programas que no alcanzan su objetivo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Reasignar si no hay resultado",
+              "texto": "Si el aumento no logra su objetivo, el dinero pasa a otro programa del mismo servicio que sí funcione, no sale del servicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de programas que funcionan"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "beneficiarios del programa que pierde el dinero"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         },
         {
           "nivel": 4,
           "resumen": "Suelo de gasto por habitante ajustado por necesidad, fijado por ley para cuatro años, actualizado cada año y con parte reservada.",
           "medidas": [
-            { "nombre": "Ley de suelo a cuatro años", "texto": "Una ley fija para cuatro años el mínimo de sanidad, educación y dependencia, y el Gobierno no puede presupuestar por debajo, como hizo Inglaterra con su sanidad en 2020.", "meta": true, "fuente": "https://www.legislation.gov.uk/ukpga/2020/5/section/1" },
-            { "nombre": "Suelo ajustado por necesidad", "texto": "El suelo por habitante se ajusta por edad, estado de salud, pobreza y dispersión, y se recalcula cada año con datos oficiales y costes." },
-            { "nombre": "Parte reservada a primaria y dependencia", "texto": "Un porcentaje mínimo del gasto sanitario va a la atención primaria, y el nivel mínimo estatal de dependencia cubre el coste real del servicio." },
-            { "nombre": "Fondo de reserva para las crisis", "texto": "Un fondo que se llena en los años buenos y solo puede usarse para mantener el suelo en las recesiones." },
-            { "nombre": "Encaje con la revisión de gasto", "texto": "El suelo protege el mínimo; lo que va por encima pasa por la revisión de gasto, y todo encaja con las reglas fiscales europeas y la ley de estabilidad." }
+            {
+              "nombre": "Ley de suelo a cuatro años",
+              "texto": "Una ley fija para cuatro años el mínimo de sanidad, educación y dependencia, y el Gobierno no puede presupuestar por debajo, como hizo Inglaterra con su sanidad en 2020.",
+              "meta": true,
+              "fuente": "https://www.legislation.gov.uk/ukpga/2020/5/section/1",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de sanidad, educación y dependencia"
+                  ],
+                  "indirecto": [
+                    "profesionales de esos servicios"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "usuarios de otras partidas en años de ajuste"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Suelo ajustado por necesidad",
+              "texto": "El suelo por habitante se ajusta por edad, estado de salud, pobreza y dispersión, y se recalcula cada año con datos oficiales y costes.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "territorios con población mayor, enferma, pobre o dispersa"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "territorios con menos necesidad que reciben menos"
+                  ],
+                  "indirecto": []
+                }
+              }
+            },
+            {
+              "nombre": "Parte reservada a primaria y dependencia",
+              "texto": "Un porcentaje mínimo del gasto sanitario va a la atención primaria, y el nivel mínimo estatal de dependencia cubre el coste real del servicio.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "pacientes de atención primaria",
+                    "personas dependientes"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "servicios hospitalarios que crecen menos"
+                  ],
+                  "indirecto": [
+                    "pacientes hospitalarios en lista de espera"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Fondo de reserva para las crisis",
+              "texto": "Un fondo que se llena en los años buenos y solo puede usarse para mantener el suelo en las recesiones.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "usuarios de servicios en recesión"
+                  ],
+                  "indirecto": []
+                },
+                "perjudica": {
+                  "directo": [
+                    "contribuyentes en los años buenos"
+                  ],
+                  "indirecto": [
+                    "usuarios de otras partidas en los años buenos"
+                  ]
+                }
+              }
+            },
+            {
+              "nombre": "Encaje con la revisión de gasto",
+              "texto": "El suelo protege el mínimo; lo que va por encima pasa por la revisión de gasto, y todo encaja con las reglas fiscales europeas y la ley de estabilidad.",
+              "colectivos": {
+                "beneficia": {
+                  "directo": [
+                    "contribuyentes"
+                  ],
+                  "indirecto": [
+                    "generaciones futuras"
+                  ]
+                },
+                "perjudica": {
+                  "directo": [
+                    "usuarios que esperaban gasto por encima del suelo"
+                  ],
+                  "indirecto": []
+                }
+              }
+            }
           ]
         }
       ]

@@ -52,6 +52,19 @@ function validar(k) {
         const clave = String(m.nombre || "").toLowerCase().trim();
         if (vistos.has(clave)) err.push(`${dm}: nombre repetido en este aspecto («${m.nombre}»)`);
         vistos.add(clave);
+        // Who wins and who loses, first degree (directly) and second degree (through others), short labels
+        const co = m.colectivos;
+        if (!co || typeof co !== "object") err.push(`${dm}: faltan "colectivos"`);
+        else {
+          for (const lado of ["beneficia", "perjudica"]) for (const grado of ["directo", "indirecto"]) {
+            const l = co[lado] && co[lado][grado];
+            if (!Array.isArray(l) || l.length > 4) { err.push(`${dm}: colectivos.${lado}.${grado} debe ser una lista de 0 a 4`); continue; }
+            l.forEach((g) => { largo(g, 3, 70, `${dm} (colectivo «${g}»)`); limpio(g, `${dm} (colectivo)`); });
+          }
+          if (!(co.beneficia && Array.isArray(co.beneficia.directo) && co.beneficia.directo.length)) err.push(`${dm}: al menos un colectivo que se beneficia en primer grado`);
+          const pj = co.perjudica || {};
+          if (![...(pj.directo || []), ...(pj.indirecto || [])].length && !(typeof co.sin_perjuicio === "string" && co.sin_perjuicio.trim().length >= 20)) err.push(`${dm}: o algún perjudicado, o "sin_perjuicio" explicando por qué nadie pierde`);
+        }
         if (CIFRA.test(m.texto || "") && m.meta !== true && !/^https?:\/\//.test(m.fuente || "")) err.push(`${dm}: tiene una cifra; marca "meta": true si es un objetivo, o pon "fuente" si es un dato`);
       });
     });
@@ -115,6 +128,13 @@ const CSS = `/* generado por scripts/geometria-medidas.mjs: no editar a mano */
 .mds li p{margin:2px 0 0;color:var(--ink2)}
 .mds .meta{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);font-size:12px;color:var(--muted);vertical-align:2px}
 .mds .fte{font-size:13.5px;color:#1D4ED8;margin-left:4px}
+.cols{display:grid;gap:4px;margin-top:8px;font-size:14px}
+.col{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;padding:6px 10px;border-radius:10px}
+.col b{font-size:13px;min-width:7.5em}
+.col em{font-style:normal;color:var(--muted)}
+.col.mas{background:#ECFDF5}.col.mas b{color:#047857}
+.col.menos{background:#FEF2F2}.col.menos b{color:#B91C1C}
+.col.cero{background:var(--bg2)}.col.cero b{color:var(--ink2)}
 .antes details{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:10px 14px;margin:0 0 8px;background:var(--bg2)}
 .antes summary{cursor:pointer;font-weight:600}
 .antes ul{margin:8px 0 0;padding-left:1.2em;font-size:15px;color:var(--ink2)}
@@ -250,7 +270,7 @@ ${t.ejes.map((e, i) => {
   return `<li style="--c:${col}"><div class="t"><b>${i + 1}. ${esc(e.n)}</b><span class="niv">${NIV[l]}</span></div>`
     + (rz ? `<p class="rz"><b>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}:</b> ${esc(rz.r)}${/^https?:\/\//.test(rz.u || "") ? ` <a href="${esc(rz.u)}" rel="noopener nofollow" target="_blank">Fuente: ${esc(rz.f || host(rz.u))} ↗</a>` : ""}</p>` : "")
     + `<p class="inc">${l === 0 ? "Quedarse en indefinido aquí es:" : `El nivel ${NIV[l].toLowerCase()} incluye (medidas de esta web):`}</p><ul class="nombres">${nv.medidas.map((m) => `<li>${esc(m.nombre)}</li>`).join("")}</ul>`
-    + `<details><summary>Ver cada medida explicada</summary><p style="margin:6px 0 0">${esc(nv.resumen)}</p><ul>${nv.medidas.map((m) => `<li><b>${esc(m.nombre)}.</b> ${esc(m.texto)}</li>`).join("")}</ul></details>`
+    + `<details><summary>Ver cada medida explicada</summary><p style="margin:6px 0 0">${esc(nv.resumen)}</p><ul>${nv.medidas.map((m) => `<li><b>${esc(m.nombre)}.</b> ${esc(m.texto)}${htmlColectivos(m)}</li>`).join("")}</ul></details>`
     + `<p style="margin:8px 0 0"><a class="mas" href="/medidas/${x.slug}/${NIV_SLUG[l]}/">Ver el nivel y qué partidos están en él →</a>${l < 4 ? ` · <a class="mas" href="/medidas/${x.slug}/${NIV_SLUG[l + 1]}/">Qué le falta para el siguiente nivel →</a>` : ""}</p></li>`;
 }).join("\n")}
 </ol>
@@ -282,6 +302,12 @@ ${t.ejes.map((e, i) => {
 
 // Party positions: the levels live in datos.json (TEMAS[k].v), the reasons in the RAZONES constant of the
 // geometry page (one per party and aspect, with its source). Same data the level side panel shows.
+// «A quién beneficia y a quién perjudica», first and second degree (Eugenio, 2026-11-25)
+function htmlColectivos(m) {
+  const c = m.colectivos; if (!c) return "";
+  const fila = (cls, tit, d, i) => (d.length || i.length) ? `<div class="col ${cls}"><b>${tit}</b>${d.length ? `<span><em>1.er grado:</em> ${d.map(esc).join(", ")}</span>` : ""}${i.length ? `<span><em>2.º grado:</em> ${i.map(esc).join(", ")}</span>` : ""}</div>` : "";
+  return `<div class="cols">${fila("mas", "Se benefician", c.beneficia.directo, c.beneficia.indirecto)}${fila("menos", "Se perjudican", c.perjudica.directo, c.perjudica.indirecto)}${!c.perjudica.directo.length && !c.perjudica.indirecto.length && c.sin_perjuicio ? `<div class="col cero"><b>Nadie pierde de forma clara</b><span>${esc(c.sin_perjuicio)}</span></div>` : ""}</div>`;
+}
 function leerRazones() {
   const html = fs.readFileSync(path.join(RAIZ, "public/observatorio-polarizacion/index.html"), "utf8");
   const m = html.match(/^const RAZONES = (\{.*\});\s*$/m);
@@ -336,7 +362,7 @@ function paginas(temas) {
     const hermanos = todos.filter((y) => y.k === k && y !== x);
     const enTema = `${SITIO}/geometria-politica?tema=${TEMA_SLUG[k]}`;
     const pildoras = (actual) => `<ul class="pildoras" aria-label="Niveles">${NIV.map((n, j) => `<li style="--c:${colorNivel(t, j)}">${j === actual ? `<span aria-current="page">${n}</span>` : `<a href="/medidas/${slug}/${NIV_SLUG[j]}/">${n}</a>`}</li>`).join("")}</ul>`;
-    const lista = (nv) => `<ul class="mds">${nv.medidas.map((m) => `<li><b>${esc(m.nombre)}${m.meta ? `<span class="meta">objetivo propuesto</span>` : ""}</b><p>${esc(m.texto)}${/^https?:\/\//.test(m.fuente || "") ? ` <a class="fte" href="${esc(m.fuente)}" rel="noopener nofollow" target="_blank">fuente: ${esc(host(m.fuente))} ↗</a>` : ""}</p></li>`).join("\n")}</ul>`;
+    const lista = (nv) => `<ul class="mds">${nv.medidas.map((m) => `<li><b>${esc(m.nombre)}${m.meta ? `<span class="meta">objetivo propuesto</span>` : ""}</b><p>${esc(m.texto)}${/^https?:\/\//.test(m.fuente || "") ? ` <a class="fte" href="${esc(m.fuente)}" rel="noopener nofollow" target="_blank">fuente: ${esc(host(m.fuente))} ↗</a>` : ""}</p>${htmlColectivos(m)}</li>`).join("\n")}</ul>`;
     // one page per level
     a.niveles.forEach((nv, n) => {
       const ruta = `/medidas/${slug}/${NIV_SLUG[n]}/`;
@@ -432,7 +458,7 @@ if (args[0] === "--verificar" || args[0] === "--aplicar") {
     const out = { version: 1, temas: {} };
     for (const k of temas) {
       const d = JSON.parse(fs.readFileSync(path.join(DIR, `${k}.json`), "utf8"));
-      out.temas[k] = d.aspectos.map((a) => a.niveles.map((nv) => [nv.resumen.trim(), nv.medidas.map((m) => [m.nombre.trim(), m.texto.trim()])]));
+      out.temas[k] = d.aspectos.map((a) => a.niveles.map((nv) => [nv.resumen.trim(), nv.medidas.map((m) => { const c = m.colectivos; return c ? [m.nombre.trim(), m.texto.trim(), [c.beneficia.directo, c.beneficia.indirecto, c.perjudica.directo, c.perjudica.indirecto], c.sin_perjuicio || ""] : [m.nombre.trim(), m.texto.trim()]; })]));
     }
     out.rutas = Object.fromEntries(temas.map((k) => [k, DATOS.temas.find((t) => t.k === k).ejes.map((e) => slugify(e.n))]));
     fs.writeFileSync(SALIDA, JSON.stringify(out));
