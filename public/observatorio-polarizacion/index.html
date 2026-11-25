@@ -841,25 +841,49 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .gt-barra i{display:block;height:100%;width:0;background:#F6BE3B;border-radius:99px;transition:width .3s}
 .gt-prog b{font:600 14px/1 var(--mono);min-width:44px;text-align:right}
 .gt-x{flex:none;width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font:400 24px/1 var(--sans);cursor:pointer}
-.gt-cuerpo{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:0;min-height:0}
+.gt-cuerpo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;min-height:0}
 .gt-preg{overflow:auto;padding:22px clamp(14px,3vw,40px) 28px;display:grid;gap:16px;align-content:start}
 .gt-preg h3{margin:0;font:700 clamp(22px,2.4vw,30px)/1.2 var(--sans);color:var(--ink)}
 .gt-intro{margin:0;color:var(--muted);max-width:70ch}
-.gt-q{padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2);display:grid;gap:8px;max-width:820px}
-.gt-q.hecha{border-color:var(--tc)}
-.gt-q h4{margin:0;font:600 17px/1.3 var(--sans);color:var(--ink)}
-.gt-q h4 small{display:block;margin-top:2px;font:400 14px/1.45 var(--sans);color:var(--ink-2)}
-.gt-q input[type=range]{width:100%;accent-color:var(--tc);min-height:30px;opacity:.55}
-.gt-q.hecha input[type=range]{opacity:1}
-.gt-niv{display:flex;flex-wrap:wrap;gap:6px}
-.gt-niv button{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink-2);font:500 13px/1 var(--sans);cursor:pointer}
-.gt-niv button.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--ink)}
-.gt-txt{margin:0;padding:10px 12px;border-radius:12px;border-left:3px solid var(--c,var(--line));background:color-mix(in srgb,var(--c,#888) 9%,transparent);min-height:3.2em}
-.gt-txt b{display:block;color:var(--c,var(--ink));font-weight:600}
-.gt-txt.vacio{color:var(--muted);--c:var(--line)}
+.gt-q{--c:var(--tc);padding:18px 20px 16px;border:1px solid var(--line);border-radius:18px;background:var(--bg-2);display:grid;gap:14px;max-width:820px;box-shadow:0 1px 2px rgba(13,18,38,.05);transition:border-color .2s,box-shadow .2s}
+.gt-q.hecha{border-color:color-mix(in srgb,var(--c) 55%,var(--line));box-shadow:0 6px 22px -12px color-mix(in srgb,var(--c) 70%,transparent)}
+.gt-q h4{margin:0;display:flex;align-items:center;gap:10px;font:600 17px/1.3 var(--sans);color:var(--ink)}
+.gt-num{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc);font:700 13px/1 var(--mono)}
+.gt-q.hecha .gt-num{background:var(--c);color:#fff}
+/* Five equal columns: each stop of the slider sits in the centre of its column, and so does its label */
+.gt-esc{--v:0;--th:28px;display:grid;gap:6px}
+.gt-pista{position:relative;height:var(--th)}
+.gt-pista input{position:absolute;top:calc(50% - 4px);left:calc(10% - var(--th) / 2);width:calc(80% + var(--th));height:8px;margin:0;padding:0;-webkit-appearance:none;appearance:none;border-radius:99px;cursor:pointer;background:linear-gradient(90deg,var(--c) 0 calc(var(--th) / 2 + (100% - var(--th)) * var(--v) / 4),var(--line) 0);transition:background .15s}
+.gt-pista input:focus-visible{outline:2px solid var(--c);outline-offset:8px}
+.gt-pista input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:var(--th);height:var(--th);border-radius:50%;background:#fff;border:4px solid var(--c);box-shadow:0 2px 8px rgba(13,18,38,.25);cursor:grab;transition:border-color .15s,transform .15s}
+.gt-pista input::-moz-range-thumb{box-sizing:border-box;width:var(--th);height:var(--th);border-radius:50%;background:#fff;border:4px solid var(--c);box-shadow:0 2px 8px rgba(13,18,38,.25);cursor:grab}
+.gt-pista input:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
+.gt-q:not(.hecha) .gt-pista input::-webkit-slider-thumb{border-color:#aab2c2;border-style:dashed}
+.gt-q:not(.hecha) .gt-pista input::-moz-range-thumb{border-color:#aab2c2;border-style:dashed}
+.gt-marcas{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);place-items:center;pointer-events:none;z-index:1}
+.gt-marcas i{width:8px;height:8px;border-radius:50%;background:var(--m);opacity:.9}
+.gt-niv{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.gt-niv button{min-width:0;margin:0 3px;padding:8px 2px;border-radius:10px;border:1.5px solid transparent;background:transparent;color:var(--muted);font:500 clamp(11px,2.9vw,13.5px)/1.15 var(--sans);text-align:center;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.gt-niv button:hover{color:var(--ink);background:color-mix(in srgb,var(--m) 10%,transparent)}
+.gt-niv button.on{border-color:var(--m);background:color-mix(in srgb,var(--m) 18%,transparent);color:var(--ink);font-weight:700}
+.gt-txt{margin:0;padding:12px 14px;border-radius:12px;border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);color:var(--ink-2)}
+.gt-txt b{display:block;margin-bottom:2px;color:var(--ink);font-weight:700}
+.gt-txt.vacio{border-left-color:var(--line);background:transparent;color:var(--muted);font-size:14px}
 .gt-lat{overflow:auto;padding:22px clamp(14px,2vw,28px);border-left:1px solid var(--line);background:var(--bg-2);display:grid;gap:14px;align-content:start}
 .gt-lat h5{margin:0 0 6px;font:600 12px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.gt-lat svg{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+.gt-lat #gt-svg{width:100%;max-width:min(100%,58vh);height:auto;aspect-ratio:1/1;display:block;margin:0 auto;touch-action:none;cursor:crosshair;user-select:none}
+.gt-lat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.gt-lat-cab h5{margin:0}
+.gt-ojo{padding:7px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);font:600 12.5px/1 var(--sans);cursor:pointer}
+.gt-ojo[aria-pressed=true]{background:#0D1226;color:#fff;border-color:#0D1226}
+.gt-info{margin:0;padding:12px 14px;border-radius:12px;border-left:4px solid var(--c,var(--line));background:color-mix(in srgb,var(--c,#888) 9%,var(--bg));font-size:14px;min-height:4.6em}
+.gt-info b{display:block;color:var(--ink);margin-bottom:2px}
+.gt-info.vacio{color:var(--muted)}
+.gt-leyenda{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--ink-2)}
+.gt-leyenda span{display:inline-flex;align-items:center;gap:5px}
+.gt-leyenda i{width:16px;height:0;border-top:2px dashed var(--pc)}
+.gt-q.flash{animation:gtFlash .9s}
+@keyframes gtFlash{0%{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
 .gt-resp{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:13px}
 .gt-resp li{display:grid;grid-template-columns:20px 1fr auto;gap:6px;color:var(--ink-2)}
 .gt-resp li i{font:600 12px/1.6 var(--mono);color:var(--muted);font-style:normal}
@@ -883,7 +907,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .gt-res-fila .chips span{padding:4px 10px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 14%,transparent);color:var(--ink);font:500 13px/1.2 var(--sans)}
 .gt-res-fila button{justify-self:start;margin-top:2px;padding:0;border:0;background:none;color:var(--ink-2);text-decoration:underline;font:500 12.5px var(--sans);cursor:pointer}
 .gt-acc{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
-@media (max-width:860px){.gt-cuerpo{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);overflow:auto}.gt-lat{order:-1;border-left:0;border-bottom:1px solid var(--line);max-height:42vh}.gt-lat svg{max-width:210px}.gt-preg{overflow:visible}.gt-cab{flex-wrap:wrap;gap:8px}.gt-prog{order:3;flex-basis:100%;max-width:none}.gt-res-fila{grid-template-columns:1fr}}
+@media (max-width:860px){.gt-cuerpo{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);overflow:auto}.gt-lat{order:-1;border-left:0;border-bottom:1px solid var(--line);max-height:46vh;padding-top:12px;gap:10px}.gt-lat #gt-svg{max-width:min(300px,32vh)}.gt-info{min-height:0;font-size:13px}.gt-pie{flex-wrap:wrap;row-gap:8px}.gt-pie #gt-aviso{order:-1;flex-basis:100%;font-size:12.5px}.gt-preg{overflow:visible}.gt-cab{flex-wrap:wrap;gap:8px}.gt-prog{order:3;flex-basis:100%;max-width:none}.gt-res-fila{grid-template-columns:1fr}}
 .geo-ideal-mas{display:inline-block;margin:6px 0 2px;color:#8A5A00;font:600 13.5px/1.35 var(--sans);text-decoration:underline;text-underline-offset:3px;pointer-events:auto}
 .geo-ideal-mas:hover{color:var(--ink)}
 .geo-link{appearance:none;border:0;background:none;padding:0;color:var(--ink);font:600 14px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
@@ -4454,33 +4478,57 @@ const ILUS = {
   const gtEl = $("#gt"), gtPreg = $("#gt-preg"), gtLat = $("#gt-lat"), gtSig = $("#gt-sig"), gtAtras = $("#gt-atras"), gtAviso = $("#gt-aviso");
   const TOTAL_ASP = KEYS.reduce((a, k) => a + TEMAS[k].ejes.length, 0);
   // gt.r[tema][i] es el nivel contestado, o null si ese aspecto aún no se ha contestado; gt.paso es el tema (0..) o KEYS.length en el resultado
-  let gt = { r: {}, paso: 0 };
+  let gt = { r: {}, paso: 0, ver: false };
   try { const x = JSON.parse(localStorage.getItem(LS_TEST) || "null"); if (x && typeof x === "object" && x.r) gt = x; } catch (e) { /* sin almacenamiento */ }
   KEYS.forEach((k) => { const n = TEMAS[k].ejes.length, r = gt.r[k]; if (!Array.isArray(r) || r.length !== n || r.some((x) => x !== null && !(Number.isInteger(x) && x >= 0 && x <= NMAX))) gt.r[k] = Array(n).fill(null); });
   if (!Number.isInteger(gt.paso) || gt.paso < 0 || gt.paso > KEYS.length) gt.paso = 0;
+  gt.ver = gt.ver === true;
   const gtGuardar = () => { try { localStorage.setItem(LS_TEST, JSON.stringify(gt)); } catch (e) { /* sin almacenamiento */ } };
   const gtHechas = (k) => gt.r[k].filter((x) => x !== null).length;
   const gtCompleto = (k) => gtHechas(k) === gt.r[k].length;
   const gtTodas = () => KEYS.reduce((a, k) => a + gtHechas(k), 0);
   const gtPct = () => Math.round((gtTodas() / TOTAL_ASP) * 100);
   const colorEn = (t, k) => (k === NMAX ? ORO : k === 0 ? ROJO : t.c);
-  // Parecido solo con los aspectos contestados: así el panel de la derecha se mueve desde la primera respuesta
-  function parecidoParcial(r, v) {
-    const idx = r.map((x, i) => (x === null ? -1 : i)).filter((i) => i >= 0);
-    if (!idx.length) return null;
-    return Math.round(100 - (idx.reduce((d, i) => d + Math.abs(r[i] - v[i]), 0) / idx.length) * 25);
-  }
-  const topPartidos = (k, n = 3) => PARTIDOS.map((p) => [p, parecidoParcial(gt.r[k], TEMAS[k].v[p.k])]).filter((x) => x[1] !== null).sort((a, b) => b[1] - a[1]).slice(0, n);
-  // La figura pequeña de la derecha: los cinco anillos y tus puntos; lo no contestado se queda en el centro
+  // Lo que no se ha contestado cuenta como «Indefinido» (nivel 0): se puede pasar de tema sin terminarlo
+  const figuraTest = (k) => gt.r[k].map((x) => (x === null ? 0 : x));
+  const topPartidos = (k, n = 3) => { const f = figuraTest(k); return PARTIDOS.map((p) => [p, parecido(f, TEMAS[k].v[p.k])]).sort((a, b) => b[1] - a[1]).slice(0, n); };
+  const gtSincronizar = (k) => { if (gtHechas(k)) { tu[k] = figuraTest(k); guardarTu(); } };
+  // La figura de la derecha: se puede dibujar en ella (pulsar o arrastrar) y al pasar por un punto enseña su medida
+  const GR = { C: 210, R: 160 };
+  const gtXY = (n, i, nv) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / n, d = (GR.R * (nv + 1)) / 5; return [GR.C + d * Math.cos(a), GR.C + d * Math.sin(a)]; };
+  const gtPts = (n, f) => f.map((v, i) => gtXY(n, i, v).map((q) => q.toFixed(1)).join(",")).join(" ");
   function radarTest(k) {
-    const t = TEMAS[k], n = t.ejes.length, C = 130, Rr = 100, r = gt.r[k];
-    const xy = (i, nv) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / n, d = (Rr * (nv + 1)) / 5; return [C + d * Math.cos(a), C + d * Math.sin(a)]; };
-    let o = `<svg viewBox="0 0 260 260" role="img" aria-label="Tu figura en ${t.n}">`;
-    for (let nv = 0; nv < 5; nv++) o += `<circle cx="${C}" cy="${C}" r="${(Rr * (nv + 1)) / 5}" fill="none" stroke="${nv === 4 ? ORO : nv === 0 ? ROJO : t.c}" stroke-opacity="${nv === 4 ? ".7" : ".3"}" stroke-width="1.2"/>`;
-    for (let i = 0; i < n; i++) { const [x, y] = xy(i, 4); o += `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#9aa3b5" stroke-opacity=".5"/>`; }
-    o += `<polygon points="${r.map((v, i) => xy(i, v === null ? 0 : v).map((q) => q.toFixed(1)).join(",")).join(" ")}" fill="${t.c}" fill-opacity=".22" stroke="${t.c}" stroke-width="2.4" stroke-linejoin="round"/>`;
-    r.forEach((v, i) => { const [x, y] = xy(i, v === null ? 0 : v), [lx, ly] = xy(i, 4.75); o += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${v === null ? 3 : 5}" fill="${v === null ? "#fff" : colorEn(t, v)}" stroke="${t.c}" stroke-width="1.6"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="#5b6478">${i + 1}</text>`; });
+    const t = TEMAS[k], n = t.ejes.length;
+    let o = `<svg id="gt-svg" viewBox="0 0 420 420" role="img" aria-label="Tu figura en ${t.n}. Pulsa o arrastra sobre un radio para elegir el nivel.">`;
+    for (let nv = 0; nv < 5; nv++) o += `<circle cx="${GR.C}" cy="${GR.C}" r="${(GR.R * (nv + 1)) / 5}" fill="${nv === 0 ? "rgba(229,72,77,.05)" : "none"}" stroke="${nv === 4 ? ORO : nv === 0 ? ROJO : t.c}" stroke-opacity="${nv === 4 ? ".8" : ".3"}" stroke-width="${nv === 4 ? 2 : 1.2}"/>`;
+    for (let i = 0; i < n; i++) { const [x, y] = gtXY(n, i, 4); o += `<line x1="${GR.C}" y1="${GR.C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#9aa3b5" stroke-opacity=".5"/>`; for (let nv = 0; nv < 5; nv++) { const [px, py] = gtXY(n, i, nv); o += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="2.5" fill="#9aa3b5" opacity=".55"/>`; } }
+    if (gt.ver) PARTIDOS.forEach((p) => { o += `<polygon points="${gtPts(n, t.v[p.k])}" fill="none" stroke="${p.c}" stroke-width="1.8" stroke-opacity=".8" stroke-dasharray="6 4" stroke-linejoin="round"><title>${p.n}</title></polygon>`; });
+    o += `<polygon id="gt-poly" fill="${t.c}" fill-opacity=".22" stroke="${t.c}" stroke-width="3" stroke-linejoin="round"/><circle id="gt-fantasma" r="12" fill="none" stroke-width="2.5" opacity="0"/>`;
+    for (let i = 0; i < n; i++) { const [lx, ly] = gtXY(n, i, 4.7); o += `<circle data-gt-dot="${i}" stroke="${t.c}" stroke-width="2"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="#5b6478">${i + 1}</text>`; }
     return o + "</svg>";
+  }
+  function gtRadarAct(k) {
+    const svg = $("#gt-svg"); if (!svg) return;
+    const t = TEMAS[k], r = gt.r[k], n = r.length;
+    svg.querySelector("#gt-poly").setAttribute("points", gtPts(n, figuraTest(k)));
+    r.forEach((v, i) => { const c = svg.querySelector(`[data-gt-dot="${i}"]`), [x, y] = gtXY(n, i, v === null ? 0 : v);
+      c.setAttribute("cx", x.toFixed(1)); c.setAttribute("cy", y.toFixed(1)); c.setAttribute("r", v === null ? 5 : 8); c.setAttribute("fill", v === null ? "#fff" : colorEn(t, v)); });
+  }
+  // Del puntero al aspecto (el radio más cercano) y al nivel (el anillo más cercano)
+  function gtPunto(e) {
+    const svg = $("#gt-svg"), m = svg && svg.getScreenCTM(); if (!m) return null;
+    const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse()), dx = q.x - GR.C, dy = q.y - GR.C, d = Math.hypot(dx, dy);
+    if (d > GR.R * 1.18) return null;
+    const n = TEMAS[KEYS[gt.paso]].ejes.length, ang = Math.atan2(dy, dx) + Math.PI / 2;
+    return [((Math.round(ang / ((2 * Math.PI) / n)) % n) + n) % n, Math.max(0, Math.min(NMAX, Math.round(d / (GR.R / 5) - 1)))];
+  }
+  const GT_PISTA = "Pasa por encima de un punto para ver su medida. Pulsa o arrastra para dibujar tu figura.";
+  function gtInfo(p) {
+    const box = $("#gt-info"), fan = $("#gt-fantasma"); if (!box) return;
+    if (!p) { box.className = "gt-info vacio"; box.style.removeProperty("--c"); box.textContent = GT_PISTA; fan.setAttribute("opacity", "0"); return; }
+    const k = KEYS[gt.paso], t = TEMAS[k], [i, v] = p, e = t.ejes[i], [x, y] = gtXY(t.ejes.length, i, v), c = colorEn(t, v);
+    box.className = "gt-info"; box.style.setProperty("--c", c); box.innerHTML = `<b>${i + 1}. ${e.n} · ${NIV_TITULO[v]}</b>${e.niv[v]}`;
+    fan.setAttribute("cx", x.toFixed(1)); fan.setAttribute("cy", y.toFixed(1)); fan.setAttribute("stroke", c); fan.setAttribute("opacity", "1");
   }
   function gtCabecera() {
     const pct = gtPct();
@@ -4489,28 +4537,38 @@ const ILUS = {
   }
   function gtLateral() {
     if (gt.paso >= KEYS.length) { gtLat.innerHTML = `<h5>Tus diez temas</h5>${gtListaTemas()}`; return; }
-    const k = KEYS[gt.paso], t = TEMAS[k], r = gt.r[k], top = topPartidos(k);
-    gtLat.innerHTML = `<div><h5>Tu geometría en ${t.n}</h5>${radarTest(k)}</div>`
-      + `<ul class="gt-resp">${t.ejes.map((e, i) => `<li><i>${i + 1}</i><span>${e.n}</span><span>${r[i] === null ? "—" : NIVEL_CORTO[r[i]]}</span></li>`).join("")}</ul>`
-      + `<div class="gt-top"><h5>De momento te pareces más a</h5>${top.length ? top.map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${x}%;background:${p.c}"></i></span><b>${x}%</b></div>`).join("") : `<p class="tiny">Contesta el primer aspecto y aquí aparecerán.</p>`}</div>`
+    const k = KEYS[gt.paso], t = TEMAS[k];
+    gtLat.innerHTML = `<div class="gt-lat-cab"><h5>Tu geometría en ${t.n}</h5><button type="button" class="gt-ojo" data-gt-partidos aria-pressed="${gt.ver}">${gt.ver ? "Ocultar partidos" : "Mostrar partidos"}</button></div>`
+      + `<div class="gt-fig">${radarTest(k)}</div>`
+      + (gt.ver ? `<div class="gt-leyenda">${PARTIDOS.map((p) => `<span style="--pc:${p.c}"><i></i>${p.n}</span>`).join("")}</div>` : "")
+      + `<p class="gt-info vacio" id="gt-info">${GT_PISTA}</p><div id="gt-lat-resto" style="display:grid;gap:14px"></div>`;
+    gtRadarAct(k); gtLatResto();
+  }
+  function gtLatResto() {
+    const k = KEYS[gt.paso], t = TEMAS[k], r = gt.r[k], caja = $("#gt-lat-resto"); if (!caja) return;
+    caja.innerHTML = `<ul class="gt-resp">${t.ejes.map((e, i) => `<li><i>${i + 1}</i><span>${e.n}</span><span>${r[i] === null ? "<em>Indefinido</em>" : NIVEL_CORTO[r[i]]}</span></li>`).join("")}</ul>`
+      + (gt.ver ? `<div class="gt-top"><h5>De momento te pareces más a</h5>${topPartidos(k).map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${x}%;background:${p.c}"></i></span><b>${x}%</b></div>`).join("")}</div>` : "")
       + `<div><h5>Tus temas</h5>${gtListaTemas()}</div>`;
   }
   function gtListaTemas() {
-    return `<div class="gt-temas">${KEYS.map((k, j) => { const ok = gtCompleto(k), n = gtHechas(k), alcanzable = ok || j <= gt.paso || KEYS.slice(0, j).every(gtCompleto);
-      return `<button type="button" data-gt-ir="${j}" class="${j === gt.paso ? "act" : ""}" ${alcanzable ? "" : "disabled"}><span class="ok">${ok ? "✓" : ""}</span><span>${TEMAS[k].n}</span><span>${n}/${TEMAS[k].ejes.length}</span></button>`; }).join("")}</div>`;
+    return `<div class="gt-temas">${KEYS.map((k, j) => { const ok = gtCompleto(k), n = gtHechas(k);
+      return `<button type="button" data-gt-ir="${j}" class="${j === gt.paso ? "act" : ""}" ><span class="ok">${ok ? "✓" : ""}</span><span>${TEMAS[k].n}</span><span>${n}/${TEMAS[k].ejes.length}</span></button>`; }).join("")}</div>`;
   }
+  const gtTexto = (t, e, v) => (v === null
+    ? `<p class="gt-txt vacio">Sin contestar: si pasas de tema, cuenta como «Indefinido». Desliza o pulsa un nivel para ver la medida.</p>`
+    : `<p class="gt-txt"><b>${NIV_TITULO[v]}</b>${e.niv[v]}</p>`);
   function gtPregunta(k, i) {
-    const t = TEMAS[k], e = t.ejes[i], v = gt.r[k][i], hecha = v !== null, val = hecha ? v : (valida2(k) ? tu[k][i] : 2);
-    const txt = hecha ? `<p class="gt-txt" style="--c:${colorEn(t, v)}"><b>${NIV_TITULO[v]}</b>${e.niv[v]}</p>` : `<p class="gt-txt vacio">Mueve el deslizador o pulsa un nivel: aquí te explico qué significa en este aspecto.</p>`;
-    return `<article class="gt-q${hecha ? " hecha" : ""}" style="--tc:${t.c}" data-gt-q="${i}"><h4>${i + 1}. ${e.n}<small>${e.d}</small></h4>`
-      + `<input type="range" min="0" max="${NMAX}" step="1" value="${val}" data-gt-r="${i}" aria-label="${e.n}: nivel" aria-valuetext="${hecha ? NIVEL_CORTO[v] : "sin contestar"}">`
-      + `<div class="gt-niv" role="group" aria-label="Niveles de ${e.n}">${NIVEL_CORTO.map((nm, j) => `<button type="button" data-gt-n="${i}:${j}" class="${hecha && v === j ? "on" : ""}" style="--c:${colorEn(t, j)}" aria-pressed="${hecha && v === j}">${nm}</button>`).join("")}</div>${txt}</article>`;
+    const t = TEMAS[k], e = t.ejes[i], v = gt.r[k][i], hecha = v !== null, val = hecha ? v : 0;
+    return `<article class="gt-q${hecha ? " hecha" : ""}" style="--tc:${t.c};--c:${colorEn(t, val)}" data-gt-q="${i}"><h4><span class="gt-num">${i + 1}</span>${e.n}</h4>`
+      + `<div class="gt-esc" style="--v:${val}"><div class="gt-pista"><span class="gt-marcas" aria-hidden="true">${NIVEL_CORTO.map((_, j) => `<i style="--m:${colorEn(t, j)}"></i>`).join("")}</span>`
+      + `<input type="range" min="0" max="${NMAX}" step="1" value="${val}" data-gt-r="${i}" aria-label="${e.n}: nivel" aria-valuetext="${hecha ? NIVEL_CORTO[v] : "sin contestar"}"></div>`
+      + `<div class="gt-niv" role="group" aria-label="Niveles de ${e.n}">${NIVEL_CORTO.map((nm, j) => `<button type="button" data-gt-n="${i}:${j}" class="${hecha && v === j ? "on" : ""}" style="--m:${colorEn(t, j)}" aria-pressed="${hecha && v === j}">${nm}</button>`).join("")}</div></div>`
+      + gtTexto(t, e, v) + `</article>`;
   }
-  const valida2 = (k) => Array.isArray(tu[k]) && tu[k].length === TEMAS[k].ejes.length && tu[k].every((x) => Number.isInteger(x) && x >= 0 && x <= NMAX);
   function gtResultado() {
-    const hechos = KEYS.filter(gtCompleto);
-    const media = PARTIDOS.map((p) => [p, Math.round(hechos.reduce((a, k) => a + parecidoParcial(gt.r[k], TEMAS[k].v[p.k]), 0) / (hechos.length || 1))]).sort((a, b) => b[1] - a[1]).slice(0, 3);
-    return `<h3>Tu geometría política</h3><p class="gt-intro">Has contestado ${gtTodas()} de ${TOTAL_ASP} aspectos. Debajo, en cada tema, los tres partidos cuya figura se parece más a la tuya según la valoración de esta página. No es una recomendación de voto: mide cuánto se separan las dos figuras, radio a radio.</p>`
+    const media = PARTIDOS.map((p) => [p, Math.round(KEYS.reduce((a, k) => a + parecido(figuraTest(k), TEMAS[k].v[p.k]), 0) / KEYS.length)]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const faltan = TOTAL_ASP - gtTodas();
+    return `<h3>Tu geometría política</h3><p class="gt-intro">Has contestado ${gtTodas()} de ${TOTAL_ASP} aspectos${faltan ? `; los ${faltan} sin contestar cuentan como «Indefinido»` : ""}. Debajo, en cada tema, los tres partidos cuya figura se parece más a la tuya según la valoración de esta página. No es una recomendación de voto: mide cuánto se separan las dos figuras, radio a radio.</p>`
       + `<div class="gt-res"><div class="gt-res-fila" style="background:transparent"><b>En conjunto</b><div class="chips">${media.map(([p, x]) => `<span style="--pc:${p.c}">${p.n} · ${x}%</span>`).join("")}</div></div>`
       + KEYS.map((k) => `<div class="gt-res-fila"><div><b>${TEMAS[k].n}</b><br><button type="button" data-gt-ver="${k}">Ver mi figura sobre los partidos</button></div><div class="chips">${topPartidos(k).map(([p, x]) => `<span style="--pc:${p.c}">${p.n} · ${x}%</span>`).join("")}</div></div>`).join("")
       + `</div><div class="gt-acc"><button class="gt-btn" type="button" data-gt-repetir>Repetir el test</button><button class="gt-btn" type="button" data-gt-cerrar>Cerrar</button></div>`;
@@ -4522,26 +4580,27 @@ const ILUS = {
     } else {
       const k = KEYS[gt.paso], t = TEMAS[k], ok = gtCompleto(k), ultimo = gt.paso === KEYS.length - 1;
       gtPreg.innerHTML = `<h3 style="color:${t.c}">${t.n}</h3><p class="gt-intro">Para cada aspecto elige hasta dónde llegarías tú. Cada nivel incluye al anterior; «Indefinido» es quedarse por debajo de lo básico.</p>` + t.ejes.map((e, i) => gtPregunta(k, i)).join("");
-      gtSig.hidden = false; gtSig.disabled = !ok; gtSig.textContent = ultimo ? "Ver mi resultado →" : "Siguiente tema →";
+      gtSig.hidden = false; gtSig.disabled = false; gtSig.textContent = ultimo ? "Ver mi resultado →" : "Siguiente tema →";
       gtAtras.disabled = gt.paso === 0; gtAtras.textContent = "← Tema anterior";
-      gtAviso.textContent = ok ? "Tema completo." : `Te faltan ${t.ejes.length - gtHechas(k)} de ${t.ejes.length} para pasar al siguiente tema.`;
+      gtAviso.textContent = ok ? "Tema completo." : `Llevas ${gtHechas(k)} de ${t.ejes.length}. Puedes seguir: lo que no contestes contará como «Indefinido».`;
     }
     if (conFoco) { gtPreg.scrollTop = 0; gtEl.scrollTop = 0; }
   }
-  function gtResponder(i, v) {
-    const k = KEYS[gt.paso]; if (!TEMAS[k]) return;
+  function gtResponder(i, v, desdeFigura) {
+    const k = KEYS[gt.paso]; if (!TEMAS[k] || gt.r[k][i] === v) return;
     gt.r[k][i] = v;
-    if (!valida2(k)) tu[k] = TEMAS[k].ejes.map(() => 2);
-    tu[k][i] = v; guardarTu(); gtGuardar();
+    gtSincronizar(k); gtGuardar();
     // Se repinta solo lo que cambia, para no soltar el deslizador que se está arrastrando
     const art = gtPreg.querySelector(`[data-gt-q="${i}"]`), t = TEMAS[k];
-    art.classList.add("hecha");
-    art.querySelector("input").setAttribute("aria-valuetext", NIVEL_CORTO[v]);
+    art.classList.add("hecha"); art.style.setProperty("--c", colorEn(t, v));
+    art.querySelector(".gt-esc").style.setProperty("--v", v);
+    const inp = art.querySelector("input"); if (+inp.value !== v) inp.value = v; inp.setAttribute("aria-valuetext", NIVEL_CORTO[v]);
     $$("[data-gt-n]", art).forEach((b) => { const on = +b.dataset.gtN.split(":")[1] === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
-    art.querySelector(".gt-txt").outerHTML = `<p class="gt-txt" style="--c:${colorEn(t, v)}"><b>${NIV_TITULO[v]}</b>${t.ejes[i].niv[v]}</p>`;
-    const ok = gtCompleto(k); gtSig.disabled = !ok;
-    gtAviso.textContent = ok ? "Tema completo." : `Te faltan ${t.ejes.length - gtHechas(k)} de ${t.ejes.length} para pasar al siguiente tema.`;
-    gtCabecera(); gtLateral();
+    art.querySelector(".gt-txt").outerHTML = gtTexto(t, t.ejes[i], v);
+    if (desdeFigura) { if (getComputedStyle(gtPreg).overflowY === "auto") art.scrollIntoView({ block: "nearest", behavior: "smooth" }); art.classList.remove("flash"); void art.offsetWidth; art.classList.add("flash"); }
+    const ok = gtCompleto(k);
+    gtAviso.textContent = ok ? "Tema completo." : `Llevas ${gtHechas(k)} de ${t.ejes.length}. Puedes seguir: lo que no contestes contará como «Indefinido».`;
+    gtCabecera(); gtRadarAct(k); gtLatResto();
   }
   let gtFocoAntes = null;
   function abrirTest() {
@@ -4562,6 +4621,7 @@ const ILUS = {
   }
   gtEl.addEventListener("click", (e) => {
     if (e.target.closest("[data-gt-cerrar]")) return cerrarTest();
+    if (e.target.closest("[data-gt-partidos]")) { gt.ver = !gt.ver; gtGuardar(); return gtLateral(); }
     const n = e.target.closest("[data-gt-n]"); if (n) { const [i, v] = n.dataset.gtN.split(":").map(Number); return gtResponder(i, v); }
     const ir = e.target.closest("[data-gt-ir]"); if (ir && !ir.disabled) { gt.paso = +ir.dataset.gtIr; gtGuardar(); return gtPintar(true); }
     const ver = e.target.closest("[data-gt-ver]");
@@ -4571,8 +4631,23 @@ const ILUS = {
       KEYS.forEach((k) => { gt.r[k] = Array(TEMAS[k].ejes.length).fill(null); delete tu[k]; }); gt.paso = 0; guardarTu(); gtGuardar(); gtPintar(true); etiquetaTest();
     }
   });
+  let gtArrastre = false;
+  gtLat.addEventListener("pointerdown", (e) => {
+    if (!e.target.closest("#gt-svg")) return;
+    const p = gtPunto(e); if (!p) return;
+    e.preventDefault(); gtArrastre = true; try { $("#gt-svg").setPointerCapture(e.pointerId); } catch (x) { /* sin captura */ }
+    gtResponder(p[0], p[1], true); gtInfo(p);
+  });
+  gtLat.addEventListener("pointermove", (e) => {
+    if (!e.target.closest("#gt-svg")) return;
+    const p = gtPunto(e); gtInfo(p);
+    if (gtArrastre && p) gtResponder(p[0], p[1], true);
+  });
+  const gtSoltar = () => { gtArrastre = false; };
+  gtLat.addEventListener("pointerup", gtSoltar); gtLat.addEventListener("pointercancel", gtSoltar);
+  gtLat.addEventListener("pointerleave", () => { if (!gtArrastre) gtInfo(null); });
   gtEl.addEventListener("input", (e) => { const r = e.target.closest("[data-gt-r]"); if (r) gtResponder(+r.dataset.gtR, +r.value); });
-  gtSig.addEventListener("click", () => { if (gtSig.disabled) return; gt.paso = Math.min(KEYS.length, gt.paso + 1); gtGuardar(); gtPintar(true); });
+  gtSig.addEventListener("click", () => { if (gt.paso < KEYS.length) gtSincronizar(KEYS[gt.paso]); gt.paso = Math.min(KEYS.length, gt.paso + 1); gtGuardar(); gtPintar(true); });
   gtAtras.addEventListener("click", () => { gt.paso = gt.paso >= KEYS.length ? KEYS.length - 1 : Math.max(0, gt.paso - 1); gtGuardar(); gtPintar(true); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !gtEl.hidden) { e.preventDefault(); cerrarTest(); } });
   etiquetaTest();

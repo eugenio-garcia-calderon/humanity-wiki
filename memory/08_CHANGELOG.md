@@ -13341,3 +13341,13 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - **Project tab**: Spain's figures with sources (MAPA AgrInfo 36, ESYRCE 2023, anuario 2019, mesa de frutos secos 2024), today's model vs syntropic, water retention, how the trial will measure, team (agronomists, foresters, Vicente Cano, Vanessa Aguilar, Lucho Iglesias).
 - Checked: `tsc` clean, build passes; the four designs × four key species run through the model (≈100 ms per hectare); conventional almond calibrates to ≈2.5 kg/tree, ≈490 kg/ha (MAPA 2019: 438 kg/ha rainfed); Playwright screenshots of every view at 1440×900 and 390 px with no JavaScript errors; migration 0241 run twice on a scratch database with the columns it touches (second run does nothing) and once on one without the table.
 - **Not verified**: luzhumanidad.com itself (the proxy blocks it) and the installed app; touch dragging in the module editor on a phone; the species values are references to be reviewed by the team, and the page says so.
+
+## 2026-11-25 — Geometría test: draw on the figure, aligned scale, skip topics, parties toggle
+
+> «Que aparezca solo el título y debajo la medida… que indefinido, básico… esté alineado con el slider… permite pasar de un tema a otro sin completar… la geometría de la derecha tendría que ocupar la mitad de la pantalla… dibujar tu geometría… mostrar/ocultar información de los partidos.»
+
+- Question cards: only the title, no description line (it read as a measure). New scale: custom slider whose five stops sit in the centre of five equal columns, the level labels in the same columns (offset measured: 0 px at 1440 and 390 px wide); fill and thumb take the level colour; unanswered thumb is dashed.
+- Topics can be left unfinished: «Siguiente tema» is always enabled; unanswered aspects count as level 0 («Indefinido») in the figure, the comparisons and the final result. The % still counts only real answers.
+- The figure takes half the screen (top of the dialog on mobile). Click or drag on it to set levels (nearest spoke, nearest ring); hovering a point shows that level's measure; the matching card is highlighted (and scrolled to on desktop).
+- «Mostrar/Ocultar partidos» (hidden by default, saved in `politica.geo.test.v1.ver`): dashed party polygons + legend, and the live «de momento te pareces más a». Hidden, the test is answered without party references; the final screen always shows the top 3.
+- Not verified: real touch devices, installed app / service worker.
