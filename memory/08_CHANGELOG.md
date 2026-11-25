@@ -13360,3 +13360,8 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Run once per topic (10 in parallel): `scripts/medidas/datos/<tema>.json`, 1,265 measures. Grades: 6/10 in eight topics, 7/10 in Inmigración and Vivienda. Each file keeps its `evaluacion` (6–9 problems each).
 - `scripts/geometria-medidas.mjs --verificar|--aplicar` validates (lengths, counts, banned labels and party names, figures need meta/fuente, no repeated names) and builds `public/geometria-figura/medidas.json` (278 KB, loaded after the page).
 - The page shows summary + bullets in the test cards, the level side panel, and (names only) when hovering the test figure. Without the file it falls back to the short level text.
+
+### 2026-11-25 — luzhumanidad.com: sector «Innovación en Agricultura»
+- Eugenio: «añade innovación en Agricultura… y añade ahí el proyecto de agricultura sintrópica, que ahora está en informática».
+- Migración `0242_sector_agricultura_luz.sql`: nuevo sector en `sitio.sectores` de `KWMUO4S4V663` (áreas Alimentación, Agricultura, Agroecología; a todo el ancho), entre Vivienda y Cultura. El proyecto tenía el área «Alimentación», que ningún sector recogía.
+- `VistaProyectosSitio`: color lima para el icono «Agricultura».
