@@ -41,6 +41,12 @@
       "ruta": "src/server/figuras.ts",
       "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
       "desde": "2026-11-25T12:01:00.925Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/politica/VisualesHerramientas.tsx",
+      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
+      "desde": "2026-11-25T12:01:03.587Z"
     }
   ]
 }
