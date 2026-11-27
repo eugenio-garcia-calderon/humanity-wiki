@@ -7,7 +7,7 @@
 // one bold figure. Every picture is 320×128 (the card header is 360×144).
 //
 //   · Crowd: many small loans converge on one solar roof, the bar is full, the money
-//     comes back with a modest interest (0 % to 2.5 % a year, the range of the next loan).
+//     comes back with interest (no rate on the card: it changes from one loan to the next).
 //   · humanity.wiki: the knowledge graph of the twelve sectors of /vision around a
 //     territory, and the four steps every sector is organised in.
 //   · Conciencia: Grinberg's lattice drawn as a grid that two neuronal fields bend.

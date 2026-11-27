@@ -6,7 +6,7 @@
 // area's colour behind a thin, round-capped line drawing, plus one soft second tone.
 // viewBox 0 0 32 32. Colours are literal Tailwind classes so the build keeps them.
 
-type Area = 'energia' | 'movilidad' | 'vivienda' | 'politica' | 'economia' | 'agricultura' | 'informatica' | 'conciencia';
+type Area = 'energia' | 'movilidad' | 'vivienda' | 'politica' | 'economia' | 'agricultura' | 'informatica' | 'conciencia' | 'salud';
 
 const TONO: Record<Area | 'otra', { disco: string; trazo: string; suave: string }> = {
   energia: { disco: 'fill-amber-100', trazo: 'stroke-amber-600', suave: 'fill-amber-300' },
@@ -17,6 +17,7 @@ const TONO: Record<Area | 'otra', { disco: string; trazo: string; suave: string 
   agricultura: { disco: 'fill-lime-100', trazo: 'stroke-lime-700', suave: 'fill-lime-300' },
   informatica: { disco: 'fill-cyan-100', trazo: 'stroke-cyan-600', suave: 'fill-cyan-300' },
   conciencia: { disco: 'fill-violet-100', trazo: 'stroke-violet-500', suave: 'fill-violet-300' },
+  salud: { disco: 'fill-red-100', trazo: 'stroke-red-500', suave: 'fill-red-300' },
   otra: { disco: 'fill-slate-100', trazo: 'stroke-slate-500', suave: 'fill-slate-300' },
 };
 
@@ -36,6 +37,14 @@ function Dibujo({ area }: { area: string }) {
           <path d="M21,4.5v1.3M26.5,10h-1.3M24.9,6.1l-.9.9M17.1,6.1l.9.9M24.9,13.9l-.9-.9" />
           <path d="M8,16h11l3,8H5z" />
           <path d="M6.5,20h14M11.5,16l-1.4,8M15.5,16l1.4,8M13.5,24v3.5M10,27.5h7" />
+        </g>
+      </>}
+      {area === 'salud' && <>
+        {/* Corazón con el trazo del pulso */}
+        <path d="M16,25.5C10,21 6.5,17.5 6.5,13.2A4.7,4.7 0 0 1 16,10.8A4.7,4.7 0 0 1 25.5,13.2C25.5,17.5 22,21 16,25.5z" className={t.suave} opacity={0.45} />
+        <g {...s}>
+          <path d="M16,25.5C10,21 6.5,17.5 6.5,13.2A4.7,4.7 0 0 1 16,10.8A4.7,4.7 0 0 1 25.5,13.2C25.5,17.5 22,21 16,25.5z" />
+          <path d="M9,17h3.5l1.6-3.2 2.4,6 1.8-4.3 1.1,1.5H23" />
         </g>
       </>}
       {area === 'movilidad' && <>

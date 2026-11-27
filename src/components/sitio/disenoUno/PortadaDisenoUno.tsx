@@ -32,6 +32,8 @@ const sinInnovacion = (t: string) => t.replace(/^Innovaci[oó]n en (?:el sector 
 
 /** How many cards an area shows before «Ver más herramientas». */
 const PRIMERAS = 3;
+/** Up to how many tools an area shares its row with other small areas. */
+const PEQUENA = 2;
 
 export default function PortadaDisenoUno({ grupos, beneficiarias, destino, principios, nombreFila }: {
   grupos: GrupoPortada[];
@@ -48,11 +50,22 @@ export default function PortadaDisenoUno({ grupos, beneficiarias, destino, princ
     const nombre = info?.nombre || sinInnovacion(g.titulo);
     return { id: `area-${plano(nombre)}`, area, nombre, corto: info?.corto || nombre, lema: info?.lema || '', filas };
   });
+  // Eugenio, 2026-11-27: «las secciones de innovación que solo tengan un proyecto colócalas al lado de otras que
+  // también tengan 1 o 2, para que la web no sea tan alargada». Areas with three or more tools keep their full
+  // row, in the order of `sitio.sectores`; the small ones follow, side by side, each as wide as its cards. The
+  // menu follows the same order as the page, so it never jumps backwards.
+  const grandes = secciones.filter(s => s.filas.length > PEQUENA);
+  const pequenas = secciones.filter(s => s.filas.length <= PEQUENA);
 
   return (
     <div data-diseno="1" className="pb-10">
-      <MenuAreas secciones={secciones} />
-      {secciones.map(s => <SeccionArea key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
+      <MenuAreas secciones={[...grandes, ...pequenas]} />
+      {grandes.map(s => <SeccionArea key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
+      {!!pequenas.length && (
+        <div className="grid grid-cols-1 gap-x-4 [grid-auto-flow:dense] sm:grid-cols-2 lg:grid-cols-3">
+          {pequenas.map(s => <SeccionPequena key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
+        </div>
+      )}
       <PrincipiosSitio cfg={principios} />
       {!!beneficiarias?.length && <Beneficiarias grupos={beneficiarias} destino={destino} nombreFila={nombreFila} />}
     </div>
@@ -165,6 +178,25 @@ function SeccionArea({ id, area, nombre, lema, filas, destino, nombreFila }: {
           <ChevronDown aria-hidden className={cn('h-4 w-4 transition-transform', todas && 'rotate-180')} />
         </button>
       )}
+    </section>
+  );
+}
+
+/** A small area (one or two tools): its title and its cards in one or two of the three columns. */
+function SeccionPequena({ id, area, nombre, lema, filas, destino, nombreFila }: {
+  id: string; area: string; nombre: string; lema: string; filas: FilaPortada[];
+  destino: (f: FilaPortada) => Destino | null; nombreFila: (f: FilaPortada) => string;
+}) {
+  const doble = filas.length > 1;
+  return (
+    <section id={id} aria-labelledby={`${id}-t`} className={cn('flex min-w-0 flex-col pt-8 sm:pt-10', doble && 'sm:col-span-2')}>
+      <h2 id={`${id}-t`} className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[28px]">
+        <IconoArea area={area} className="hidden h-8 w-8 sm:block" />{nombre}
+      </h2>
+      {lema && <p className="mt-1 text-[15px] leading-snug text-slate-600 sm:line-clamp-2 sm:min-h-[2.6em]">{lema}</p>}
+      <ul className={cn('mt-4 grid list-none grid-cols-1 gap-4 p-0', doble && 'sm:grid-cols-2')}>
+        {filas.map(f => <li key={f.id}><Tarjeta f={f} area={area} destino={destino(f)} nombre={nombreFila(f)} /></li>)}
+      </ul>
     </section>
   );
 }

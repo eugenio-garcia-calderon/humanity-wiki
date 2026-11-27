@@ -312,7 +312,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
   // Economía teal since it has its own sector again (2026-11-27), so it does not look like Política.
-  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'teal', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime' };
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'teal', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime', Salud: 'red' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const agrupar = (todas: Fila[], beneficiarias = false) => {
     const usados = new Set<string>();
@@ -348,7 +348,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
               amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
               rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
-              teal: { borde: 'sm:border-t-teal-500', icono: 'text-teal-600' },
+              teal: { borde: 'sm:border-t-teal-500', icono: 'text-teal-600' }, red: { borde: 'sm:border-t-red-500', icono: 'text-red-600' },
               slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
             };
             let n = desdeN;
