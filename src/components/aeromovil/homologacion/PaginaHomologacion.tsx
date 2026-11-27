@@ -13,9 +13,18 @@ import type { CdConocido } from './ficha';
 import { useHomologacion } from './PanelHomologacion';
 import { PaginaEpac } from './epac/PaginaEpac';
 import { OtrasHomologaciones } from './OtrasHomologaciones';
+import { PaginaHomologacionAvion, PaginaHomologacionCoche } from './PaginasProyecto';
+import type { IdProyecto } from '../proyectos';
 
 /** `puedeDecidir`: the owner (or an admin) of the Aeromóvil: the only one who fills in the pedal cycle's file. */
-export function PaginaHomologacion({ P, modelo, res, cd, nombre, puedeDecidir }: { P: Parametros; modelo: Modelo; res: Resultados; cd: CdConocido | null; nombre: string; puedeDecidir: boolean }) {
+export function PaginaHomologacion({ proyecto = 'bici', ...p }: { proyecto?: IdProyecto; P: Parametros; modelo: Modelo; res: Resultados; cd: CdConocido | null; nombre: string; puedeDecidir: boolean }) {
+  // (2026-11-27) each project its own homologation: the bicycle's pedal cycle file (below), the car's L6e/L7e, the aircraft's
+  if (proyecto === 'coche') return <PaginaHomologacionCoche {...p} />;
+  if (proyecto === 'avion') return <PaginaHomologacionAvion res={p.res} nombre={p.nombre} />;
+  return <PaginaBici {...p} />;
+}
+
+function PaginaBici({ P, modelo, res, cd, nombre, puedeDecidir }: { P: Parametros; modelo: Modelo; res: Resultados; cd: CdConocido | null; nombre: string; puedeDecidir: boolean }) {
   const { ficha, auto } = useHomologacion(P, modelo, res, cd, nombre);
   const [otras, setOtras] = useState(false);
   const cerrar = useCallback(() => setOtras(false), []);

@@ -84,6 +84,7 @@ const C = {
 
 export const RAIZ = 'meta';
 import { ARBOL_BICI, RAIZ_BICI } from './arbolBici';
+import { ARBOL_AVION, RAIZ_AVION } from './arbolAvion';
 
 /**
  * (2026-11-24) More than one strategy: each is a tree of its own with its own root (`padre: null`). The first is the
@@ -92,6 +93,8 @@ import { ARBOL_BICI, RAIZ_BICI } from './arbolBici';
 export const ESTRATEGIAS: { raiz: string; nombre: string; resumen: string; abiertos: string[]; inicio: string }[] = [
   { raiz: RAIZ, nombre: 'Aeromóvil: de hoy a la fábrica', resumen: 'El camino de hoy a la fábrica, como un árbol de decisiones.', abiertos: [RAIZ, 'h1', 'h1-legal'], inicio: 'h1-legal' },
   { raiz: RAIZ_BICI, nombre: 'Cuadriciclo estilo bicicleta', resumen: 'Un cuadriciclo de pedales con ayuda eléctrica y tu carrocería de velomóvil, que legalmente sea una bicicleta.', abiertos: [RAIZ_BICI, 'b-legal', 'b-como', 'b-china'], inicio: 'b-china' },
+  // (2026-11-27) the third project, «Aeromóvil avión» (arbolAvion.ts)
+  { raiz: RAIZ_AVION, nombre: 'Aeromóvil avión', resumen: 'El Aeromóvil con alas, alrededor del diseño «Aeromóvil Alado»: qué es para la ley, cómo vuela y los primeros pasos.', abiertos: [RAIZ_AVION, 'a-legal', 'a-pasos'], inicio: 'a-ulm' },
 ];
 
 const ARBOL_AEROMOVIL: NodoEstrategia[] = [
@@ -728,7 +731,7 @@ Gracias y un saludo,
 ];
 
 /** Every strategy's nodes, the first tree first. */
-export const ARBOL: NodoEstrategia[] = [...ARBOL_AEROMOVIL, ...ARBOL_BICI];
+export const ARBOL: NodoEstrategia[] = [...ARBOL_AEROMOVIL, ...ARBOL_BICI, ...ARBOL_AVION];
 
 /** The root of the tree a node belongs to. */
 export function raizDe(id: string): string { let n = nodo(id); while (n?.padre) n = nodo(n.padre); return n?.id ?? RAIZ; }

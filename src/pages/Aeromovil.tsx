@@ -65,7 +65,8 @@ import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '..
 import { ColoresCarroceria } from '../components/aeromovil/ColorCarroceria';
 import { CLAVES_COLOR, coloresDe } from '../components/aeromovil/coloresCarroceria';
 import { rotuloFilas } from '../components/aeromovil/filasTriciclo';
-import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { MenuDisenos, PROPUESTAS, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { esProyecto, proyecto as proyectoPorId, proyectoDeDiseno, type IdProyecto } from '../components/aeromovil/proyectos';
 import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
@@ -278,9 +279,20 @@ export default function Aeromovil() {
     try { return JSON.parse(localStorage.getItem('aeromovil.diseno') || 'null'); } catch { return null; }
   });
   useEffect(() => { try { localStorage.setItem('aeromovil.diseno', JSON.stringify(actual)); } catch { /* sin almacenamiento */ } }, [actual]);
+  // (2026-11-27) the project on screen: «Aeromóvil bicicleta», «coche» or «avión» (proyectos.ts). `?proyecto=` wins, then the
+  // last one used here, then the open design's own. Opening a design moves to its project; picking a project opens its star.
+  const [proyecto, setProyecto] = useState<IdProyecto>(() => {
+    try {
+      const u = new URLSearchParams(window.location.search).get('proyecto'); if (esProyecto(u)) return u;
+      const g = localStorage.getItem('aeromovil.proyecto'); if (esProyecto(g)) return g;
+    } catch { /* sin almacenamiento */ }
+    return proyectoDeDiseno({ id: actual?.id ?? 0, nombre: actual?.nombre ?? '', parametros: P });
+  });
+  useEffect(() => { try { localStorage.setItem('aeromovil.proyecto', proyecto); } catch { /* sin almacenamiento */ } }, [proyecto]);
   const abrirDiseno = useCallback((d: Diseno) => {
     const Q = deDiseno(d.parametros || {});
     setP(Q); setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(Q)) });
+    setProyecto(proyectoDeDiseno(d));
   }, []);
   // (2026-11-13) The garage keeps every saved version too. A save of a design that is no longer the open one (an
   // automatic save still on its way when another design was opened) only updates the garage: it used to make that
@@ -503,7 +515,8 @@ export default function Aeromovil() {
   // behind (`garaje/filas.ts`). Our designs: not in the tunnel or the overlay. Picking one opens it (`eleccion`).
   const disenosGaraje = useDisenosGaraje({
     activo: { id: actual?.id ?? null, nombre: actual?.nombre ?? 'Sin guardar', morro: modelo.xn, cola: modelo.xt, ancho: modelo.P.W },
-    referencias: useMemo(() => garaje.filter(v => v.visible).map(v => v.id), [garaje]),
+    referencias: useMemo(() => garaje.filter(v => v.visible && proyectoPorId(proyecto).garaje.includes(v.id)).map(v => v.id), [garaje, proyecto]),
+    proyecto,
     resolucion: opcionesTunel.resolucion, conCd: tunel || verConsumo, huecoFila2: tunel ? HUECO_CON_TUNEL : undefined,
   });
   garajeRef.current = { actualizar: disenosGaraje.actualizar, tiene: id => !!disenosGaraje.lista?.some(d => d.id === id) };
@@ -519,7 +532,7 @@ export default function Aeromovil() {
   const soloGaraje = soloUrl || (eleccion.solo && eleccion.solo !== 'activo' ? eleccion.solo : null);
   const garajeVisor = useMemo(() => {
     if (soloGaraje) return [{ id: soloGaraje, x: 0, z: 0, giro: 0 }];
-    const visibles = garaje.filter(v => v.visible);
+    const visibles = garaje.filter(v => v.visible && proyectoPorId(proyecto).garaje.includes(v.id));
     // (2026-11-13) in the second row, behind our designs; a car the rows could not place keeps its old place
     if (!superponer) return visibles.map(v => { const p = disenosGaraje.plazas.get(v.id); return p ? { id: v.id, x: p.x, z: p.z, giro: 0 } : { id: v.id, x: v.x, z: v.z, giro: v.giro }; });
     // Superpuestos: todos en el eje del nuestro; el morro y la cola salen de la silueta de cada coche.
@@ -528,7 +541,31 @@ export default function Aeromovil() {
       const x = superponer === 'morro' ? modelo.xn - Math.max(...xs) : superponer === 'cola' ? modelo.xt - Math.min(...xs) : 0;
       return { id: v.id, x, z: 0, giro: 0 };
     });
-  }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt, disenosGaraje.plazas]);
+  }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt, disenosGaraje.plazas, proyecto]);
+  // (2026-11-27) the first time a project is opened in this browser its garage shows all its reference vehicles (the aircraft
+  // were hidden in the old single garage). The car's garage stays as it was: it IS the old one.
+  useEffect(() => {
+    let vistos: string[] = [];
+    try { vistos = JSON.parse(localStorage.getItem('aeromovil.proyectosVistos') || '[]'); } catch { /* sin almacenamiento */ }
+    if (!Array.isArray(vistos) || vistos.includes(proyecto)) return;
+    if (proyecto !== 'coche') { const suyos = proyectoPorId(proyecto).garaje; setGaraje(g => g.map(v => (suyos.includes(v.id) && !v.quitado ? { ...v, visible: true } : v))); }
+    try { localStorage.setItem('aeromovil.proyectosVistos', JSON.stringify([...vistos, proyecto])); } catch { /* sin almacenamiento */ }
+  }, [proyecto]);
+  /** Picking a project in the menu: it becomes the one on screen and its star model opens (a proposal, or a saved design). */
+  const elegirProyecto = async (id: IdProyecto) => {
+    // the project changes when its design opens (`abrirDiseno`): with unsaved changes the garage's card asks first, and until
+    // then the page stays in the project whose design is still on screen
+    const est = proyectoPorId(id).estrella;
+    let d: Diseno | undefined = PROPUESTAS.find(x => x.id === est.id);
+    if (!d) {
+      try {
+        const r = await fetch('/api/aeromovil/disenos', { credentials: 'include' });
+        const l: Diseno[] = r.ok ? await r.json() : [];
+        d = l.find(x => x.id === est.id) ?? l.find(x => proyectoDeDiseno(x) === id);
+      } catch { /* sin red: se queda el diseño abierto */ }
+    }
+    if (d) { if (seccion === 'diseno') void eleccion.elegir(d); else abrirDiseno(d); } else setProyecto(id);
+  };
   const garajeConDisenos = useMemo(() => (eleccion.solo === 'activo' && !soloUrl ? [] : superponer || soloGaraje ? garajeVisor : [...garajeVisor, ...disenosGaraje.visor]), [garajeVisor, disenosGaraje.visor, superponer, soloGaraje, soloUrl, eleccion.solo]);
 
   // The Triciclo's Cd: the tunnel's, numbers only, in the background, at its calculation speed (its results and consumption use it).
@@ -706,7 +743,7 @@ export default function Aeromovil() {
   const quitarDelGaraje = (id: string) => { setGaraje(g => quitarReferencia(g, id)); if (eleccion.solo === id) eleccion.setSolo(null); };
   const garajeLista = (
     <ListaGaraje g={disenosGaraje} e={eleccion} actual={actual} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
-      referencias={VEHICULOS_GARAJE.map(v => { const g = garaje.find(x => x.id === v.id); return { id: v.id, nombre: v.nombre, largo: v.largo, masa: masaGaraje(v), visible: !!g?.visible, quitado: !!g?.quitado }; })}
+      referencias={VEHICULOS_GARAJE.filter(v => proyectoPorId(proyecto).garaje.includes(v.id)).map(v => { const g = garaje.find(x => x.id === v.id); return { id: v.id, nombre: v.nombre, largo: v.largo, masa: masaGaraje(v), visible: !!g?.visible, quitado: !!g?.quitado }; })}
       alAlternarReferencia={id => setGaraje(g => alternarReferencia(g, id))}
       alQuitarReferencia={quitarDelGaraje} alRecuperarReferencia={id => setGaraje(g => recuperarReferencia(g, id))}
       alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }} />
@@ -743,7 +780,7 @@ export default function Aeromovil() {
             Picking a department from another section goes back to the 3D design. */}
         {/* (on a phone the tabs take their own line under the logo, scrolling sideways: beside the logo there was room for one) */}
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 sm:flex-nowrap sm:gap-3 sm:px-4">
-          <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={d => (seccion === 'diseno' ? void eleccion.elegir(d) : abrirDiseno(d))} estado={guardadoWeb} alLista={disenosGaraje.ponerLista}
+          <MenuDisenos proyecto={proyecto} alProyecto={elegirProyecto} P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={d => (seccion === 'diseno' ? void eleccion.elegir(d) : abrirDiseno(d))} estado={guardadoWeb} alLista={disenosGaraje.ponerLista}
             nombreVehiculo={nombreVehiculo} alVehiculo={cambiarVehiculo}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
@@ -766,7 +803,7 @@ export default function Aeromovil() {
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : paginaEntera ? 'block' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
         {/* (2026-11-24, «Homologación»: pantalla completa, sin garaje) the page replaces the 3D view and the side panel; both stay mounted, hidden */}
-        {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir} />}
+        {homologando && <PaginaHomologacion proyecto={proyecto} P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir} />}
         {comprando && <PaginaCompras puedeDecidir={!!dueno?.puedeDecidir} />}
         <div className={cn('min-w-0', paginaEntera && 'hidden')}>
         {/* (2026-11-24) each department's parts as a row of tabs above the 3D view (partes/PanelSubsistema.tsx) */}
@@ -1225,7 +1262,7 @@ export default function Aeromovil() {
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'estrategia' && (
         <Suspense fallback={<p className="mx-auto max-w-[1200px] px-4 py-8 text-sm text-slate-500">Cargando la estrategia…</p>}>
-          <VistaEstrategia />
+          <VistaEstrategia proyecto={proyecto} />
         </Suspense>
       )}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}

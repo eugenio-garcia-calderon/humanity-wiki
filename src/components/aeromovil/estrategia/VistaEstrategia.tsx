@@ -1,6 +1,7 @@
 // «Estrategia» (/aeromovil/estrategia, 2026-11-19): the decision tree from today to the factory, drawn left to right.
 // The tree is data (`arbol.ts`, edited by Claude as the conversation advances); Eugenio's marks, notes and answers stay
 // in his browser (`almacen.ts`). Click a box: its detail opens at the side. The chevron folds a branch.
+import { proyecto as proyectoPorId, type IdProyecto } from '../proyectos';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronRight, CircleHelp, ClipboardCopy, ExternalLink, X } from 'lucide-react';
 import { Badge, Button, Card } from '../../ui/core';
@@ -187,10 +188,13 @@ function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: 
   );
 }
 
-export default function VistaEstrategia() {
+export default function VistaEstrategia({ proyecto }: { proyecto?: IdProyecto }) {
   const d = useEstrategia();
   const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set(ABIERTOS_INICIO));
-  const [sel, setSel] = useState('h1-legal');
+  // (2026-11-27) each project has its own tree: the bicycle's, the car's («de hoy a la fábrica») and the aircraft's
+  const propia = proyecto ? ESTRATEGIAS.find(e => e.raiz === proyectoPorId(proyecto).estrategia) : undefined;
+  const [sel, setSel] = useState(propia?.inicio ?? 'h1-legal');
+  useEffect(() => { if (propia) setSel(propia.inicio); }, [propia]);
   // (2026-11-24) which strategy is on screen: the tree the chosen box belongs to
   const raiz = raizDe(sel), estrategia = ESTRATEGIAS.find(e => e.raiz === raiz) ?? ESTRATEGIAS[0];
   const [copiado, setCopiado] = useState<'no' | 'si' | 'fallo'>('no');
@@ -229,7 +233,7 @@ export default function VistaEstrategia() {
         {estrategia.resumen} Toca una caja para ver su detalle, marcar tu decisión y responder a las preguntas. La flecha de cada caja pliega su rama.
       </p>
       <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Estrategias">
-        {ESTRATEGIAS.map(e => (
+        {ESTRATEGIAS.filter(e => !propia || e === propia).map(e => (
           <Button key={e.raiz} variant="outline" role="tab" aria-selected={e.raiz === raiz} onClick={() => setSel(e.inicio)}
             className={cn('px-3 py-1.5 text-sm font-medium normal-case tracking-normal', e.raiz === raiz ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800 hover:text-white' : 'text-slate-700')}>
             {e.nombre}

@@ -77,6 +77,9 @@ export const masaFija = (P: Parametros, id: string) => P.piezas?.[id]?.masa ?? M
 /** Los campos del Bala (`CamposBala`, prefijo `b`) y del Triciclo (`CamposTriciclo`, prefijo `t`) son opcionales: los diseños de los otros vehículos no los llevan. */
 export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo>, Partial<CamposBasculante> {
   disposicion: Disposicion;
+  /** (2026-11-27) the project the design belongs to: «Aeromóvil bicicleta», «coche» or «avión» (`proyectos.ts`). Saved designs
+   *  from before carry none and are placed by `proyectoDeDiseno`. */
+  proyecto?: 'bici' | 'coche' | 'avion';
   /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
   variantes?: Record<string, string>;
   /** 2026-11-13: the body's paint and its accent, `#rrggbb` (coloresCarroceria.ts); absent, the pearl white and the navy of always. */
