@@ -43,9 +43,10 @@ export interface Subsistema {
   medida?: string;
 }
 
-export const NOMBRE_DEP: Record<DepTriciclo, string> = { carroceria: 'Carrocería', interior: 'Interior', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Batería' };
+/** The name of each department's TAB: since 2026-11-27 the body's tab is «Chasis y carrocería» and carries the frame too (`pestanaDe`). */
+export const NOMBRE_DEP: Record<DepTriciclo, string> = { carroceria: 'Chasis y carrocería', interior: 'Interior', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Batería' };
 /** «Partes del rodaje», «Las cuatro partes del motor»… */
-export const DE_DEP: Record<DepTriciclo, string> = { carroceria: 'de la carrocería', interior: 'del interior', chasis: 'del chasis', rodaje: 'del rodaje', propulsion: 'del motor', energia: 'de la batería' };
+export const DE_DEP: Record<DepTriciclo, string> = { carroceria: 'del chasis y la carrocería', interior: 'del interior', chasis: 'del chasis', rodaje: 'del rodaje', propulsion: 'del motor', energia: 'de la batería' };
 
 /** The 3D tags of the motor layer's meshes that belong to these groups of `piezasMotor.ts` (the registry the «Mostrar solo el motor» list reads). */
 const delGrupo = (...ids: string[]) => GRUPOS_MOTOR.filter(g => ids.includes(g.id)).flatMap(g => g.componentes);
@@ -95,5 +96,18 @@ export const subsistema = (id: IdSub) => SUBSISTEMAS.find(s => s.id === id)!;
 export const esSub = (v: unknown): v is IdSub => SUBSISTEMAS.some(s => s.id === v);
 /** The parts of a department that this design has, in the order they are shown. */
 export const partesDe = (dep: string, P: object) => SUBSISTEMAS.filter(s => s.dep === dep && (!s.visible || s.visible(P as Record<string, unknown>)));
+/**
+ * (2026-11-27, Eugenio: «fusionen esas dos partes del menú, chasis y carrocería… ponlas en un mismo link y vamos a trabajar
+ * como si fuesen una cosa sola») one tab for two departments. The departments stay two inside (every mass line, check,
+ * section, price and record keeps its `dep`): only the tabs are merged. `pestanaDe` says which tab shows a department,
+ * `depsDePestana` which departments a tab shows, in order.
+ */
+export const DEPS_DE_PESTANA: Partial<Record<string, string[]>> = { carroceria: ['carroceria', 'chasis'] };
+export const depsDePestana = (tab: string) => DEPS_DE_PESTANA[tab] ?? [tab];
+export const pestanaDe = (dep: string) => Object.entries(DEPS_DE_PESTANA).find(([, ds]) => ds!.includes(dep))?.[0] ?? dep;
+/** The tabs of the Triciclo family that have parts, in the menu's order. */
+export const PESTANAS_CON_PARTES = ['carroceria', 'interior', 'rodaje', 'propulsion', 'energia'];
+/** The parts a TAB shows in its row: those of every department it carries. */
+export const partesDePestana = (tab: string, P: object) => depsDePestana(tab).flatMap(d => partesDe(d, P));
 /** Does the department have parts (a row of them under its tab)? */
 export const tieneSub = (dep: string) => SUBSISTEMAS.some(s => s.dep === dep);

@@ -161,10 +161,12 @@ export function zonaTriciclo(m: ModeloTriciclo, d: { punto: [number, number, num
  * de `deslizadoresTriciclo()` (geometriaTriciclo.ts), la misma tabla que leen las opciones del túnel; las de la forma,
  * de la del Cuadriciclo en rombo. «Proyecto» es el resumen: todas las comprobaciones, el rendimiento y el peso.
  */
-export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
+export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir, unido }: {
   P: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: ModeloTriciclo; dep: DepTriciclo | 'proyecto'; cd: CdTriciclo;
   /** (2026-11-15) a block to open and show: the one under a click on the 3D car (`n` changes on every click) */
   abrir?: { bloque: string; n: number } | null;
+  /** (2026-11-27) the panel is one half of the merged tab «Chasis y carrocería»: the frame's half has no vehicle summary */
+  unido?: 'carroceria' | 'chasis';
 }) {
   // (2026-11-15, Eugenio: «los slider en acordeón plegados por categoría … y con capacidad de pinchar y que se vea la
   // configuración»): every block folds; which are open is remembered in this browser (a convenience: it may come back empty)
@@ -405,12 +407,17 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
     // (2026-11-17, «proveedores») each part's supplier, model and files read the design from here (proveedores/)
     <ContextoProveedores.Provider value={{ P, set }}>
       {dep === 'proyecto' && peso}
-      <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
+      {unido === 'chasis' ? (
+        <Bloque titulo={`Chasis: ${lemas.chasis}`} nota="el bastidor">
+          <p className="text-xs text-slate-500">El chasis y la carrocería se trabajan juntos en esta pestaña: lo de arriba es la piel; esto, los tubos que van dentro. Cómo repartir el trabajo entre los dos (todo de fibra o metal y fibra) está debajo del 3D, en «Materiales y estructura».</p>
+          <SinSeccion partes={pesosSec?.sinSeccion.chasis} />
+        </Bloque>
+      ) : <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
         {cuatro || rombo
           ? (rombo ? <p className="text-xs text-slate-500">Cuatro ruedas en rombo: una en el morro, que gira; dos laterales en carenados, que no giran (con «Bascular en las curvas», se inclinan con la cabina); y una en la cola con el motor en el buje. Es la disposición del Cuadriciclo Bala en rombo con esta carrocería (en Rodaje, «Disposición de las ruedas», se vuelve a la de dos delante).</p> : <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, {modelo.motor.tipo === 'central' ? 'movidas por el motor eléctrico MG2, que va junto al de gasolina, en el planetario' : 'con un motor en el buje de cada una'}. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>)
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, {modelo.motor.tipo === 'central' ? 'movida por el motor eléctrico MG2, junto al de gasolina' : 'con el motor en el buje'}. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
         <SinSeccion partes={dep === 'proyecto' ? undefined : pesosSec?.sinSeccion[dep]} />
-      </Bloque>
+      </Bloque>}
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
         <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoPrecio(textoPesoSeccion(seccionDe(bloque)), precioDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
@@ -476,7 +483,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Cola' && modelo.F.kamm && <ParrafoKamm modelo={modelo} cd={cd} />}
           {bloque === 'Forma' && T.tCubierta === 'lisa' && <p className="-mt-1 text-xs text-slate-500">Cubierta lisa: detrás del cristal de la cúpula y delante del parabrisas, lo de arriba ya no sigue la forma redonda de la cúpula. Es una cubierta casi plana, un poco abombada en el centro (el «bombeo»), que solo baja hacia la punta, con un canto redondeado hacia los lados. Así no salen montículos ni hombros, se muevan como se muevan los deslizadores (lo comprueba un programa con cada deslizador en sus dos extremos y muchas combinaciones). Entre la cúpula y la cubierta la forma se funde a lo largo de 30 cm, sobre el cristal.</p>}
           {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ` Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).${T.tCubierta === 'lisa' ? ' Con la cubierta lisa cubre toda la cubierta de la cola, dejando un marco de unos 5 cm a cada lado.' : ''}` : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo.{modelo.ventanas.marco ? ` Entre el panel y el cristal va un marco de carrocería de ${cm(modelo.ventanas.marco.ancho, 0)}: arriba del parabrisas y a lo largo de los dos carriles del techo (${fmt(modelo.marcoTecho)} m² de laminado en lugar de panel).` : ''} Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
-          {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
+          {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Chasis y carrocería › Techo solar y ventanas).'}</p>}
           {bloque === 'Basculación' && (rt.tilt ? <FichaTilt t={rt.tilt} tres={!cuatro && !rombo} rombo={rombo} /> : <p className="-mt-1 text-xs text-slate-500">Con «Sí», la cabina se inclina hacia dentro en las curvas, como una moto, y los carenados de las ruedas con ella, cada uno sobre sus dos brazos en paralelogramo. {cuatro || rombo ? '' : 'En el triciclo se inclinan los dos carenados de delante; la rueda de la cola va dentro de la carrocería y se inclina con ella. '}Aquí se elige la tecnología que la mueve y salen, una a una, las piezas que hay que construir.</p>)}
           {bloque === 'Propulsión' && <p className="-mt-1 text-xs text-slate-500">{T.tPropulsion === 'phev' ? 'Híbrido enchufable: se carga enchufado y gasta primero la batería; cuando se acaba, sigue con gasolina. Debajo, el motor de gasolina y cómo se une a las ruedas («Motor gasolina») y, después, el motor eléctrico («Motor eléctrico»); cada uno con lo que pesa en su título.' : 'Solo eléctrico: la batería y el motor de buje. Con «Híbrida enchufable» se añade un motor de gasolina en el maletero, con tres maneras de unirlo a las ruedas.'}</p>}
           {bloque === 'Híbrido enchufable' && modelo.phev && <FichaHibrido modelo={modelo} vel={T.tVel} hib={e?.hibrido ?? null} />}
@@ -535,7 +542,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         </Bloque>
       )}
 
-      <Bloque titulo={dep === 'proyecto' ? 'Comprobaciones' : 'Comprobaciones de este departamento'} nota={checks.length ? (malas ? `${malas} por revisar` : 'todo cabe') : ''}>
+      <Bloque titulo={dep === 'proyecto' ? 'Comprobaciones' : unido === 'chasis' ? 'Comprobaciones del chasis' : unido === 'carroceria' ? 'Comprobaciones de la carrocería' : 'Comprobaciones de este departamento'} nota={checks.length ? (malas ? `${malas} por revisar` : 'todo cabe') : ''}>
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>

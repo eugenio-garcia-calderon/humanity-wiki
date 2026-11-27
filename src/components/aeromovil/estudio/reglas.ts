@@ -102,7 +102,7 @@ export function fichasDe(P: Parametros): Partial<Record<keyof Parametros, Ficha>
   } else {
     const t = tipo === 'a1' ? FICHAS_A1 : FICHAS_GOTA;
     for (const [k, f] of Object.entries(t)) if (f) o[k as keyof Parametros] = { ...f, unidad: k === 'clear' ? 'cm' : undefined };
-    if (tipo === 'a1') { o.H = { n: 'Alto total (techo de la cúpula)', donde: 'Carrocería › Carrocería y cúpula', min: 1.0, max: 1.7, unidad: 'm' }; }
+    if (tipo === 'a1') { o.H = { n: 'Alto total (techo de la cúpula)', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 1.0, max: 1.7, unidad: 'm' }; }
   }
   return o;
 }
@@ -301,7 +301,7 @@ export const REGLAS: Regla[] = [
         return {
           titulo: 'La cola larga podría ser una cola cortada (Kamm), más corta', gravedad: 'baja',
           porQue: `Con ${fmt(T.tCola, 2)} m de cola, cortarla en recto donde le queda el 30 % de la sección mayor la acorta ${fmt(ahorro * 100, 0)} cm. No es gratis: lo que una cola larga ahorra es casi proporcional a la sección que cierra (SAE 2020-01-0673), y el culote frena con una succión de ${fmt(SUCCION_CULOTE[0], 2)}–${fmt(SUCCION_CULOTE[1], 2)} sobre su área. El túnel dice cuánto cuesta en este diseño.`,
-          recomendacion: `Si el largo importa más que el último poco de Cd, elige «Cortada en recto (cola Kamm)» en «Formato de la cola» (Carrocería › Cola). ${borde}`,
+          recomendacion: `Si el largo importa más que el último poco de Cd, elige «Cortada en recto (cola Kamm)» en «Formato de la cola» (Chasis y carrocería › Cola). ${borde}`,
           pruebas: [0.3, 0.4].map(f => ({ cambios: { tColaCorte: 'kamm', tKammSeccion: f } as Partial<Parametros>, texto: `Cola cortada al ${Math.round(f * 100)} % de la sección mayor` })),
         };
       }
@@ -532,14 +532,14 @@ export const REGLAS: Regla[] = [
         titulo: 'Ruedas al aire (la carrocería del Smera)', gravedad: 'alta', deFondo: true,
         porQue: `La réplica del Lumeneo Smera lleva las cuatro ruedas fuera, bajo guardabarros: según el túnel las ruedas son el ${pct(r)} del Cd. Una rueda al aire arrastra como una placa de su tamaño (Fackrell y Harvey, 1975).`,
         recomendacion: '«Carrocería: Aerodinámica (gota, cola del Aptera)» tapa las traseras y lleva las delanteras dentro del morro o en carenados.',
-        pruebas: [{ cambios: { qCarroceria: 'aero' } as Partial<Parametros>, texto: '«Carrocería» (Carrocería › Forma): de «Como el Lumeneo Smera» a «Aerodinámica»' }],
+        pruebas: [{ cambios: { qCarroceria: 'aero' } as Partial<Parametros>, texto: '«Carrocería» (Chasis y carrocería › Forma): de «Como el Lumeneo Smera» a «Aerodinámica»' }],
       };
       if (Q.qRuedasDel !== 'carenados') return null;
       return {
         titulo: 'Ruedas delanteras en carenados fuera del morro', gravedad: r > 0.25 ? 'media' : 'baja', deFondo: true,
         porQue: `Cada carenado es otro cuerpo con su propia estela, y el túnel ve sus ruedas mucho más expuestas que dentro del morro (las ruedas son el ${pct(r)} del Cd). A cambio, el morro puede ser más estrecho y las ruedas giran sin pasos de rueda.`,
         recomendacion: 'Prueba «Las ruedas delanteras van: Dentro del morro (una sola pieza)».',
-        pruebas: [{ cambios: { qRuedasDel: 'morro' } as Partial<Parametros>, texto: '«Las ruedas delanteras van» (Carrocería › Ruedas delanteras): «Dentro del morro»' }],
+        pruebas: [{ cambios: { qRuedasDel: 'morro' } as Partial<Parametros>, texto: '«Las ruedas delanteras van» (Chasis y carrocería › Ruedas delanteras): «Dentro del morro»' }],
       };
     },
   },
@@ -633,7 +633,7 @@ export const REGLAS: Regla[] = [
         titulo: 'Retrovisores de espejo', gravedad: 'media',
         porQue: 'Dos espejos son entre el 2 y el 7 % de la resistencia de un coche, y en uno tan fino como este pesan más. El túnel no los ve (van en la parte fija de «detalles»).',
         recomendacion: '«Retrovisores: Cámaras en cápsulas». El Honda e bajó un 3,8 % el Cd del coche entero al cambiar espejos por cámaras. Para matricular, las cámaras tienen que cumplir el reglamento UN R46.',
-        pruebas: [{ cambios: { tRetrovisores: 'camaras' } as Partial<Parametros>, texto: '«Retrovisores» (Carrocería › Puertas y maletero): «Cámaras en cápsulas»', tunel: false }],
+        pruebas: [{ cambios: { tRetrovisores: 'camaras' } as Partial<Parametros>, texto: '«Retrovisores» (Chasis y carrocería › Puertas y maletero): «Cámaras en cápsulas»', tunel: false }],
         estimacion: { dCdA: -0.03 * cx.base.cdA, fuente: 'estimado: un 3 % del CdA (los espejos son el 2–7 % de un coche; Honda e −3,8 %)' },
       };
     },

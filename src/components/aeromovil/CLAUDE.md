@@ -349,7 +349,7 @@ peso y el precio y lo manda arriba al proyecto … y de ahí también se sacan l
 | Carrocería | Carrocería · Cúpula · Paneles solares · Puertas y maletero · Retrovisores · Luces (model parts) |
 | Interior | Asientos · Mando · Salpicadero · Acabado interior (model parts) |
 | Batería | Batería (one part: no row of tabs) |
-| Chasis | Bastidor (one part: no row of tabs) |
+| Chasis | Bastidor (since 2026-11-27 it is the last part of the merged tab «Chasis y carrocería», below) |
 
 A department with a single part has no row (`SubmenuPartes` returns null under two); its panel opens directly.
 
@@ -508,3 +508,32 @@ of the Aeromóvil 1 and of every vehicle with departments. First and only purcha
   from «Ver eliminadas»; his stars (blue) replace the catalogue's (yellow) in the score and in «Parecido mínimo». A mark is keyed by
   the option's `id`: **never rename an id**, or its marks are orphaned.
 - **Public page**: no personal budgets or figures of Eugenio's in the texts.
+
+## «Chasis y carrocería» — one tab, two departments (2026-11-27)
+
+Eugenio: «fusionen esas dos partes del menú, chasis y carrocería… ponlas en un mismo link y vamos a trabajar como si fuesen una
+cosa sola». Only the TABS merged: `carroceria` and `chasis` are still two departments everywhere else (`FILAS`, selectors, mass
+sections, `grupoPieza`, checks, `SUBSISTEMAS`, prices, labour, the A1's `Departamento` objects). `partes/subsistemas.ts`:
+`DEPS_DE_PESTANA` (`carroceria` → `['carroceria', 'chasis']`), `depsDePestana`, `pestanaDe`, `partesDePestana`, `PESTANAS_CON_PARTES`;
+`NOMBRE_DEP.carroceria` is the tab's name. In `pages/Aeromovil.tsx`: `depTri` maps `chasis` to `carroceria` and an effect does the
+same for the A1, so any way of reaching «chasis» lands on the merged tab; `lemaTab` / `unirTab` give the tab both one-liners and the
+sum of kg and €; `CAPAS_DEP*.carroceria` include the frame's layer; the side panel is `LadoTriciclo` / `LadoBasculante` / `LadoA1`
+rendered once per department, with `unido` on the first two (the frame's half has no vehicle summary; «Comprobaciones de la
+carrocería / del chasis»). **A new block of the frame**: its row with `dep: 'chasis'` as before; it shows in the merged tab by itself.
+`scripts/robot-3d.ts` walks tabs (`PESTANAS_CON_PARTES`; `--dep chasis` means the merged tab).
+
+## `materiales/` — «Materiales y estructura» (2026-11-27)
+
+Under the 3D of «Chasis y carrocería» on every vehicle with tabs, lazy-loaded (recharts). Which fibre where (carbon, glass, aramid,
+flax, against aluminium and steel), and a full-composite chassis against a metal + fibre hybrid, by weight, safety and cost.
+
+| File | What |
+|---|---|
+| `datos.ts` | THE SECTION AS DATA: `MATERIALES` (laminate E and density, fibre fraction, €/kg, crush energy, CO₂, how it breaks, where to use and not), `RESINA`, `panelIgual` (a panel as stiff as `PANEL_REF`: 2 mm of glass), `ZONAS`, `ARQUITECTURAS` (mass, prototype cost, hours, 1–5 marks on `CRITERIOS`), `PRESETS`, `puntuacion`, `RECOMENDACION`, `SEGURIDAD`, `UNIONES`, `FUENTES` |
+| `PanelMateriales.tsx` | the drawing: recommendation, weight-vs-cost scatter (★ = best with the priorities), priority picker + score bars, architectures table, four small bar charts, fibre cards, zones table, safety, joints, sources |
+
+- Every figure is a range plus the middle the charts use; prices are small-quantity estimates; `FUENTES` are search-engine titles
+  (`leida: false`). Say so on the page; never present them as a datasheet or a quote.
+- **A new material or architecture**: one object in its list; the marks must agree with the masses and costs (a lighter one never
+  has a worse «Peso» mark). Then `npx tsx scripts/materiales.ts` must end «Todo OK».
+- Chart colours: fibres `--color-blue-600`, metals `--color-orange-600` (validated as a pair with the dataviz validator).

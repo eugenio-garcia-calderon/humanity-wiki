@@ -18,7 +18,7 @@ export function pendientesTriciclo(T: CamposTriciclo, checks: Comprobacion[], nP
   if (!controladorDe(T.tCatCtrl)) o.push({ titulo: 'Elegir el controlador del catálogo', porQue: 'Su corriente y su tensión deciden si el motor da la potencia que se le pide.', dep: 'propulsion' });
   if (T.tPropulsion === 'phev' && !termicoDe(T.tCatTermico)) o.push({ titulo: 'Elegir el motor de gasolina del catálogo', porQue: 'Su tamaño y su masa salen hoy de una regla por kW. Uno real fija su sitio, su peso y su consumo.', dep: 'propulsion' });
   o.push({ titulo: 'Pesar las piezas de verdad', porQue: `Las ${nPiezas} masas del vehículo son estimaciones de piezas de su clase: el centro de gravedad y el reparto por ejes («Masas») valen lo que valgan ellas.`, dep: 'masas' });
-  o.push({ titulo: 'Hacer el estudio aerodinámico', porQue: 'Prueba cambios de forma en el túnel y dice cuáles bajan el consumo (Carrocería › Aerodinámica).', dep: 'carroceria' });
+  o.push({ titulo: 'Hacer el estudio aerodinámico', porQue: 'Prueba cambios de forma en el túnel y dice cuáles bajan el consumo (Chasis y carrocería › Aerodinámica).', dep: 'carroceria' });
   o.push({ titulo: 'Que un ingeniero revise el bastidor', porQue: 'Los largueros se calculan como una viga sobre dos apoyos, con un factor 2,5 por los baches: un primer número, no un cálculo de estructura.', dep: 'chasis' });
   if (T.tBascula === 'si') o.push({ titulo: 'Que un ingeniero revise la basculación', porQue: 'Sus pares y potencias son de un primer diseño; el vuelco y el consumo aún no cuentan la inclinación.', dep: 'rodaje' });
   return o;

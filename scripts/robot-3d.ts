@@ -20,7 +20,7 @@
  */
 import { chromium, type Page } from 'playwright';
 import { PARAMETROS_TRICICLO } from '../src/components/aeromovil/geometria';
-import { NOMBRE_DEP, partesDe, type Subsistema } from '../src/components/aeromovil/partes/subsistemas';
+import { NOMBRE_DEP, PESTANAS_CON_PARTES, partesDePestana, pestanaDe, type Subsistema } from '../src/components/aeromovil/partes/subsistemas';
 import type { Pieza3D } from '../src/components/aeromovil/visor/inspeccion';
 import type { CapaId } from '../src/components/aeromovil/visor/capas';
 
@@ -160,7 +160,7 @@ async function recorrer(nombre: string, cambios: Record<string, unknown>, deps: 
   const alto = page.viewportSize()!.height;
   let ventanaMedida = false;
   for (const dep of deps) {
-    const partes = partesDe(dep, P as never);
+    const partes = partesDePestana(dep, P as never);
     console.log(`  ── ${NOMBRE_DEP[dep as keyof typeof NOMBRE_DEP]}: ${partes.map(p => p.nombre).join(' · ')}`);
     await page.locator('nav[aria-label="Departamentos"] button', { hasText: NOMBRE_DEP[dep as keyof typeof NOMBRE_DEP] }).first().click({ force: true, timeout: 120000 });
     await page.waitForTimeout(1500);
@@ -197,7 +197,8 @@ async function recorrer(nombre: string, cambios: Record<string, unknown>, deps: 
 }
 
 const diseños = (arg('diseno') ?? Object.keys(DISENOS).join(',')).split(',').filter(Boolean);
-const deps = (arg('dep') ?? Object.keys(NOMBRE_DEP).join(',')).split(',').filter(Boolean);
+// (2026-11-27) one entry per TAB: «chasis» is inside «Chasis y carrocería» (`pestanaDe`)
+const deps = [...new Set((arg('dep') ?? PESTANAS_CON_PARTES.join(',')).split(',').filter(Boolean).map(pestanaDe))];
 for (const d of diseños) { if (!DISENOS[d]) { console.log(`diseño desconocido «${d}»: ${Object.keys(DISENOS).join(', ')}`); process.exit(2); } await recorrer(d, DISENOS[d], deps); }
 await (await navegador()).close();
 
