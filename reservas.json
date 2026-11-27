@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
-      "motivo": "Diseño 1 luz",
-      "desde": "2026-11-27T01:43:23.830Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/CabeceraSitio.tsx",
       "motivo": "Diseño 1 luz",
       "desde": "2026-11-27T01:43:26.848Z"
