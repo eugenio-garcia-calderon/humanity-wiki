@@ -5,6 +5,7 @@ import { cn } from '../../../utils/cn';
 import { HERRAMIENTAS, AREAS, areaDeIcono } from './herramientas';
 import { IconoArea } from './visuales/iconosAreas';
 import PrincipiosSitio, { type ConfigPrincipios } from '../PrincipiosSitio';
+import { miniatura } from '../../../utils/miniatura';
 
 // ============================================================================
 // DISEÑO 1 DE LA PORTADA DE luzhumanidad.com (2026-11-27, Eugenio)
@@ -21,7 +22,7 @@ import PrincipiosSitio, { type ConfigPrincipios } from '../PrincipiosSitio';
 // `sitio.sectores`, inventions only. Each card takes its picture, title and line from `herramientas.tsx` by row id;
 // a project that is not there yet gets its area's icon and its page's own description, so nothing new disappears.
 
-export type FilaPortada = { id: string; pagina_id?: string | null; orden: number; pagina?: { titulo?: string | null; descripcion?: string | null } | null };
+export type FilaPortada = { id: string; pagina_id?: string | null; orden: number; pagina?: { titulo?: string | null; descripcion?: string | null; imagen?: string | null; encuadre?: { x?: number; y?: number } | null } | null };
 export type GrupoPortada = { titulo: string; icono?: string; filas: FilaPortada[] };
 type Destino = { href: string; fuera: boolean };
 
@@ -197,28 +198,53 @@ function Tarjeta({ f, area, destino, nombre }: { f: FilaPortada; area: string; d
     : <Link to={destino.href} className={clases} aria-label={`${titulo}: ver más`}>{cuerpo}</Link>;
 }
 
-// ── The communities that already enjoy those inventions: names only, by area ──
+// ── The communities that already enjoy those inventions ──
+// Eugenio, 2026-11-27: «Las comunidades beneficiadas ponlas con imágenes reales y en formato galería. Una galería
+// compacta donde se ven ahí todas. Todas juntas, y dentro de la imagen, en pequeñito, si corresponde a energía,
+// vivienda, agricultura…». So: one grid in the table's order (not one row per area), each tile the cover photo of
+// the community's page with its name over it and a small area tag in the corner. These are real photographs: the
+// tools above are illustrated, the people who use them are not.
 function Beneficiarias({ grupos, destino, nombreFila }: { grupos: GrupoPortada[]; destino: (f: FilaPortada) => Destino | null; nombreFila: (f: FilaPortada) => string }) {
+  const todas = grupos
+    .flatMap(g => { const area = areaDeIcono(g.icono || '', g.titulo); return g.filas.map(f => ({ f, area })); })
+    .sort((a, b) => a.f.orden - b.f.orden);
   return (
     <section aria-labelledby="beneficiarias-t" className="mt-14 sm:mt-20">
       <h2 id="beneficiarias-t" className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Comunidades beneficiadas</h2>
       <p className="mt-1.5 text-base text-slate-600">Personas, pueblos y comunidades que ya disfrutan de estas herramientas.</p>
-      <div className="mt-5 space-y-4">
-        {grupos.map(g => {
-          const area = areaDeIcono(g.icono || '', g.titulo);
-          return (
-            <div key={g.titulo} className="flex flex-wrap items-center gap-2">
-              <span className="mr-1 inline-flex items-center gap-1.5 text-sm font-bold text-slate-500"><IconoArea area={area} className="h-6 w-6" />{AREAS[area]?.nombre || sinInnovacion(g.titulo)}</span>
-              {g.filas.map(f => {
-                const d = destino(f), n = nombreFila(f);
-                const cl = 'inline-flex h-8 items-center rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:border-slate-400 hover:text-slate-950';
-                return !d ? <span key={f.id} className={cl}>{n}</span>
-                  : d.fuera ? <a key={f.id} href={d.href} className={cl}>{n}</a> : <Link key={f.id} to={d.href} className={cl}>{n}</Link>;
-              })}
-            </div>
-          );
-        })}
-      </div>
+      <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-5">
+        {todas.map(({ f, area }, i) => <FotoComunidad key={f.id} fila={f} area={area} nombre={nombreFila(f)} destino={destino(f)} prioridad={i} />)}
+      </ul>
     </section>
+  );
+}
+
+function FotoComunidad({ fila, area, nombre, destino, prioridad }: { fila: FilaPortada; area: string; nombre: string; destino: Destino | null; prioridad: number }) {
+  const img = fila.pagina?.imagen || null;
+  const enc = fila.pagina?.encuadre;
+  const etiqueta = AREAS[area]?.corto || AREAS[area]?.nombre || '';
+  const clases = 'group relative block aspect-[4/3] overflow-hidden rounded-xl bg-slate-200 outline-none ring-slate-900 focus-visible:ring-2';
+  const cuerpo = (
+    <>
+      {img
+        ? <img src={miniatura(img, 280)} alt="" loading={prioridad < 5 ? 'eager' : 'lazy'} decoding="async"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            style={{ objectPosition: `${enc?.x ?? 50}% ${enc?.y ?? 40}%` }} />
+        : <span className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200"><IconoArea area={area} className="h-12 w-12 opacity-70" /></span>}
+      <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent" />
+      {etiqueta && (
+        <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-white/90 py-0.5 pl-0.5 pr-2 text-[10.5px] font-semibold text-slate-700 shadow-sm backdrop-blur">
+          <IconoArea area={area} className="h-4 w-4" />{etiqueta}
+        </span>
+      )}
+      <span className="absolute inset-x-0 bottom-0 line-clamp-2 px-2.5 pb-2 text-[13px] font-bold leading-tight text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.4)]">{nombre}</span>
+    </>
+  );
+  return (
+    <li>
+      {!destino ? <span className={clases}>{cuerpo}</span>
+        : destino.fuera ? <a href={destino.href} className={clases}>{cuerpo}</a>
+        : <Link to={destino.href} className={clases}>{cuerpo}</Link>}
+    </li>
   );
 }
