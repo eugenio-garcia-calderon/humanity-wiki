@@ -13449,3 +13449,12 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - The conclusion, in the green box: nothing for sale has the render's shape. Closest buyable: an AutoGyro/RotorSport Calidus tandem pod (a damaged one, £16,000); cheapest teardrop: an aircraft drop tank (JetStar, 1.02 m diameter, $2,400; P-38 tanks $20,000); the exact shape needs a mould from our 3D model (estimates only); wheel spats are catalogue parts (Aircraft Spruce MF-4, $372 a pair); a used Twizy is a cheap homologated tandem base.
 - `scripts/compras.ts` checks the catalogue and prints the top 12; it ends «Todo OK».
 - Not verified: no supplier was contacted; prices are the pages' on 2026-11-27 and many used listings are old or expired (each says so); the red reference photo is probably the Yufei S100 eVTOL, not confirmed (images could not be downloaded); the search budget ran out before Marktplaats, Kleinanzeigen, Wallapop beyond Twizy, Spanish thermoformers and canopy blowers were covered.
+
+## 2026-11-27 — «Compras»: favourites, removing options and his own stars
+
+> «Permite eliminar opciones o guardar como favoritas opciones y puntuarlas, cambiarles las estrellas.»
+
+- Each option of the body-shell catalogue now has, for the Aeromóvil's owner (or an admin): five clickable stars (his own score, blue, replaces the catalogue's yellow one in the ranking and in «Parecido mínimo»; «Volver a las del catálogo» in the detail), a heart (favourite: always first, «Solo favoritas (n)») and a bin (removed: leaves the list and the counts, «Ver eliminadas (n)» brings it back, with a restore button).
+- Saved on the server, so it follows him to the phone: one key `compras-carenado` of the private Aeromóvil file (`aeromovil_expediente`, versioned writes, owner-only), through the pedal cycle file's client store. No server change, no localStorage. Visitors see the catalogue without his marks and a line saying whose they are.
+- `compras/marcas.ts` (new), `compras/PaginaCompras.tsx`, `pages/Aeromovil.tsx` (passes `puedeDecidir`).
+- Checked locally with the owner's session simulated (Playwright, routes stubbed): favourite moved to first place, a removed option left the list (138 of 138) and appeared under «Ver eliminadas», one star set, one save sent with `{unionfab:{favorita:true}, kabinenroller-malaga:{estrellas:1}, qhd-shengze:{eliminada:true}}` to `/api/aeromovil/expediente/compras-carenado`; 1366 and 390 px, no page errors. In production only that the controls load; no real mark was written.

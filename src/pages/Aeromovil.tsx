@@ -758,7 +758,7 @@ export default function Aeromovil() {
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : paginaEntera ? 'block' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
         {/* (2026-11-24, «Homologación»: pantalla completa, sin garaje) the page replaces the 3D view and the side panel; both stay mounted, hidden */}
         {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir} />}
-        {comprando && <PaginaCompras />}
+        {comprando && <PaginaCompras puedeDecidir={!!dueno?.puedeDecidir} />}
         <div className={cn('min-w-0', paginaEntera && 'hidden')}>
         {/* (2026-11-24) each department's parts as a row of tabs above the 3D view (partes/PanelSubsistema.tsx) */}
         {esTri && tieneSub(depTri) && <SubmenuPartes dep={depTri} sub={subDe(depTri)} alElegir={elegirSub} P={P} precios={coste?.precios ?? null} />}
