@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/components/aeromovil/CLAUDE.md",
-      "motivo": "tres proyectos: bici, coche, avión",
-      "desde": "2026-11-27T13:49:39.266Z"
-    }
-  ]
+  "reservas": []
 }
