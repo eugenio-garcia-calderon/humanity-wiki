@@ -15,6 +15,8 @@ import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
 import { columnaMadre } from './SubproyectosSitio';
 import FilaSector from './FilaSector';
 import PrincipiosSitio from './PrincipiosSitio';
+import { useDiseno } from './disenoUno/diseno';
+const PortadaDisenoUno = lazy(() => import('./disenoUno/PortadaDisenoUno'));
 import { pedirRutas } from '../../utils/rutasLegibles';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
@@ -273,6 +275,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   // `#personas` bajaría antes de que se pintaran y la página se movería después.
   const esEscaparate = raiz?.config?.sitio?.escaparate === true;
   useBajarAlAncla(!!modelo && (!esEscaparate || datos !== undefined));
+  // Before the early returns: a hook (2026-11-27, Diseño 1).
+  const diseno = useDiseno();
 
   if (fallo) return <div className="py-24 text-center text-sm text-slate-500">No se han podido cargar los proyectos. Inténtalo dentro de un momento.</div>;
   if (!modelo || !raiz) return <div className="grid min-h-[50vh] place-items-center py-24 text-sm text-slate-400 animate-pulse">Cargando los proyectos…</div>;
@@ -330,6 +334,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     return grupos.filter(g => g.filas.length);
   };
   const conSectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length > 0;
+  const disenoUno = conSectores && !edicion && diseno === '1';
   const sectores = conSectores ? agrupar(visibles) : null;
   const sectoresBeneficiarias = conSectores && modelo.beneficiarias.length ? agrupar(modelo.beneficiarias, true) : null;
 
@@ -499,6 +504,18 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
       {/* Sin el titular ni el botón cuando `sitio.presentacion` es false (2026-11-12: Colaborar sube a la barra). */}
+      {/* DISEÑO 1 (2026-11-27, Eugenio: «tocando en el logo se puede elegir diseño 1 o diseño 2»): the areas menu and
+          three illustrated tools per area (disenoUno/PortadaDisenoUno.tsx) instead of the presentation, the sector
+          rows, the communities and the principles. Only on the public home page, never in the editor. */}
+      {disenoUno && sectores ? (
+        <Suspense fallback={null}>
+          <PortadaDisenoUno grupos={sectores} beneficiarias={sectoresBeneficiarias} principios={raiz.config?.sitio?.principios}
+            nombreFila={f => String((f as Fila).celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim()}
+            destino={f => !f.pagina_id ? null
+              : webs[f.pagina_id] && webs[f.pagina_id] !== window.location.hostname ? { href: `https://${webs[f.pagina_id]}/`, fuera: true }
+              : { href: sitio ? sitio.enlacePagina(f.pagina_id) : `/p/${f.pagina_id}`, fuera: false }} />
+        </Suspense>
+      ) : (<>
       {escaparate && raiz.config?.sitio?.presentacion !== false && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
@@ -552,6 +569,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       )}
       {/* LOS PRINCIPIOS DEL LABORATORIO (2026-11-27, Eugenio): cómo innovamos, después de lo que innovamos. */}
       {escaparate && <PrincipiosSitio cfg={raiz.config?.sitio?.principios} />}
+      </>)}
       {aviso && (edicion || equipo) && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       {ordenable && <p aria-live="polite" className="sr-only">{anuncio}</p>}
       </div>
