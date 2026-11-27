@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "fusionar Chasis y Carrocería + materiales",
-      "desde": "2026-11-27T12:30:06.179Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "fusionar Chasis y Carrocería + materiales",
       "desde": "2026-11-27T12:30:13.492Z"
