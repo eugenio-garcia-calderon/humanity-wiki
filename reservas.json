@@ -11,6 +11,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "Aeromóvil: departamento Compras (carenado)",
       "desde": "2026-11-27T00:38:53.909Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/departamentos/tipos.ts",
+      "motivo": "Aeromóvil: departamento Compras (carenado)",
+      "desde": "2026-11-27T00:39:01.601Z"
     }
   ]
 }
