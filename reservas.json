@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/LadoResumen.tsx",
-      "motivo": "texto: pestaña Chasis y carrocería",
-      "desde": "2026-11-27T13:07:26.062Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/triciclo/pendientes.ts",
       "motivo": "texto: pestaña Chasis y carrocería",
       "desde": "2026-11-27T13:07:28.788Z"
