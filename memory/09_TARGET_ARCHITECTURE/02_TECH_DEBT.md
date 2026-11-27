@@ -1194,3 +1194,8 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 ## 2026-11-25 — /medidas/ pages are a static copy of party positions
 
 - Party levels and reasons are copied into 320 static pages at generation time. Nothing fails if someone edits `TEMAS`/`RAZONES` in the geometry page and forgets `geometria-datos.mjs` + `geometria-medidas.mjs --aplicar`. A CI step that regenerates and fails on diff: ~20 min.
+
+## «Compras» catalogue (2026-11-27)
+
+- **Prices and listings go stale and nothing re-checks them.** 139 options with the price each page showed on 2026-11-27; 34 were only seen in a search result. A link checker (open each URL, flag 404 / «sold») is ≈ 2 hours; without it the page's date is the only warning.
+- **Quotes have nowhere to live.** The next step is asking for quotes; there is no field for «asked / received / amount». Logged in `03_DECISIONS.md` as the trigger to move the catalogue to a table.

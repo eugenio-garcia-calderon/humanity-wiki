@@ -20,7 +20,9 @@ export type IdDepartamento =
   // `Departamento` of its own (no tasks, suppliers or messages), so it is not in `DEPARTAMENTOS`
   | 'masas'
   // 2026-11-17: «Mano de obra», the labour's tab (precios/PanelManoObra.tsx), the same kind of tab as «Masas»
-  | 'manoobra';
+  | 'manoobra'
+  // 2026-11-27: «Compras», the purchasing tab (compras/PaginaCompras.tsx), a whole page like «Homologación»
+  | 'compras';
 
 export interface Tarea {
   titulo: string;

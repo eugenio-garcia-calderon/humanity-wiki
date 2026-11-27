@@ -486,3 +486,25 @@ fijado», not the amount. That is also why his answers stay in his browser.
 **Before you change this, decide**: marks in `localStorage` (today: private, zero server code, but one device only and
 Claude cannot read them) vs a per-account table (≈ half a day: migration, an owner-only route, a store like
 `notas/almacen.ts`). Worth it the day he uses two devices or wants Claude to read his marks without pasting.
+
+## `compras/` — the purchasing department («Compras», 2026-11-27)
+
+A whole-page tab like «Homologación» (`comprando` / `paginaEntera` in `pages/Aeromovil.tsx`), last among the department tabs
+of the Aeromóvil 1 and of every vehicle with departments. First and only purchase so far: the body shell, the bottleneck.
+
+| File | What |
+|---|---|
+| `tipos.ts` | `OpcionCompra`, `CategoriaCompra`, `Via` (comprar / adaptar / a-medida / referencia) |
+| `carenado.ts` | THE CATALOGUE AS DATA: `OPCIONES_CARENADO` (139 on 2026-11-27), `RECOMENDACION` (the green box), `CATEGORIAS`, `VIAS`, `FECHA_BUSQUEDA` |
+| `PaginaCompras.tsx` | the page: ranking (`puntuacion`), filters, a card per option that opens its detail |
+| `marcas.ts` | the owner's marks per option id: favourite, removed, his own stars (`estrellasDe`). ONE key, `compras-carenado`, of the private file on the server (`aeromovil_expediente`, through `homologacion/epac/almacen.ts`): versioned, owner-only, no localStorage. Visitors see the catalogue without marks |
+
+- **A new option**: one object in `OPCIONES_CARENADO`, unique `id`, the price exactly as the page shows it (or «a consultar» and
+  an `estimacion` that says it is one), `verificado` = «sí, página abierta el …» only if the page was opened, else «no: …».
+  Something made to our design (`via: 'a-medida'`) gets at most 4 stars: the shape is ours, but nobody has seen theirs yet.
+  Then `npx tsx scripts/compras.ts` must end «Todo OK».
+- **A new purchase** (seats, wheels…): a second catalogue file of the same shape and a selector at the top of the page.
+- **Marks (2026-11-27)**: favourites always go first in any order; a removed option leaves the list and the counts and comes back
+  from «Ver eliminadas»; his stars (blue) replace the catalogue's (yellow) in the score and in «Parecido mínimo». A mark is keyed by
+  the option's `id`: **never rename an id**, or its marks are orphaned.
+- **Public page**: no personal budgets or figures of Eugenio's in the texts.
