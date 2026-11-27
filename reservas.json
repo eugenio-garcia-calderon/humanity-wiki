@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "tres proyectos: bici, coche, avión",
       "desde": "2026-11-27T13:49:26.381Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/GarajeDisenos.tsx",
+      "motivo": "tres proyectos: bici, coche, avión",
+      "desde": "2026-11-27T13:49:28.976Z"
     }
   ]
 }
