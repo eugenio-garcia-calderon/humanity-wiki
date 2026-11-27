@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "carrocería impresa 3D (bici)",
+      "desde": "2026-11-27T15:37:44.364Z"
+    }
+  ]
 }
