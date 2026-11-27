@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/estrategia/VistaEstrategia.tsx",
       "motivo": "tres proyectos: bici, coche, avión",
       "desde": "2026-11-27T13:49:34.074Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/estrategia/arbol.ts",
+      "motivo": "tres proyectos: bici, coche, avión",
+      "desde": "2026-11-27T13:49:36.729Z"
     }
   ]
 }
