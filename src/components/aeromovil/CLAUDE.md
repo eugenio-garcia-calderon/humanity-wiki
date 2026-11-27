@@ -556,3 +556,13 @@ ids of `garaje/index.ts`), `homologacion` (`epac` / `pesado` / `avion`), `estrat
   vehicle in no project, an unknown id, a missing strategy root or a star placed in another project. Must end «Todo OK».
 - **Aircraft homologation** (`homologacion/avion.ts`): data only, every figure «por confirmar» (sources seen by title); the editor
   checks mass only (no wings yet). **Still shared by the three**: Tareas, Plan, Componentes, Planos, Compras.
+
+### `materiales/impresion3d.ts` — a body printed in 3D on a tube frame (Aeromóvil bicicleta, 2026-11-27)
+
+`PanelImpresion3D.tsx` shows under the 3D of «Chasis y carrocería» when `proyecto === 'bici'` (lazy, recharts), fed by the page with
+the open design's opaque skin (`res.triciclo.piel − cristal`, m²), its length (`modelo.Lf`) and today's `res.masas['Carrocería']` (same
+surface: no wheel pods). Data: `PLASTICOS`, `PAREDES`, `IMPRESORAS`, `calcular(area, plastico, pared, impresora, n)` (kg, panels from
+the bed size × `APROVECHAMIENTO_CAMA`, machine hours from g/h, days at 20 h/day, € of plastic / printers / finishing / power, person
+hours), `RUTAS` (four ways to the skin, per m² + fixed; the workshop is the midpoint of «Compras»' 22.000–47.000 € estimate),
+`holguraDilatacion`, `CHASIS`, `DISENO`, `RIESGOS`, `FUENTES_IMPRESION` (titles only). All constants are estimates and the page says
+so. `npx tsx scripts/impresion3d.ts` must end «Todo OK». The same option is the architecture `tubo-impresa` of `datos.ts`.

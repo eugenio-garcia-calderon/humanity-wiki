@@ -16,7 +16,7 @@ import {
 const FIBRA = 'var(--color-blue-600)', METAL = 'var(--color-orange-600)', REJILLA = 'var(--color-slate-200)', EJE = 'var(--color-slate-500)';
 const fmt = (v: number, d = 0) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 /** where each architecture's name goes beside its point, so two points at the same cost do not write on each other */
-const LADO: Record<IdArquitectura, ['left' | 'right', number]> = { 'acero-vidrio': ['right', -6], 'aluminio-lino': ['left', -6], 'hibrido-vidrio': ['left', 15], 'hibrido-carbono': ['right', -6], 'monocasco-vidrio': ['right', -6], 'monocasco-carbono': ['left', -6] };
+const LADO: Record<IdArquitectura, ['left' | 'right', number]> = { 'tubo-impresa': ['left', 14], 'acero-vidrio': ['right', -6], 'aluminio-lino': ['left', -6], 'hibrido-vidrio': ['left', 15], 'hibrido-carbono': ['right', -6], 'monocasco-vidrio': ['right', -6], 'monocasco-carbono': ['left', -6] };
 
 function Titulo({ n, children, nota }: { n: number; children: React.ReactNode; nota?: string }) {
   return <h3 className="flex flex-wrap items-baseline gap-x-2 text-base font-semibold text-slate-900"><span className="font-mono text-xs text-slate-400">{n}</span>{children}{nota && <span className="text-xs font-normal text-slate-500">{nota}</span>}</h3>;

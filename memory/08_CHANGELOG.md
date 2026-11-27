@@ -13523,3 +13523,15 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 
 ### 2026-11-27 — luzhumanidad.com: la ilustración del Aeromóvil, como el diseño de Eugenio
 - Eugenio (16:25), con un render del vehículo: «haz que la ilustración del aeromóvil ultraligero solar se parezca más a este diseño». `VisualAeromovil` (Diseño 1) redibujado de lado: gota larga blanca con la panza y el morro azul marino, línea roja entre los dos colores, cúpula de cristal tintado grande con placas solares en el techo y en el capó, y **cuatro ruedas en carenados en forma de huevo, fuera del cuerpo y unidas con brazos** (las dos del otro lado, más claras, detrás). Antes era una gota de tres ruedas con ruedas de bicicleta. Se mantienen el aire alrededor y la cifra de 4 kWh cada 100 km.
+
+## 2026-11-27 — Aeromóvil bicicleta: body printed in 3D on a metal tube frame
+
+> «¿Y la solución de hacer la carrocería con impresoras 3D? y el chasis tubular metálico. Explora esa opción, en este caso para el vehículo tipo BICICLETA»
+
+- `materiales/impresion3d.ts` (data) + `PanelImpresion3D.tsx`: under the 3D of «Chasis y carrocería», bicycle project only, above «Materiales y estructura». Computed on the open design's opaque skin (bicycle proposal: 10,5 m², 4,38 m).
+  - The verdict: yes for the prototype. ASA, printed as a sandwich, on a tube frame with the skin floating on rubber mounts (ASA grows ≈ 15 mm more than steel over 40 °C on 4,4 m). For the series, print the plug and laminate in a mould.
+  - A calculator: plastic, wall, printer and how many. Its outputs: skin kg vs today's laminate, panels, machine and person hours, days, material, printers, finishing and total €. ASA sandwich on 4 medium printers comes to ≈ 29 kg, 171 panels, ≈ 400 machine hours / 5 days, ≈ 890 € of plastic, ≈ 5.960 € with the printers bought.
+  - Four routes compared in charts (printed; printed + one glass ply; printed plug → mould → glass skin; a composite workshop at the «Compras» estimate).
+  - Tables: the plastics (PLA ruled out for the street: softens at ≈ 60 °C), the tube frame options, how to design the skin for printing, the risks, examples and sources (search-engine titles only).
+- New architecture «Tubo + impresa 3D» in `materiales/datos.ts`: second for «Primer prototipo» (80, after steel + glass 86), last but one for «Vehículo de serie».
+- `scripts/impresion3d.ts` «Todo OK»; materiales, proyectos «Todo OK»; tsc, build; screenshots at 1400 and 390 px, no page errors.

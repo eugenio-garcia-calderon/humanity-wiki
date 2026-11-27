@@ -115,6 +115,8 @@ const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaC
 const VistaEstrategia = lazy(() => import('../components/aeromovil/estrategia/VistaEstrategia'));
 // (2026-11-27) fibres and chassis architectures with charts, under the 3D of «Chasis y carrocería» (materiales/): recharts loads only there
 const PanelMateriales = lazy(() => import('../components/aeromovil/materiales/PanelMateriales'));
+// (2026-11-27) a body printed in 3D on a tube frame: the bicycle project's own study (materiales/impresion3d.ts)
+const PanelImpresion3D = lazy(() => import('../components/aeromovil/materiales/PanelImpresion3D'));
 
 // v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
 const CLAVE = 'aeromovil.parametros.v5';
@@ -1045,6 +1047,11 @@ export default function Aeromovil() {
           : <PanelSubsistema sub={subDe(depTri) as IdSub} P={P} set={set} modelo={paraCalcular} res={res} precios={coste?.precios ?? null} alElegirSub={elegirSub} />)}
         {/* (2026-11-27, Eugenio: «cuándo utilizar y en qué partes del vehículo una fibra u otra… chasis de fibra completa o un híbrido entre
             los metales y la fibra… compara peso, seguridad, economía, y vamos haciendo unas gráficas») under the 3D of «Chasis y carrocería» */}
+        {/* (2026-11-27, Eugenio: «¿y la solución de hacer la carrocería con impresoras 3D? y el chasis tubular metálico … para el
+            vehículo tipo BICICLETA») the bicycle project only, before the general materials section */}
+        {(esA1 || porDeps) && (porDeps ? depTri : dep) === 'carroceria' && proyecto === 'bici' && <Suspense fallback={null}><PanelImpresion3D
+          area={res.triciclo ? res.triciclo.piel - res.triciclo.cristal : null} largo={modelo.Lf}
+          kgActual={res.masas['Carrocería'] ?? null} /></Suspense>}
         {(esA1 || porDeps) && (porDeps ? depTri : dep) === 'carroceria' && <Suspense fallback={null}><PanelMateriales /></Suspense>}
         {/* (2026-11-17, Eugenio: «Falta un apartado en el menú que sea de homologación») the pre-check under the 3D view;
             the Gota and the Bala, which have no tabs, open it with a button */}
