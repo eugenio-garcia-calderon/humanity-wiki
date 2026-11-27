@@ -2,9 +2,9 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0245_economia_principios_politica_luz.sql",
-      "motivo": "sectores Economía, /politica pública, principios",
-      "desde": "2026-11-27T00:34:37.425Z"
+      "ruta": "drizzle/0246_salud_conocimiento_medicina.sql",
+      "motivo": "Salud luz",
+      "desde": "2026-11-27T09:39:07.338Z"
     }
   ]
 }
