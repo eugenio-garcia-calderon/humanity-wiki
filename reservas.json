@@ -5,12 +5,6 @@
       "ruta": "drizzle/0245_economia_principios_politica_luz.sql",
       "motivo": "sectores Economía, /politica pública, principios",
       "desde": "2026-11-27T00:34:37.425Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/components/aeromovil/CLAUDE.md",
-      "motivo": "Compras: marcas",
-      "desde": "2026-11-27T01:24:16.732Z"
     }
   ]
 }
