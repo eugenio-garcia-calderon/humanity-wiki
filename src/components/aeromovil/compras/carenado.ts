@@ -22,13 +22,12 @@ export const CATEGORIAS: Record<CategoriaCompra, string> = {
 
 /** What the search concluded, for the green box at the top of the page. */
 export const RECOMENDACION: string[] = [
-  'No existe a la venta ninguna carrocería con la forma del render: cabina estrecha en gota para dos en tándem con las cuatro ruedas fuera en carenados. Nadie vende la del Aptera ni la del Elio, y ningún fabricante de velomóviles vende la carcasa sola.',
-  'Lo más parecido que se puede comprar hoy es la cápsula de un autogiro biplaza en tándem (AutoGyro/RotorSport Calidus): composite, cúpula grande y unos 4,8 m. Aparecen siniestrados de segunda mano, como uno con daños «sobre todo estéticos» por 16.000 £; habría que quitar mástil, rotor y motor.',
-  'La vía más barata para tener la forma de gota es un depósito lanzable de avión, la receta clásica del «lakester» con las ruedas fuera. El del JetStar mide 1,02 m de diámetro, justo la anchura buscada, y salió por 2.400 $. Los P-38 de 4,3 × 0,9 m cuestan unos 20.000 $ y no traen cabina ni cúpula.',
-  'La vía que da exactamente el render es fabricarla con nuestro modelo 3D: imprimir o fresar el modelo, sacar un molde y laminar en fibra. Por estimaciones, no por presupuestos: en China, de 6.000 a 20.000 $ el molde y de 800 a 3.000 $ cada carrocería; imprimir el modelo a tamaño real, de 5.000 a 20.000 $. El siguiente paso es pedir presupuesto con el STEP.',
-  'Los carenados de rueda sí se compran hechos: los de avioneta de Aircraft Spruce cuestan 372 $ el par. Pero son para rueda de avión: las delanteras, que giran, necesitan carenados más anchos o que giren con la rueda.',
-  'Como base rodante homologada y barata, el Renault Twizy de segunda mano (de 1.300 a 7.000 € en España) ya es tándem y lleva las ruedas fuera de la bañera. Cambiarle la carrocería exige una reforma en la ITV.',
-];
+  'Vía elegida (27-11-2026): fabricar la carrocería a medida con nuestro modelo 3D. Se fresa el modelo a tamaño real, se saca un molde y se lamina en fibra. Es la única vía que da exactamente la forma del render: no existe a la venta ninguna carrocería con cabina estrecha en gota, dos plazas en tándem y las cuatro ruedas fuera.',
+  'La referencia es Carbodynamic (Ibi, Alicante): fresadora de 5 ejes de 8 × 3 × 2 m, que hace el modelo entero de una pieza, y autoclave de 3 × 8 m, con el molde, el laminado y la medición en el mismo taller. Dan presupuesto gratis enviándoles el modelo 3D.',
+  'Talleres parecidos en España para comparar presupuestos: Managing Composites (Vizcaya, hizo el monocasco de carbono del Zenvo Aurora), Comargo Composites (País Vasco), Sugam (Guipúzcoa), Molder Disnova (Valencia), Aitiip (Zaragoza, moldes prototipo), Zoyk Marine (Murcia), ONE Palma Composites (Mallorca) y los de impresión 3D de gran formato (R3DIMENSION, Indus3D, 3D Innovación) para el modelo.',
+  'Cuánto costaría, por estimación y no por presupuesto: con un taller español, de 22.000 a 47.000 € el modelo, el molde, la primera carrocería en fibra de vidrio y los cuatro carenados de rueda. En China, de 6.000 a 20.000 $ el molde y de 800 a 3.000 $ cada carrocería, más el envío. Con el molde hecho, cada carrocería más sale mucho más barata.',
+  'El siguiente paso es pedir presupuesto a tres o cuatro talleres con el mismo paquete: el STEP de la carrocería, las medidas, el material (fibra de vidrio o carbono), cuántas unidades y el plazo deseado.',
+]
 
 const SI = 'sí, página abierta el 27-11-2026';
 const BUSCADOR = 'no: solo visto en el buscador (título y extracto del resultado)';
@@ -944,6 +943,86 @@ export const OPCIONES_CARENADO: OpcionCompra[] = [
     categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, estimacion: 'Una carrocería única que ruede: del orden de 100.000 € o más. Estimación.',
     plazas: 'Las de nuestro diseño', parecido: 3, porQueParecido: 'Construye coches únicos para fabricantes: cualquier forma.', pros: ['Cuarenta años de modelista de primer nivel'],
     contras: ['Muy caro'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  // ── More Spanish shops like Carbodynamic (2026-11-27, Eugenio: «Búscame otras similares a esta empresa en España»).
+  //    Found with the search engine only (no page opened, so nobody is asked for permission): their figures are not checked.
+  {
+    id: 'managing-composites', nombre: 'Monocascos y estructuras de carbono para automoción (hizo el del Zenvo Aurora)', proveedor: 'Managing Composites S.L.', pais: 'España (Vizcaya; nacida en la Escuela de Ingeniería de Bilbao)',
+    url: 'https://cardesign.es/entrevista-managing-composites-rafael-lopez-eneko-angulo-monocasco-espanol-zenvo-aurora/', categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio: ingeniería y fabricación en carbono',
+    precio: 'a consultar', precioEur: null, estimacion: 'Nivel de superdeportivo: una carrocería única probablemente por encima de 50.000 €. Estimación.', plazas: 'Las de nuestro diseño', parecido: 4,
+    porQueParecido: 'Fabrica monocascos de carbono para coches de altas prestaciones: puede hacer nuestra carrocería con nuestro modelo.', material: 'Fibra de carbono',
+    pros: ['Ha fabricado en España el monocasco de un superdeportivo (Zenvo Aurora)', 'Cerró una ronda de financiación de 15 millones (CompositesWorld)', 'Ingeniería de estructuras, no solo laminado'],
+    contras: ['Probablemente cara para una carrocería única', 'No consta que acepte proyectos pequeños'], estado: 'bajo-pedido', verificado: BUSCADOR,
+    notas: 'Ficha en la web de la Escuela de Ingeniería de Bilbao (ehu.eus) y noticia de su financiación en compositesworld.com.',
+  },
+  {
+    id: 'comargo', nombre: 'Composites para competición', proveedor: 'Comargo Composites S.L.', pais: 'España (País Vasco)', url: 'https://blogs.eitb.eus/tododeportes/2014/11/10/comargo-composite-materials/',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 3,
+    porQueParecido: 'Taller vasco de composites de competición: puede laminar piezas grandes a medida.', material: 'Carbono y composites',
+    pros: ['Experiencia en competición'], contras: ['Sin web propia encontrada; la reseña es de 2014', 'Sin precios'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'aitiip', nombre: 'Moldes prototipo, impresión 3D y composites para automoción', proveedor: 'Aitiip (centro tecnológico)', pais: 'España (Zaragoza)', url: 'https://www.aitiip.com/en/sectors/automotion.html',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio de I+D y fabricación', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 3,
+    porQueParecido: 'Centro tecnológico con moldes prototipo, impresión 3D y composites para automoción: puede hacer el modelo y el molde.',
+    material: 'Plásticos, composites e impresión 3D', pros: ['Se presentó como el mayor centro de Europa de moldes prototipo (Interempresas)', 'Fabricación aditiva y mecanizado', 'Puede ayudar a pedir ayudas de I+D'],
+    contras: ['Centro de investigación: plazos y precios de proyecto', 'No consta que haga carrocerías completas'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'zoyk-marine', nombre: 'Ingeniería naval y composites, moldes de fibra de carbono', proveedor: 'Zoyk Marine', pais: 'España (Murcia)', url: 'https://zoykmarine.com/',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 3,
+    porQueParecido: 'Diseña y fabrica en composites y explica cómo hace moldes de carbono: los cascos de barco se hacen igual que una carrocería.',
+    material: 'Fibra de carbono y de vidrio', pros: ['Ingeniería y fabricación juntas', 'Experiencia en moldes de piezas grandes y curvas'], contras: ['Náutica, no automoción', 'Sin precios'],
+    estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'one-palma', nombre: 'Composites para superyates', proveedor: 'ONE Palma Composites', pais: 'España (Mallorca)', url: 'https://www.superyachtservicesguide.com/20/23831/one-palma-composites',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 3,
+    porQueParecido: 'Fabrica piezas de composite a medida para yates de lujo, con acabados de alto nivel.', material: 'Composites',
+    pros: ['Acabado de calidad de superyate'], contras: ['Probablemente caro', 'En una isla: transporte'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'navalwood', nombre: 'Moldes únicos (one-off) y kits', proveedor: 'Navalwood', pais: 'Probablemente España (sin confirmar)', url: 'https://navalwood.com/es/servicios/moldes-one-kits',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio: molde único', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 3,
+    porQueParecido: 'Hace moldes de una sola pieza para barcos («one-off»), justo lo que hace falta para una carrocería única.', material: 'Madera, espuma y fibra',
+    pros: ['Especialidad en moldes únicos'], contras: ['No se ha confirmado dónde está', 'Náutica'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'astilleros-dalmau', nombre: 'Construcción de embarcaciones de poliéster y otras piezas de fibra', proveedor: 'Astilleros Dalmau', pais: 'España', url: 'https://www.astillerosdalmau.com/es/184869/embarcaciones/Otras-Piezas.htm',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 2,
+    porQueParecido: 'Astillero de poliéster que fabrica también otras piezas de fibra por encargo.', material: 'Fibra de vidrio y poliéster',
+    pros: ['Hace piezas que no son barcos'], contras: ['Acabado y tolerancias de barco, no de coche'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'liux', nombre: 'Fábrica de carrocerías de fibras naturales', proveedor: 'LIUX', pais: 'España (Elche y Novelda, Alicante)', url: 'https://www.autofacil.es/liux-fabrica-biocomposites-elche-2026/',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio (si aceptan el encargo)', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 2,
+    porQueParecido: 'Fabrica en Alicante carrocerías de composite de lino para su propio coche eléctrico; no consta que trabaje para otros.', material: 'Biocomposites de fibras naturales (lino)',
+    pros: ['Fábrica de carrocerías de composite a 30 km de Carbodynamic', 'Material natural y ligero'], contras: ['Fabrica para su propio coche', 'Puede no aceptar encargos de terceros'],
+    estado: 'bajo-pedido', verificado: BUSCADOR, notas: 'En prensa: mantienen en Elche el desarrollo del monocasco y la carrocería y amplían fábrica en La Mancha (alicanteplaza.es).',
+  },
+  {
+    id: 'spania-gta', nombre: 'Fabricante valenciano de superdeportivos de carbono', proveedor: 'Spania GTA', pais: 'España (Valencia)', url: 'https://en.wikipedia.org/wiki/Spania_GTA_Spano',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio (si aceptan el encargo)', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 2,
+    porQueParecido: 'Construye coches con carrocería y chasis de composite en Valencia; no consta que fabrique para otros.', material: 'Carbono y composites',
+    pros: ['Experiencia real en carrocerías de coche de composite'], contras: ['Fabricante de su propio coche', 'Encargo poco probable'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'airtificial', nombre: 'Composites para automoción y aeronáutica (antes Carbures)', proveedor: 'Airtificial (antes Carbures)', pais: 'España (El Puerto de Santa María, Cádiz)', url: 'https://compositesworld.com/articles/carbures-el-puerto-de-santa-maria-spain',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 2,
+    porQueParecido: 'Gran fabricante español de piezas de carbono para coches y aviones: capaz, pero de gran serie.', material: 'Carbono',
+    pros: ['Capacidad industrial y de automoción'], contras: ['Trabaja para grandes fabricantes', 'Poco probable para una pieza única'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'lofith', nombre: 'Composites termoplásticos sostenibles (nacida de Aimplas)', proveedor: 'Lofith Composites', pais: 'España (Valencia)', url: 'https://compositesworld.com/news/aimplas-redit-ventures-launch-lofith-composites',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Servicio y material', precio: 'a consultar', precioEur: null, plazas: 'Las de nuestro diseño', parecido: 1,
+    porQueParecido: 'Desarrolla composites termoplásticos para series industriales, no carrocerías únicas.', material: 'Termoplásticos reforzados',
+    pros: ['Material reciclable, para cuando haya serie'], contras: ['No hace piezas únicas'], estado: 'bajo-pedido', verificado: BUSCADOR,
+  },
+  {
+    id: 'directorio-carbono', nombre: 'Directorio: 100 empresas de fibra de carbono en España', proveedor: 'ensun.io', pais: 'España', url: 'https://ensun.io/search/carbon-fiber/spain',
+    categoria: 'taller-composite-europa', via: 'a-medida', queSeCompra: 'Lista de empresas para pedir presupuesto', precio: 'Gratis', precioEur: 0, plazas: 'Las de nuestro diseño', parecido: 1,
+    porQueParecido: 'No es un taller: es la lista donde buscar más candidatos.', pros: ['Muchos candidatos en un sitio'], contras: ['Sin filtrar: mezcla fabricantes, distribuidores y centros'],
+    estado: 'disponible', verificado: BUSCADOR,
   },
   {
     id: 'otros-talleres', nombre: 'Otros talleres de fibra, fresado y moldes sin comprobar', proveedor: 'Portugal: Fibroforma, Axiomstrategy, Poliexport, Fibrosport; Reino Unido: Stuart Pease y otros; Alemania: Schneppenheim y otros; España: Arousa Fiber, Carbono Racing, prototipadorapido.es, Cortes CNC',
