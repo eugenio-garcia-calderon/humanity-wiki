@@ -13480,3 +13480,11 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Diseño 1: área `salud` (icono de corazón con pulso, rojo), su ilustración (`visuales/salud.tsx`) y su tarjeta. **Las áreas con 1 o 2 herramientas van juntas** en una cuadrícula de tres columnas después de las grandes, cada una tan ancha como sus tarjetas; el menú sigue el mismo orden que la página. La portada de prueba pasa de 3.987 a 3.498 px de alto en ordenador.
 - Diseño 2: color rojo para el sector Salud.
 - `0247_salud_enlace_colabora.sql`: «Quiero sumarme al equipo» apuntaba a `?proyecto=conocimiento-medicina`, que el formulario no reconoce (identifica cada proyecto por su dirección en el sitio, sacada del título). Corregido a `plataforma-de-agregacion-del-conocimiento-de-la-medicina`, el valor que da `GET /api/sitio/KWMUO4S4V663/formulario` en producción.
+
+## 2026-11-27 — «Compras»: the made-to-measure route chosen; 12 more Spanish shops; the rest removed from Eugenio's list
+
+> «me gusta la solución de carbodynamic de Alicante para hacerlo a medida. Búscame otras similares a esta empresa en España y añádelas en la lista de Compras, elimina todas las demás, que no sean a medida.»
+
+- 12 new options (`via: 'a-medida'`), found with the search engine only (no page opened, so he gets no permission prompt; every one says «solo visto en el buscador»): Managing Composites (Vizcaya), Comargo Composites (País Vasco), Aitiip (Zaragoza), Zoyk Marine (Murcia), ONE Palma Composites (Mallorca), Navalwood (location not confirmed), Astilleros Dalmau, LIUX (Elche/Novelda), Spania GTA (Valencia), Airtificial/Carbures (Cádiz), Lofith Composites (Valencia) and the ensun.io directory of 100 Spanish carbon-fibre companies. 151 options; 40 made to measure, 25 of them in Spain.
+- `RECOMENDACION` rewritten around the chosen route (Carbodynamic as the reference, the Spanish shops to compare, the cost estimates, the next step: the same quote package to three or four shops).
+- «Elimina todas las demás»: the 111 options that are not made to measure were NOT deleted from the catalogue (the research stays); they were marked «eliminada» in his own marks (`compras-carenado`, through the page's API with his session), so they leave his list and come back from «Ver eliminadas». Carbodynamic marked as a favourite. Visitors still see the whole catalogue.
