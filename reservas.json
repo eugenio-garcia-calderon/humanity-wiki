@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Compras: favoritas, eliminar y estrellas",
-      "desde": "2026-11-27T01:19:46.707Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "Compras: marcas",
       "desde": "2026-11-27T01:24:16.732Z"
