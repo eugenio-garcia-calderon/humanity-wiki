@@ -1207,3 +1207,7 @@ The merged tab mounts `LadoTriciclo` (or `LadoBasculante`) twice. Each keeps its
 ## 2026-11-27 — «Materiales y estructura» figures are literature ranges and estimates
 
 No datasheet of a chosen fabric/resin, no shop price opened, no source page opened (read by search-engine title only, on Eugenio's request not to be asked for web permissions). Before a mould is made, replace the chosen material's row with its datasheet values and a quote. The architecture masses are hand estimates (`comoMasa`), not the model's.
+
+## 2026-11-27 — Projects: inferred membership and an unread aircraft homologation
+
+Saved designs from before 2026-11-27 have no `parametros.proyecto`: `proyectoDeDiseno` places them by id, class and a regex on the name («alad|avión|volador»). Renaming the «Aeromovil Alado» to something without those words keeps it in the aircraft only because it is the star (id 17). The aircraft homologation (`homologacion/avion.ts`) and its strategy tree were written from search-engine titles: read RD 765/2022, RD 141/2025 and AESA's pages and move each row to «leído». The editor computes no wings, lift or stall speed: the aircraft page checks mass only.

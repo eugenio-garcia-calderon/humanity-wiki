@@ -537,3 +537,22 @@ flax, against aluminium and steel), and a full-composite chassis against a metal
 - **A new material or architecture**: one object in its list; the marks must agree with the masses and costs (a lighter one never
   has a worse «Peso» mark). Then `npx tsx scripts/materiales.ts` must end «Todo OK».
 - Chart colours: fibres `--color-blue-600`, metals `--color-orange-600` (validated as a pair with the dataviz validator).
+
+## `proyectos.ts` — three projects: bicycle, car, aircraft (2026-11-27)
+
+Eugenio: «en el menú superior izquierdo, te deje elegir entre 3 tipos de vehículos … cada uno con su homologación, sus costes,
+sus planes, su estrategia». A project is a LENS on the one editor, not a second editor. `PROYECTOS`: `estrella` (the design that
+opens when the project is picked: −19 the bicycle proposal, 19 «Vehiculo de producción», 17 «Aeromovil Alado»), `garaje` (reference
+ids of `garaje/index.ts`), `homologacion` (`epac` / `pesado` / `avion`), `estrategia` (a root of `estrategia/arbol.ts`).
+- **Which project a design is in**: `proyectoDeDiseno(d)`: `parametros.proyecto` (written by «Guardar como nuevo» since 2026-11-27),
+  else the star's, else bicycle parts or the Gota → bicycle, wings in the name → aircraft, the rest → car.
+- **In the page** (`pages/Aeromovil.tsx`): state `proyecto` (`?proyecto=`, then `localStorage['aeromovil.proyecto']`, then the open
+  design's); `abrirDiseno` moves it to the design's project; `elegirProyecto` opens the star through `eleccion.elegir` (unsaved
+  changes ask first; the project changes only when the design opens). The garage's references and saved designs are filtered by it
+  (`useDisenosGaraje({ proyecto })`); a project opened for the first time in a browser shows all its references (except the car's,
+  which is the old garage). `MenuDisenos` takes `proyecto`/`alProyecto`; `PaginaHomologacion` takes `proyecto`
+  (`homologacion/PaginasProyecto.tsx` for car and aircraft); `VistaEstrategia` takes `proyecto` and shows that tree only.
+- **A new reference vehicle**: add its id to the `garaje` of every project it belongs to; `npx tsx scripts/proyectos.ts` fails on a
+  vehicle in no project, an unknown id, a missing strategy root or a star placed in another project. Must end «Todo OK».
+- **Aircraft homologation** (`homologacion/avion.ts`): data only, every figure «por confirmar» (sources seen by title); the editor
+  checks mass only (no wings yet). **Still shared by the three**: Tareas, Plan, Componentes, Planos, Compras.

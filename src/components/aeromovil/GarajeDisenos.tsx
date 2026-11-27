@@ -13,6 +13,7 @@
 // version, one at a time after the page has drawn, and from then on copied (the copy shares the geometry). A design
 // can be hidden from the 3D (per browser); the one being edited never is. The reference cars stand in a second row,
 // behind (`garaje/filas.ts` places both rows).
+import { proyectoDeDiseno, type IdProyecto } from './proyectos';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { construirDisenoGaraje } from './Visor3D';
@@ -131,7 +132,9 @@ async function llamar(url: string, metodo: string, cuerpo: unknown) {
   return j;
 }
 
-export function useDisenosGaraje({ activo, referencias, resolucion, conCd, huecoFila2 }: {
+export function useDisenosGaraje({ activo, referencias, resolucion, conCd, huecoFila2, proyecto }: {
+  /** (2026-11-27) only the designs of this project (`proyectos.ts`) stand in the garage */
+  proyecto?: IdProyecto;
   /** The design being edited: its saved id (null if it is not saved), its name, nose and tail x and width (m). */
   activo: { id: number | null; nombre: string; morro: number; cola: number; ancho: number };
   /** The reference cars on show: the second row (placed from the smallest to the largest). */
@@ -185,11 +188,11 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   // under the user's hands; a design that cannot be computed goes last.
   const lista = useMemo(() => {
     if (!crudo) return null;
-    const base = ordenar(crudo, orden), pos = new Map(base.map((d, k) => [d.id, k]));
+    const base = ordenar(proyecto ? crudo.filter(d => proyectoDeDiseno(d) === proyecto) : crudo, orden), pos = new Map(base.map((d, k) => [d.id, k]));
     const t = new Map(base.map(d => { const i = infoDe(d); return [d.id, i ? { largo: i.modelo.Lf, masa: i.res.mVeh > 0 ? i.res.mVeh : undefined } : { largo: 99 }]; }));
     return [...base].sort((a, b) => compararTamano(t.get(a.id)!, t.get(b.id)!) || pos.get(a.id)! - pos.get(b.id)!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [crudo, orden]);
+  }, [crudo, orden, proyecto]);
   /** Each saved design's length and empty mass (as saved), for the list's rows. */
   const medidas = useMemo(() => {
     const o: Record<number, { largo: number; masa?: number }> = {};

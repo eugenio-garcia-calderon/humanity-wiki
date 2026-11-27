@@ -34,6 +34,7 @@ import { NOMBRE_PROPUESTA_BICI, PROPUESTA_BICI } from './triciclo/propuestaBici'
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_BASCULANTE, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
 import { camposTriciclo, fichaTriciclo, paqueteAntes, semiAnchoPaquete } from './geometriaTriciclo';
 import { ponerDestino } from './notas/almacen';
+import { PROYECTOS, proyecto as proyectoPorId, proyectoDeDiseno, type IdProyecto } from './proyectos';
 
 /** The four vehicle families, in the order the menu lists them (the Triciclo Bala since 2026-11-10). */
 export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
@@ -192,8 +193,11 @@ export function useAutoguardado(P: Parametros, actual: DisenoAbierto | null, alG
   return { tipo: cambiado ? 'pendiente' : 'al-dia' };
 }
 
-export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehiculo, nombreVehiculo, puedeDecidir, estado, alLista }: {
+export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehiculo, nombreVehiculo, puedeDecidir, estado, alLista, proyecto, alProyecto }: {
   P: Parametros;
+  /** (2026-11-27) the project on screen (bicycle, car, aircraft): the menu lists its designs only, its star first */
+  proyecto: IdProyecto;
+  alProyecto: (p: IdProyecto) => void;
   /** Every list the menu reads (each time it opens or saves), so the garage drops what was removed here (2026-11-13). */
   alLista?: (l: Diseno[]) => void;
   /** The open vehicle's name: the button is the page's logo. */
@@ -243,7 +247,7 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
     setOcupado(true); setAviso(null);
     try {
       let autor = ''; try { autor = localStorage.getItem('aeromovil.autor') || ''; } catch { /* nada */ }
-      const j = await llamar('/api/aeromovil/disenos', 'POST', { nombre: n, parametros: aDiseno(P), autor });
+      const j = await llamar('/api/aeromovil/disenos', 'POST', { nombre: n, parametros: { ...aDiseno(P), proyecto }, autor });
       if (j.diseno) { guardarClave(j.diseno.id, j.clave); alGuardado(j.diseno); }
       setModoNuevo(false); setNombre(''); setAviso('Guardado como diseño nuevo.'); cargar();
     } catch (e: any) { setAviso(e.message); } finally { setOcupado(false); }
@@ -282,7 +286,8 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
                     className="min-w-0 flex-1 justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
                     {esActual ? <Check className="h-3.5 w-3.5 shrink-0 text-teal-700" /> : <span className="w-3.5 shrink-0" />}
                     <span className="min-w-0 flex-1 truncate">{d.nombre}</span>
-                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.id < 0 ? 'propuesta, sin guardar · ' : ''}{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
+                    {d.id === proyectoPorId(proyecto).estrella.id && <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-100 px-1.5 text-[10px] font-semibold text-amber-800" title="El modelo estrella del proyecto: todo gira en torno a él"><Star className="h-3 w-3 fill-current" aria-label="estrella del proyecto" /></span>}
+                    <span className="hidden shrink-0 text-[11px] font-normal text-slate-400 sm:inline">{d.id < 0 ? 'propuesta, sin guardar · ' : ''}{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
                   </Button>
                   {puedeDecidir && d.id > 0 && (
                     <Button variant="ghost" aria-label={d.por_defecto ? `${d.nombre} es el diseño por defecto` : `Poner ${d.nombre} por defecto`} aria-pressed={!!d.por_defecto} disabled={!!d.por_defecto || ocupado} onClick={() => ponerPorDefecto(d)}
@@ -307,10 +312,10 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
         </svg>
         <span className="flex min-w-0 flex-col items-start text-left leading-tight">
           <span className="flex items-center gap-1 whitespace-nowrap text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
-            {nombreVehiculo}<ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-500 transition-transform', abierto && 'rotate-180')} />
+            {proyectoPorId(proyecto).nombre}<ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-500 transition-transform', abierto && 'rotate-180')} />
           </span>
           <span className="hidden max-w-[13rem] items-center gap-1 text-[11px] font-normal text-slate-500 sm:flex">
-            <span className="truncate">{actual ? actual.nombre : 'sin guardar'}</span>
+            <span className="truncate">{actual ? actual.nombre : `${nombreVehiculo} · sin guardar`}</span>
             {estado.tipo === 'guardando' && <Loader2 className="h-3 w-3 shrink-0 animate-spin text-slate-400" aria-label="Guardando en la web" />}
             {estado.tipo === 'al-dia' && actual && <Check className="h-3 w-3 shrink-0 text-teal-700" aria-label="Guardado en la web" />}
             {estado.tipo === 'error' && <CloudOff className="h-3 w-3 shrink-0 text-amber-600" aria-label="Sin guardar en la web" />}
@@ -320,6 +325,16 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
       </Button>
       {abierto && (
         <div role="menu" className="absolute left-0 top-full z-40 mt-1 w-[min(92vw,420px)] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+          {/* (2026-11-27) the three projects: picking one opens its star model; the list below is that project's */}
+          <div className="grid gap-1 border-b border-slate-100 p-1 pb-2" role="group" aria-label="Proyecto">
+            {PROYECTOS.map(pr => (
+              <Button key={pr.id} variant="outline" role="menuitemradio" aria-checked={pr.id === proyecto} onClick={() => { alProyecto(pr.id); setAbierto(false); }}
+                className={cn('h-auto flex-col items-start gap-0 whitespace-normal px-2.5 py-1.5 text-left normal-case tracking-normal', pr.id === proyecto ? 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-800')}>
+                <span className="flex items-center gap-1 text-sm font-semibold">{pr.nombre}</span>
+                <span className={cn('text-[11px] font-normal', pr.id === proyecto ? 'text-teal-100' : 'text-slate-500')}>{pr.lema} Modelo estrella: {pr.estrella.nombre}.</span>
+              </Button>
+            ))}
+          </div>
           {!puedeDecidir && <p className="border-b border-slate-100 px-2 py-1.5 text-[11px] text-amber-800">Solo el dueño del Aeromóvil, con su sesión iniciada, guarda o cambia diseños (desde el 2026-11-07). Aquí se pueden abrir y mirar.</p>}
           {puedeDecidir && <div className="flex flex-wrap gap-1.5 border-b border-slate-100 p-1 pb-2">
             <Button variant="outline" disabled={ocupado} onClick={guardarCambios} className="px-2.5 py-1.5 text-xs normal-case tracking-normal">
@@ -354,7 +369,10 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
           {!lista && !error && <p className="flex items-center gap-2 px-2 py-2 text-xs text-slate-500"><Loader2 className="h-3.5 w-3.5 animate-spin" />Cargando…</p>}
           <ul className="max-h-[60vh] overflow-y-auto py-1">
             {lista && VEHICULOS.map(v => {
-              const suyos = [...lista, ...PROPUESTAS].filter(d => familiaDe(d) === v.k), abiertoAhora = P.disposicion === v.k;
+              const estrella = proyectoPorId(proyecto).estrella.id;
+              const suyos = [...lista, ...PROPUESTAS].filter(d => familiaDe(d) === v.k && proyectoDeDiseno(d) === proyecto).sort((a, b) => Number(b.id === estrella) - Number(a.id === estrella)), abiertoAhora = P.disposicion === v.k;
+              // an empty family shows its starting measures only in the project it belongs to (the pedal Gota is a bicycle)
+              if (!suyos.length && (v.k === 'rombo' ? 'bici' : 'coche') !== proyecto) return null;
               return (
                 <li key={v.k} className="py-1">
                   <p className={cn('flex items-baseline gap-2 px-2 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wide', abiertoAhora ? 'text-teal-800' : 'text-slate-500')}>
