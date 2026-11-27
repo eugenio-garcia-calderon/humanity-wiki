@@ -13,7 +13,8 @@ import { useEffect, useState } from 'react';
 /** Dónde está un proyecto (`config.lugar` de su página). */
 export type LugarPortada = { nombre: string; region: string | null; pais: string; lat: number; lon: number };
 export type ProyectoPortada = {
-  pagina: string; titulo: string; url: string; descripcion: string; portada: string | null;
+  pagina: string; /** Its row in «Proyectos» (since 2026-11-27, for the Diseño 1 illustration in «Nuestra historia»). */
+  fila?: string; titulo: string; url: string; descripcion: string; portada: string | null;
   ano: string | null; estado: string | null; color: string | null; areas: string[]; lugar: LugarPortada | null;
 };
 /** Un hito de «Nuestra historia» (`config.sitio.historia` de la raíz), siempre con su fuente. */

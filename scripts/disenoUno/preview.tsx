@@ -36,7 +36,7 @@ const principios = { titulo: 'Nuestros principios', texto: 'Los valores que guí
   { id: 'd', icono: 'oportunidades', titulo: 'Igualdad de oportunidades y cuidado', resumen: 'Que todos puedan prosperar.' }] };
 const html = renderToStaticMarkup(
   <MemoryRouter>
-    <PortadaDisenoUno grupos={grupos as any} beneficiarias={benef as any} principios={principios as any}
+    <PortadaDisenoUno grupos={grupos as any} beneficiarias={benef as any}
       nombreFila={f => f.pagina?.titulo || ''} destino={f => ({ href: '/' + f.pagina_id, fuera: false })} />
   </MemoryRouter>);
 fs.writeFileSync('/tmp/disenoUno-portada.html', `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="file://${css}"></head>

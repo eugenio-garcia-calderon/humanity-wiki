@@ -4,7 +4,6 @@ import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react
 import { cn } from '../../../utils/cn';
 import { HERRAMIENTAS, AREAS, areaDeIcono } from './herramientas';
 import { IconoArea } from './visuales/iconosAreas';
-import PrincipiosSitio, { type ConfigPrincipios } from '../PrincipiosSitio';
 import { miniatura } from '../../../utils/miniatura';
 
 // ============================================================================
@@ -35,11 +34,10 @@ const PRIMERAS = 3;
 /** Up to how many tools an area shares its row with other small areas. */
 const PEQUENA = 2;
 
-export default function PortadaDisenoUno({ grupos, beneficiarias, destino, principios, nombreFila }: {
+export default function PortadaDisenoUno({ grupos, beneficiarias, destino, nombreFila }: {
   grupos: GrupoPortada[];
   beneficiarias?: GrupoPortada[] | null;
   destino: (f: FilaPortada) => Destino | null;
-  principios?: ConfigPrincipios | null;
   nombreFila: (f: FilaPortada) => string;
 }) {
   const secciones = grupos.map(g => {
@@ -66,7 +64,6 @@ export default function PortadaDisenoUno({ grupos, beneficiarias, destino, princ
           {pequenas.map(s => <SeccionPequena key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
         </div>
       )}
-      <PrincipiosSitio cfg={principios} />
       {!!beneficiarias?.length && <Beneficiarias grupos={beneficiarias} destino={destino} nombreFila={nombreFila} />}
     </div>
   );
@@ -241,7 +238,7 @@ function Beneficiarias({ grupos, destino, nombreFila }: { grupos: GrupoPortada[]
     .flatMap(g => { const area = areaDeIcono(g.icono || '', g.titulo); return g.filas.map(f => ({ f, area })); })
     .sort((a, b) => a.f.orden - b.f.orden);
   return (
-    <section aria-labelledby="beneficiarias-t" className="mt-14 sm:mt-20">
+    <section data-ancla="comunidades" aria-labelledby="beneficiarias-t" className="mt-14 scroll-mt-36 outline-none sm:mt-20 sm:scroll-mt-24">
       <h2 id="beneficiarias-t" className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Comunidades beneficiadas</h2>
       <p className="mt-1.5 text-base text-slate-600">Personas, pueblos y comunidades que ya disfrutan de estas herramientas.</p>
       <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-5">

@@ -434,7 +434,7 @@ function referencias(bloques: any, out: Array<{ nombre: string; url: string }> =
 export function datosPortada(m: Pick<Modelo, 'proyectos' | 'noticias'>, cfg: any) {
   return {
     proyectos: m.proyectos.map(p => ({
-      pagina: p.pagina, titulo: p.titulo, url: p.url, descripcion: p.descripcion, portada: p.imagenPropia,
+      pagina: p.pagina, fila: p.fila, titulo: p.titulo, url: p.url, descripcion: p.descripcion, portada: p.imagenPropia,
       ano: p.ano, estado: p.estado, color: p.color, areas: p.areas, lugar: p.lugar,
     })),
     noticias: m.noticias.length,

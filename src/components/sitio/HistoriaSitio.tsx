@@ -1,7 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { History, Sparkles, ArrowUpRight } from 'lucide-react';
 import { miniatura } from '../../utils/miniatura';
 import { anosDe, fotoPropia, type DatosPortada, type ProyectoPortada } from './portadaEscaparate';
+
+// The area icons of Diseño 1 for the small pictures of tools (2026-11-27): see `disenoUno/MiniaturaHistoria.tsx`.
+const MiniaturaHistoria = lazy(() => import('./disenoUno/MiniaturaHistoria'));
 
 // ============================================================================
 // «NUESTRA HISTORIA» (2026-11-07, portada de luzhumanidad.com)
@@ -62,9 +66,16 @@ export default function HistoriaSitio({ datos, enlace }: { datos: DatosPortada; 
                       <li key={p.pagina} className="max-w-full">
                         <Link to={enlace(p)} data-interno="" title={p.descripcion || undefined}
                           className="group inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 shadow-sm outline-none transition-colors hover:border-slate-400 focus-visible:ring-2 focus-visible:ring-amber-500 sm:pr-3.5">
-                          {fotoPropia(p.portada)
-                            ? <img src={miniatura(fotoPropia(p.portada), 32)} alt="" loading="lazy" decoding="async" className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7" />
-                            : <span aria-hidden className="h-6 w-6 shrink-0 rounded-full bg-slate-100 sm:h-7 sm:w-7" />}
+                          {(() => {
+                            const foto = fotoPropia(p.portada)
+                              ? <img src={miniatura(fotoPropia(p.portada), 32)} alt="" loading="lazy" decoding="async" className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7" />
+                              : null;
+                            return (
+                              <Suspense fallback={foto || <span aria-hidden className="h-6 w-6 shrink-0 rounded-full bg-slate-100 sm:h-7 sm:w-7" />}>
+                                <MiniaturaHistoria fila={p.fila} areas={p.areas || []} foto={foto} />
+                              </Suspense>
+                            );
+                          })()}
                           <span className="truncate text-[13px] font-bold text-slate-700 group-hover:text-slate-950">{p.titulo}</span>
                         </Link>
                       </li>

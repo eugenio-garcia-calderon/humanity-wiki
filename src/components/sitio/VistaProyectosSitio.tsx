@@ -509,7 +509,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           rows, the communities and the principles. Only on the public home page, never in the editor. */}
       {disenoUno && sectores ? (
         <Suspense fallback={null}>
-          <PortadaDisenoUno grupos={sectores} beneficiarias={sectoresBeneficiarias} principios={raiz.config?.sitio?.principios}
+          <PortadaDisenoUno grupos={sectores} beneficiarias={sectoresBeneficiarias}
             nombreFila={f => String((f as Fila).celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim()}
             destino={f => !f.pagina_id ? null
               : webs[f.pagina_id] && webs[f.pagina_id] !== window.location.hostname ? { href: `https://${webs[f.pagina_id]}/`, fuera: true }
@@ -567,8 +567,6 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           </div>
         </section>
       )}
-      {/* LOS PRINCIPIOS DEL LABORATORIO (2026-11-27, Eugenio): cómo innovamos, después de lo que innovamos. */}
-      {escaparate && <PrincipiosSitio cfg={raiz.config?.sitio?.principios} />}
       </>)}
       {aviso && (edicion || equipo) && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       {ordenable && <p aria-live="polite" className="sr-only">{anuncio}</p>}
@@ -585,12 +583,14 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           personas esté en la página inicial y que te haga un scroll down hasta allí»). El menú
           baja hasta aquí (`sitio.anclas`, en `VistaPagina`) en vez de abrir otra página. */}
       {gente && gente.length > 0 && genteVisible && (
-        <section data-ancla="personas" className="mt-16 scroll-mt-36 sm:scroll-mt-24">
-          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-            {activa ? <>Personas del área de <span className="text-slate-700">{activa.nombre}</span></> : 'Personas'}
+        <section data-ancla="personas" className="mt-20 scroll-mt-36 sm:scroll-mt-24">
+          {/* 2026-11-27, Eugenio: «el título de personas un poco más grande, como el resto de títulos… pon personas que han
+              contribuido en el laboratorio de Luz y Humanidad». Same size as «Cómo ha crecido el laboratorio». */}
+          <h2 className="mx-auto max-w-3xl text-center text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            {activa ? <>Personas del área de {activa.nombre}</> : 'Personas que han contribuido en el laboratorio de Luz & Humanidad'}
           </h2>
           {genteVisible.length === 0 && <p className="mt-4 text-center text-sm text-slate-400">Todavía no hay personas en esta área.</p>}
-          <ul className="mt-6 grid list-none grid-cols-3 gap-x-3 gap-y-6 p-0 sm:grid-cols-5 lg:grid-cols-8">
+          <ul className="mt-8 grid list-none grid-cols-3 gap-x-3 gap-y-6 p-0 sm:grid-cols-5 lg:grid-cols-8">
             {genteVisible.map(p => (
               <li key={p.id}>
                 <Link to={sitio ? sitio.enlacePagina(p.id) : `/p/${p.id}`} className="group flex flex-col items-center gap-2 text-center">
@@ -604,6 +604,10 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           </ul>
         </section>
       )}
+
+      {/* LOS PRINCIPIOS DEL LABORATORIO (2026-11-27). Eugenio, the same day: «pon antes las comunidades beneficiadas que
+          los principios, y los principios después de las personas». In both designs. */}
+      {escaparate && <PrincipiosSitio cfg={raiz.config?.sitio?.principios} />}
 
       {/* EN LOS MEDIOS (2026-11-06): todas las noticias de los proyectos, debajo de las personas. */}
       <Suspense fallback={null}><NoticiasSitio raizId={raizId} /></Suspense>
