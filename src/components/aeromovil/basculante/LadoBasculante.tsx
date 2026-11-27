@@ -135,8 +135,10 @@ function nota(bloque: string, m: ModeloBasculante, res: Resultados): string | nu
   return null;
 }
 
-export function LadoBasculante({ P, set, res, modelo, dep, cd, ui }: {
+export function LadoBasculante({ P, set, res, modelo, dep, cd, ui, unido }: {
   P: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: ModeloBasculante; dep: DepBasculante | 'proyecto'; cd: CdBasculante; ui: UiLado;
+  /** (2026-11-27) one half of the merged tab «Chasis y carrocería»: the frame's half has no vehicle summary */
+  unido?: 'carroceria' | 'chasis';
 }) {
   const { Bloque, Deslizador, Selector, ListaComprobaciones } = ui;
   const Q = camposBasculante(P), b = res.basculante!;
@@ -200,11 +202,15 @@ export function LadoBasculante({ P, set, res, modelo, dep, cd, ui }: {
   return (
     <>
       {dep === 'proyecto' && peso}
-      <Bloque titulo={LEMAS_BASCULANTE[dep]} nota={NOMBRE_BASCULANTE}>
+      {unido === 'chasis' ? (
+        <Bloque titulo={`Chasis: ${LEMAS_BASCULANTE.chasis}`} nota="el bastidor">
+          <p className="text-xs text-slate-500">El chasis y la carrocería se trabajan juntos en esta pestaña: lo de arriba es la piel; esto, los tubos que van dentro. Todo de fibra o metal y fibra: «Materiales y estructura», debajo del 3D.</p>
+        </Bloque>
+      ) : <Bloque titulo={LEMAS_BASCULANTE[dep]} nota={NOMBRE_BASCULANTE}>
         {modelo.smera
           ? <p className="text-xs text-slate-500">Carrocería como el Lumeneo Smera (Francia, 2008): su réplica, calcada de las fotos de prensa de Lumeneo, con su paralelogramo que inclina la cabina y las cuatro ruedas, sus dos puertas que se abren, el conductor delante y el pasajero detrás. Todos los deslizadores la cambian: más larga, más baja, los dos más reclinados, paneles en el techo y en la cola. {m2(modelo.Lf)} × {m2(modelo.anchoTotal)} × {m2(modelo.alto)} (la carrocería, {m2(modelo.anchoCuerpo)} de ancho; con las ruedas, {m2(modelo.anchoTotal)}).</p>
           : <p className="text-xs text-slate-500">Cuatro ruedas que se inclinan en las curvas, como en el Lumeneo Smera (francés, 2008-2012), pero más bajo: el techo un 25 % más bajo, con los dos reclinados como en un velomóvil, la cola curva del Aptera y {modelo.enMorro ? 'las dos ruedas delanteras dentro del morro, envueltas en una sola pieza' : 'las ruedas delanteras en carenados que giran y se inclinan con ellas'}. {m2(modelo.Lf)} × {m2(modelo.anchoTotal)} × {m2(modelo.alto)}{modelo.pod ? ` (la carrocería, ${m2(modelo.anchoCuerpo)} de ancho; con los carenados, ${m2(modelo.anchoTotal)})` : ' (lo más ancho es el morro, sobre las ruedas delanteras)'}.</p>}
-      </Bloque>
+      </Bloque>}
       {bloques.map(bloque => (
         <Bloque key={bloque} titulo={bloque}>
           {bloque === 'Forma' && (() => {
@@ -243,7 +249,7 @@ export function LadoBasculante({ P, set, res, modelo, dep, cd, ui }: {
         </Bloque>
       )}
       {(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento}
-      <Bloque titulo={dep === 'proyecto' ? 'Comprobaciones' : 'Comprobaciones de este departamento'} nota={checks.length ? (malas ? `${malas} por revisar` : 'todo cabe') : ''}>
+      <Bloque titulo={dep === 'proyecto' ? 'Comprobaciones' : unido === 'chasis' ? 'Comprobaciones del chasis' : unido === 'carroceria' ? 'Comprobaciones de la carrocería' : 'Comprobaciones de este departamento'} nota={checks.length ? (malas ? `${malas} por revisar` : 'todo cabe') : ''}>
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un 45 % de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro de la cúpula.</p>}
         {(dep === 'rodaje' || dep === 'carroceria' || dep === 'proyecto') && <p className="text-xs text-slate-500">Las comprobaciones de la basculación se hacen en las posiciones extremas: inclinado a tope a cada lado, con las ruedas rectas y giradas a tope, con la carrocería vista desde sí misma (las ruedas y sus pasos) y desde la calle (el suelo).</p>}

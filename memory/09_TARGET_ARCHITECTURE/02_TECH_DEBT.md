@@ -1199,3 +1199,11 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 
 - **Prices and listings go stale and nothing re-checks them.** 139 options with the price each page showed on 2026-11-27; 34 were only seen in a search result. A link checker (open each URL, flag 404 / «sold») is ≈ 2 hours; without it the page's date is the only warning.
 - **Quotes have nowhere to live.** The next step is asking for quotes; there is no field for «asked / received / amount». Logged in `03_DECISIONS.md` as the trigger to move the catalogue to a table.
+
+## 2026-11-27 — «Chasis y carrocería»: two side panels share one «open blocks» memory
+
+The merged tab mounts `LadoTriciclo` (or `LadoBasculante`) twice. Each keeps its own open/closed blocks and both write `localStorage['aeromovil.bloquesAbiertos']`, so a block opened in one half may come back closed after a reload if the other half was toggled later. A convenience only (it may come back empty anyway). Fix: lift `abiertos` to the page (≈ 30 min).
+
+## 2026-11-27 — «Materiales y estructura» figures are literature ranges and estimates
+
+No datasheet of a chosen fabric/resin, no shop price opened, no source page opened (read by search-engine title only, on Eugenio's request not to be asked for web permissions). Before a mould is made, replace the chosen material's row with its datasheet values and a quote. The architecture masses are hand estimates (`comoMasa`), not the model's.

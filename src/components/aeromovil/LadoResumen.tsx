@@ -55,7 +55,7 @@ export function LadoResumen({ dep, modelo, res, masas, alIr, extra }: {
     : [
       ...(res.comprobaciones.some(c => c.holgura < 0) ? [{ titulo: 'Arreglar los puntos críticos en rojo', porQue: 'Están abajo, agrupados por el departamento donde se arreglan.', dep: 'rodaje' }] : []),
       { titulo: 'Pesar las piezas de verdad', porQue: 'Las masas son estimaciones de piezas de su clase: el centro de gravedad y el reparto («Masas») valen lo que valgan ellas.', dep: 'masas' },
-      { titulo: 'Hacer el estudio aerodinámico', porQue: 'Prueba cambios de forma en el túnel y dice cuáles bajan el consumo (Carrocería › Aerodinámica).', dep: 'carroceria' },
+      { titulo: 'Hacer el estudio aerodinámico', porQue: 'Prueba cambios de forma en el túnel y dice cuáles bajan el consumo (Chasis y carrocería › Aerodinámica).', dep: 'carroceria' },
     ];
   return <PanelProyecto checks={extra?.length ? [...res.comprobaciones, ...extra] : res.comprobaciones} pendientes={pendientes} alIr={alIr} />;
 }

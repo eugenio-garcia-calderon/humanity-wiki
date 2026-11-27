@@ -25,7 +25,7 @@ import { aguantaRueda, datosGiro, numerosActuales, sinParteDe } from './numeros'
 import { camposDeFavorita, elegidasDe, favoritaDe, opcionesDe } from './opciones';
 import { conEvaluaciones, useEvaluaciones } from './alternativas';
 import { datosDelDiseno } from './datosDiseno';
-import { DE_DEP, NOMBRE_DEP, partesDe, subsistema } from './subsistemas';
+import { DE_DEP, NOMBRE_DEP, depsDePestana, partesDePestana, pestanaDe, subsistema } from './subsistemas';
 import { A_MEDIDA_RODAJE, type IdSub } from './tipos';
 
 type Poner = <K extends keyof Parametros>(k: K, v: Parametros[K]) => void;
@@ -85,12 +85,12 @@ export function PanelSubsistema({ sub, P, set, modelo, res, precios, alElegirSub
   const nombreOpcion = (id: string, clave?: string) => id === A_MEDIDA_RODAJE ? (S.medida ?? 'ninguna: la estimación del proyecto') : lista.find(o => o.id === (clave ? `${clave}:${id}` : id))?.n ?? id;
   const grupos = [...new Set(lista.map(o => o.grupo ?? ''))];
   const datos = datosDelDiseno(sub, P, modelo, res);
-  const solaEnDep = partesDe(S.dep, P).length === 1;
+  const tab = pestanaDe(S.dep), solaEnDep = partesDePestana(tab, P).length === 1;
 
   return (
-    <section aria-label={`${NOMBRE_DEP[S.dep]}: ${S.nombre}`} className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <section aria-label={`${NOMBRE_DEP[tab as keyof typeof NOMBRE_DEP]}: ${S.nombre}`} className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
       <header className="flex flex-wrap items-start gap-x-4 gap-y-2 bg-slate-50 px-3 py-3">
-        {!solaEnDep && <Button variant="ghost" onClick={() => alElegirSub('resumen')} className="shrink-0 gap-1 px-1.5 py-1 text-[11px] normal-case tracking-normal text-slate-600"><ArrowLeft className="h-3.5 w-3.5" />{NOMBRE_DEP[S.dep]}</Button>}
+        {!solaEnDep && <Button variant="ghost" onClick={() => alElegirSub('resumen')} className="shrink-0 gap-1 px-1.5 py-1 text-[11px] normal-case tracking-normal text-slate-600"><ArrowLeft className="h-3.5 w-3.5" />{NOMBRE_DEP[tab as keyof typeof NOMBRE_DEP]}</Button>}
         <div className="min-w-[12rem] flex-1">
           <h3 className="text-base font-semibold text-slate-900">{S.nombre}</h3>
           <p className="text-xs text-slate-600">{S.lema}</p>
@@ -227,7 +227,7 @@ function GeometriaDelDiseno({ giro, brazo, cremallera }: { giro: ReturnType<type
 
 /** The row of tabs under a department's tab (and its overview): where the part is chosen. Shown above the 3D view. A department with one part has no row. */
 export function SubmenuPartes({ dep, sub, alElegir, P, precios }: { dep: string; sub: IdSub | 'resumen'; alElegir: (s: IdSub | 'resumen') => void; P: Parametros; precios: PreciosDiseno | null }) {
-  const partes = partesDe(dep, P);
+  const partes = partesDePestana(dep, P);
   if (partes.length < 2) return null;
   const botones: { id: IdSub | 'resumen'; n: string; extra?: string }[] = [
     { id: 'resumen', n: 'Resumen' },
@@ -248,7 +248,7 @@ export function SubmenuPartes({ dep, sub, alElegir, P, precios }: { dep: string;
 
 /** «Resumen» of a department: its parts, what each carries today and whether it has a favourite. */
 export function ResumenPartes({ dep, P, precios, alElegir }: { dep: string; P: Parametros; precios: PreciosDiseno | null; alElegir: (s: IdSub) => void }) {
-  const filas = partesDe(dep, P).map(s => {
+  const filas = partesDePestana(dep, P).map(s => {
     const n = numerosActuales(s.id, precios);
     const nombre = (id: string) => opcionesDe(s.id, P).find(o => o.id === id)?.n;
     let fav: string | null;
@@ -258,7 +258,7 @@ export function ResumenPartes({ dep, P, precios, alElegir }: { dep: string; P: P
     return { s, n, fav };
   });
   const kg = filas.reduce((a, f) => a + f.n.kg, 0), e = filas.reduce((a, f) => a + f.n.eur, 0);
-  const otras = sinParteDe(dep, precios), okg = otras.reduce((a, p) => a + p.kg, 0), oeur = otras.reduce((a, p) => a + p.eur, 0);
+  const otras = depsDePestana(dep).flatMap(d => sinParteDe(d, precios)), okg = otras.reduce((a, p) => a + p.kg, 0), oeur = otras.reduce((a, p) => a + p.eur, 0);
   return (
     <section aria-label={`${NOMBRE_DEP[dep as keyof typeof NOMBRE_DEP] ?? dep}: resumen`} className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
       <h3 className="text-base font-semibold text-slate-900">{filas.length === 4 ? 'Las cuatro' : filas.length === 3 ? 'Las tres' : 'Las'} partes {DE_DEP[dep as keyof typeof DE_DEP] ?? ''}</h3>

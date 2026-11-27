@@ -53,16 +53,16 @@ const g = (texto: string): Frase => ({ texto, origen: 'general' });
 /** `ver`: what the screen shows for a stored value (the Triciclo measures some lengths from its own front axle). */
 type Ficha = { n: string; donde: string; min: number; max: number; ver?: number };
 export const A1: Partial<Record<keyof Parametros, Ficha>> = {
-  parabrisas: { n: 'Inclinación del parabrisas', donde: 'Carrocería › Carrocería y cúpula', min: 0.12, max: 0.32 },
-  techo: { n: 'Caída del techo', donde: 'Carrocería › Carrocería y cúpula', min: 1, max: 3 },
-  colaA1: { n: 'Forma de la cola', donde: 'Carrocería › Carrocería y cúpula', min: 0, max: 1 },
-  posMorro: { n: 'Largo del morro (hasta la sección máxima)', donde: 'Carrocería › Carrocería y cúpula', min: -0.12, max: 0.18 },
-  morroA1: { n: 'Redondez del morro', donde: 'Carrocería › Carrocería y cúpula', min: 0, max: 1 },
-  fMorro: { n: 'Voladizo del morro', donde: 'Carrocería › Carrocería y cúpula', min: 0.15, max: 0.40 },
-  cupX1: { n: 'Cúpula: dónde acaba', donde: 'Carrocería › Carrocería y cúpula', min: 0.70, max: 0.995 },
-  nU: { n: 'Sección superior de la carrocería', donde: 'Carrocería › Carrocería y cúpula', min: 2.0, max: 3.4 },
-  nL: { n: 'Fondo', donde: 'Carrocería › Carrocería y cúpula', min: 2.0, max: 5.0 },
-  clear: { n: 'Altura de los bajos', donde: 'Chasis › Chasis', min: 0.10, max: 0.30 },
+  parabrisas: { n: 'Inclinación del parabrisas', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 0.12, max: 0.32 },
+  techo: { n: 'Caída del techo', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 1, max: 3 },
+  colaA1: { n: 'Forma de la cola', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 0, max: 1 },
+  posMorro: { n: 'Largo del morro (hasta la sección máxima)', donde: 'Chasis y carrocería › Carrocería y cúpula', min: -0.12, max: 0.18 },
+  morroA1: { n: 'Redondez del morro', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 0, max: 1 },
+  fMorro: { n: 'Voladizo del morro', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 0.15, max: 0.40 },
+  cupX1: { n: 'Cúpula: dónde acaba', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 0.70, max: 0.995 },
+  nU: { n: 'Sección superior de la carrocería', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 2.0, max: 3.4 },
+  nL: { n: 'Fondo', donde: 'Chasis y carrocería › Carrocería y cúpula', min: 2.0, max: 5.0 },
+  clear: { n: 'Altura de los bajos', donde: 'Chasis y carrocería › Chasis', min: 0.10, max: 0.30 },
 };
 export const GOTA: Partial<Record<keyof Parametros, Ficha>> = {
   tailRound: { n: 'Redondez de la punta de cola', donde: 'Carenado aerodinámico', min: 0, max: 0.8 },
