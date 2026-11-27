@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0249_principios_cortos_bicicleta_2017.sql",
+      "motivo": "portada luz",
+      "desde": "2026-11-27T11:51:44.997Z"
+    }
+  ]
 }
