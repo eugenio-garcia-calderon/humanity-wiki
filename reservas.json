@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/basculante/LadoBasculante.tsx",
       "motivo": "fusionar Chasis y Carrocería + materiales",
       "desde": "2026-11-27T12:30:24.183Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/LadoA1.tsx",
+      "motivo": "fusionar Chasis y Carrocería + materiales",
+      "desde": "2026-11-27T12:30:27.052Z"
     }
   ]
 }
