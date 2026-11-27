@@ -7,6 +7,7 @@ import { VistasMenu, vistasDe, type Vista } from './VistaMapaSitio';
 import SelectorIdioma from './SelectorIdioma';
 import { enlaceColabora } from './PresentacionSitio';
 import { useSitio } from './ContextoSitio';
+import { useDiseno, elegirDiseno, type Diseno } from './disenoUno/diseno';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -65,6 +66,46 @@ function BotonLoco({ loco, cambiar }: { loco: boolean; cambiar: () => void }) {
   );
 }
 
+/** The logo as a button: a small menu to try the two designs of the home page (disenoUno/diseno.ts). */
+function SelectorDiseno({ titulo, children }: { titulo: string; children: ReactNode }) {
+  const diseno = useDiseno();
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: MouseEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('mousedown', fuera); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', esc); };
+  }, [abierto]);
+  const opcion = (d: Diseno, nombre: string, nota: string) => (
+    <button type="button" role="menuitemradio" aria-checked={diseno === d}
+      onClick={() => { elegirDiseno(d); setAbierto(false); if (window.location.pathname !== '/') window.location.assign('/'); }}
+      className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-slate-50 ${diseno === d ? 'bg-slate-100' : ''}`}>
+      <span className={`mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${diseno === d ? 'border-slate-900' : 'border-slate-300'}`}>
+        {diseno === d && <span className="h-1.5 w-1.5 rounded-full bg-slate-900" />}
+      </span>
+      <span><span className="block text-sm font-bold text-slate-900">{nombre}</span><span className="block text-xs text-slate-500">{nota}</span></span>
+    </button>
+  );
+  return (
+    <div ref={caja} className="relative shrink-0">
+      <button type="button" onClick={() => setAbierto(v => !v)} aria-haspopup="menu" aria-expanded={abierto}
+        aria-label={`${titulo ? `Logo de ${titulo}: ` : ''}elegir diseño de la portada`} title="Elegir diseño"
+        className="block rounded-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
+        {children}
+      </button>
+      {abierto && (
+        <div role="menu" aria-label="Diseño de la portada" className="absolute left-1/2 top-full z-50 mt-2 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl">
+          <p className="px-3 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Diseño de la portada</p>
+          {opcion('1', 'Diseño 1', 'Herramientas por área, con ilustraciones')}
+          {opcion('2', 'Diseño 2', 'El diseño actual')}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInicial = 'tabla', proyecto }: { raizId: string; ruta?: ReactNode;
   /** A project shown inside the site (2026-11-13, Eugenio, on the socioeconomic model: «Luz & Humanidad en la esquina
    *  superior izquierda, "proyecto impulsado por Luz & Humanidad", y en el centro el nombre del proyecto, que lleve a
@@ -103,10 +144,13 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       <style>{'html { overflow-x: clip; }'}</style>
       <div className="min-w-0 [grid-area:buscar]"><BuscarBarra raizId={raizId} enLinea ancha /></div>
       {/* La marca y el eslogan del mismo ancho que el nombre (2026-11-06, Eugenio). */}
-      <Link to="/" className="flex min-w-0 items-center justify-center gap-3 [grid-area:marca]" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
-        {icono && (/^(https?:|\/)/.test(icono)
+      <div className="flex min-w-0 items-center justify-center gap-3 [grid-area:marca]">
+        {/* TOCANDO EL LOGO SE ELIGE EL DISEÑO (2026-11-27, Eugenio): the picture opens «Diseño 1 / Diseño 2»;
+            the name still goes home. */}
+        {icono && <SelectorDiseno titulo={raiz?.titulo || ''}>{(/^(https?:|\/)/.test(icono)
           ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain sm:h-[44px] sm:w-[44px] lg:h-[48px] lg:w-[48px]" />
-          : <span className="text-[1.6rem] leading-none">{icono}</span>)}
+          : <span className="text-[1.6rem] leading-none">{icono}</span>)}</SelectorDiseno>}
+      <Link to="/" className="flex min-w-0 items-center" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
             <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{loco ? NOMBRE_LOCO : raiz.titulo}</span>
@@ -114,6 +158,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           </span>
         )}
       </Link>
+      </div>
       <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
         {colabora && (colabora.fuera
           ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
