@@ -5,6 +5,12 @@
       "ruta": "drizzle/0245_economia_principios_politica_luz.sql",
       "motivo": "sectores Economía, /politica pública, principios",
       "desde": "2026-11-27T00:34:37.425Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
+      "motivo": "Diseño 1 luz",
+      "desde": "2026-11-27T01:43:23.830Z"
     }
   ]
 }
