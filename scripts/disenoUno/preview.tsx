@@ -21,6 +21,7 @@ const grupos = [
   { titulo: 'Innovación en Agricultura', icono: 'Agricultura', filas: [F('BDFAGRISINTROP1', 'Agricultura sintrópica')] },
   { titulo: 'Innovación en Cultura', icono: 'Educación', filas: [F('BDFCONCIENCIASH1', 'Conciencia del ser humano'), F('BDFNTSJZVW6PBDPQ', 'Festival Arte Ser Humano')] },
   { titulo: 'Informática', icono: 'Informática', filas: [F('BDFMVDP4SCGRXS9', 'Humanity.wiki')] },
+  { titulo: 'Innovación en Salud', icono: 'Salud', filas: [F('BDFSALUDMEDIC01', 'Plataforma de agregación del conocimiento de la medicina')] },
 ];
 const FOTOS = ['bosque-sintropico/portada.jpg', 'observatorio-polarizacion/portada.jpg', 'estudio-conciencia/mapa-teoria-sintergica.jpg', ''];
 const conFoto = (f: any, i: number) => ({ ...f, orden: i, pagina: { ...f.pagina, imagen: FOTOS[i % 4] ? `file://${process.cwd()}/public/${FOTOS[i % 4]}` : null } });
