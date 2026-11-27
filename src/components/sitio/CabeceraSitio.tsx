@@ -99,7 +99,7 @@ function SelectorDiseno({ titulo, children }: { titulo: string; children: ReactN
         <div role="menu" aria-label="Diseño de la portada" className="absolute left-1/2 top-full z-50 mt-2 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl">
           <p className="px-3 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Diseño de la portada</p>
           {opcion('1', 'Diseño 1', 'Herramientas por área, con ilustraciones')}
-          {opcion('2', 'Diseño 2', 'El diseño actual')}
+          {opcion('2', 'Diseño 2', 'El diseño anterior')}
         </div>
       )}
     </div>

@@ -22,9 +22,11 @@ const grupos = [
   { titulo: 'Innovación en Cultura', icono: 'Educación', filas: [F('BDFCONCIENCIASH1', 'Conciencia del ser humano'), F('BDFNTSJZVW6PBDPQ', 'Festival Arte Ser Humano')] },
   { titulo: 'Informática', icono: 'Informática', filas: [F('BDFMVDP4SCGRXS9', 'Humanity.wiki')] },
 ];
+const FOTOS = ['bosque-sintropico/portada.jpg', 'observatorio-polarizacion/portada.jpg', 'estudio-conciencia/mapa-teoria-sintergica.jpg', ''];
+const conFoto = (f: any, i: number) => ({ ...f, orden: i, pagina: { ...f.pagina, imagen: FOTOS[i % 4] ? `file://${process.cwd()}/public/${FOTOS[i % 4]}` : null } });
 const benef = [
-  { titulo: 'Innovación en Energía', icono: 'Energía', filas: ['Luz para Kenia', 'Luz del Amazonas', 'Cañada Solar', 'Hogar Lázaro Solar', 'Comunidad Solar Mazarrón', 'Comunidad Villalbilla'].map((t, i) => F('B' + i, t)) },
-  { titulo: 'Innovación en Vivienda', icono: 'Vivienda', filas: ['Comunidad Ikigaia', 'Comunidad Oasis del Jarama', 'Comunidad y Ecoaldea Villabosque'].map((t, i) => F('V' + i, t)) },
+  { titulo: 'Innovación en Energía', icono: 'Energía', filas: ['Luz para Kenia', 'Luz del Amazonas', 'Cañada Solar', 'Hogar Lázaro Solar', 'Comunidad Solar Mazarrón', 'Comunidad Villalbilla'].map((t, i) => conFoto(F('B' + i, t), i * 2)) },
+  { titulo: 'Innovación en Vivienda', icono: 'Vivienda', filas: ['Comunidad Ikigaia', 'Comunidad Oasis del Jarama', 'Comunidad y Ecoaldea Villabosque'].map((t, i) => conFoto(F('V' + i, t), i * 2 + 1)) },
 ];
 const principios = { titulo: 'Nuestros principios', texto: 'Los valores que guían cada innovación del laboratorio.', lista: [
   { id: 'a', icono: 'escalas', titulo: 'De abajo hacia arriba', resumen: 'Innovamos desde la persona hacia el planeta.' },
