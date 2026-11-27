@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0247_salud_enlace_colabora.sql",
+      "motivo": "Salud luz",
+      "desde": "2026-11-27T09:52:01.591Z"
+    }
+  ]
 }
