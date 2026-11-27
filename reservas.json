@@ -47,6 +47,12 @@
       "ruta": "scripts/robot-3d.ts",
       "motivo": "fusionar Chasis y Carrocería + materiales",
       "desde": "2026-11-27T12:30:29.846Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/estudio/reglas.ts",
+      "motivo": "texto: pestaña Chasis y carrocería",
+      "desde": "2026-11-27T13:07:22.327Z"
     }
   ]
 }
