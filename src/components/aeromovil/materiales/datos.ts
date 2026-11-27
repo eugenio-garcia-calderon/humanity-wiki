@@ -175,7 +175,7 @@ export const ZONAS: Zona[] = [
 ];
 
 // ── Chassis architectures ───────────────────────────────────────────────────────────────────────────────────────────────────
-export type IdArquitectura = 'acero-vidrio' | 'aluminio-lino' | 'hibrido-vidrio' | 'hibrido-carbono' | 'monocasco-vidrio' | 'monocasco-carbono';
+export type IdArquitectura = 'tubo-impresa' | 'acero-vidrio' | 'aluminio-lino' | 'hibrido-vidrio' | 'hibrido-carbono' | 'monocasco-vidrio' | 'monocasco-carbono';
 export type Criterio = 'peso' | 'seguridad' | 'prototipo' | 'serie' | 'taller' | 'reparar' | 'co2';
 export const CRITERIOS: { id: Criterio; nombre: string; que: string }[] = [
   { id: 'peso', nombre: 'Peso', que: 'cuánto pesan estructura y piel juntas (5 = la más ligera)' },
@@ -206,6 +206,17 @@ export interface Arquitectura {
 }
 
 export const ARQUITECTURAS: Arquitectura[] = [
+  {
+    // (2026-11-27) the bicycle project's printed body: detail in impresion3d.ts / PanelImpresion3D.tsx
+    id: 'tubo-impresa', nombre: 'Bastidor de tubo + piel impresa en 3D', corto: 'Tubo + impresa 3D',
+    que: 'Una jaula de tubo lleva todas las cargas; la piel se imprime en paneles de ASA en sándwich, pegados y atornillados entre sí, y va flotando sobre tacos de goma. Sin macho ni molde.',
+    masa: [52, 72], comoMasa: 'el mismo bastidor que el de acero (≈ 30 kg) + piel impresa de 12 m² a ≈ 2,4–3,4 kg/m² con bridas',
+    prototipo: [2, 6], horas: [180, 320],
+    notas: { peso: 2, seguridad: 3, prototipo: 5, serie: 2, taller: 5, reparar: 5, co2: 3 },
+    ejemplos: ['Local Motors Strati (2014): carrocería y chasis impresos', 'XEV LSEV / YoYo: microcoche con piezas exteriores impresas (Polymaker)'],
+    pros: ['Sin macho ni molde: la forma se cambia y se reimprime', 'Un panel roto se reimprime', 'Se puede empezar en casa con impresoras de escritorio'],
+    contras: ['Cientos de paneles y de uniones', 'Más pesada que la piel de fibra', 'Lenta para hacer muchas unidades'],
+  },
   {
     id: 'acero-vidrio', nombre: 'Bastidor de tubo de acero + piel de vidrio', corto: 'Acero + vidrio',
     que: 'Una jaula de tubo soldado lleva todas las cargas; la piel de vidrio solo da la forma. Es lo que hay hoy en el diseño (el bastidor de tubos dentro de la carrocería).',
