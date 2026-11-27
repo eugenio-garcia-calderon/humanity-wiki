@@ -14,6 +14,7 @@ import { iconoCategoria } from './iconoCategoria';
 import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
 import { columnaMadre } from './SubproyectosSitio';
 import FilaSector from './FilaSector';
+import PrincipiosSitio from './PrincipiosSitio';
 import { pedirRutas } from '../../utils/rutasLegibles';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
@@ -306,7 +307,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   type Sector = { titulo: string; areas?: string[]; icono?: string; destacado?: boolean };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
-  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime' };
+  // Economía teal since it has its own sector again (2026-11-27), so it does not look like Política.
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'teal', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const agrupar = (todas: Fila[], beneficiarias = false) => {
     const usados = new Set<string>();
@@ -341,6 +343,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
               amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
               rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
+              teal: { borde: 'sm:border-t-teal-500', icono: 'text-teal-600' },
               slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
             };
             let n = desdeN;
@@ -547,6 +550,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           </div>
         </section>
       )}
+      {/* LOS PRINCIPIOS DEL LABORATORIO (2026-11-27, Eugenio): cómo innovamos, después de lo que innovamos. */}
+      {escaparate && <PrincipiosSitio cfg={raiz.config?.sitio?.principios} />}
       {aviso && (edicion || equipo) && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       {ordenable && <p aria-live="polite" className="sr-only">{anuncio}</p>}
       </div>
