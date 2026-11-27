@@ -5,6 +5,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "tres proyectos: bici, coche, avión",
       "desde": "2026-11-27T13:49:20.582Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Disenos.tsx",
+      "motivo": "tres proyectos: bici, coche, avión",
+      "desde": "2026-11-27T13:49:23.720Z"
     }
   ]
 }
