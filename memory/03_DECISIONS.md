@@ -2562,3 +2562,9 @@ They change saved designs' numbers on purpose.
 **Chosen**: one TypeScript file per purchase (`compras/carenado.ts`), the same pattern as the parts catalogues (`bici/catalogo.ts`, `catalogoTren.ts`), with a check script. Whole-page tab like «Homologación».
 **Alternatives**: (a) a server table editable from the page (≈ 1 day: migration, owner-only routes, an editor) — worth it the day Eugenio or a teammate adds suppliers and quotes themselves, or wants to mark «pedido presupuesto / recibido»; (b) a Docs/Sheets artifact — editable by him at once, but outside the tool, which is where he asked for it.
 **Cost of switching later**: the records already have stable ids, so moving them to a table is an import, ≈ 1 day today and about the same in a month (the cost is the editor, not the data).
+
+## 2026-11-27 — The owner's marks on «Compras» ride on the private Aeromóvil file
+
+**Chosen**: one key (`compras-carenado`) of `aeromovil_expediente`, the owner-only, versioned JSON store built for the pedal cycle file. Zero server code; it follows him to every device; a 409 adopts the newer copy.
+**Alternatives**: (a) localStorage (one device only, and the root CLAUDE.md warns about local copies outliving fixes); (b) the public `aeromovil_fichas` store (everybody reads it: his favourites and removals are purchasing decisions, not public); (c) a dedicated `aeromovil_compras` table with a row per option and per quote (≈ 1 day) — the right home the day quotes, dates and amounts are recorded per supplier (tech debt «Quotes have nowhere to live»).
+**Cost of switching later**: the value is a plain `{ id: mark }` object; moving it to a table is a 20-line import.
