@@ -61,23 +61,48 @@ function RuedaBici({ x, y, r, n = 12, claro = false }: { x: number; y: number; r
 
 /* ── Aeromóvil: the teardrop in the wind ───────────────────────────────────── */
 
-const GOTA = 'M22,84 C22,62 50,40 98,32 C128,27 160,30 184,42 C204,52 220,64 232,78 L232,84 C226,90 212,93 196,93 L46,93 C32,93 22,91 22,84 Z';
+// The Aeromóvil as Eugenio drew it (render of 2026-11-27): a long white teardrop with a navy belly and nose, a red
+// pinstripe where the two colours meet, a big tinted bubble canopy with solar cells on its roof and on the bonnet,
+// and four wheels in egg-shaped fairings set out on struts, away from the body. Side view, slightly from below
+// the line of the car so the near fairings sit in front of the body.
+const GOTA = 'M14,79 C14,69 26,63 52,60 C72,36 102,20 134,19 C170,18 196,31 218,45 C232,52 242,55 250,57 C240,67 222,75 198,79 C154,85 74,87 40,86 C22,85 14,83 14,79 Z';
+const VIENTRE = 'M0,77 C80,76 170,70 252,55 L252,128 L0,128 Z';
+const CUPULA = 'M58,59 C78,35 104,21 134,20 C168,19 192,32 212,46 C180,50 116,54 58,59 Z';
+
+/** One wheel fairing: an egg, white over navy with the red line, the tyre just showing under it. */
+function Carenado({ x, y, lejos = false }: { x: number; y: number; lejos?: boolean }) {
+  const id = `du-aero-car-${x}`;
+  return (
+    <g opacity={lejos ? 0.5 : 1}>
+      <rect x={x - 10} y={y + 8} width={20} height={10} rx={4.5} className="fill-slate-800" />
+      <rect x={x - 5} y={y + 11} width={10} height={4} rx={2} className="fill-slate-400" />
+      <clipPath id={id}><ellipse cx={x} cy={y} rx={18} ry={14} /></clipPath>
+      <ellipse cx={x} cy={y} rx={18} ry={14} className="fill-indigo-950" />
+      <g clipPath={`url(#${id})`}>
+        <path d={`M${x - 18},${y - 1} C${x - 8},${y - 3} ${x + 8},${y - 3} ${x + 18},${y - 1} L${x + 18},${y - 14} L${x - 18},${y - 14} Z`} fill="url(#du-aero-casco)" />
+        <path d={`M${x - 18},${y - 1} C${x - 8},${y - 3} ${x + 8},${y - 3} ${x + 18},${y - 1}`} fill="none" className="stroke-red-500" strokeWidth={1.1} />
+        <path d={`M${x - 11},${y - 8} C${x - 5},${y - 11} ${x + 3},${y - 11} ${x + 8},${y - 9}`} fill="none" className="stroke-white" strokeWidth={1.4} strokeLinecap="round" opacity={0.9} />
+      </g>
+      <ellipse cx={x} cy={y} rx={18} ry={14} fill="none" className="stroke-white" strokeWidth={1.2} />
+    </g>
+  );
+}
 
 export function VisualAeromovil() {
   const corrientes = [
-    'M2,20 C52,20 72,8 122,8 C172,8 212,22 252,36',
-    'M2,36 C34,36 52,21 104,20 C150,19 196,31 248,58',
-    'M2,54 C20,54 32,34 70,30',
-    'M2,100 C24,100 36,102 50,106',
+    'M2,18 C52,18 80,6 134,6 C182,6 220,24 262,42',
+    'M2,34 C34,34 56,18 110,16 C158,15 200,30 258,58',
+    'M2,52 C18,52 30,40 54,36',
+    'M2,104 C24,104 40,104 56,108',
   ];
   return (
     <svg viewBox="0 0 320 128" className="h-full w-full" role="img"
-      aria-label="Aeromóvil: vehículo de tres ruedas en forma de gota, con cúpula de cristal y techo solar, rodeado por líneas de aire; consume 4 kWh cada 100 km a 100 km/h">
+      aria-label="Aeromóvil: vehículo en forma de gota, blanco y azul marino, con cúpula de cristal y techo solar y las cuatro ruedas en carenados separados del cuerpo; consume 4 kWh cada 100 km a 100 km/h">
       <defs>
-        <linearGradient id="du-aero-aire" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="252" y2="0">
+        <linearGradient id="du-aero-aire" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="262" y2="0">
           <stop offset="0" stopColor="#38bdf8" stopOpacity={0} />
-          <stop offset="0.25" stopColor="#38bdf8" stopOpacity={0.75} />
-          <stop offset="0.8" stopColor="#38bdf8" stopOpacity={0.5} />
+          <stop offset="0.25" stopColor="#38bdf8" stopOpacity={0.7} />
+          <stop offset="0.8" stopColor="#38bdf8" stopOpacity={0.45} />
           <stop offset="1" stopColor="#38bdf8" stopOpacity={0} />
         </linearGradient>
         <linearGradient id="du-aero-casco" x1="0" y1="0" x2="0" y2="1">
@@ -85,11 +110,12 @@ export function VisualAeromovil() {
           <stop offset="1" stopColor="#e2e8f0" />
         </linearGradient>
         <linearGradient id="du-aero-cristal" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#bae6fd" />
-          <stop offset="1" stopColor="#0c4a6e" stopOpacity={0.85} />
+          <stop offset="0" stopColor="#475569" />
+          <stop offset="0.55" stopColor="#1e293b" />
+          <stop offset="1" stopColor="#0f172a" />
         </linearGradient>
         <clipPath id="du-aero-cuerpo"><path d={GOTA} /></clipPath>
-        <clipPath id="du-aero-techo"><rect x={136} y={0} width={120} height={70} /></clipPath>
+        <clipPath id="du-aero-cupula"><path d={CUPULA} /></clipPath>
       </defs>
 
       {/* Air streaming around the body */}
@@ -97,38 +123,61 @@ export function VisualAeromovil() {
         <path key={i} d={d} fill="none" stroke="url(#du-aero-aire)" strokeWidth={i < 2 ? 1.3 : 1.1} strokeLinecap="round"
           strokeDasharray={i === 0 ? '10 5' : undefined} />
       ))}
-      <path d="M234,80 C244,80 250,77 258,74" fill="none" className="stroke-sky-300" strokeWidth={1} strokeLinecap="round" />
 
-      <Sol x={244} y={13} r={5} />
+      <Sol x={248} y={13} r={5} />
 
       <g className="transition-transform duration-700 group-hover:translate-x-1">
-        {/* Shadow on the road */}
-        <ellipse cx={128} cy={114} rx={104} ry={3.2} className="fill-slate-900" opacity={0.08} />
-        <line x1={10} x2={246} y1={113} y2={113} className="stroke-slate-200" strokeWidth={1} />
-        {/* Wheels: one in front, two behind (the far one paler) */}
-        <RuedaBici x={70} y={100} r={13} />
-        <RuedaBici x={184} y={100} r={13} />
+        {/* Road and shadow */}
+        <ellipse cx={136} cy={115} rx={112} ry={3.4} className="fill-slate-900" opacity={0.1} />
+        <line x1={6} x2={254} y1={116.5} y2={116.5} className="stroke-slate-200" strokeWidth={1} />
 
-        {/* Body */}
-        <path d={GOTA} fill="url(#du-aero-casco)" className="stroke-slate-300" strokeWidth={1} />
+        {/* The far fairings, peeking out behind the body */}
+        <Carenado x={76} y={96} lejos />
+        <Carenado x={222} y={92} lejos />
+
+        {/* Struts from the body out to the near fairings */}
+        <path d="M50,85 L58,96 M80,86 L70,96 M190,80 L200,92 M224,74 L214,92" className="stroke-indigo-950" strokeWidth={3} strokeLinecap="round" />
+
+        {/* Body: white teardrop, navy belly and nose, red line between */}
+        <path d={GOTA} fill="url(#du-aero-casco)" />
         <g clipPath="url(#du-aero-cuerpo)">
-          {/* Glider-style glass canopy */}
-          <path d="M36,0 L140,0 L140,36 C126,46 100,53 72,57 C56,59 44,62 36,66 Z" fill="url(#du-aero-cristal)" />
-          <path d="M140,36 C126,46 100,53 72,57 C56,59 44,62 36,66" fill="none" className="stroke-slate-400" strokeWidth={1} />
-          <path d="M54,50 C68,40 88,34 112,32" fill="none" className="stroke-white" strokeWidth={1.8} strokeLinecap="round" opacity={0.65} />
-          {/* Solar roof: dark band of cells along the top */}
-          <g clipPath="url(#du-aero-techo)">
-            <path d="M98,32 C128,27 160,30 184,42 C204,52 220,64 232,78" fill="none" className="stroke-indigo-900" strokeWidth={13} />
-            <path d="M98,32 C128,27 160,30 184,42 C204,52 220,64 232,78" fill="none" className="stroke-sky-300" strokeWidth={13}
-              strokeDasharray="0.7 6.3" opacity={0.55} />
-          </g>
-          {/* Accent line low on the side */}
-          <path d="M30,86 L224,84" className="stroke-sky-500" strokeWidth={1.6} opacity={0.8} />
+          <path d={VIENTRE} className="fill-indigo-950" />
+          <path d="M0,77 C80,76 170,70 252,55" fill="none" className="stroke-red-500" strokeWidth={1.3} />
+          <path d="M0,75 C80,74 170,68 252,53" fill="none" className="stroke-white" strokeWidth={0.8} opacity={0.8} />
+          {/* Navy nose cone and its light */}
+          <path d="M12,86 C10,72 18,64 32,63 C30,70 30,80 34,90 Z" className="fill-indigo-950" />
+          <path d="M17,80 h7" className="stroke-white" strokeWidth={1.4} strokeLinecap="round" strokeDasharray="1.2 1.2" />
+          {/* Solar cells on the bonnet */}
+          <path d="M30,64 C38,60 50,58 60,58 C56,63 48,68 36,71 Z" className="fill-indigo-800" />
+          <path d="M34,64 l20,-5 M35,67 l18,-5 M42,59 l2,10 M50,58 l2,8" className="stroke-sky-300" strokeWidth={0.5} opacity={0.7} />
+          {/* Side shine */}
+          <path d="M100,63 C140,61 180,56 212,50" fill="none" className="stroke-white" strokeWidth={2} strokeLinecap="round" opacity={0.9} />
+          <path d="M222,54 l10,-2" className="stroke-indigo-950" strokeWidth={2} strokeLinecap="round" />
         </g>
-              </g>
+        <path d={GOTA} fill="none" className="stroke-slate-300" strokeWidth={0.9} />
+
+        {/* The bubble canopy: tinted glass, two people, solar cells on the roof */}
+        <path d={CUPULA} fill="url(#du-aero-cristal)" />
+        <g clipPath="url(#du-aero-cupula)">
+          <g className="fill-slate-400" opacity={0.75}>
+            <circle cx={116} cy={38} r={5} /><path d="M106,58 C106,46 126,46 126,58 Z" />
+            <circle cx={152} cy={37} r={5} /><path d="M142,58 C142,45 162,45 162,58 Z" />
+          </g>
+          <path d="M72,46 C90,32 110,25 132,24 C160,23 182,30 200,40" fill="none" className="stroke-indigo-700" strokeWidth={9} />
+          <path d="M72,46 C90,32 110,25 132,24 C160,23 182,30 200,40" fill="none" className="stroke-sky-300" strokeWidth={9}
+            strokeDasharray="0.6 5.4" opacity={0.6} />
+          <path d="M68,55 C84,40 98,34 112,32" fill="none" className="stroke-white" strokeWidth={1.6} strokeLinecap="round" opacity={0.45} />
+          <path d="M178,34 L182,52" className="stroke-slate-600" strokeWidth={1.2} />
+        </g>
+        <path d={CUPULA} fill="none" className="stroke-indigo-950" strokeWidth={1.4} />
+
+        {/* The near fairings */}
+        <Carenado x={62} y={100} />
+        <Carenado x={208} y={98} />
+      </g>
 
       {/* The figure */}
-      <g transform="translate(262 -4)">
+      <g transform="translate(261 -4)">
         <text y={36} className="fill-slate-500 text-[8.5px] uppercase tracking-[0.14em]">Consumo</text>
         <text y={70} className="fill-slate-900 text-[32px] font-bold">4</text>
         <text x={21} y={70} className="fill-slate-900 text-[11px] font-bold">kWh</text>
