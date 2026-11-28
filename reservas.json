@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0252_democracia_organica_gremios.sql",
+      "motivo": "democracia orgánica: modelo de gremios sin sorteo",
+      "desde": "2026-11-28T19:12:53.208Z"
+    }
+  ]
 }
