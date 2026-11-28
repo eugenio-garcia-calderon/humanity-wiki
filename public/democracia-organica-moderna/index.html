@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Democracia orgánica moderna · Luz &amp; Humanidad</title>
-<meta name="description" content="Una propuesta de democracia de doble raíz: cada persona, un voto igual; y además voz para territorios, oficios y ciudadanos por sorteo, con seis poderes de orígenes distintos. Comparada con la España de hoy, fallo por fallo.">
+<meta name="description" content="Una propuesta de democracia de doble raíz: la ciudadanía vota lo común en una Cámara General y cada oficio regula lo suyo, con tecnócratas, consulta pública y el voto de sus profesionales. Justicia, seguridad y medios, sin mando de partido. Comparada con la España de hoy, fallo por fallo.">
 <link rel="canonical" href="https://luzhumanidad.com/democracia-organica">
 <style>
 :root{--ink:#0f172a;--ink2:#334155;--muted:#64748b;--line:#e2e8f0;--bg:#fff;--bg2:#f8fafc;
@@ -114,12 +114,18 @@ td.hoy{background:#fff1f2}td.mod{background:#f0fdf4}
 footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);text-align:center}
 @media (max-width:640px){body{font-size:16.5px}section{padding:48px 0}.barra b{display:none}
 .tabla{border:0;overflow:visible}.tabla table,.tabla tbody,.tabla tr,.tabla th,.tabla td{display:block;width:auto}.tabla thead{display:none}.tabla tr{border:1px solid var(--line);border-radius:14px;margin:0 0 12px;padding:10px 14px;background:#fff}.tabla tbody th{border:0;padding:0 0 6px;font-size:16px}.tabla table{min-width:0}.tabla tbody th{width:auto}.tabla td{border:0;padding:8px 10px;border-radius:8px;margin-top:6px}.tabla td[data-l]::before{content:attr(data-l);display:block;font:700 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}}
+.pendientes{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:8px}
+.pendientes li{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px 44px;font-size:15.5px}
+.pendientes li::before{content:"";position:absolute;left:14px;top:15px;width:16px;height:16px;border:2px solid #94a3b8;border-radius:4px}
+.pendientes b{color:var(--ink)}
+.pri{float:right;margin:0 0 4px 10px;font:700 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px}
+.pri.alta{background:#fee2e2;color:#991b1b}.pri.media{background:#fef3c7;color:#92400e}
 @media print{.barra{display:none}.fallo .cuerpo{display:grid}}
 </style>
 </head>
 <body>
 <header class="barra"><div class="w"><b>Democracia orgánica moderna</b><nav aria-label="Secciones">
-<a href="#que-es">Qué es</a><a href="#espana">España hoy</a><a href="#principios">Principios</a><a href="#modelo">El modelo</a><a href="#escalas">Escalas</a><a href="#directa">Democracia directa</a><a href="#comparacion">Comparación</a><a href="#criticas">Críticas</a><a href="#hipotesis">Hipótesis</a><a href="#transicion">Transición</a><a href="#fuentes">Fuentes</a>
+<a href="#que-es">Qué es</a><a href="#espana">España hoy</a><a href="#principios">Principios</a><a href="#modelo">El modelo</a><a href="#escalas">Escalas</a><a href="#directa">Democracia directa</a><a href="#comparacion">Comparación</a><a href="#criticas">Críticas</a><a href="#hipotesis">Hipótesis</a><a href="#lagunas">Lagunas</a><a href="#transicion">Transición</a><a href="#fuentes">Fuentes</a>
 </nav></div></header>
 
 <main>
@@ -127,74 +133,80 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <div class="w">
 <p class="ceja">Una propuesta de Luz &amp; Humanidad · área de Política</p>
 <h1>Democracia orgánica moderna</h1>
-<p class="sub">Una democracia de doble raíz: la persona, con un voto igual al de todas las demás. Y los cuerpos de la sociedad en que vive (su territorio, su oficio y la ciudadanía común), con voz propia.</p>
+<p class="sub">Una democracia de doble raíz: la ciudadanía, donde todas las personas votan igual, y los oficios, donde deciden quienes los ejercen. Y cada poder, fuera del alcance de los partidos.</p>
 <ol class="resumen">
-<li><span>1</span><div><b>Lo que no cambia:</b> sufragio universal, libertad de asociación, partidos libres, derechos fundamentales fuera de cualquier votación.</div></li>
-<li><span>2</span><div><b>Lo que se añade:</b> una segunda cámara con tres tercios (territorios, oficios y ciudadanos por sorteo) que propone leyes y tiene que dar su acuerdo a las de cada sector, aunque la cámara elegida por todos puede superarla por 3/5.</div></li>
-<li><span>3</span><div><b>Lo que se separa:</b> el Gobierno se elige aparte del Parlamento, y ningún poder elige él solo a quien lo controla: jueces, Tribunal Constitucional, Fiscalía y órganos de control tienen orígenes mezclados y salen de concursos públicos.</div></li>
-<li><span>4</span><div><b>Lo que se quita:</b> el dinero y los nombramientos del poder en los medios de comunicación.</div></li>
-<li><span>5</span><div><b>De abajo arriba:</b> el mismo patrón en cada escala, de la comunidad de vecinos a la nación. Cuatro vías de representación (voto, territorio, oficio y sorteo) y, además, la decisión directa por temas.</div></li>
+<li><span>1</span><div><b>Lo que no cambia:</b> sufragio universal para votar, libertad de asociación, partidos libres, derechos fundamentales fuera de cualquier votación.</div></li>
+<li><span>2</span><div><b>Quién hace las leyes:</b> la Cámara General, que elige toda la ciudadanía, hace las leyes comunes y coordina. Cada oficio regula lo suyo en su propia cámara: sus tecnócratas proponen, hay consulta pública abierta a todos y votan sus profesionales. Una persona puede estar en varios oficios.</div></li>
+<li><span>3</span><div><b>Lo que se separa:</b> jueces y guardianes de la seguridad eligen sus órganos de abajo arriba; sus mandos, los órganos de control y la dirección de los medios públicos salen de concursos. El Gobierno no nombra a ninguno.</div></li>
+<li><span>4</span><div><b>Lo que le queda al Gobierno:</b> recaudar y asignar el dinero público según las leyes. Ni legisla ni nombra.</div></li>
+<li><span>5</span><div><b>De abajo arriba:</b> el mismo patrón en cada escala, de la comunidad vecinal a la nación, con representantes que responden ante quien los eligió. Y además, la decisión directa por temas.</div></li>
 </ol>
 <p class="aviso">Es un <b>ejercicio de diseño</b> para debatir, con sus principios e hipótesis a la vista. No es un programa de partido ni una recomendación de voto. Los fallos del sistema actual se cuentan como fallos del diseño, con lo que ha hecho cada parte y con los mejores argumentos de quienes lo defienden.</p>
 
 <figure id="arquitectura">
 <div class="lienzo"><svg viewBox="0 0 1100 640" role="img" aria-labelledby="arq-t arq-d">
 <title id="arq-t">La arquitectura del modelo</title>
-<desc id="arq-d">De izquierda a derecha: la ciudadanía; sus cuatro raíces (voto personal, territorio, oficios y sorteo); los seis poderes que alimentan; y lo que cada poder produce. Cada flecha dice quién elige a quién.</desc>
+<desc id="arq-d">Dos raíces: la ciudadanía, donde todas las personas votan igual, y los profesionales acreditados en uno o varios oficios. La ciudadanía elige la Cámara General y el Gobierno, y decide directamente por iniciativa, referéndum y voto por temas. Los profesionales forman las cámaras de oficios, donde los tecnócratas proponen, hay consulta pública abierta a todos y votan los miembros. La Cámara General controla y coordina a los oficios y elige los órganos de control. Jueces y guardianes eligen sus órganos desde dentro, con miembros externos. El Gobierno solo recauda y asigna.</desc>
 <defs><marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#64748b"/></marker></defs>
 <rect x="0" y="0" width="1100" height="640" rx="16" fill="#fffbeb" opacity=".45"/>
-<text x="550" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a" letter-spacing="2">LA DEMOCRACIA ORGÁNICA MODERNA · QUIÉN ELIGE A QUIÉN</text>
-<!-- column 1: citizens -->
-<rect x="22" y="250" width="150" height="132" rx="12" fill="#1e293b"/>
-<text x="97" y="290" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">CIUDADANÍA</text>
-<text x="97" y="314" text-anchor="middle" font-size="12" fill="#cbd5e1">todas las personas</text>
-<text x="97" y="332" text-anchor="middle" font-size="12" fill="#cbd5e1">con derecho a voto</text>
-<text x="97" y="358" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fde68a">votos iguales</text>
-<!-- column 2: roots -->
-<g font-size="13">
-<rect x="230" y="84" width="170" height="74" rx="10" fill="#1e293b"/><text x="315" y="114" text-anchor="middle" font-weight="800" fill="#fff">Voto personal</text><text x="315" y="134" text-anchor="middle" font-size="11.5" fill="#cbd5e1">sufragio universal, libre</text><text x="315" y="149" text-anchor="middle" font-size="11.5" fill="#cbd5e1">y secreto</text>
-<rect x="230" y="210" width="170" height="74" rx="10" fill="#0284c7"/><text x="315" y="240" text-anchor="middle" font-weight="800" fill="#fff">Territorio</text><text x="315" y="260" text-anchor="middle" font-size="11.5" fill="#e0f2fe">consejos electos de cada</text><text x="315" y="275" text-anchor="middle" font-size="11.5" fill="#e0f2fe">escala (vecinos → región)</text>
-<rect x="230" y="336" width="170" height="74" rx="10" fill="#d97706"/><text x="315" y="366" text-anchor="middle" font-weight="800" fill="#fff">Oficios</text><text x="315" y="386" text-anchor="middle" font-size="11.5" fill="#fef3c7">cada persona vota en el</text><text x="315" y="401" text-anchor="middle" font-size="11.5" fill="#fef3c7">sector de su actividad (12)</text>
-<rect x="230" y="462" width="170" height="74" rx="10" fill="#059669"/><text x="315" y="492" text-anchor="middle" font-weight="800" fill="#fff">Sorteo</text><text x="315" y="512" text-anchor="middle" font-size="11.5" fill="#d1fae5">ciudadanos comunes,</text><text x="315" y="527" text-anchor="middle" font-size="11.5" fill="#d1fae5">estratificado y rotatorio</text>
+<text x="550" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#0f172a" letter-spacing="2">LA DEMOCRACIA ORGÁNICA MODERNA · QUIÉN ELIGE A QUIÉN</text>
+<!-- roots -->
+<rect x="22" y="110" width="170" height="120" rx="12" fill="#1e293b"/>
+<text x="107" y="144" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">CIUDADANÍA</text>
+<text x="107" y="167" text-anchor="middle" font-size="12" fill="#cbd5e1">todas las personas</text>
+<text x="107" y="184" text-anchor="middle" font-size="12" fill="#cbd5e1">con derecho a voto</text>
+<text x="107" y="211" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fde68a">un voto igual</text>
+<rect x="22" y="370" width="170" height="130" rx="12" fill="#d97706"/>
+<text x="107" y="402" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">PROFESIONALES</text>
+<text x="107" y="425" text-anchor="middle" font-size="12" fill="#fef3c7">acreditados en uno</text>
+<text x="107" y="442" text-anchor="middle" font-size="12" fill="#fef3c7">o varios oficios</text>
+<text x="107" y="469" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">votan en cada oficio</text>
+<text x="107" y="486" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">que ejercen</text>
+<!-- legislative -->
+<rect x="232" y="64" width="360" height="468" rx="14" fill="#fff" stroke="#94a3b8" stroke-dasharray="6 4"/>
+<text x="412" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="#475569" letter-spacing="1.5">QUIÉN HACE LAS LEYES</text>
+<rect x="252" y="102" width="320" height="124" rx="10" fill="#0369a1"/>
+<text x="412" y="128" text-anchor="middle" font-size="13.5" font-weight="800" fill="#fff">CÁMARA GENERAL · HOLÍSTICA</text>
+<text x="412" y="150" text-anchor="middle" font-size="12" fill="#e0f2fe">la eligen todos, en cada escala</text>
+<text x="412" y="168" text-anchor="middle" font-size="12" fill="#e0f2fe">leyes comunes, derechos y presupuesto</text>
+<text x="412" y="186" text-anchor="middle" font-size="12" fill="#e0f2fe">coordina los oficios y evalúa</text>
+<text x="412" y="204" text-anchor="middle" font-size="12" fill="#e0f2fe">el sistema entero</text>
+<g stroke="#0369a1" stroke-width="1.8" fill="none" marker-end="url(#fl)"><path d="M330,228 V296"/></g>
+<g stroke="#d97706" stroke-width="1.8" fill="none" marker-end="url(#fl)"><path d="M494,298 V230"/></g>
+<text x="322" y="266" text-anchor="end" font-size="11.5" fill="#075985">controla</text><text x="322" y="281" text-anchor="end" font-size="11.5" fill="#075985">y propone</text>
+<text x="502" y="266" font-size="11.5" fill="#92400e">informa</text><text x="502" y="281" font-size="11.5" fill="#92400e">y propone</text>
+<rect x="252" y="300" width="320" height="214" rx="10" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
+<text x="412" y="324" text-anchor="middle" font-size="13.5" font-weight="800" fill="#92400e">CÁMARAS DE OFICIOS</text>
+<g font-size="11.5" text-anchor="middle">
+<rect x="264" y="338" width="92" height="58" rx="8" fill="#d97706"/><text x="310" y="362" font-weight="800" fill="#fff">Tecnócratas</text><text x="310" y="380" fill="#fef3c7">proponen</text>
+<rect x="366" y="338" width="92" height="58" rx="8" fill="#fff" stroke="#d97706" stroke-width="1.5"/><text x="412" y="360" font-weight="800" fill="#92400e">Consulta</text><text x="412" y="374" font-weight="800" fill="#92400e">pública</text><text x="412" y="389" font-size="10.5" fill="#475569">todos aportan</text>
+<rect x="468" y="338" width="92" height="58" rx="8" fill="#b45309"/><text x="514" y="362" font-weight="800" fill="#fff">Miembros</text><text x="514" y="380" fill="#fef3c7">votan</text>
 </g>
-<g stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#fl)">
-<path d="M172,300 H200 V121 H228"/><path d="M200,300 V247 H228"/><path d="M172,330 H200 V373 H228"/><path d="M200,373 V499 H228"/>
+<g stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#fl)"><path d="M356,367 H364"/><path d="M458,367 H466"/></g>
+<text x="412" y="424" text-anchor="middle" font-size="12" fill="#334155">Solo votan quienes ejercen el oficio.</text>
+<text x="412" y="444" text-anchor="middle" font-size="12" fill="#334155">Su representante sube a la escala de arriba,</text>
+<text x="412" y="461" text-anchor="middle" font-size="12" fill="#334155">y el gremio valida lo que allí decide.</text>
+<text x="412" y="490" text-anchor="middle" font-size="12" font-weight="700" fill="#9a3412">Lo que afecta a terceros lo valida la General.</text>
+<!-- other powers -->
+<g font-size="12">
+<rect x="640" y="62" width="438" height="66" rx="10" fill="#e11d48"/><text x="656" y="88" font-size="13.5" font-weight="800" fill="#fff">GOBIERNO · RECAUDA Y ASIGNA</text><text x="656" y="110" fill="#ffe4e6">lo elige la ciudadanía; ejecuta el presupuesto; ni legisla ni nombra</text>
+<rect x="640" y="146" width="438" height="66" rx="10" fill="#7c3aed"/><text x="656" y="172" font-size="13.5" font-weight="800" fill="#fff">JUSTICIA</text><text x="656" y="194" fill="#ede9fe">los jueces eligen su consejo de abajo arriba, con miembros externos</text>
+<rect x="640" y="230" width="438" height="66" rx="10" fill="#0f766e"/><text x="656" y="256" font-size="13.5" font-weight="800" fill="#fff">GUARDIANES · SEGURIDAD</text><text x="656" y="278" fill="#ccfbf1">por escalas; mandos por concurso; obedecen a la ley y a los jueces</text>
+<rect x="640" y="314" width="438" height="66" rx="10" fill="#be185d"/><text x="656" y="340" font-size="13.5" font-weight="800" fill="#fff">MEDIOS DE COMUNICACIÓN</text><text x="656" y="362" fill="#fce7f3">sin dinero discrecional ni directivos nombrados por el poder</text>
+<rect x="640" y="398" width="438" height="66" rx="10" fill="#475569"/><text x="656" y="424" font-size="13.5" font-weight="800" fill="#fff">ÓRGANOS DE CONTROL</text><text x="656" y="446" fill="#e2e8f0">Cuentas, Defensor, Junta Electoral…: concurso y elección por la General</text>
+<rect x="640" y="482" width="438" height="66" rx="10" fill="#047857"/><text x="656" y="508" font-size="13.5" font-weight="800" fill="#fff">PODER CIUDADANO DIRECTO</text><text x="656" y="530" fill="#d1fae5">iniciativa, referéndum, revocatorio y voto por temas</text>
 </g>
-<!-- column 3: powers -->
-<g font-size="13">
-<rect x="470" y="56" width="210" height="58" rx="10" fill="#e11d48"/><text x="575" y="80" text-anchor="middle" font-weight="800" fill="#fff">PRESIDENCIA DEL GOBIERNO</text><text x="575" y="100" text-anchor="middle" font-size="11.5" fill="#ffe4e6">elección directa, mandato fijo</text>
-<rect x="470" y="134" width="210" height="58" rx="10" fill="#0369a1"/><text x="575" y="158" text-anchor="middle" font-weight="800" fill="#fff">CÁMARA DE LOS CIUDADANOS</text><text x="575" y="178" text-anchor="middle" font-size="11.5" fill="#e0f2fe">350 escaños, sistema mixto</text>
-<rect x="470" y="240" width="210" height="120" rx="10" fill="#b45309"/><text x="575" y="266" text-anchor="middle" font-weight="800" fill="#fff">CÁMARA DE LA SOCIEDAD</text><text x="575" y="286" text-anchor="middle" font-size="11.5" fill="#fef3c7">240 escaños en tres tercios</text>
-<rect x="488" y="298" width="174" height="16" rx="4" fill="#0284c7"/><text x="575" y="310" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">tercio territorial · 80</text>
-<rect x="488" y="318" width="174" height="16" rx="4" fill="#f59e0b"/><text x="575" y="330" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">tercio de oficios · 80</text>
-<rect x="488" y="338" width="174" height="16" rx="4" fill="#059669"/><text x="575" y="350" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">tercio cívico, por sorteo · 80</text>
-<rect x="470" y="384" width="210" height="58" rx="10" fill="#7c3aed"/><text x="575" y="408" text-anchor="middle" font-weight="800" fill="#fff">CONSEJO DE JUSTICIA</text><text x="575" y="428" text-anchor="middle" font-size="10.5" fill="#ede9fe">12 jueces + 6 de las cámaras + 3 sorteo</text>
-<rect x="470" y="462" width="210" height="58" rx="10" fill="#475569"/><text x="575" y="486" text-anchor="middle" font-weight="800" fill="#fff">ÓRGANOS DE CONTROL</text><text x="575" y="506" text-anchor="middle" font-size="11.5" fill="#e2e8f0">concurso + cámara + sorteo</text>
-<rect x="470" y="540" width="210" height="58" rx="10" fill="#047857"/><text x="575" y="564" text-anchor="middle" font-weight="800" fill="#fff">PODER CIUDADANO DIRECTO</text><text x="575" y="584" text-anchor="middle" font-size="11.5" fill="#d1fae5">iniciativa, referéndum, revocatorio</text>
+<g stroke-width="1.7" fill="none" marker-end="url(#fl)">
+<path d="M192,166 H250" stroke="#1e293b"/>
+<path d="M192,435 H250" stroke="#d97706"/>
+<path d="M107,108 V46 H624 V95 H638" stroke="#1e293b"/>
+<path d="M22,172 H12 V596 H624 V515 H638" stroke="#1e293b" stroke-dasharray="5 4"/>
+<path d="M574,150 H608 V431 H638" stroke="#0369a1"/>
 </g>
-<g stroke-width="1.6" fill="none" marker-end="url(#fl)">
-<path d="M400,110 H440 V85 H468" stroke="#1e293b"/><path d="M440,110 V163 H468" stroke="#1e293b"/><path d="M400,132 H420 V569 H468" stroke="#1e293b" stroke-dasharray="5 4"/>
-<path d="M400,247 H468 V306" stroke="#0284c7"/><path d="M400,373 H446 V326 H486" stroke="#d97706"/><path d="M400,499 H452 V346 H486" stroke="#059669"/>
-<path d="M452,499 H468" stroke="#059669"/>
-</g>
-<!-- column 4: what each produces -->
-<g font-size="12.5">
-<rect x="760" y="56" width="318" height="58" rx="10" fill="#fff" stroke="#e11d48" stroke-width="1.6"/><text x="776" y="80" font-weight="800" fill="#9f1239">Gobierno y ministros</text><text x="776" y="99" font-size="11.5" fill="#475569">ministros con audiencia en la Cámara de la Sociedad</text>
-<rect x="760" y="134" width="318" height="58" rx="10" fill="#fff" stroke="#0369a1" stroke-width="1.6"/><text x="776" y="158" font-weight="800" fill="#075985">Leyes y presupuestos</text><text x="776" y="177" font-size="11.5" fill="#475569">las dos cámaras; «doble llave» en las sectoriales</text>
-<rect x="760" y="212" width="318" height="70" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.6"/><text x="776" y="236" font-weight="800" fill="#5b21b6">Tribunal Constitucional (12)</text><text x="776" y="255" font-size="11.5" fill="#475569">4 Ciudadanos · 4 Sociedad · 4 por sorteo</text><text x="776" y="271" font-size="11.5" fill="#475569">(sorteo entre juristas que superan un concurso)</text>
-<rect x="760" y="300" width="318" height="58" rx="10" fill="#fff" stroke="#b45309" stroke-width="1.6"/><text x="776" y="324" font-weight="800" fill="#92400e">Fiscal General</text><text x="776" y="343" font-size="11.5" fill="#475569">terna del Consejo Fiscal → Cámara de la Sociedad</text>
-<rect x="760" y="384" width="318" height="58" rx="10" fill="#fff" stroke="#7c3aed" stroke-width="1.6"/><text x="776" y="408" font-weight="800" fill="#5b21b6">Jueces y magistrados</text><text x="776" y="427" font-size="11.5" fill="#475569">ascensos por concurso público de méritos</text>
-<rect x="760" y="462" width="318" height="58" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/><text x="776" y="486" font-weight="800" fill="#334155">Cuentas, Defensor, Junta Electoral, Medios</text><text x="776" y="505" font-size="11.5" fill="#475569">los elige una cámara distinta de la que controlan</text>
-<rect x="760" y="540" width="318" height="58" rx="10" fill="#fff" stroke="#047857" stroke-width="1.6"/><text x="776" y="564" font-weight="800" fill="#065f46">Mandatos por temas («Votar por temas»)</text><text x="776" y="583" font-size="11.5" fill="#475569">precedidos de una asamblea por sorteo</text>
-</g>
-<g stroke="#94a3b8" stroke-width="1.4" fill="none" marker-end="url(#fl)">
-<path d="M680,85 H758"/><path d="M680,163 H758"/><path d="M680,260 H720 V230 H758"/><path d="M720,260 V329 H758"/><path d="M680,413 H758"/><path d="M680,491 H758"/><path d="M680,569 H758"/>
-<path d="M680,172 H700 V244 H758"/>
-</g>
-<text x="22" y="622" font-size="12" fill="#64748b">Línea continua: elige o compone · discontinua: el voto personal también decide directamente. Detalles de cada caja en «El modelo».</text>
+<text x="30" y="616" font-size="12" fill="#64748b">Flechas: quién elige a quién (discontinua: la ciudadanía decide directamente).</text><text x="30" y="632" font-size="12" fill="#64748b">Jueces y guardianes eligen sus órganos desde dentro, con miembros externos; mandos, control y medios, por concurso. El Gobierno no nombra a nadie.</text>
 </svg></div>
 <p class="desliza">Desliza el esquema hacia los lados para verlo entero.</p>
-<figcaption>El esquema se lee como el organigrama clásico de la «democracia orgánica» (de quien manda hacia abajo), pero al revés: aquí todo nace de la ciudadanía, y cada poder tiene un origen distinto.</figcaption>
+<figcaption>El esquema se lee como el organigrama clásico de la «democracia orgánica» (de quien manda hacia abajo), pero al revés: aquí todo nace de abajo, de la ciudadanía y de quienes ejercen cada oficio, y cada poder tiene un origen distinto.</figcaption>
 </figure>
 </div>
 </section>
@@ -228,13 +240,13 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <div class="caja color" style="--c:#7c3aed">
 <p class="ceja" style="color:#5b21b6">Lo que SÍ es esta propuesta</p>
 <ul style="margin:0;padding-left:1.15em">
-<li><b>Primero el voto igual.</b> La segunda raíz se suma al sufragio universal; no lo sustituye ni lo pondera.</li>
-<li><b>Organizaciones libres y plurales.</b> En cada sector compiten varias; nadie está obligado a afiliarse, y a los representantes de un sector los elige directamente la gente de ese sector, no las cúpulas.</li>
+<li><b>Primero el voto igual.</b> Los oficios se suman al sufragio universal, no lo sustituyen: lo que afecta a todos lo decide la Cámara General, donde cada persona vale lo mismo.</li>
+<li><b>Organizaciones libres y plurales.</b> En cada oficio compiten varias; nadie está obligado a afiliarse, y a los representantes de un oficio los eligen directamente quienes lo ejercen, que además validan lo que deciden.</li>
 <li><b>Poderes separados de verdad,</b> con orígenes distintos y controles cruzados.</li>
-<li><b>El sorteo</b> como antídoto contra la captura: un tercio de la cámara orgánica son ciudadanos comunes.</li>
+<li><b>Quien sabe propone, todos opinan, el oficio decide:</b> tecnócratas que redactan, consulta pública abierta a cualquiera y voto de los miembros.</li>
 <li><b>Reversible:</b> todo cargo electo rinde cuentas y la ciudadanía puede corregir por referéndum.</li>
 </ul>
-<p class="nota" style="margin:12px 0 0"><b>Sobre el nombre.</b> «Democracia orgánica» fue el nombre oficial que se dio a sí mismo el franquismo, y por eso puede confundir. Lo mantenemos porque describe bien la idea de representar a los cuerpos de la sociedad, y lo acompañamos de su versión precisa: <b>democracia de doble raíz</b>. Otros nombres posibles: democracia asociativa, o democracia plural de abajo arriba.</p>
+<p class="nota" style="margin:12px 0 0"><b>Sobre el nombre.</b> «Democracia orgánica» fue el nombre oficial que se dio a sí mismo el franquismo, y por eso puede confundir. Se mantiene porque describe bien la idea de representar a los cuerpos de la sociedad, y lo acompañamos de su versión precisa: <b>democracia de doble raíz</b>. Otros nombres posibles: democracia asociativa, o democracia plural de abajo arriba.</p>
 </div>
 </div>
 </div>
@@ -299,21 +311,21 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <div><b class="et h">Hecho</b><p>El Congreso inviste al Presidente (art. 99) y puede derribarlo con una moción de censura (art. 113). Con mayoría, el Gobierno controla también la agenda de la cámara que debería vigilarlo.</p></div>
 <div><b class="et c">Crítica</b><p>Manuel García-Pelayo describió el «Estado de partidos»: entre Gobierno y Parlamento ya no hay separación de poderes, sino de partidos. Antonio García-Trevijano lo llevó más lejos: sin elecciones separadas, no hay separación de poderes.</p></div>
 <div><b class="et d">Defensa</b><p>Juan Linz sostuvo que el parlamentarismo es más flexible y estable que el presidencialismo: un Gobierno cae sin crisis de régimen. Arend Lijphart mostró que las democracias de consenso, parlamentarias y proporcionales, protegen mejor a las minorías. Casi todas las democracias europeas son parlamentarias.</p></div>
-<div><b class="et p">Propuesta</b><p>Presidencia elegida directamente, con mandato fijo, juicio político y una salida al bloqueo. Alternativa: un Gobierno colegiado de mandato fijo, al estilo suizo.</p></div>
+<div><b class="et p">Propuesta</b><p>Un Gobierno elegido directamente, con mandato fijo, que solo recauda y asigna: no legisla ni nombra a jueces, fiscales, mandos de seguridad, directivos de medios ni reguladores. Alternativa: un Gobierno colegiado de mandato fijo, al estilo suizo.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">2</span><div><h4>A quién responde cada diputado</h4><span class="tema">Representación</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>Al Congreso se vota con listas cerradas y bloqueadas por provincia. La Constitución prohíbe el mandato imperativo (art. 67.2), pero los grupos imponen disciplina de voto y sancionan a quien la rompe.</p></div>
 <div><b class="et c">Crítica</b><p>Quien quiera repetir en la lista obedece a la dirección. El votante no puede premiar ni castigar a una persona concreta.</p></div>
 <div><b class="et d">Defensa</b><p>La disciplina hace previsibles los programas y evita que cada voto se negocie por separado. Las listas abiertas premian a los famosos y a quien tiene más dinero para hacer campaña.</p></div>
-<div><b class="et p">Propuesta</b><p>Sistema mixto: la mitad de los escaños con nombre y apellidos en distritos pequeños; la otra mitad en listas desbloqueadas que compensan para que el resultado sea proporcional.</p></div>
+<div><b class="et p">Propuesta</b><p>En la Cámara General, la mitad de los escaños con nombre y apellidos en distritos pequeños y la otra mitad en listas desbloqueadas que compensan para que el resultado sea proporcional. En los oficios, cada representante responde ante su gremio, que valida lo que decide.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">3</span><div><h4>No todos los votos pesan lo mismo</h4><span class="tema">Igualdad del voto</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>Cada provincia es una circunscripción con un mínimo inicial de diputados, y el reparto se hace por el método D'Hondt. Un escaño cuesta muchos menos votos en las provincias pequeñas que en Madrid o Barcelona.</p></div>
 <div><b class="et c">Crítica</b><p>Se rompe la igualdad del voto, y los partidos medianos con voto repartido por todo el país salen penalizados.</p></div>
 <div><b class="et d">Defensa</b><p>Protege a las provincias poco pobladas, que de otro modo apenas tendrían voz, y favorece mayorías que facilitan gobernar.</p></div>
-<div><b class="et p">Propuesta</b><p>Compensación proporcional de ámbito nacional en la Cámara de los Ciudadanos. Parte de la protección territorial pasa al tercio territorial de la Cámara de la Sociedad, aunque las provincias menos pobladas pierden peso respecto a hoy: es un coste consciente a favor del voto igual.</p></div>
+<div><b class="et p">Propuesta</b><p>Compensación proporcional de ámbito nacional en la Cámara General. Las provincias menos pobladas pierden peso respecto a hoy: es un coste consciente a favor del voto igual. El territorio se protege de otra forma: cada escala tiene sus propias cámaras, con competencias que la de arriba no puede quitarle.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">4</span><div><h4>De qué viven los partidos</h4><span class="tema">Financiación</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
@@ -327,21 +339,21 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <div><b class="et h">Hecho</b><p>El Congreso y el Senado eligen por 3/5 a los 20 vocales del CGPJ, también a los 12 que son jueces. La ley de 1985 (PSOE) pasó esa elección a las Cortes; el PP prometió cambiarla y en 2013 la mantuvo. El Consejo estuvo caducado de 2018 a 2024 porque los dos partidos no se pusieron de acuerdo. En 2025 el Consejo envió dos modelos de reforma, uno de cada sector. La Comisión de Venecia advirtió entonces de una politización externa (los partidos) e interna (las asociaciones judiciales).</p></div>
 <div><b class="et c">Crítica</b><p>El Consejo de Europa recomienda que al menos la mitad de los consejos judiciales sean jueces elegidos por sus pares. Quien nombra a los jueces que ascienden al Supremo puede influir en quién juzgará a los políticos.</p></div>
 <div><b class="et d">Defensa</b><p>El Tribunal Constitucional avaló la elección parlamentaria (STC 108/1986): da al Consejo legitimidad democrática y evita que los jueces se gobiernen como un cuerpo cerrado. La misma sentencia advirtió, eso sí, del riesgo de repartir los puestos por cuotas de partido.</p></div>
-<div><b class="et p">Propuesta</b><p>12 vocales jueces elegidos por todos los jueces, con voto personal y listas abiertas, sin cuotas de asociaciones. Junto a ellos, 9 vocales de otros orígenes, y ascensos por concurso público de méritos.</p></div>
+<div><b class="et p">Propuesta</b><p>De abajo arriba: los jueces de cada partido judicial eligen, con voto personal y listas abiertas y sin cuotas de asociaciones, a sus representantes en el consejo de su región, y estos al Consejo de Justicia. Junto a 12 jueces, 9 miembros externos elegidos por la Cámara General y por el oficio jurídico, y ascensos por concurso público de méritos.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">6</span><div><h4>Cómo se compone el Tribunal Constitucional</h4><span class="tema">Justicia · Constitucional</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>Doce magistrados (art. 159): cuatro los propone el Congreso y cuatro el Senado, en ambos casos por 3/5; dos el Gobierno y dos el CGPJ. El mandato es de nueve años y se renueva por tercios. Las renovaciones se han retrasado a menudo.</p></div>
 <div><b class="et c">Crítica</b><p>Los medios y los propios partidos hablan de magistrados «progresistas» y «conservadores», y las sentencias se anticipan por esa cuenta. Eso daña la confianza en el árbitro.</p></div>
 <div><b class="et d">Defensa</b><p>Interpretar la Constitución tiene una dimensión política: es razonable que la elijan órganos con legitimidad democrática. Las mayorías de 3/5 obligan a pactar.</p></div>
-<div><b class="et p">Propuesta</b><p>Cuatro magistrados por cada cámara y cuatro por sorteo entre juristas que superan un concurso público. Mandato único, y si no hay acuerdo en plazo, sorteo entre los aprobados.</p></div>
+<div><b class="et p">Propuesta</b><p>Cuatro magistrados elegidos por los jueces, cuatro por la Cámara General por 3/5 y cuatro por la cámara del oficio jurídico, siempre entre quienes superan un concurso público. Mandato único; si no hay acuerdo en plazo, entra quien mejor puntuó.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">7</span><div><h4>Quién propone al Fiscal General</h4><span class="tema">Justicia · Fiscalía</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>El Fiscal General lo nombra el Rey a propuesta del Gobierno, oído el CGPJ (art. 124.4), y la Fiscalía funciona con dependencia jerárquica. Gobiernos de distinto color han nombrado a personas de su confianza, y el nombramiento y la actuación del Fiscal General se discuten cada vez que cambia la mayoría.</p></div>
 <div><b class="et c">Crítica</b><p>Quien dirige la acusación depende de un Gobierno cuyos miembros pueden acabar acusados.</p></div>
 <div><b class="et d">Defensa</b><p>La política contra el delito necesita un responsable que rinda cuentas ante los votantes. Una Fiscalía totalmente autónoma no respondería ante nadie.</p></div>
-<div><b class="et p">Propuesta</b><p>El Consejo Fiscal propone una terna tras un concurso público, y la Cámara de la Sociedad elige por 3/5. Mandato único de seis años, comparecencia anual ante la Cámara de los Ciudadanos y cese solo por causas tasadas.</p></div>
+<div><b class="et p">Propuesta</b><p>El Consejo Fiscal propone una terna tras un concurso público, y la Cámara General elige por 3/5; si no hay acuerdo en tres meses, el más votado por los fiscales. Mandato único de seis años, cuentas anuales ante la Cámara General y cese solo por causas tasadas.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">8</span><div><h4>Quién dirige la televisión pública</h4><span class="tema">Medios · RTVE</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
@@ -362,42 +374,42 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <div><b class="et h">Hecho</b><p>Al Tribunal de Cuentas y al Defensor del Pueblo los eligen las Cortes por 3/5. A la AIReF, la CNMC, el Banco de España y el CIS los nombra el Gobierno. La Junta Electoral Central combina magistrados del Supremo sorteados con catedráticos propuestos conjuntamente por los partidos con representación en el Congreso.</p></div>
 <div><b class="et c">Crítica</b><p>O el Gobierno nombra a quien debe vigilarlo, o los partidos se reparten las plazas por cuotas.</p></div>
 <div><b class="et d">Defensa</b><p>Son personas de prestigio, que suelen comparecer ante el Congreso, y las mayorías reforzadas obligan a pactar candidatos aceptables para todos.</p></div>
-<div><b class="et p">Propuesta</b><p>Concurso público y elección en una cámara distinta de la que el órgano controla. Si no hay acuerdo en plazo, sorteo entre los aprobados. La Junta Electoral, entera por sorteo entre magistrados y catedráticos.</p></div>
+<div><b class="et p">Propuesta</b><p>Concurso público y elección por la Cámara General por 3/5. Si no hay acuerdo en plazo, entra quien mejor puntuó. El Gobierno, que solo recauda y asigna, no nombra a ninguno. La Junta Electoral, con magistrados elegidos por los jueces y catedráticos elegidos por el oficio jurídico.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">11</span><div><h4>Cuánto decide la ciudadanía entre elecciones</h4><span class="tema">Participación directa</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>La iniciativa legislativa popular exige 500.000 firmas y excluye las leyes orgánicas, los impuestos, los tratados y el indulto (art. 87.3). El referéndum consultivo lo convoca el Rey a propuesta del Presidente, con autorización del Congreso (art. 92). No hay revocación ni referéndum de iniciativa ciudadana.</p></div>
 <div><b class="et c">Crítica</b><p>La ciudadanía delega todo en bloque y no puede corregir nada entre elecciones.</p></div>
 <div><b class="et d">Defensa</b><p>La representación permite decisiones meditadas y negociadas. Los referéndums simplifican cuestiones complejas en un sí o un no y pueden polarizar.</p></div>
-<div><b class="et p">Propuesta</b><p>Iniciativa con el 1 % del censo, referéndum por iniciativa ciudadana con el 2 %, precedido de una asamblea por sorteo y de un control previo de constitucionalidad. Revocatorio con un umbral alto y en una sola ventana por mandato. Votar por temas con 100 puntos.</p></div>
+<div><b class="et p">Propuesta</b><p>Iniciativa con el 1 % del censo y referéndum por iniciativa ciudadana con el 2 %, precedido de una consulta pública, de los argumentos publicados por la Cámara General y los oficios afectados y de un control previo de constitucionalidad. Revocatorio con un umbral alto y en una sola ventana por mandato. Votar por temas con 100 puntos.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">12</span><div><h4>Qué papel tiene la sociedad organizada</h4><span class="tema">Sociedad organizada</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>El Consejo Económico y Social (61 miembros: 20 de sindicatos, 20 de organizaciones empresariales y 20 de otros grupos y expertos) es solo consultivo. A su presidente lo nombra el Gobierno con el apoyo de dos tercios del Consejo. Los grupos de interés influyen por cauces poco visibles.</p></div>
 <div><b class="et c">Crítica</b><p>Los afectados y quienes saben del asunto llegan tarde o entran por la puerta de atrás, mediante presión opaca.</p></div>
 <div><b class="et d">Defensa</b><p>El diálogo social ha dado grandes acuerdos sin dar poder legislativo a organizaciones, y dárselo sería corporativismo.</p></div>
-<div><b class="et p">Propuesta</b><p>La Cámara de la Sociedad, con voz y voto. Un registro público de grupos de interés y de reuniones. En cada ley sectorial vota también el tercio por sorteo, que habla como usuario, para equilibrar a los productores.</p></div>
+<div><b class="et p">Propuesta</b><p>Las cámaras de oficios, con poder normativo real en su ámbito, abiertas a la consulta pública y bajo la validación de la Cámara General en lo que afecta a terceros. Un registro público de grupos de interés y de reuniones.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">13</span><div><h4>Qué representa el Senado</h4><span class="tema">Territorio</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>La Constitución lo define como cámara de representación territorial (art. 69). Pero la mayoría de los senadores se eligen por provincias en listas de partido, y su veto lo levanta el Congreso por mayoría absoluta, o por mayoría simple pasados dos meses (art. 90).</p></div>
 <div><b class="et c">Crítica</b><p>Es una cámara de segunda lectura con la misma lógica de partidos que el Congreso, y los territorios negocian por otras vías (bilateralidad, apoyos parlamentarios).</p></div>
 <div><b class="et d">Defensa</b><p>La segunda lectura corrige errores, y en el Senado ya se vota a personas (listas abiertas).</p></div>
-<div><b class="et p">Propuesta</b><p>Sustituirlo por la Cámara de la Sociedad, cuyo tercio territorial forman delegados de los consejos electos de regiones y municipios.</p></div>
+<div><b class="et p">Propuesta</b><p>Desaparece. El territorio queda representado porque cada escala (municipio, comarca, región) tiene su propia Cámara General y sus cámaras de oficios, con competencias propias, y envía representantes a la de arriba.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">14</span><div><h4>La política de bloques y la polarización</h4><span class="tema">Polarización</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>España aparece primera de veinte democracias en polarización afectiva (rechazo a los votantes de otros partidos) en el estudio comparado de Gidron, Adams y Horne (2020). Torcal y Comellas (2022) matizan que el sur de Europa no destaca en la media.</p></div>
 <div><b class="et c">Crítica</b><p>Cuando toda la representación es una competición de bloques por el todo, el que gana se lo lleva todo y el adversario pasa a ser una amenaza. Lo estudia el <a href="https://luzhumanidad.com/observatorio-de-polarizacion" target="_top">Observatorio de polarización</a>.</p></div>
 <div><b class="et d">Defensa</b><p>La polarización tiene causas sociales y mediáticas (crisis, redes sociales) más que institucionales, y también es alta en sistemas presidenciales como el de Estados Unidos.</p></div>
-<div><b class="et p">Propuesta</b><p>Repartir la representación por vías que no son de bloque (oficios, territorios, sorteo) y votar por temas en lugar de por colores.</p></div>
+<div><b class="et p">Propuesta</b><p>Repartir el poder de hacer normas por oficios, que no son bloques ideológicos, y votar por temas en lugar de por colores.</p></div>
 </div></details>
 
 <details class="fallo"><summary><span class="n">15</span><div><h4>Cómo se selecciona a quien gobierna</h4><span class="tema">Selección · la crítica de Platón</span></div><span class="mas">Ver</span></summary><div class="cuerpo">
 <div><b class="et h">Hecho</b><p>Nada obliga a demostrar capacidad ni a que alguien independiente evalúe el coste y los efectos de un programa. Las campañas giran alrededor de líderes y del tiempo que consiguen en los medios.</p></div>
 <div><b class="et c">Crítica</b><p>Platón (República, libro VIII) describió cómo la democracia degenera en demagogia y, de ahí, en tiranía. Aristóteles asoció la elección con la oligarquía o la aristocracia, y el sorteo con la democracia. Madison (El Federalista, 10) temía a las facciones.</p></div>
 <div><b class="et d">Defensa</b><p>El remedio de Platón, el gobierno de los sabios, era antidemocrático. Cualquier filtro de «capacidad» puede acabar excluyendo a personas por su origen o su formación.</p></div>
-<div><b class="et p">Propuesta</b><p>Filtros sin aristocracia:</p><ul><li>evaluación pública de los programas por una autoridad independiente, como hace la oficina de análisis económico de los Países Bajos;</li><li>debates obligatorios;</li><li>límite de mandatos;</li><li>conocimiento de los oficios;</li><li>sorteo.</li></ul></div>
+<div><b class="et p">Propuesta</b><p>Filtros sin aristocracia:</p><ul><li>las normas técnicas las redactan tecnócratas que superan un concurso, y las vota quien conoce el oficio;</li><li>una Cámara General con visión de conjunto, que evalúa el sistema cada año;</li><li>evaluación pública de los programas por una autoridad independiente, como hace la oficina de análisis económico de los Países Bajos;</li><li>debates obligatorios y límite de mandatos.</li></ul></div>
 </div></details>
 </div>
 </div>
@@ -409,14 +421,14 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <h2>Nueve principios de partida</h2>
 <p class="lede">Son las reglas que el diseño intenta cumplir. Cuando una pieza del modelo choca con un principio, se dice.</p>
 <ol class="principios">
-<li><b><i>1</i>Votos iguales para todos</b>El sufragio universal es la base. Cada persona tiene exactamente los mismos votos que cualquier otra (Presidencia, Cámara, su sector, su consejo territorial), y ninguno pesa más.</li>
-<li><b><i>2</i>Doble raíz</b>La persona por sí misma (su voto) y los cuerpos en que vive: su territorio, su oficio o situación (también quien no tiene empleo) y, por sorteo, la ciudadanía común. En total, cuatro vías de representación.</li>
-<li><b><i>3</i>Libertad de asociación</b>Nadie está obligado a afiliarse. En cada sector compiten varias organizaciones, y a quien representa al sector lo elige su gente.</li>
-<li><b><i>4</i>Ningún poder elige él solo a quien lo controla</b>Cada órgano de control mezcla orígenes distintos: una cámara, sus pares y el sorteo entre aprobados en un concurso. Excepción consciente: los jueces son mayoría en su propio consejo, como recomienda el Consejo de Europa, pero con miembros externos y concursos públicos.</li>
-<li><b><i>5</i>De abajo arriba</b>Cada asunto se decide en la escala más baja capaz de resolverlo. Las escalas mayores coordinan y ayudan; no sustituyen.</li>
-<li><b><i>6</i>El más capaz, no el más influyente</b>Filtros de capacidad sin aristocracia: deliberación informada, evaluación pública de programas, conocimiento de los oficios, sorteo y límite de mandatos.</li>
+<li><b><i>1</i>Voto igual en lo común</b>Lo que afecta a todos (la Cámara General, el Gobierno, los referendos) lo vota toda la ciudadanía, y ningún voto pesa más que otro.</li>
+<li><b><i>2</i>Doble raíz</b>La ciudadanía y los oficios. Quien ejerce un oficio y lo acredita decide además sobre lo suyo, y puede estar en varios oficios.</li>
+<li><b><i>3</i>Quien sabe propone, todos opinan, el oficio decide</b>Tecnócratas que redactan, consulta pública abierta a cualquiera con respuesta motivada, y voto de los miembros del oficio.</li>
+<li><b><i>4</i>Nadie nombra a quien lo controla</b>Jueces y guardianes eligen sus órganos desde dentro, con miembros externos; mandos, órganos de control y medios públicos salen de concursos. El Gobierno no nombra a nadie. Que jueces y guardianes se gobiernen a sí mismos es una excepción consciente al control cruzado, compensada con inspecciones independientes y la validación de la Cámara General.</li>
+<li><b><i>5</i>De abajo arriba</b>Cada asunto se decide en la escala más baja capaz de resolverlo. Los representantes suben a la escala de arriba y responden ante quien los eligió.</li>
+<li><b><i>6</i>El más capaz, no el más influyente</b>Acreditación de los oficios, concursos de méritos, evaluación pública de programas y límite de mandatos.</li>
 <li><b><i>7</i>Información sin dinero del poder</b>Quien gobierna no paga ni nombra a quien le informa a uno.</li>
-<li><b><i>8</i>Rendición de cuentas</b>Todo cargo rinde cuentas y todo se publica. Los de elección directa (Presidencia y diputados de distrito) pueden ser revocados.</li>
+<li><b><i>8</i>Rendición de cuentas</b>Todo cargo rinde cuentas y todo se publica. Los representantes de oficio validan sus decisiones con su gremio, y los cargos de elección directa pueden ser revocados.</li>
 <li><b><i>9</i>Derechos fuera de subasta</b>Los derechos fundamentales no se votan: ni por mayoría, ni por oficios, ni en referéndum.</li>
 </ol>
 <p class="nota" style="margin-top:14px">Recogen también los principios del laboratorio Luz &amp; Humanidad: de abajo hacia arriba, del individuo al planeta; suma positiva; paz y cooperación; igualdad de oportunidades y cuidado de quien no puede valerse por sí mismo.</p>
@@ -426,395 +438,148 @@ footer{padding:36px 0 50px;border-top:1px solid var(--line);font-size:14px;color
 <section id="modelo" class="alt">
 <div class="w">
 <p class="ceja">4 · El modelo</p>
-<h2>Cuatro raíces, seis poderes</h2>
-<p class="lede">Descrito a escala nacional. En cada escala inferior se repite el mismo patrón, a su medida (sección 5). Las cuatro raíces son las cuatro vías de representación; la decisión directa por temas va aparte (sección 6).</p>
+<h2>Dos raíces, seis poderes</h2>
+<p class="lede">Descrito a escala nacional; en cada escala inferior se repite el mismo patrón, a su medida (sección 5). La regla de fondo: <b>lo que afecta a todos lo decide la ciudadanía entera; lo que solo afecta a un oficio lo decide quien lo ejerce</b>, a la vista de todos.</p>
 
-<h3>Las cuatro raíces</h3>
-<div class="rejilla r4">
-<div class="caja color" style="--c:#1e293b"><h4>Voto personal</h4><p>Sufragio universal, libre, igual y secreto. Elige la Presidencia del Gobierno y la Cámara de los Ciudadanos, y vota en referéndums e iniciativas.</p></div>
-<div class="caja color" style="--c:#0284c7"><h4>Territorio</h4><p>Consejos elegidos por sufragio universal en cada escala: comunidad vecinal, municipio, comarca o provincia, región. Cada consejo envía delegados al de la escala superior y al tercio territorial de la Cámara de la Sociedad.</p></div>
-<div class="caja color" style="--c:#d97706"><h4>Oficios</h4><p>Cada persona vota una sola vez, en el sector de su actividad: quien trabaja en un hospital vota en salud, sea asalariada, autónoma o empresaria. Hay doce sectores, también uno para la vida no remunerada, cada uno con un mínimo de tres escaños.</p></div>
-<div class="caja color" style="--c:#059669"><h4>Sorteo</h4><p>Ciudadanos elegidos al azar, con una muestra estratificada por edad, sexo, territorio y estudios para que se parezcan al país. Mandato de dos años y medio, renovado por mitades, retribuido y con permiso laboral. Aceptar es voluntario, y siempre hay suplentes.</p></div>
+<h3>Las dos raíces</h3>
+<div class="rejilla r2">
+<div class="caja color" style="--c:#1e293b"><h4>La ciudadanía</h4><p>Todas las personas con derecho a voto, con o sin oficio, y con un voto igual. Elige la Cámara General de cada escala y el Gobierno, aporta en cualquier consulta pública y decide directamente por iniciativa, referéndum y voto por temas. Quien no ejerce ningún oficio (estudiantes, jubilados, quien cuida en casa, quien busca empleo) está representado aquí con el mismo peso que cualquiera.</p></div>
+<div class="caja color" style="--c:#d97706"><h4>Los oficios</h4><p>Quien ejerce un oficio y lo acredita vota en la cámara de ese oficio. Una persona puede estar en varios: una médica que da clase en la universidad vota en medicina y en enseñanza universitaria. La acreditación se gana por tres vías: un título oficial, la experiencia demostrada (años de ejercicio) o la validación de sus pares mediante una prueba pública. No hace falta afiliarse a ninguna organización.</p></div>
 </div>
-<p class="nota"><b>Cómo se vota por oficios.</b> Por defecto, a cada persona se le asigna su sector según su afiliación a la Seguridad Social, sus estudios, su pensión o su búsqueda de empleo, y puede cambiarlo una vez por mandato. El registro lo custodia la Junta Electoral como dato protegido. Tras el mínimo de tres escaños por sector, el resto se reparte en proporción a los inscritos. Se presentan organizaciones acreditadas (con democracia interna y cuentas públicas) y candidaturas independientes con firmas. <b>Los doce sectores:</b> campo, mar y medio rural · industria y energía · construcción y vivienda · comercio, hostelería y turismo · transporte y logística · finanzas, tecnología y servicios · salud y cuidados · educación, ciencia y universidad · cultura, comunicación y deporte · servicio público y administración · economía social, tercer sector y voluntariado · vida no remunerada (estudiantes, jubilados, cuidadores en casa, personas en paro).</p>
+<p class="nota"><b>Las doce ramas de oficios</b> (cada rama agrupa oficios con cámara propia cuando tienen un ámbito propio que regular): campo, mar y medio rural · industria y energía · construcción, arquitectura y vivienda · comercio, hostelería y turismo · transporte y logística · finanzas, tecnología y servicios · salud y cuidados · educación, ciencia y universidad · cultura, comunicación y deporte · derecho y justicia · administración pública · economía social y tercer sector. En cada oficio compiten libremente colegios, sindicatos, asociaciones empresariales y candidaturas independientes.</p>
 
 <h3>Los seis poderes</h3>
-<div class="poder" style="--c:#e11d48"><h3><span class="chip" style="--c:#e11d48">1</span>Presidencia del Gobierno</h3>
+<div class="poder" style="--c:#0369a1"><h3><span class="chip" style="--c:#0369a1">1</span>Cámara General: la visión de conjunto</h3>
 <ul>
-<li><b>Elección directa</b> del Presidente y del Vicepresidente en tándem, a dos vueltas. Mandato fijo de cinco años, con un máximo de dos. Sucede el Vicepresidente.</li>
-<li><b>Nombra a los ministros</b> tras una audiencia pública en la Cámara de la Sociedad. La Cámara de los Ciudadanos puede reprobar a un ministro por 3/5, y entonces cesa.</li>
-<li><b>No disuelve las cámaras.</b> Los decretos-ley quedan para urgencias, sin tocar derechos, instituciones ni elecciones, y caducan si no se convalidan en 30 días, como hoy.</li>
-<li><b>Juicio político</b> por delito o violación grave de la Constitución: acusa la Cámara de los Ciudadanos por 2/3 y juzga el Tribunal Constitucional.</li>
-<li><b>Salida al bloqueo:</b> si no hay presupuestos durante dos años, el Presidente puede convocar elecciones a las dos cámaras <i>y a su propio cargo</i>, una sola vez por mandato. Es una disolución recíproca: quien rompe, se somete también al voto.</li>
+<li><b>La elige todo el mundo,</b> en cada escala. A escala nacional, 300 escaños por un sistema mixto: la mitad con nombre y apellidos en distritos de un diputado y la otra mitad en listas desbloqueadas que compensan para que el resultado sea proporcional. Si un partido gana más distritos de los escaños que le tocan, sus ganadores de distrito con peor resultado se quedan fuera, como en Alemania desde 2023. Mandato de cuatro años.</li>
+<li><b>Hace las leyes comunes:</b> derechos, código civil y penal, impuestos y presupuesto, organización del Estado y reglas electorales.</li>
+<li><b>Coordina los oficios:</b> aprueba el mapa de lo que puede regular cada oficio en cada escala, resuelve las normas que tocan a varios oficios y puede pedir a un oficio que regule algo en un plazo; si no lo hace, regula ella.</li>
+<li><b>Controla a los oficios:</b> toda norma de un oficio que afecte a terceros (usuarios, otros oficios, el medio ambiente o el dinero público) necesita su validación en 30 días. Si la devuelve, el oficio la rehace, o la General decide por mayoría absoluta.</li>
+<li><b>Evalúa el sistema entero:</b> cada año publica el estado del sistema, con los indicadores de cada escala y de cada oficio, y propone mejoras. Es la función holística: mirar cómo encajan las partes, no solo cada parte.</li>
+<li>Elige, por 3/5 y tras concurso, a los órganos de control, al Fiscal General, a cuatro magistrados del Constitucional y a cinco miembros del Consejo de Justicia, y aprueba el presupuesto que propone el Gobierno.</li>
 </ul>
 <div class="opciones">
-<div class="opcion elegida"><b>Opción A (la del modelo):</b> elección directa. Es la separación más clara. Pero es también la pieza más «el ganador se lo lleva todo» del modelo, y choca con la hipótesis de menos polarización (H1). Su otro riesgo es el choque entre poderes (Linz). Se mitiga con un mandato fijo, sin disolución y con las salidas descritas; si los pilotos no lo confirman, la opción B gana peso.</div>
-<div class="opcion"><b>Opción B:</b> un Gobierno colegiado de siete miembros, elegido por las dos cámaras en sesión conjunta para un mandato fijo, sin moción de censura y con presidencia rotatoria, como el Consejo Federal suizo. Polariza menos, pero separa menos el origen.</div>
+<div class="opcion elegida"><b>Opción A (la del modelo):</b> una cámara holística en sentido fuerte. Solo pueden presentarse quienes acrediten formación y experiencia en visión de conjunto (ciencia de sistemas, evaluación de políticas, ecología, economía), aunque la elige todo el mundo. A favor: capacidad para ver el conjunto. En contra: limita el derecho a ser elegido (art. 23.2) y se aparta del principio de que cualquiera puede representar a los demás, y la «ciencia holística» todavía no es una disciplina reconocida que se pueda acreditar (ver Lagunas).</div>
+<div class="opcion"><b>Opción B:</b> cualquiera puede presentarse, y la visión holística la aporta una Oficina de Evaluación del Sistema, elegida por concurso, al servicio de la cámara. Respeta mejor la igualdad, pero la capacidad queda fuera de quien decide.</div>
 </div>
 </div>
 
-<div class="poder" style="--c:#0369a1"><h3><span class="chip" style="--c:#0369a1">2</span>Cámara de los Ciudadanos (350)</h3>
+<div class="poder" style="--c:#d97706"><h3><span class="chip" style="--c:#d97706">2</span>Cámaras de oficios: quien sabe propone, todos opinan, el oficio decide</h3>
 <ul>
-<li><b>Sistema mixto:</b> 175 escaños con nombre y apellidos en distritos de un solo diputado, y 175 de compensación en listas desbloqueadas por región. Así el resultado final es proporcional en todo el país. Umbral del 3 %. Si un partido gana más distritos de los escaños que le tocan, sus ganadores de distrito con peor resultado se quedan fuera (la solución que adoptó Alemania en 2023). Mandato de cuatro años.</li>
-<li>Aprueba las leyes y los presupuestos, controla al Gobierno (preguntas, comisiones de investigación con poderes reales, reprobación de ministros) y elige a cuatro magistrados del Constitucional.</li>
-</ul>
-<div class="opciones">
-<div class="opcion elegida"><b>Opción A (la del modelo):</b> sistema mixto proporcional, como el alemán. Mantiene la proporcionalidad que exige el art. 68.3 y da a cada distrito su diputado.</div>
-<div class="opcion"><b>Opción B:</b> 350 distritos de un diputado a dos vueltas, como proponía García-Trevijano. Crea más vínculo con el votante, pero es menos proporcional y tiende a dos bloques, como en Francia.</div>
-</div>
-</div>
-
-<div class="poder" style="--c:#b45309"><h3><span class="chip" style="--c:#b45309">3</span>Cámara de la Sociedad (240): la pieza orgánica</h3>
-<div class="rejilla r2" style="align-items:center">
-<svg viewBox="0 0 660 330" role="img" aria-label="Hemiciclo de 240 escaños: 80 del tercio territorial en azul, 80 del tercio de oficios en ámbar y 80 del tercio cívico por sorteo en verde" style="width:100%;height:auto">
-<circle cx="66.2" cy="290.1" r="7.2" fill="#0284c7"/>
-<circle cx="88.2" cy="290.3" r="7.2" fill="#0284c7"/>
-<circle cx="110.2" cy="290.1" r="7.2" fill="#0284c7"/>
-<circle cx="132.2" cy="290.3" r="7.2" fill="#0284c7"/>
-<circle cx="154.3" cy="290.1" r="7.2" fill="#0284c7"/>
-<circle cx="176.3" cy="290.3" r="7.2" fill="#0284c7"/>
-<circle cx="198.4" cy="290.1" r="7.2" fill="#0284c7"/>
-<circle cx="220.4" cy="290.4" r="7.2" fill="#0284c7"/>
-<circle cx="67.7" cy="270.4" r="7.2" fill="#0284c7"/>
-<circle cx="89.8" cy="270.8" r="7.2" fill="#0284c7"/>
-<circle cx="112.0" cy="270.5" r="7.2" fill="#0284c7"/>
-<circle cx="134.1" cy="270.9" r="7.2" fill="#0284c7"/>
-<circle cx="156.5" cy="270.5" r="7.2" fill="#0284c7"/>
-<circle cx="70.6" cy="250.9" r="7.2" fill="#0284c7"/>
-<circle cx="178.7" cy="271.1" r="7.2" fill="#0284c7"/>
-<circle cx="92.9" cy="251.6" r="7.2" fill="#0284c7"/>
-<circle cx="201.3" cy="270.6" r="7.2" fill="#0284c7"/>
-<circle cx="115.5" cy="251.0" r="7.2" fill="#0284c7"/>
-<circle cx="137.9" cy="251.9" r="7.2" fill="#0284c7"/>
-<circle cx="223.7" cy="271.5" r="7.2" fill="#0284c7"/>
-<circle cx="75.0" cy="231.7" r="7.2" fill="#0284c7"/>
-<circle cx="160.9" cy="251.3" r="7.2" fill="#0284c7"/>
-<circle cx="97.6" cy="232.7" r="7.2" fill="#0284c7"/>
-<circle cx="183.5" cy="252.4" r="7.2" fill="#0284c7"/>
-<circle cx="120.8" cy="232.0" r="7.2" fill="#0284c7"/>
-<circle cx="80.8" cy="212.8" r="7.2" fill="#0284c7"/>
-<circle cx="143.6" cy="233.3" r="7.2" fill="#0284c7"/>
-<circle cx="103.7" cy="214.2" r="7.2" fill="#0284c7"/>
-<circle cx="207.1" cy="251.8" r="7.2" fill="#0284c7"/>
-<circle cx="167.4" cy="232.6" r="7.2" fill="#0284c7"/>
-<circle cx="127.7" cy="213.5" r="7.2" fill="#0284c7"/>
-<circle cx="88.0" cy="194.4" r="7.2" fill="#0284c7"/>
-<circle cx="230.3" cy="253.5" r="7.2" fill="#0284c7"/>
-<circle cx="190.7" cy="234.4" r="7.2" fill="#0284c7"/>
-<circle cx="151.0" cy="215.3" r="7.2" fill="#0284c7"/>
-<circle cx="111.4" cy="196.3" r="7.2" fill="#0284c7"/>
-<circle cx="96.6" cy="176.6" r="7.2" fill="#0284c7"/>
-<circle cx="136.3" cy="195.7" r="7.2" fill="#0284c7"/>
-<circle cx="176.0" cy="214.9" r="7.2" fill="#0284c7"/>
-<circle cx="215.7" cy="234.0" r="7.2" fill="#0284c7"/>
-<circle cx="120.4" cy="179.0" r="7.2" fill="#0284c7"/>
-<circle cx="160.2" cy="198.2" r="7.2" fill="#0284c7"/>
-<circle cx="106.5" cy="159.5" r="7.2" fill="#0284c7"/>
-<circle cx="200.0" cy="217.5" r="7.2" fill="#0284c7"/>
-<circle cx="146.4" cy="178.8" r="7.2" fill="#0284c7"/>
-<circle cx="130.8" cy="162.5" r="7.2" fill="#0284c7"/>
-<circle cx="239.9" cy="236.9" r="7.2" fill="#0284c7"/>
-<circle cx="186.5" cy="198.2" r="7.2" fill="#0284c7"/>
-<circle cx="117.6" cy="143.2" r="7.2" fill="#0284c7"/>
-<circle cx="171.0" cy="182.1" r="7.2" fill="#0284c7"/>
-<circle cx="226.8" cy="217.7" r="7.2" fill="#0284c7"/>
-<circle cx="158.0" cy="162.8" r="7.2" fill="#0284c7"/>
-<circle cx="142.5" cy="146.9" r="7.2" fill="#0284c7"/>
-<circle cx="211.3" cy="201.8" r="7.2" fill="#0284c7"/>
-<circle cx="129.9" cy="127.8" r="7.2" fill="#0284c7"/>
-<circle cx="198.8" cy="182.7" r="7.2" fill="#0284c7"/>
-<circle cx="183.3" cy="167.0" r="7.2" fill="#0284c7"/>
-<circle cx="171.0" cy="148.0" r="7.2" fill="#0284c7"/>
-<circle cx="155.5" cy="132.4" r="7.2" fill="#0284c7"/>
-<circle cx="252.2" cy="222.2" r="7.2" fill="#0284c7"/>
-<circle cx="143.3" cy="113.3" r="7.2" fill="#0284c7"/>
-<circle cx="224.6" cy="187.7" r="7.2" fill="#0284c7"/>
-<circle cx="240.2" cy="203.2" r="7.2" fill="#0284c7"/>
-<circle cx="197.0" cy="153.3" r="7.2" fill="#0284c7"/>
-<circle cx="212.7" cy="168.8" r="7.2" fill="#0284c7"/>
-<circle cx="169.5" cy="118.9" r="7.2" fill="#0284c7"/>
-<circle cx="185.3" cy="134.3" r="7.2" fill="#0284c7"/>
-<circle cx="157.8" cy="99.9" r="7.2" fill="#0284c7"/>
-<circle cx="184.6" cy="106.5" r="7.2" fill="#0284c7"/>
-<circle cx="212.1" cy="141.0" r="7.2" fill="#0284c7"/>
-<circle cx="173.2" cy="87.6" r="7.2" fill="#0284c7"/>
-<circle cx="239.5" cy="175.4" r="7.2" fill="#0284c7"/>
-<circle cx="200.7" cy="122.0" r="7.2" fill="#0284c7"/>
-<circle cx="228.2" cy="156.5" r="7.2" fill="#0284c7"/>
-<circle cx="266.9" cy="209.9" r="7.2" fill="#0284c7"/>
-<circle cx="255.6" cy="190.9" r="7.2" fill="#0284c7"/>
-<circle cx="200.7" cy="95.5" r="7.2" fill="#0284c7"/>
-<circle cx="189.5" cy="76.5" r="7.2" fill="#0284c7"/>
-<circle cx="228.2" cy="130.2" r="7.2" fill="#0284c7"/>
-<circle cx="217.2" cy="111.1" r="7.2" fill="#0284c7"/>
-<circle cx="244.9" cy="146.0" r="7.2" fill="#f59e0b"/>
-<circle cx="255.8" cy="165.0" r="7.2" fill="#f59e0b"/>
-<circle cx="206.6" cy="66.6" r="7.2" fill="#f59e0b"/>
-<circle cx="217.5" cy="85.7" r="7.2" fill="#f59e0b"/>
-<circle cx="272.7" cy="181.1" r="7.2" fill="#f59e0b"/>
-<circle cx="234.5" cy="101.8" r="7.2" fill="#f59e0b"/>
-<circle cx="245.3" cy="121.0" r="7.2" fill="#f59e0b"/>
-<circle cx="283.5" cy="200.3" r="7.2" fill="#f59e0b"/>
-<circle cx="224.4" cy="58.0" r="7.2" fill="#f59e0b"/>
-<circle cx="235.1" cy="77.4" r="7.2" fill="#f59e0b"/>
-<circle cx="262.6" cy="137.4" r="7.2" fill="#f59e0b"/>
-<circle cx="273.3" cy="156.8" r="7.2" fill="#f59e0b"/>
-<circle cx="252.7" cy="94.0" r="7.2" fill="#f59e0b"/>
-<circle cx="263.3" cy="113.6" r="7.2" fill="#f59e0b"/>
-<circle cx="242.8" cy="50.8" r="7.2" fill="#f59e0b"/>
-<circle cx="253.4" cy="70.5" r="7.2" fill="#f59e0b"/>
-<circle cx="291.1" cy="173.9" r="7.2" fill="#f59e0b"/>
-<circle cx="281.3" cy="130.9" r="7.2" fill="#f59e0b"/>
-<circle cx="271.5" cy="87.9" r="7.2" fill="#f59e0b"/>
-<circle cx="301.5" cy="193.7" r="7.2" fill="#f59e0b"/>
-<circle cx="261.7" cy="45.0" r="7.2" fill="#f59e0b"/>
-<circle cx="291.7" cy="150.8" r="7.2" fill="#f59e0b"/>
-<circle cx="281.9" cy="107.9" r="7.2" fill="#f59e0b"/>
-<circle cx="272.1" cy="65.0" r="7.2" fill="#f59e0b"/>
-<circle cx="280.9" cy="40.6" r="7.2" fill="#f59e0b"/>
-<circle cx="290.7" cy="83.5" r="7.2" fill="#f59e0b"/>
-<circle cx="300.5" cy="126.5" r="7.2" fill="#f59e0b"/>
-<circle cx="291.2" cy="61.1" r="7.2" fill="#f59e0b"/>
-<circle cx="310.3" cy="169.5" r="7.2" fill="#f59e0b"/>
-<circle cx="300.9" cy="104.1" r="7.2" fill="#f59e0b"/>
-<circle cx="310.7" cy="147.2" r="7.2" fill="#f59e0b"/>
-<circle cx="300.4" cy="37.7" r="7.2" fill="#f59e0b"/>
-<circle cx="310.3" cy="80.9" r="7.2" fill="#f59e0b"/>
-<circle cx="320.4" cy="190.4" r="7.2" fill="#f59e0b"/>
-<circle cx="310.5" cy="58.8" r="7.2" fill="#f59e0b"/>
-<circle cx="320.1" cy="124.3" r="7.2" fill="#f59e0b"/>
-<circle cx="320.3" cy="102.2" r="7.2" fill="#f59e0b"/>
-<circle cx="320.1" cy="36.2" r="7.2" fill="#f59e0b"/>
-<circle cx="330.0" cy="168.0" r="7.2" fill="#f59e0b"/>
-<circle cx="330.0" cy="146.0" r="7.2" fill="#f59e0b"/>
-<circle cx="330.0" cy="80.0" r="7.2" fill="#f59e0b"/>
-<circle cx="330.0" cy="58.0" r="7.2" fill="#f59e0b"/>
-<circle cx="339.9" cy="36.2" r="7.2" fill="#f59e0b"/>
-<circle cx="339.7" cy="102.2" r="7.2" fill="#f59e0b"/>
-<circle cx="339.9" cy="124.3" r="7.2" fill="#f59e0b"/>
-<circle cx="349.5" cy="58.8" r="7.2" fill="#f59e0b"/>
-<circle cx="339.6" cy="190.4" r="7.2" fill="#f59e0b"/>
-<circle cx="349.7" cy="80.9" r="7.2" fill="#f59e0b"/>
-<circle cx="359.6" cy="37.7" r="7.2" fill="#f59e0b"/>
-<circle cx="349.3" cy="147.2" r="7.2" fill="#f59e0b"/>
-<circle cx="359.1" cy="104.1" r="7.2" fill="#f59e0b"/>
-<circle cx="349.7" cy="169.5" r="7.2" fill="#f59e0b"/>
-<circle cx="368.8" cy="61.1" r="7.2" fill="#f59e0b"/>
-<circle cx="359.5" cy="126.5" r="7.2" fill="#f59e0b"/>
-<circle cx="369.3" cy="83.5" r="7.2" fill="#f59e0b"/>
-<circle cx="379.1" cy="40.6" r="7.2" fill="#f59e0b"/>
-<circle cx="387.9" cy="65.0" r="7.2" fill="#f59e0b"/>
-<circle cx="378.1" cy="107.9" r="7.2" fill="#f59e0b"/>
-<circle cx="368.3" cy="150.8" r="7.2" fill="#f59e0b"/>
-<circle cx="358.5" cy="193.7" r="7.2" fill="#f59e0b"/>
-<circle cx="398.3" cy="45.0" r="7.2" fill="#f59e0b"/>
-<circle cx="388.5" cy="87.9" r="7.2" fill="#f59e0b"/>
-<circle cx="378.7" cy="130.9" r="7.2" fill="#f59e0b"/>
-<circle cx="368.9" cy="173.9" r="7.2" fill="#f59e0b"/>
-<circle cx="406.6" cy="70.5" r="7.2" fill="#f59e0b"/>
-<circle cx="417.2" cy="50.8" r="7.2" fill="#f59e0b"/>
-<circle cx="396.7" cy="113.6" r="7.2" fill="#f59e0b"/>
-<circle cx="407.3" cy="94.0" r="7.2" fill="#f59e0b"/>
-<circle cx="386.7" cy="156.8" r="7.2" fill="#f59e0b"/>
-<circle cx="397.4" cy="137.4" r="7.2" fill="#f59e0b"/>
-<circle cx="424.9" cy="77.4" r="7.2" fill="#f59e0b"/>
-<circle cx="435.6" cy="58.0" r="7.2" fill="#f59e0b"/>
-<circle cx="376.5" cy="200.3" r="7.2" fill="#f59e0b"/>
-<circle cx="414.7" cy="121.0" r="7.2" fill="#f59e0b"/>
-<circle cx="387.3" cy="181.1" r="7.2" fill="#f59e0b"/>
-<circle cx="425.5" cy="101.8" r="7.2" fill="#f59e0b"/>
-<circle cx="442.5" cy="85.7" r="7.2" fill="#f59e0b"/>
-<circle cx="453.4" cy="66.6" r="7.2" fill="#f59e0b"/>
-<circle cx="404.2" cy="165.0" r="7.2" fill="#f59e0b"/>
-<circle cx="415.1" cy="146.0" r="7.2" fill="#f59e0b"/>
-<circle cx="442.8" cy="111.1" r="7.2" fill="#059669"/>
-<circle cx="431.8" cy="130.2" r="7.2" fill="#059669"/>
-<circle cx="470.5" cy="76.5" r="7.2" fill="#059669"/>
-<circle cx="459.3" cy="95.5" r="7.2" fill="#059669"/>
-<circle cx="404.4" cy="190.9" r="7.2" fill="#059669"/>
-<circle cx="393.1" cy="209.9" r="7.2" fill="#059669"/>
-<circle cx="431.8" cy="156.5" r="7.2" fill="#059669"/>
-<circle cx="420.5" cy="175.4" r="7.2" fill="#059669"/>
-<circle cx="459.3" cy="122.0" r="7.2" fill="#059669"/>
-<circle cx="486.8" cy="87.6" r="7.2" fill="#059669"/>
-<circle cx="447.9" cy="141.0" r="7.2" fill="#059669"/>
-<circle cx="475.4" cy="106.5" r="7.2" fill="#059669"/>
-<circle cx="502.2" cy="99.9" r="7.2" fill="#059669"/>
-<circle cx="474.7" cy="134.3" r="7.2" fill="#059669"/>
-<circle cx="490.5" cy="118.9" r="7.2" fill="#059669"/>
-<circle cx="447.3" cy="168.8" r="7.2" fill="#059669"/>
-<circle cx="463.0" cy="153.3" r="7.2" fill="#059669"/>
-<circle cx="419.8" cy="203.2" r="7.2" fill="#059669"/>
-<circle cx="435.4" cy="187.7" r="7.2" fill="#059669"/>
-<circle cx="407.8" cy="222.2" r="7.2" fill="#059669"/>
-<circle cx="516.7" cy="113.3" r="7.2" fill="#059669"/>
-<circle cx="504.5" cy="132.4" r="7.2" fill="#059669"/>
-<circle cx="489.0" cy="148.0" r="7.2" fill="#059669"/>
-<circle cx="476.7" cy="167.0" r="7.2" fill="#059669"/>
-<circle cx="461.2" cy="182.7" r="7.2" fill="#059669"/>
-<circle cx="530.1" cy="127.8" r="7.2" fill="#059669"/>
-<circle cx="448.7" cy="201.8" r="7.2" fill="#059669"/>
-<circle cx="517.5" cy="146.9" r="7.2" fill="#059669"/>
-<circle cx="433.2" cy="217.7" r="7.2" fill="#059669"/>
-<circle cx="502.0" cy="162.8" r="7.2" fill="#059669"/>
-<circle cx="489.0" cy="182.1" r="7.2" fill="#059669"/>
-<circle cx="542.4" cy="143.2" r="7.2" fill="#059669"/>
-<circle cx="473.5" cy="198.2" r="7.2" fill="#059669"/>
-<circle cx="420.1" cy="236.9" r="7.2" fill="#059669"/>
-<circle cx="529.2" cy="162.5" r="7.2" fill="#059669"/>
-<circle cx="513.6" cy="178.8" r="7.2" fill="#059669"/>
-<circle cx="460.0" cy="217.5" r="7.2" fill="#059669"/>
-<circle cx="553.5" cy="159.5" r="7.2" fill="#059669"/>
-<circle cx="499.8" cy="198.2" r="7.2" fill="#059669"/>
-<circle cx="444.3" cy="234.0" r="7.2" fill="#059669"/>
-<circle cx="539.6" cy="179.0" r="7.2" fill="#059669"/>
-<circle cx="484.0" cy="214.9" r="7.2" fill="#059669"/>
-<circle cx="523.7" cy="195.7" r="7.2" fill="#059669"/>
-<circle cx="563.4" cy="176.6" r="7.2" fill="#059669"/>
-<circle cx="548.6" cy="196.3" r="7.2" fill="#059669"/>
-<circle cx="509.0" cy="215.3" r="7.2" fill="#059669"/>
-<circle cx="469.3" cy="234.4" r="7.2" fill="#059669"/>
-<circle cx="429.7" cy="253.5" r="7.2" fill="#059669"/>
-<circle cx="572.0" cy="194.4" r="7.2" fill="#059669"/>
-<circle cx="532.3" cy="213.5" r="7.2" fill="#059669"/>
-<circle cx="492.6" cy="232.6" r="7.2" fill="#059669"/>
-<circle cx="452.9" cy="251.8" r="7.2" fill="#059669"/>
-<circle cx="556.3" cy="214.2" r="7.2" fill="#059669"/>
-<circle cx="516.4" cy="233.3" r="7.2" fill="#059669"/>
-<circle cx="579.2" cy="212.8" r="7.2" fill="#059669"/>
-<circle cx="476.5" cy="252.4" r="7.2" fill="#059669"/>
-<circle cx="539.2" cy="232.0" r="7.2" fill="#059669"/>
-<circle cx="562.4" cy="232.7" r="7.2" fill="#059669"/>
-<circle cx="499.1" cy="251.3" r="7.2" fill="#059669"/>
-<circle cx="436.3" cy="271.5" r="7.2" fill="#059669"/>
-<circle cx="585.0" cy="231.7" r="7.2" fill="#059669"/>
-<circle cx="522.1" cy="251.9" r="7.2" fill="#059669"/>
-<circle cx="458.7" cy="270.6" r="7.2" fill="#059669"/>
-<circle cx="544.5" cy="251.0" r="7.2" fill="#059669"/>
-<circle cx="567.1" cy="251.6" r="7.2" fill="#059669"/>
-<circle cx="481.3" cy="271.1" r="7.2" fill="#059669"/>
-<circle cx="589.4" cy="250.9" r="7.2" fill="#059669"/>
-<circle cx="503.5" cy="270.5" r="7.2" fill="#059669"/>
-<circle cx="525.9" cy="270.9" r="7.2" fill="#059669"/>
-<circle cx="548.0" cy="270.5" r="7.2" fill="#059669"/>
-<circle cx="570.2" cy="270.8" r="7.2" fill="#059669"/>
-<circle cx="592.3" cy="270.4" r="7.2" fill="#059669"/>
-<circle cx="439.6" cy="290.4" r="7.2" fill="#059669"/>
-<circle cx="461.6" cy="290.1" r="7.2" fill="#059669"/>
-<circle cx="483.7" cy="290.3" r="7.2" fill="#059669"/>
-<circle cx="505.7" cy="290.1" r="7.2" fill="#059669"/>
-<circle cx="527.8" cy="290.3" r="7.2" fill="#059669"/>
-<circle cx="549.8" cy="290.1" r="7.2" fill="#059669"/>
-<circle cx="571.8" cy="290.3" r="7.2" fill="#059669"/>
-<circle cx="593.8" cy="290.1" r="7.2" fill="#059669"/>
-<text x="330" y="282" text-anchor="middle" font-size="30" font-weight="800" fill="#0f172a">240</text><text x="330" y="304" text-anchor="middle" font-size="13" fill="#64748b">escaños</text>
-<text x="60" y="326" font-size="13" font-weight="700" fill="#0284c7">Territorial · 80</text><text x="330" y="326" text-anchor="middle" font-size="13" font-weight="700" fill="#d97706">Oficios · 80</text><text x="600" y="326" text-anchor="end" font-size="13" font-weight="700" fill="#059669">Sorteo · 80</text>
-</svg>
-<div>
-<p><b style="color:#0284c7">Tercio territorial:</b> delegados de los parlamentos regionales y de los consejos municipales de cada región, repartidos por población con un mínimo de dos por comunidad. Aquí se protegen las lenguas y la diversidad territorial.</p>
-<p><b style="color:#d97706">Tercio de oficios:</b> elegido directamente por cada sector, según la regla de igualdad descrita en «Oficios». Mandato de cinco años, como el territorial.</p>
-<p><b style="color:#059669">Tercio cívico:</b> ciudadanos por sorteo, que no deben nada a ninguna organización. Mandato de dos años y medio: se renueva por mitades.</p>
-<p style="margin:0">Es la vuelta del revés de los «tercios» de la representación orgánica franquista: aquí todo se elige o se sortea en libertad, con pluralidad y con poder real.</p>
-</div>
-</div>
-<ul>
-<li><b>Iniciativa legislativa propia</b> e informe de impacto obligatorio sobre cada ley: a quién beneficia, a quién perjudica y qué cuesta.</li>
-<li><b>Leyes generales:</b> veto suspensivo de dos meses, que la Cámara de los Ciudadanos levanta por mayoría absoluta.</li>
-<li><b>Leyes sectoriales: la «doble llave».</b> Necesitan el sí de los representantes del sector o sectores afectados y el sí del tercio por sorteo, que vota como usuario y como ciudadano común, para que los productores no decidan solos sobre lo suyo. Si dicen no, hay una comisión mixta de dos meses, y después la ley sale con 3/5 de la Cámara de los Ciudadanos o en referéndum. Quedan fuera los presupuestos, los derechos fundamentales y las reglas electorales.</li>
-<li>Elige al Fiscal General, a cuatro magistrados del Constitucional y a los órganos que controlan al Gobierno. Escucha a los ministros antes de su nombramiento.</li>
+<li><b>Una cámara por oficio en cada escala</b> en la que ese oficio tenga algo que regular. Votan solo quienes lo ejercen y lo acreditan.</li>
+<li><b>Los tecnócratas:</b> un comité técnico elegido por los miembros entre quienes superan un concurso de méritos, por cuatro años. Redactan las propuestas: normas técnicas, protocolos, formación, deontología, acceso al oficio.</li>
+<li><b>La consulta pública:</b> toda propuesta se publica entre 30 días y 12 semanas, según su alcance, y cualquiera puede aportar mejoras, sea del oficio o no. Es lo que ya hacen el IDAE y los ministerios con el trámite de consulta y audiencia pública, y Suiza con su procedimiento de consulta. Aquí, además, el comité tiene que responder de forma motivada a cada aportación.</li>
+<li><b>El voto de los miembros:</b> la versión final la aprueban o rechazan todos los miembros, con voto electrónico y secreto. Sin ese voto no hay norma.</li>
+<li><b>El representante y su validación:</b> cada cámara elige a un representante para la cámara del mismo oficio en la escala de arriba. Allí debate, enmienda y vota, pero lo que decide no es definitivo hasta que lo valida su gremio: las normas, siempre por el voto de los miembros de esa escala, y el resto de decisiones solo si lo pide el 5 % de los miembros en 30 días.</li>
+<li><b>Límites:</b> ningún oficio puede fijar precios, cerrar el acceso para proteger a quienes ya están dentro ni tocar derechos fundamentales. Lo que afecta a terceros pasa por la Cámara General.</li>
 </ul>
 </div>
 
 <figure>
-<div class="lienzo"><svg viewBox="0 0 1100 330" role="img" aria-labelledby="ley-t ley-d">
-<title id="ley-t">El camino de una ley con la doble llave</title>
-<desc id="ley-d">Una iniciativa pasa por la calificación de la Mesa conjunta, que decide si la ley es general o sectorial. La Cámara de los Ciudadanos la aprueba. Si es general, la Cámara de la Sociedad puede vetarla durante dos meses, y la Cámara de los Ciudadanos levanta el veto por mayoría absoluta. Si es sectorial, tienen que aprobarla la sección del sector y la de consumidores; si la rechazan, hay comisión mixta y después 3/5 o referéndum. Al final queda el control de constitucionalidad.</desc>
+<div class="lienzo"><svg viewBox="0 0 1100 312" role="img" aria-labelledby="ley-t ley-d">
+<title id="ley-t">El camino de una norma de oficio</title>
+<desc id="ley-d">Los tecnócratas del oficio proponen. La propuesta sale a consulta pública, donde cualquiera aporta. El comité publica una respuesta motivada y la versión final. Votan los miembros del oficio. Si la norma solo afecta al oficio, entra en vigor. Si afecta a terceros, la Cámara General la valida en 30 días; si la devuelve, el oficio la rehace o la General decide por mayoría absoluta.</desc>
 <defs><marker id="fl2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#64748b"/></marker></defs>
-<text x="550" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="2">EL CAMINO DE UNA LEY</text>
-<g font-size="12">
-<rect x="14" y="130" width="140" height="70" rx="10" fill="#1e293b"/><text x="84" y="156" text-anchor="middle" font-weight="800" fill="#fff">Iniciativa</text><text x="84" y="174" text-anchor="middle" font-size="10.5" fill="#cbd5e1">Gobierno, una cámara</text><text x="84" y="189" text-anchor="middle" font-size="10.5" fill="#cbd5e1">o 1 % del censo</text>
-<rect x="186" y="130" width="150" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/><text x="261" y="156" text-anchor="middle" font-weight="800" fill="#334155">Mesa conjunta</text><text x="261" y="174" text-anchor="middle" font-size="10.5" fill="#475569">¿general o sectorial?</text><text x="261" y="189" text-anchor="middle" font-size="10.5" fill="#475569">(recurrible al TC, 10 días)</text>
-<rect x="368" y="130" width="160" height="70" rx="10" fill="#0369a1"/><text x="448" y="156" text-anchor="middle" font-weight="800" fill="#fff">Cámara de los</text><text x="448" y="172" text-anchor="middle" font-weight="800" fill="#fff">Ciudadanos</text><text x="448" y="189" text-anchor="middle" font-size="10.5" fill="#e0f2fe">debate y aprueba</text>
-<rect x="566" y="54" width="230" height="74" rx="10" fill="#fff" stroke="#b45309" stroke-width="1.6"/><text x="681" y="78" text-anchor="middle" font-weight="800" fill="#92400e">LEY GENERAL</text><text x="681" y="96" text-anchor="middle" font-size="10.5" fill="#475569">Cámara de la Sociedad: sí, o veto</text><text x="681" y="111" text-anchor="middle" font-size="10.5" fill="#475569">de 2 meses (se levanta por mayoría</text><text x="681" y="124" text-anchor="middle" font-size="10.5" fill="#475569">absoluta de los Ciudadanos)</text>
-<rect x="566" y="196" width="230" height="104" rx="10" fill="#fff7ed" stroke="#d97706" stroke-width="2"/><text x="681" y="218" text-anchor="middle" font-weight="800" fill="#92400e">LEY SECTORIAL · DOBLE LLAVE</text><text x="681" y="237" text-anchor="middle" font-size="10.5" fill="#475569">sí de los representantes del sector</text><text x="681" y="252" text-anchor="middle" font-size="10.5" fill="#475569">+ sí del tercio por sorteo (usuarios)</text><text x="681" y="273" text-anchor="middle" font-size="10.5" fill="#9a3412">si no: comisión mixta (2 meses),</text><text x="681" y="288" text-anchor="middle" font-size="10.5" fill="#9a3412">y luego 3/5 de Ciudadanos o referéndum</text>
-<rect x="836" y="130" width="120" height="70" rx="10" fill="#7c3aed"/><text x="896" y="158" text-anchor="middle" font-weight="800" fill="#fff">Control de</text><text x="896" y="174" text-anchor="middle" font-weight="800" fill="#fff">constitucionalidad</text><text x="896" y="190" text-anchor="middle" font-size="10" fill="#ede9fe">si alguien recurre</text>
-<rect x="984" y="138" width="100" height="54" rx="27" fill="#047857"/><text x="1034" y="170" text-anchor="middle" font-weight="800" fill="#fff">LEY</text>
+<text x="550" y="26" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="2">EL CAMINO DE UNA NORMA DE OFICIO</text>
+<g font-size="12" text-anchor="middle">
+<rect x="14" y="118" width="140" height="74" rx="10" fill="#d97706"/><text x="84" y="144" font-weight="800" fill="#fff">1 · Tecnócratas</text><text x="84" y="162" font-size="10.5" fill="#fef3c7">del oficio: redactan</text><text x="84" y="177" font-size="10.5" fill="#fef3c7">la propuesta</text>
+<rect x="184" y="118" width="150" height="74" rx="10" fill="#fff" stroke="#d97706" stroke-width="1.6"/><text x="259" y="144" font-weight="800" fill="#92400e">2 · Consulta pública</text><text x="259" y="162" font-size="10.5" fill="#475569">de 30 días a 12 semanas;</text><text x="259" y="177" font-size="10.5" fill="#475569">cualquiera aporta</text>
+<rect x="364" y="118" width="150" height="74" rx="10" fill="#fff" stroke="#d97706" stroke-width="1.6"/><text x="439" y="144" font-weight="800" fill="#92400e">3 · Respuesta</text><text x="439" y="162" font-size="10.5" fill="#475569">motivada a cada aporte</text><text x="439" y="177" font-size="10.5" fill="#475569">y versión final</text>
+<rect x="544" y="118" width="140" height="74" rx="10" fill="#b45309"/><text x="614" y="144" font-weight="800" fill="#fff">4 · Votan</text><text x="614" y="162" font-size="10.5" fill="#fef3c7">todos los miembros</text><text x="614" y="177" font-size="10.5" fill="#fef3c7">del oficio</text>
+<rect x="714" y="118" width="124" height="74" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/><text x="776" y="146" font-weight="800" fill="#334155">¿Afecta</text><text x="776" y="163" font-weight="800" fill="#334155">a terceros?</text>
+<rect x="868" y="46" width="218" height="60" rx="10" fill="#047857"/><text x="977" y="71" font-weight="800" fill="#fff">NO → norma en vigor</text><text x="977" y="90" font-size="10.5" fill="#d1fae5">obliga dentro del oficio</text>
+<rect x="868" y="168" width="218" height="104" rx="10" fill="#0369a1"/><text x="977" y="192" font-weight="800" fill="#fff">SÍ → Cámara General</text><text x="977" y="212" font-size="10.5" fill="#e0f2fe">la valida en 30 días.</text><text x="977" y="230" font-size="10.5" fill="#e0f2fe">Si la devuelve, el oficio la rehace</text><text x="977" y="246" font-size="10.5" fill="#e0f2fe">o la General decide por</text><text x="977" y="261" font-size="10.5" fill="#e0f2fe">mayoría absoluta</text>
 </g>
 <g stroke="#64748b" stroke-width="1.7" fill="none" marker-end="url(#fl2)">
-<path d="M154,165 H184"/><path d="M336,165 H366"/><path d="M528,165 H546 V91 H564"/><path d="M546,165 V245 H564"/><path d="M796,91 H816 V165 H834"/><path d="M796,245 H816 V165"/><path d="M956,165 H982"/>
+<path d="M154,155 H182"/><path d="M334,155 H362"/><path d="M514,155 H542"/><path d="M684,155 H712"/><path d="M838,145 H852 V76 H866"/><path d="M838,165 H852 V220 H866"/>
 </g>
-<text x="14" y="318" font-size="11.5" fill="#64748b">Fuera de la doble llave: presupuestos (Gobierno → Ciudadanos, con informe de la Sociedad y prórroga automática), derechos fundamentales y reglas electorales.</text>
+<text x="14" y="300" font-size="11.5" fill="#64748b">Siempre cabe recurso de constitucionalidad. Las leyes comunes siguen el camino inverso: las aprueba la Cámara General, tras consulta pública y con informe de los oficios afectados.</text>
 </svg></div>
 <p class="desliza">Desliza el esquema hacia los lados para verlo entero.</p>
-<figcaption>La doble llave obliga a contar con quien conoce un oficio y con quien usa sus servicios, sin darles un bloqueo absoluto. <b>Ejemplo:</b> una ley de pesca. La Mesa la califica como sectorial (campo, mar y medio rural); la aprueba la Cámara de los Ciudadanos. Votan sí los representantes del sector y el tercio por sorteo, y es ley. Si el sector dijera no, tras dos meses de comisión mixta la Cámara de los Ciudadanos podría aprobarla igualmente con 3/5.</figcaption>
+<figcaption><b>Ejemplo:</b> una norma de eficiencia energética para viviendas. La proponen los tecnócratas de arquitectura e ingeniería; la consulta queda abierta doce semanas y aportan fabricantes, inquilinos, ayuntamientos y cualquier vecino. El comité responde a cada aporte, votan los arquitectos e ingenieros acreditados y, como afecta a propietarios e inquilinos, la Cámara General la valida en 30 días.</figcaption>
 </figure>
 
-<div class="poder" style="--c:#7c3aed"><h3><span class="chip" style="--c:#7c3aed">4</span>Justicia: una rama con gobierno propio, pero no cerrada</h3>
+<h3>Qué regula cada oficio en cada escala</h3>
+<p class="nota">Ejemplos orientativos. El mapa definitivo lo aprueba la Cámara General y es una de las lagunas por resolver.</p>
+<div class="tabla"><table>
+<thead><tr><th>Oficio</th><th>Municipio</th><th>Región</th><th>Nación</th></tr></thead>
+<tbody>
+<tr><th>Salud</th><td data-l="Municipio">Salud pública local: agua, alimentos, plagas.</td><td data-l="Región">Protocolos asistenciales y organización de los hospitales.</td><td data-l="Nación">Especialidades, formación y cartera común de servicios.</td></tr>
+<tr><th>Construcción y arquitectura</th><td data-l="Municipio">Ordenanzas técnicas de edificación.</td><td data-l="Región">Accesibilidad y eficiencia de la vivienda.</td><td data-l="Nación">Código técnico de la edificación.</td></tr>
+<tr><th>Educación</th><td data-l="Municipio">Uso de los centros y actividades del entorno.</td><td data-l="Región">Programas y evaluación de los centros.</td><td data-l="Nación">Títulos y contenidos mínimos.</td></tr>
+<tr><th>Energía</th><td data-l="Municipio">Autoconsumo y comunidades energéticas.</td><td data-l="Región">Redes de distribución y permisos de renovables.</td><td data-l="Nación">Normas técnicas del sistema eléctrico.</td></tr>
+</tbody></table></div>
+
+<div class="poder" style="--c:#e11d48"><h3><span class="chip" style="--c:#e11d48">3</span>Gobierno: recaudar y asignar</h3>
 <ul>
-<li><b>Consejo de Justicia (21):</b>
-<ul>
-<li>12 jueces elegidos por todos los jueces, con voto personal, listas abiertas y sin cuotas de asociaciones (el riesgo que señaló la Comisión de Venecia en 2025);</li>
-<li>3 juristas elegidos por la Cámara de los Ciudadanos y 3 por la de la Sociedad, en ambos casos por 3/5;</li>
-<li>3 ciudadanos por sorteo.</li>
+<li><b>Lo elige la ciudadanía directamente,</b> a dos vueltas, con mandato fijo de cuatro años, a la vez que la Cámara General, y un máximo de dos.</li>
+<li><b>Recauda</b> los impuestos que fijan las leyes, <b>propone el presupuesto</b> a la Cámara General y <b>asigna</b> el dinero aprobado a cada escala, oficio y servicio, según las leyes y las prioridades que la ciudadanía vota por temas. Dirige solo la administración que recauda y paga.</li>
+<li><b>No legisla ni nombra:</b> no hay decretos-ley, y no elige jueces, fiscales, mandos de los guardianes, directivos de medios ni reguladores. Tampoco reparte publicidad institucional discrecional.</li>
+<li><b>Rinde cuentas</b> ante la Cámara General y el Tribunal de Cuentas. Puede ser revocado por la ciudadanía y sometido a juicio político por delito o violación grave de la Constitución.</li>
 </ul>
-Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción consciente al principio 4, compensada con miembros externos y concursos públicos.</li>
-<li><b>Nombramientos y ascensos</b> por concurso público, con baremo y motivación publicados. El presupuesto de la justicia se fija por ley para varios años y no se negocia cada año con el Gobierno.</li>
-<li><b>Tribunal Constitucional (12):</b> cuatro por cada cámara (3/5) y cuatro por sorteo entre juristas que superan un concurso. Mandato único de nueve años. Si no hay acuerdo en tres meses, sorteo entre los aprobados.</li>
-<li><b>Fiscal General:</b>
+<div class="opciones">
+<div class="opcion elegida"><b>Opción A (la del modelo):</b> elección directa. Separa del todo el Gobierno de la Cámara General, y al tener tan pocas funciones, el riesgo del «ganador se lo lleva todo» debería ser menor que en un presidencialismo clásico (es una hipótesis por comprobar).</div>
+<div class="opcion"><b>Opción B:</b> un Gobierno colegiado de siete miembros, elegido por la Cámara General para un mandato fijo y con presidencia rotatoria, como el Consejo Federal suizo. Polariza menos, pero separa menos el origen.</div>
+</div>
+</div>
+
+<div class="poder" style="--c:#7c3aed"><h3><span class="chip" style="--c:#7c3aed">4</span>Justicia: aplica las leyes y gobierna su propia casa</h3>
 <ul>
-<li>tras un concurso público, el Consejo Fiscal propone una terna;</li>
-<li>la Cámara de la Sociedad elige por 3/5, y si no hay acuerdo, se sortea dentro de la terna;</li>
-<li>mandato único de seis años y cuentas anuales ante la Cámara de los Ciudadanos;</li>
-<li>cese solo por causas tasadas, que aprecia el Supremo.</li>
-</ul></li>
-<li><b>Contra la intromisión en los dos sentidos:</b>
-<ul>
-<li>cinco años de espera para que un juez que ha ocupado un cargo político vuelva a juzgar asuntos con implicación política;</li>
-<li>reparto aleatorio y público de los asuntos;</li>
-<li>plazos máximos de instrucción;</li>
-<li>aforamientos reducidos a los titulares de los poderes del Estado.</li>
-</ul></li>
+<li><b>De abajo arriba:</b> los jueces de cada partido judicial eligen, con voto personal y listas abiertas, a quienes los representan en el consejo de su región, y estos al Consejo de Justicia nacional. Sin cuotas de asociaciones, el riesgo que señaló la Comisión de Venecia en 2025.</li>
+<li><b>Consejo de Justicia (21):</b> 12 jueces elegidos así, 5 juristas elegidos por la Cámara General por 3/5 y 4 por la cámara del oficio jurídico (abogacía, universidad). Los jueces son mayoría, como recomienda el Consejo de Europa.</li>
+<li><b>Nombramientos y ascensos</b> por concurso público, con baremo y motivación publicados. El presupuesto de la justicia se fija por ley para varios años.</li>
+<li><b>Tribunal Constitucional (12):</b> cuatro elegidos por los jueces, cuatro por la Cámara General por 3/5 y cuatro por la cámara del oficio jurídico, siempre entre quienes superan un concurso. Mandato único de nueve años. Si no hay acuerdo en tres meses, entra quien mejor puntuó en el concurso.</li>
+<li><b>Fiscal General:</b> el Consejo Fiscal propone una terna tras un concurso público y la Cámara General elige por 3/5; si no hay acuerdo en tres meses, el más votado por los fiscales. Mandato único de seis años, cuentas anuales ante la Cámara General y cese solo por causas tasadas.</li>
+<li><b>Contra la intromisión en los dos sentidos:</b> cinco años de espera para que un juez que ha ocupado un cargo político vuelva a juzgar asuntos con implicación política; reparto aleatorio y público de los asuntos; plazos máximos de instrucción; aforamientos solo para los titulares de los poderes del Estado.</li>
 </ul>
 </div>
 
-<div class="poder" style="--c:#475569"><h3><span class="chip" style="--c:#475569">5</span>Órganos de control</h3>
-<p>Tribunal de Cuentas, Defensor del Pueblo, autoridad fiscal (AIReF), competencia (CNMC), estadística pública (INE y CIS) y Consejo de Medios. Su nombramiento sigue la misma regla:</p>
-<ol>
-<li>Concurso público, con un tribunal de expertos sorteados.</li>
-<li>Elige la cámara que <b>no</b> es controlada por ese órgano, por 3/5. Los que vigilan al Gobierno los elige la Cámara de la Sociedad.</li>
-<li>Si no hay acuerdo en tres meses, sorteo entre los aprobados.</li>
-<li>Mandato único.</li>
-</ol>
-<p>La Junta Electoral, entera por sorteo entre magistrados y catedráticos.</p>
+<div class="poder" style="--c:#0f766e"><h3><span class="chip" style="--c:#0f766e">5</span>Guardianes: la seguridad, sin mando político</h3>
+<p>Son quienes tienen el uso legítimo de la fuerza: policía, protección civil, bomberos, salvamento. Hoy dependen del Gobierno (art. 104 de la Constitución); en el modelo dependen de la ley.</p>
+<ul>
+<li><b>Por escalas:</b> guardia local en el municipio, regional en la región y nacional para lo que desborda a las regiones (delincuencia organizada, fronteras, grandes emergencias). Cada escala resuelve lo suyo y pide ayuda a la de arriba.</li>
+<li><b>De abajo arriba:</b> los guardianes de cada escala eligen a sus representantes en el consejo de la escala superior, hasta un Consejo de Guardianes nacional. Ese consejo es su voz profesional: propone las normas técnicas de su oficio (formación, protocolos de uso de la fuerza) con consulta pública, y las valida la Cámara General.</li>
+<li><b>Mandos por concurso,</b> nunca por elección popular ni por nombramiento político: los eligen tribunales con jueces, guardianes y miembros de la Cámara General.</li>
+<li><b>Obedecen a la ley:</b> en las investigaciones, a jueces y fiscales (policía judicial, art. 126). Ni un partido decide a quién se investiga, ni los guardianes deciden qué leyes cumplir.</li>
+<li><b>Control:</b> una inspección independiente, elegida por la Cámara General tras concurso, investiga todo uso de la fuerza. Sus informes se publican y los abusos los juzgan los tribunales ordinarios. El presupuesto llega por fórmula, no por favor. En servicio activo no se puede militar en un partido.</li>
+</ul>
+<p class="nota" style="margin:0">Las Fuerzas Armadas quedan fuera de este esquema hasta resolver quién las dirige (art. 8 y 97): es una de las lagunas.</p>
 </div>
 
-<div class="poder" style="--c:#047857"><h3><span class="chip" style="--c:#047857">6</span>Poder ciudadano directo</h3>
-<p>Iniciativa legislativa, referéndum de iniciativa ciudadana, revocatorio y mandatos por temas. Se explica en la <a href="#directa">sección 6</a>, junto con la herramienta <a href="https://luzhumanidad.com/democracia-directa" target="_top">Democracia directa</a>.</p>
-</div>
-
-<h3>Y además: medios, partidos y derechos</h3>
-<div class="rejilla r3">
-<div class="caja color" style="--c:#e11d48"><h4>Medios sin dinero del poder</h4>
-<ul style="padding-left:1.1em;margin:6px 0">
+<div class="poder" style="--c:#be185d"><h3><span class="chip" style="--c:#be185d">6</span>Medios de comunicación: informar sin deber nada al poder</h3>
+<ul>
 <li><b>Publicidad institucional:</b> solo avisos de utilidad pública, repartidos con una fórmula automática de audiencia auditada, con un tope y publicados medio por medio.</li>
 <li><b>Propiedad de los medios</b> pública y transparente, como pide el reglamento europeo.</li>
-<li><b>Medio público, opción A:</b> no hay medio público de información general. Los contenidos de servicio público (cultura, lenguas, emergencias) se financian por concurso abierto, sin informativos políticos. A favor: cierra la puerta a la captura. En contra: se pierde un servicio común, sobre todo en territorios donde a los medios privados no les sale rentable informar. La Constitución no obliga a tener medios públicos.</li>
-<li><b>Opción B:</b> medio público con financiación automática fijada por ley y dirección elegida por concurso profesional, con control parlamentario solo de sus cuentas (art. 20.3). A favor: mantiene el servicio. En contra: la tentación de capturarlo sigue ahí.</li>
-</ul></div>
+<li><b>El periodismo, como oficio,</b> tiene su cámara para su deontología y su formación, pero sin carné obligatorio ni control previo de lo que se publica, que prohíbe la Constitución (art. 20.2).</li>
+<li><b>Medio público, opción A:</b> no hay medio público de información general. Los contenidos de servicio público (cultura, lenguas, emergencias) se financian por concurso abierto, sin informativos políticos. A favor: cierra la puerta a la captura. En contra: se pierde un servicio común, sobre todo donde a los medios privados no les sale rentable informar.</li>
+<li><b>Opción B:</b> medio público con financiación automática fijada por ley y dirección elegida por concurso profesional, con control de sus cuentas por la Cámara General. A favor: mantiene el servicio. En contra: la tentación de capturarlo sigue ahí.</li>
+</ul>
+</div>
+
+<h3>Y además: control, participación directa, partidos y derechos</h3>
+<div class="rejilla r2">
+<div class="caja color" style="--c:#475569"><h4>Órganos de control</h4>
+<p style="margin:6px 0">Tribunal de Cuentas, Defensor del Pueblo, autoridad fiscal, competencia, estadística pública y Consejo de Medios:</p>
+<ol style="padding-left:1.2em;margin:0">
+<li>concurso público ante un tribunal de expertos;</li>
+<li>elección por la Cámara General por 3/5;</li>
+<li>si no hay acuerdo en tres meses, entra quien mejor puntuó;</li>
+<li>mandato único.</li>
+</ol>
+<p style="margin:8px 0 0">La Junta Electoral la forman magistrados elegidos por los jueces y catedráticos elegidos por la cámara del oficio jurídico.</p></div>
+<div class="caja color" style="--c:#047857"><h4>Poder ciudadano directo</h4><p style="margin:6px 0 0">Iniciativa legislativa, referéndum de iniciativa ciudadana, revocatorio y voto por temas, en cada escala. Se explica en la <a href="#directa">sección 6</a>, junto con la herramienta <a href="https://luzhumanidad.com/democracia-directa" target="_top">Democracia directa</a>.</p></div>
 <div class="caja color" style="--c:#0369a1"><h4>Partidos libres, financiados por la gente</h4>
 <ul style="padding-left:1.1em;margin:6px 0">
-<li>Los partidos siguen siendo libres y necesarios.</li>
-<li><b>Dinero público solo de contrapartida:</b> por cada cuota o pequeña donación, el Estado añade lo mismo, con topes por donante y en total.</li>
-<li>Primarias y listas desbloqueadas.</li>
-<li>Cuentas auditadas y publicadas en plazo.</li>
-<li><b>Dos años de espera</b> entre dirigir un partido y ocupar un órgano de control o la judicatura.</li>
+<li>Compiten en la Cámara General y por el Gobierno; en los oficios compiten candidaturas del oficio.</li>
+<li><b>Dinero público solo de contrapartida:</b> por cada cuota o pequeña donación, el Estado añade lo mismo, con topes.</li>
+<li>Primarias, listas desbloqueadas y cuentas auditadas y publicadas en plazo.</li>
+<li><b>Dos años de espera</b> entre dirigir un partido y entrar en un órgano de control, la judicatura o el mando de los guardianes.</li>
 </ul></div>
 <div class="caja color" style="--c:#7c3aed"><h4>Derechos y emergencias</h4>
 <ul style="padding-left:1.1em;margin:6px 0">
-<li>Los derechos fundamentales quedan fuera de cualquier votación.</li>
-<li><b>Estado de alarma:</b> lo declara el Gobierno por 15 días; las prórrogas y el estado de excepción necesitan 3/5 de la Cámara de los Ciudadanos, y el estado de sitio 2/3.</li>
-<li><b>Control urgente</b> del Constitucional en 30 días.</li>
-<li><b>Calendario electoral fijo</b> y conocido de antemano.</li>
+<li>Los derechos fundamentales quedan fuera de cualquier votación: ni por mayoría, ni por oficios, ni en referéndum.</li>
+<li><b>Estado de alarma:</b> lo declara la Cámara General (o su comisión permanente si no puede reunirse) por 15 días; las prórrogas y el estado de excepción necesitan 3/5, y el de sitio 2/3. Lo ejecutan los guardianes y protección civil.</li>
+<li><b>Control urgente</b> del Constitucional en 30 días y <b>calendario electoral fijo</b>.</li>
 </ul></div>
 </div>
 </div>
@@ -824,11 +589,11 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <div class="w">
 <p class="ceja">5 · De abajo arriba</p>
 <h2>El mismo patrón en las ocho escalas</h2>
-<p class="lede">Lo que se decide cerca se decide cerca. Cada escala tiene los mismos cuatro órganos, a su medida, y envía delegados a la de arriba. La escala mayor coordina y ayuda a la menor, pero no la sustituye.</p>
+<p class="lede">Lo que se decide cerca se decide cerca. Cada escala tiene su Cámara General y su gobierno; los oficios, la justicia y los guardianes tienen órganos en las escalas donde les toca. Cada escala envía representantes a la de arriba. La escala mayor coordina y ayuda a la menor, pero no la sustituye.</p>
 <figure>
 <div class="lienzo"><svg viewBox="0 0 1100 478" role="img" aria-labelledby="esc-t esc-d">
 <title id="esc-t">Las ocho escalas</title>
-<desc id="esc-d">Una escalera de ocho peldaños: persona, comunidad vecinal, municipio, comarca o provincia, región, nación, continente y planeta. En cada peldaño hay un consejo electo (C), un consejo de oficios y asociaciones (O), una asamblea por sorteo (S) y un comité técnico que ejecuta (T). Las dos últimas escalas son una aspiración, porque dependen de tratados.</desc>
+<desc id="esc-d">Una escalera de ocho peldaños: persona, comunidad vecinal, municipio, comarca o provincia, región, nación, continente y planeta. En cada peldaño, en color, los órganos que tiene: Cámara General (C), cámaras de oficios (O), un gobierno que recauda y asigna (E), justicia (J) y guardianes (G); en gris, los que no tiene. Las dos últimas escalas son una aspiración, porque dependen de tratados.</desc>
 <defs><marker id="fl3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#94a3b8"/></marker></defs>
 <g font-size="12">
 <g>
@@ -837,10 +602,10 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <g id="peldanos"></g>
 </g>
 <text x="14" y="34" font-size="14" font-weight="800" fill="#0f172a" letter-spacing="2">LAS OCHO ESCALAS</text>
-<g font-size="11" fill="#475569"><circle cx="560" cy="30" r="9" fill="#0284c7"/><text x="574" y="34">C consejo electo</text><circle cx="690" cy="30" r="9" fill="#d97706"/><text x="704" y="34">O oficios y asociaciones</text><circle cx="860" cy="30" r="9" fill="#059669"/><text x="874" y="34">S asamblea por sorteo</text><circle cx="1010" cy="30" r="9" fill="#475569"/><text x="1024" y="34">T técnico</text></g>
+<g font-size="11" fill="#475569"><circle cx="430" cy="30" r="9" fill="#0369a1"/><text x="444" y="34">C Cámara General</text><circle cx="575" cy="30" r="9" fill="#d97706"/><text x="589" y="34">O oficios</text><circle cx="668" cy="30" r="9" fill="#e11d48"/><text x="682" y="34">E recauda y asigna</text><circle cx="815" cy="30" r="9" fill="#7c3aed"/><text x="829" y="34">J justicia</text><circle cx="910" cy="30" r="9" fill="#0f766e"/><text x="924" y="34">G guardianes</text></g>
 </svg></div>
 <p class="desliza">Desliza el esquema hacia los lados para verlo entero.</p>
-<figcaption>C, O y S son órganos con poder; T es el comité técnico que ejecuta lo que ellos deciden, no un poder más. La persona no tiene órganos: es la escala desde la que parte todo, con su voto. La comunidad vecinal puede apoyarse en lo que ya existe: el concejo abierto (art. 140 de la Constitución) y las entidades locales menores. El continente y el planeta son una aspiración: dependen de tratados (Unión Europea, Naciones Unidas), no de una reforma española. La financiación de cada escala la desarrolla la propuesta hermana, <a href="https://humanity.wiki/economia-publica-optimizada" target="_top">Economía pública optimizada</a>.</figcaption>
+<figcaption>Cada oficio tiene cámara solo en las escalas en las que tiene algo que regular, y su representante sube a la de arriba con el mandato validado por su gremio. La persona no tiene órganos: es la escala desde la que parte todo, con su voto y con sus oficios. La comunidad vecinal puede apoyarse en lo que ya existe: el concejo abierto (art. 140 de la Constitución) y las entidades locales menores. El continente y el planeta son una aspiración: dependen de tratados (Unión Europea, Naciones Unidas), no de una reforma española. La financiación de cada escala la desarrolla la propuesta hermana, <a href="https://humanity.wiki/economia-publica-optimizada" target="_top">Economía pública optimizada</a>.</figcaption>
 </figure>
 </div>
 </section>
@@ -848,17 +613,17 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <section id="directa" class="alt">
 <div class="w">
 <p class="ceja">6 · Democracia directa dentro del modelo</p>
-<h2>La cuarta vía: votar cosas concretas</h2>
+<h2>La tercera vía: votar cosas concretas</h2>
 <div class="rejilla r2" style="align-items:start">
 <div>
-<p class="lede">El modelo representa a las personas de cuatro maneras: por su voto, por su territorio, por su oficio y, por sorteo, como ciudadanía común. La democracia directa añade algo distinto: decidir sin representantes, sobre temas concretos y con datos.</p>
-<p>La herramienta <a href="https://luzhumanidad.com/democracia-directa" target="_top"><b>Democracia directa</b></a> de Luz &amp; Humanidad ya lo prototipa. Cada persona ve el estado real de cada tema y vota con un deslizador cuánto subir o bajar, abrir o cerrar. Además reparte 100 puntos según lo que más le importa. Puede delegar su voto en una materia en quien le convence y retirarlo cuando quiera. Los datos que se muestran los acuerda una mesa del dato con estadísticos y ciudadanos por sorteo.</p>
+<p class="lede">El modelo representa a las personas por dos raíces: como ciudadanía y por sus oficios. La democracia directa añade algo distinto: decidir sin representantes, sobre temas concretos y con datos.</p>
+<p>La herramienta <a href="https://luzhumanidad.com/democracia-directa" target="_top"><b>Democracia directa</b></a> de Luz &amp; Humanidad ya lo prototipa. Cada persona ve el estado real de cada tema y vota con un deslizador cuánto subir o bajar, abrir o cerrar. Además reparte 100 puntos según lo que más le importa. Puede delegar su voto en una materia en quien le convence y retirarlo cuando quiera. </p>
 <p>En el modelo, ese voto por temas no reemplaza a las cámaras: les da un <b>mandato orientativo</b> público en cada escala. Y se completa con cuatro instrumentos.</p>
 </div>
 <div class="rejilla" style="gap:10px">
 <div class="caja color" style="--c:#047857"><h4>Iniciativa legislativa · 1 % del censo</h4><p>Sin materias excluidas, salvo los derechos fundamentales. Hoy hacen falta 500.000 firmas y quedan fuera impuestos, leyes orgánicas y tratados.</p></div>
-<div class="caja color" style="--c:#047857"><h4>Referéndum de iniciativa ciudadana · 2 %</h4><p>Antes de votar, una asamblea por sorteo estudia la pregunta y publica los argumentos a favor y en contra. El Constitucional revisa antes que la pregunta respeta los derechos. No hay cuórum de participación, que premia la abstención (Italia exige el 50 %). Como referencia, Suiza pide unas 100.000 firmas para una iniciativa constitucional.</p></div>
-<div class="caja color" style="--c:#047857"><h4>Revocatorio</h4><p>Para la Presidencia y los diputados de distrito. Umbral alto de firmas y una sola ventana a mitad de mandato, para no vivir en campaña permanente.</p></div>
+<div class="caja color" style="--c:#047857"><h4>Referéndum de iniciativa ciudadana · 2 %</h4><p>Antes de votar hay consulta pública, y la Cámara General y los oficios afectados publican sus argumentos a favor y en contra. El Constitucional revisa antes que la pregunta respeta los derechos. No hay cuórum de participación, que premia la abstención (Italia exige el 50 %). Como referencia, Suiza pide unas 100.000 firmas para una iniciativa constitucional.</p></div>
+<div class="caja color" style="--c:#047857"><h4>Revocatorio</h4><p>Para el Gobierno y los diputados de distrito de la Cámara General. Umbral alto de firmas y una sola ventana a mitad de mandato, para no vivir en campaña permanente.</p></div>
 <div class="caja color" style="--c:#047857"><h4>Presupuestos participativos</h4><p>En cada escala, una parte de la inversión la decide directamente la ciudadanía.</p></div>
 </div>
 </div>
@@ -873,21 +638,21 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <div class="tabla"><table>
 <thead><tr><th>Asunto</th><th>España hoy</th><th>Modelo</th></tr></thead>
 <tbody>
-<tr><th>1 · Gobierno</th><td data-l="España hoy" class="hoy">Lo inviste el Congreso y depende de su mayoría.</td><td data-l="Modelo" class="mod">Elegido directamente, con mandato fijo (opción B: colegiado de mandato fijo).</td></tr>
-<tr><th>2 · Diputados</th><td data-l="España hoy" class="hoy">Listas cerradas y bloqueadas; disciplina de voto.</td><td data-l="Modelo" class="mod">La mitad, con nombre y apellidos en su distrito; la otra mitad, listas desbloqueadas.</td></tr>
-<tr><th>3 · Igualdad del voto</th><td data-l="España hoy" class="hoy">Provincia y D'Hondt: votos de distinto peso.</td><td data-l="Modelo" class="mod">Resultado proporcional nacional; parte de la protección territorial pasa a la Cámara de la Sociedad.</td></tr>
+<tr><th>1 · Gobierno</th><td data-l="España hoy" class="hoy">Lo inviste el Congreso y depende de su mayoría.</td><td data-l="Modelo" class="mod">Elegido directamente para recaudar y asignar; ni legisla ni nombra (opción B: colegiado).</td></tr>
+<tr><th>2 · Diputados</th><td data-l="España hoy" class="hoy">Listas cerradas y bloqueadas; disciplina de voto.</td><td data-l="Modelo" class="mod">Cámara General mixta y proporcional; en los oficios, representantes que valida su gremio.</td></tr>
+<tr><th>3 · Igualdad del voto</th><td data-l="España hoy" class="hoy">Provincia y D'Hondt: votos de distinto peso.</td><td data-l="Modelo" class="mod">Resultado proporcional nacional; el territorio se protege con cámaras propias en cada escala.</td></tr>
 <tr><th>4 · Financiación de partidos</th><td data-l="España hoy" class="hoy">Sobre todo, subvención pública no condicionada.</td><td data-l="Modelo" class="mod">Cuotas y pequeñas donaciones, más una contrapartida pública con topes.</td></tr>
-<tr><th>5 · Gobierno de los jueces</th><td data-l="España hoy" class="hoy">20 vocales elegidos por las Cortes.</td><td data-l="Modelo" class="mod">12 jueces elegidos por los jueces, más 6 juristas de las cámaras y 3 por sorteo.</td></tr>
-<tr><th>6 · Constitucional</th><td data-l="España hoy" class="hoy">10 de 12 por las cámaras y el Gobierno; dos más por el CGPJ.</td><td data-l="Modelo" class="mod">4 por cada cámara y 4 por sorteo tras concurso; mandato único.</td></tr>
-<tr><th>7 · Fiscal General</th><td data-l="España hoy" class="hoy">Lo propone el Gobierno.</td><td data-l="Modelo" class="mod">Terna tras concurso; elige la Cámara de la Sociedad; seis años y mandato único.</td></tr>
+<tr><th>5 · Gobierno de los jueces</th><td data-l="España hoy" class="hoy">20 vocales elegidos por las Cortes.</td><td data-l="Modelo" class="mod">12 jueces elegidos de abajo arriba por los jueces, más 9 externos de la Cámara General y del oficio jurídico.</td></tr>
+<tr><th>6 · Constitucional</th><td data-l="España hoy" class="hoy">10 de 12 por las cámaras y el Gobierno; dos más por el CGPJ.</td><td data-l="Modelo" class="mod">4 por los jueces, 4 por la Cámara General y 4 por el oficio jurídico, tras concurso; mandato único.</td></tr>
+<tr><th>7 · Fiscal General</th><td data-l="España hoy" class="hoy">Lo propone el Gobierno.</td><td data-l="Modelo" class="mod">Terna tras concurso; elige la Cámara General; seis años y mandato único.</td></tr>
 <tr><th>8 · Televisión pública</th><td data-l="España hoy" class="hoy">Su dirección la eligen las Cortes, con mayorías que cambia quien gobierna.</td><td data-l="Modelo" class="mod">Sin informativos públicos (A) o dirección por concurso profesional (B).</td></tr>
 <tr><th>9 · Publicidad institucional</th><td data-l="España hoy" class="hoy">Reparto por el propio poder.</td><td data-l="Modelo" class="mod">Solo utilidad pública, con fórmula automática y tope.</td></tr>
-<tr><th>10 · Reguladores y control</th><td data-l="España hoy" class="hoy">Los nombra el Gobierno o los reparten las Cortes.</td><td data-l="Modelo" class="mod">Concurso, elección por la cámara que no controlan y sorteo si hay bloqueo.</td></tr>
+<tr><th>10 · Reguladores y control</th><td data-l="España hoy" class="hoy">Los nombra el Gobierno o los reparten las Cortes.</td><td data-l="Modelo" class="mod">Concurso y elección por la Cámara General; si hay bloqueo, quien mejor puntuó.</td></tr>
 <tr><th>11 · Participación directa</th><td data-l="España hoy" class="hoy">Iniciativa con 500.000 firmas y muchas exclusiones; sin revocatorio.</td><td data-l="Modelo" class="mod">Iniciativa con el 1 %, referéndum con el 2 %, revocatorio y voto por temas.</td></tr>
-<tr><th>12 · Sociedad organizada</th><td data-l="España hoy" class="hoy">Solo consultiva (CES); grupos de presión opacos.</td><td data-l="Modelo" class="mod">Un tercio de la segunda cámara, la doble llave (con el tercio por sorteo como voz de los usuarios) y un registro de grupos de interés.</td></tr>
-<tr><th>13 · Segunda cámara</th><td data-l="España hoy" class="hoy">Senado con la lógica de los partidos.</td><td data-l="Modelo" class="mod">Cámara de la Sociedad: territorios, oficios y sorteo.</td></tr>
-<tr><th>14 · Polarización</th><td data-l="España hoy" class="hoy">Toda la representación pasa por bloques de partidos.</td><td data-l="Modelo" class="mod">Tres vías de representación que no son de bloque, y voto por temas.</td></tr>
-<tr><th>15 · Capacidad</th><td data-l="España hoy" class="hoy">Nada la exige ni la mide.</td><td data-l="Modelo" class="mod">Evaluación pública de programas, debates, sorteo, conocimiento de los oficios y límite de mandatos.</td></tr>
+<tr><th>12 · Sociedad organizada</th><td data-l="España hoy" class="hoy">Solo consultiva (CES); grupos de presión opacos.</td><td data-l="Modelo" class="mod">Cámaras de oficios con poder normativo, consulta pública y registro de grupos de interés.</td></tr>
+<tr><th>13 · Segunda cámara y territorio</th><td data-l="España hoy" class="hoy">Senado con la lógica de los partidos.</td><td data-l="Modelo" class="mod">Sin Senado: Cámara General y cámaras de oficios en cada escala.</td></tr>
+<tr><th>14 · Polarización</th><td data-l="España hoy" class="hoy">Toda la representación pasa por bloques de partidos.</td><td data-l="Modelo" class="mod">Normas por oficios, que no son bloques, y voto por temas.</td></tr>
+<tr><th>15 · Capacidad</th><td data-l="España hoy" class="hoy">Nada la exige ni la mide.</td><td data-l="Modelo" class="mod">Tecnócratas por concurso, acreditación de oficios, evaluación del sistema y límite de mandatos.</td></tr>
 </tbody></table></div>
 </div>
 </section>
@@ -897,10 +662,10 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <p class="ceja">8 · Críticas y riesgos</p>
 <h2>Lo que se le objetará al modelo, y lo que queda sin resolver</h2>
 <div class="rejilla r2">
-<div class="caja color" style="--c:#e11d48"><h4>Desde la izquierda</h4><p>Da más voz a los productores organizados (empresas, colegios, sindicatos grandes) que a quienes no están organizados. <b>Respuesta:</b> el voto en cada sector es individual, la vida no remunerada es un sector con su propio peso, y en las leyes sectoriales el tercio por sorteo tiene llave como usuario. <b>Queda abierto:</b> la capacidad de presión de quien tiene más recursos.</p></div>
-<div class="caja color" style="--c:#0369a1"><h4>Desde la derecha y el liberalismo</h4><p>Más cámaras, más vetos y más coste. Se frenarán reformas necesarias y aparecerán nuevos privilegios corporativos. <b>Respuesta:</b> los vetos son suspensivos o superables, los plazos son fijos y se empieza por pilotos. <b>Queda abierto:</b> el coste real de los órganos de las ocho escalas.</p></div>
-<div class="caja color" style="--c:#7c3aed"><h4>Desde el derecho</h4><p>El voto por oficios puede chocar con la igualdad (arts. 14 y 23). El registro de sector es un dato personal sensible. Un fiscal elegido fuera del Gobierno no responde ante los votantes. <b>Respuesta:</b> un solo voto funcional para todos, con escaños proporcionales a los inscritos; un registro custodiado y no público; cuentas anuales del fiscal ante la Cámara de los Ciudadanos.</p></div>
-<div class="caja color" style="--c:#475569"><h4>Desde la ciencia política</h4><p>Presidencialismo con choques entre poderes (Linz) y con un cargo en el que el ganador se lo lleva todo, que choca con el objetivo de reducir la polarización (Lijphart). Además, parálisis por exceso de jugadores con veto (Tsebelis), captura por grupos organizados (Olson) y un sorteo que no rinde cuentas ante nadie. <b>Respuesta:</b> salidas al bloqueo, vetos limitados, la opción B para el Gobierno, la hipótesis H7 para medir la captura y mandatos cortos y rotatorios para el sorteo.</p></div>
+<div class="caja color" style="--c:#e11d48"><h4>Desde la izquierda</h4><p>Da más poder a quien tiene un oficio acreditado, y más aún a quien tiene varios, que a quien no tiene ninguno: parados, quien cuida en casa, estudiantes. Y los oficios organizados tienen más recursos para presionar. <b>Respuesta:</b> lo que afecta a terceros lo valida la Cámara General, donde todos valen lo mismo, y la consulta pública está abierta a cualquiera. <b>Queda abierto:</b> si eso basta para equilibrar a los oficios fuertes.</p></div>
+<div class="caja color" style="--c:#0369a1"><h4>Desde la derecha y el liberalismo</h4><p>Gremios con poder normativo son la receta clásica de las barreras de entrada, los precios altos y los privilegios corporativos. Y muchas cámaras y votaciones cuestan dinero y tiempo. <b>Respuesta:</b> ningún oficio puede fijar precios ni cerrar el acceso, la autoridad de competencia vigila y la General valida. <b>Queda abierto:</b> el coste real de tantas cámaras en tantas escalas.</p></div>
+<div class="caja color" style="--c:#7c3aed"><h4>Desde el derecho</h4><p>Que solo los profesionales voten normas choca con la soberanía del pueblo entero (art. 1.2) y con la participación en condiciones de igualdad (art. 23). Validar lo que vota un representante es un mandato imperativo, que hoy prohíbe el art. 67.2. Exigir acreditación para la Cámara General limita el derecho a ser elegido, y unos guardianes que no dependen del Gobierno chocan con el art. 104. <b>Respuesta:</b> por eso lo esencial del modelo exige el procedimiento de reforma del art. 168 (ver «Transición»).</p></div>
+<div class="caja color" style="--c:#475569"><h4>Desde la ciencia política</h4><p>Los expertos también tienen intereses, y los grupos pequeños y organizados se imponen a los grandes y dispersos (Olson). La participación en las elecciones de colegios profesionales suele ser baja. Y los cuerpos armados que se gobiernan solos son un riesgo antiguo: en EE. UU., algunos sheriffs elegidos se han negado a aplicar leyes del Estado alegando su propio mandato electoral. <b>Respuesta:</b> consulta pública obligatoria, validación de la General, mandos por concurso y no por elección, y la hipótesis H7 para medir la captura.</p></div>
 </div>
 <h3>Lo que enseñan los intentos reales</h3>
 <div class="tabla"><table>
@@ -913,33 +678,91 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <tr><th>Consejo Nacional, Eslovenia</th><td data-l="Qué fue">40 miembros: 22 por intereses locales y 18 funcionales (empresarios, trabajadores, campo, profesiones…), con veto suspensivo.</td><td data-l="Lección para el modelo">Es el caso vivo más parecido; muestra que la idea funciona en una democracia de la UE, aunque con un papel limitado.</td></tr>
 <tr><th>CES español, CESE europeo, CNEL italiano</th><td data-l="Qué fue">Consejos económicos y sociales consultivos. El CNEL sobrevivió en 2016 porque la reforma que lo suprimía cayó en referéndum.</td><td data-l="Lección para el modelo">Ese es hoy el techo de la representación funcional en Europa: aconsejar.</td></tr>
 <tr><th>Consejo Superior de la Magistratura, Italia</th><td data-l="Qué fue">Dos tercios elegidos por los magistrados. El escándalo Palamara (2019) destapó el reparto de cargos entre corrientes de jueces.</td><td data-l="Lección para el modelo">Que los jueces elijan no basta: voto personal, listas abiertas, miembros externos y concursos públicos.</td></tr>
-<tr><th>Asambleas ciudadanas, Irlanda</th><td data-l="Qué fue">Una asamblea de 99 ciudadanos sorteados preparó el referéndum de 2018, que se aprobó. En 2024 se rechazaron, con el 67,7 % y el 73,9 %, dos referendos sobre familia y cuidados cuya redacción, según sus críticos, se apartaba de lo que había recomendado otra asamblea.</td><td data-l="Lección para el modelo">El sorteo ayuda si sus recomendaciones se respetan; usado como decorado, se vuelve en contra.</td></tr>
+<tr><th>Comité Federal Conjunto (G-BA), Alemania</th><td data-l="Qué fue">Máximo órgano de la autogestión sanitaria: médicos, dentistas, psicoterapeutas, hospitales y cajas de salud dictan directrices vinculantes sobre la atención pública. El Ministerio de Sanidad ejerce una supervisión jurídica sobre ellas.</td><td data-l="Lección para el modelo">Un oficio puede hacer normas obligatorias en una democracia de la UE, si hay un control externo de legalidad.</td></tr>
+<tr><th>Procedimiento de consulta, Suiza</th><td data-l="Qué fue">Antes de una ley importante, el Gobierno federal abre una consulta en la que cualquier persona u organización puede opinar, con al menos tres meses de plazo. Las respuestas se publican.</td><td data-l="Lección para el modelo">La consulta abierta y amplia funciona a escala de un país. Aquí se añade la respuesta motivada a cada aporte.</td></tr>
+<tr><th>Consultas públicas en España (IDAE, ministerios)</th><td data-l="Qué fue">La consulta pública previa y la audiencia pública existen por ley (art. 133 de la Ley 39/2015), y el IDAE las usa en sus programas y normas.</td><td data-l="Lección para el modelo">La pieza ya existe; falta que sea obligatoria, con plazo suficiente y con respuesta a cada aportación.</td></tr>
+<tr><th>Sheriffs elegidos, Estados Unidos</th><td data-l="Qué fue">La mayoría de los sheriffs de condado se eligen por voto popular. Algunos se han declarado «sheriffs constitucionales» y se han negado a aplicar leyes estatales, como las de armas.</td><td data-l="Lección para el modelo">Elegir por voto a quien manda la fuerza la politiza. Por eso aquí los guardianes eligen su voz profesional, pero sus mandos salen de concurso y obedecen a la ley y a los jueces.</td></tr>
 </tbody></table></div>
-<p class="nota" style="margin-top:14px"><b>Cansancio y coste:</b> cada persona votaría en un ciclo a la Presidencia, a la Cámara de los Ciudadanos, en su sector y a sus consejos territoriales, además de los referendos. Para no agotar al votante, las elecciones se agruparían en dos jornadas por ciclo. El número de cargos y el coste de los órganos de las ocho escalas no están calculados: los pilotos municipales servirían para medirlos.</p>
-<p class="nota"><b>Lo que el modelo no decide:</b> monarquía o república, y modelo territorial (autonómico o federal). Los dos debates son compatibles con el modelo, pero no son neutrales: la elección directa del Presidente toca las funciones de la Corona (ver «Transición»).</p>
+<p class="nota" style="margin-top:14px"><b>Cansancio y coste:</b> cada persona votaría en un ciclo al Gobierno y a las Cámaras Generales de sus escalas, y además en cada oficio que ejerce, cada vez que haya una norma que ratificar. Para no agotar a nadie, las elecciones se agruparían en dos jornadas por ciclo y las votaciones de los oficios en ventanas fijas al año. El número de cargos y el coste no están calculados: es una de las lagunas.</p>
+<p class="nota"><b>Lo que el modelo no decide:</b> monarquía o república, y modelo territorial (autonómico o federal). Los dos debates son compatibles con el modelo, pero no son neutrales: la elección directa del Gobierno toca las funciones de la Corona (ver «Transición»).</p>
 </div>
 </section>
 
 <section id="hipotesis">
 <div class="w">
 <p class="ceja">9 · Hipótesis</p>
-<h2>Siete apuestas comprobables</h2>
-<p class="lede">El modelo descansa en hipótesis, no en certezas. Una reforma nacional no se puede aislar, así que se comprobaría primero en municipios piloto comparados con municipios parecidos que no cambian, durante dos mandatos (unos ocho años). Así se comprueban H1, H3, H4 y H7, con encuestas propias en cada municipio. H2, H5 y H6 dependen de reformas nacionales (Gobierno, medios y jueces): se miden con datos de España antes y después de cada reforma, comparados con países parecidos.</p>
+<h2>Ocho apuestas comprobables</h2>
+<p class="lede">El modelo descansa en hipótesis, no en certezas. Las de los oficios se pueden probar pronto: con colegios profesionales voluntarios que voten sus normas técnicas con tecnócratas y consulta pública, y con municipios piloto comparados con municipios parecidos que no cambian, durante dos mandatos (unos ocho años). Así se comprueban H1, H3, H4, H7 y H8. H2, H5 y H6 dependen de reformas nacionales: se miden con datos de España antes y después de cada reforma, comparados con países parecidos.</p>
 <div class="hip">
-<div class="caja"><h4><span class="chip" style="--c:#e11d48">H1</span>Menos polarización</h4><p>Repartir la representación fuera de los bloques y votar por temas reduce el rechazo entre votantes.</p><dl><dt>Mide</dt><dd>Índice de polarización afectiva (método de Reiljan o de Wagner), con encuestas propias en los municipios piloto y de control que usan los mismos termómetros 0-10 del CIS.</dd><dt>Falla si</dt><dd>No baja al menos un 10 % frente a los municipios de control.</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#0369a1">H2</span>Más control, sin parálisis</h4><p>Elegir aparte al Gobierno aumenta el control parlamentario real.</p><dl><dt>Mide</dt><dd>Enmiendas aprobadas contra el Gobierno y comisiones que concluyen; y como coste, presupuestos prorrogados y días de bloqueo.</dd><dt>Falla si</dt><dd>El control no sube o el bloqueo crece más que el control.</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#d97706">H3</span>Mejores leyes técnicas</h4><p>Las leyes con la doble llave se aplican mejor y se reforman menos.</p><dl><dt>Mide</dt><dd>Modificaciones en cinco años, recursos y evaluación posterior independiente.</dd><dt>Falla si</dt><dd>No mejoran, o si mejoran solo para los productores (ver H7).</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#059669">H4</span>El sorteo frena al demagogo</h4><p>Las asambleas por sorteo bien informadas llegan a acuerdos que el electorado ratifica y reducen la ventaja del más mediático.</p><dl><dt>Mide</dt><dd>Tasa de ratificación de sus recomendaciones; relación entre tiempo en medios y votos.</dd><dt>Falla si</dt><dd>No hay diferencia con los procesos sin asamblea.</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#475569">H5</span>Medios con menos sesgo</h4><p>Sin dinero discrecional ni directivos nombrados por políticos, baja el sesgo a favor de quien gobierna.</p><dl><dt>Mide</dt><dd>Media Pluralism Monitor (riesgo de independencia política), Digital News Report (confianza), análisis de contenido independiente.</dd><dt>Falla si</dt><dd>Los indicadores no mejoran.</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#7c3aed">H6</span>Más confianza en la justicia</h4><p>Concursos públicos y un gobierno judicial que eligen sobre todo los jueces aumentan la independencia percibida.</p><dl><dt>Mide</dt><dd>Eurobarómetro y Cuadro de indicadores de Justicia de la UE; encuesta de la red europea de consejos judiciales a los jueces.</dd><dt>Falla si</dt><dd>No mejora la independencia percibida por la ciudadanía y por los jueces.</dd></dl></div>
-<div class="caja"><h4><span class="chip" style="--c:#0f172a">H7</span>Sin captura corporativa</h4><p>La pluralidad y el voto individual impiden que unas pocas organizaciones controlen su sector.</p><dl><dt>Mide</dt><dd>Votos de las tres mayores organizaciones de cada sector, y decisiones favorables a productores frente a usuarios.</dd><dt>Alarma si</dt><dd>Tres organizaciones suman más de dos tercios de los votos emitidos en un sector.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#e11d48">H1</span>Menos polarización</h4><p>Repartir el poder de hacer normas por oficios y votar por temas reduce el rechazo entre votantes.</p><dl><dt>Mide</dt><dd>Índice de polarización afectiva (método de Reiljan o de Wagner), con encuestas propias en los municipios piloto y de control que usan los mismos termómetros 0-10 del CIS.</dd><dt>Falla si</dt><dd>No baja al menos un 10 % frente a los municipios de control.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#0369a1">H2</span>Menos captura de las instituciones</h4><p>Un Gobierno que solo recauda y asigna deja de colocar a los suyos en las instituciones.</p><dl><dt>Mide</dt><dd>Cargos cubiertos por concurso frente a cargos de confianza; índices de independencia institucional; días de bloqueo en los nombramientos.</dd><dt>Falla si</dt><dd>Los nombramientos de confianza no bajan o el bloqueo crece.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#d97706">H3</span>Mejores normas técnicas</h4><p>Las normas que proponen los tecnócratas y vota el oficio se aplican mejor y se reforman menos.</p><dl><dt>Mide</dt><dd>Modificaciones en cinco años, recursos y evaluación posterior independiente.</dd><dt>Falla si</dt><dd>No mejoran, o si mejoran solo para el oficio (ver H7).</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#059669">H4</span>La consulta pública mejora las normas</h4><p>Cuando cualquiera puede aportar y el comité tiene que responder, las normas cambian a mejor.</p><dl><dt>Mide</dt><dd>Aportaciones recibidas, aportaciones incorporadas y diferencia de calidad entre el borrador y la versión final, juzgada por evaluadores externos.</dd><dt>Falla si</dt><dd>Se incorpora menos del 10 % de las aportaciones o el texto final no mejora.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#be185d">H5</span>Medios con menos sesgo</h4><p>Sin dinero discrecional ni directivos nombrados por políticos, baja el sesgo a favor de quien gobierna.</p><dl><dt>Mide</dt><dd>Media Pluralism Monitor (riesgo de independencia política), Digital News Report (confianza), análisis de contenido independiente.</dd><dt>Falla si</dt><dd>Los indicadores no mejoran.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#7c3aed">H6</span>Más confianza en justicia y seguridad</h4><p>Jueces y guardianes sin mando de partido ganan independencia percibida, sin perder control.</p><dl><dt>Mide</dt><dd>Eurobarómetro y Cuadro de indicadores de Justicia de la UE; confianza en la policía; informes de la inspección de los guardianes.</dd><dt>Falla si</dt><dd>No mejora la confianza o crecen las quejas por abuso de la fuerza.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#0f172a">H7</span>Sin captura corporativa</h4><p>La consulta pública y la validación de la General impiden que un oficio legisle a su favor.</p><dl><dt>Mide</dt><dd>Normas de oficio que suben barreras de entrada o costes para los usuarios; normas devueltas por la Cámara General.</dd><dt>Alarma si</dt><dd>Un oficio aprueba normas que encarecen o cierran su acceso, o la General devuelve más de una de cada cinco.</dd></dl></div>
+<div class="caja"><h4><span class="chip" style="--c:#475569">H8</span>Votar en el oficio no cansa</h4><p>Los profesionales participan en las votaciones de su oficio de forma sostenida.</p><dl><dt>Mide</dt><dd>Participación en cada ratificación, por oficio y por escala, durante dos mandatos.</dd><dt>Falla si</dt><dd>La participación baja del 30 %: entonces decidirían unos pocos en nombre de todos.</dd></dl></div>
+</div>
+</div>
+</section>
+
+<section id="lagunas" class="alt">
+<div class="w">
+<p class="ceja">10 · Lagunas</p>
+<h2>Lo que falta por resolver</h2>
+<p class="lede">Es una lista de trabajo pendiente, no de defectos escondidos. Cada punto es una pregunta que el modelo todavía no contesta bien. La prioridad indica cuánto depende el resto del modelo de resolverla.</p>
+<div class="lagunas">
+<h3>Los oficios</h3>
+<ul class="pendientes">
+<li><span class="pri alta">Alta</span><b>El mapa de competencias.</b> Qué puede regular cada oficio en cada escala, y quién decide cuando una norma toca a varios oficios o cae entre dos.</li>
+<li><span class="pri alta">Alta</span><b>La lista de oficios.</b> Cuántos hay, cómo nace uno nuevo (por ejemplo, la inteligencia artificial) y cómo se fusionan o desaparecen.</li>
+<li><span class="pri alta">Alta</span><b>La acreditación.</b> Quién acredita, sin que el propio oficio cierre la puerta a los de fuera; cada cuánto se renueva y qué pasa con quien deja de ejercer o se jubila.</li>
+<li><span class="pri alta">Alta</span><b>El peso de quien tiene varios oficios.</b> Quien está en tres oficios decide en más ámbitos que quien está en uno o en ninguno. Hay que justificar que eso no rompe la igualdad, o limitarlo.</li>
+<li><span class="pri media">Media</span><b>Los oficios sin título.</b> Trabajo doméstico, oficios artesanos o nuevos: cómo acreditan su experiencia.</li>
+<li><span class="pri media">Media</span><b>Quien cuida sin cobrar.</b> Hoy no tiene oficio y solo vota en la General. Decidir si el cuidado de personas en casa es un oficio con cámara propia.</li>
+<li><span class="pri alta">Alta</span><b>Qué decide el representante.</b> Si los miembros votan cada norma, qué le queda al representante en la escala de arriba, y cómo se suman las validaciones de muchos gremios locales en un solo resultado.</li>
+<li><span class="pri alta">Alta</span><b>Empresarios y asalariados en el mismo oficio.</b> Cómo conviven con los sindicatos, la negociación colectiva y el derecho de huelga (arts. 7, 28 y 37).</li>
+<li><span class="pri media">Media</span><b>Residentes extranjeros y profesionales de la UE:</b> si votan en los oficios, y cómo puede una persona recurrir ante un juez una norma de oficio que la perjudica.</li>
+<li><span class="pri media">Media</span><b>La validación del representante.</b> Qué pasa si el gremio rechaza lo que votó su representante: si se anula su voto, si cae la norma de la escala superior o si cesa el representante; y en qué plazo.</li>
+<li><span class="pri media">Media</span><b>El cuórum.</b> Cuánta participación hace falta para que valga una votación de oficio, y qué ocurre si no se alcanza (H8).</li>
+<li><span class="pri media">Media</span><b>Los tecnócratas.</b> Cómo es el concurso, quién lo juzga y cuántos mandatos pueden encadenar.</li>
+</ul>
+<h3>La Cámara General</h3>
+<ul class="pendientes">
+<li><span class="pri alta">Alta</span><b>Qué es la «ciencia holística».</b> Hoy no es una disciplina reconocida. Hay que definir qué se acredita (ciencia de sistemas, evaluación de políticas, ecología, economía) y quién lo acredita, o elegir la opción B.</li>
+<li><span class="pri alta">Alta</span><b>Qué cuenta como «afecta a terceros».</b> Es la frontera entre lo que decide un oficio solo y lo que valida la General. Sin una regla clara, todo acabará en la General o en el Constitucional.</li>
+<li><span class="pri alta">Alta</span><b>Quién desarrolla las leyes.</b> Hoy los reglamentos los dicta el Gobierno (art. 97). Si el Gobierno ni legisla ni reglamenta, hay que decidir si lo hacen los oficios, la Cámara General o una administración técnica.</li>
+<li><span class="pri alta">Alta</span><b>El bloqueo del presupuesto.</b> Qué pasa si el Gobierno y la Cámara General no se ponen de acuerdo: prórroga automática, desempate o elecciones a la vez.</li>
+<li><span class="pri media">Media</span><b>Quién evalúa al evaluador.</b> Con qué indicadores y con qué control externo se juzga el informe anual del sistema.</li>
+<li><span class="pri media">Media</span><b>El territorio sin cámara propia.</b> Sin Senado ni cámara territorial, comprobar que las regiones poco pobladas y las lenguas quedan bien protegidas por las cámaras de cada escala.</li>
+</ul>
+<h3>Gobierno, guardianes y justicia</h3>
+<ul class="pendientes">
+<li><span class="pri alta">Alta</span><b>Lo que no es recaudar ni asignar.</b> Quién lleva la política exterior, firma los tratados, representa a España en la Unión Europea y dirige la administración que no paga ni recauda.</li>
+<li><span class="pri alta">Alta</span><b>Las Fuerzas Armadas.</b> Quién las dirige (arts. 8 y 97), cómo encajan en el sistema de guardianes y cómo se garantiza que obedecen al poder civil.</li>
+<li><span class="pri alta">Alta</span><b>Quién vigila a los guardianes.</b> Comprobar que la inspección independiente, los jueces y la General bastan para que un cuerpo armado que no depende del Gobierno tampoco dependa de sí mismo.</li>
+<li><span class="pri media">Media</span><b>La coordinación de los guardianes</b> entre escalas en una gran emergencia o un atentado: quién manda en las primeras horas.</li>
+<li><span class="pri alta">Alta</span><b>El peso del oficio jurídico.</b> Elige a cuatro magistrados del Constitucional, a cuatro miembros del Consejo de Justicia y a parte de la Junta Electoral: es mucho poder para un solo oficio.</li>
+<li><span class="pri media">Media</span><b>El corporativismo judicial.</b> Quién juzga a los jueces y cómo se evita que el autogobierno se convierta en reparto entre corrientes, como en Italia.</li>
+</ul>
+<h3>Dinero, derecho y puesta en marcha</h3>
+<ul class="pendientes">
+<li><span class="pri alta">Alta</span><b>El encaje constitucional.</b> Soberanía del pueblo (art. 1.2), igualdad en la participación (art. 23), prohibición del mandato imperativo (art. 67.2), dependencia de la policía (art. 104). Lo que toca los arts. 1, 8, 23 o 62 exige el procedimiento del art. 168; el resto, el del 167.</li>
+<li><span class="pri alta">Alta</span><b>El voto electrónico.</b> Las ratificaciones de los oficios necesitan un voto secreto, verificable y seguro, y hoy no hay ninguno que cumpla las tres cosas a gran escala sin discusión.</li>
+<li><span class="pri media">Media</span><b>El coste.</b> Cuántos cargos, cámaras y votaciones salen en las ocho escalas, y cuánto cuestan frente al sistema actual.</li>
+<li><span class="pri media">Media</span><b>El presupuesto y los impuestos.</b> Cómo encaja con la propuesta hermana, <a href="https://humanity.wiki/economia-publica-optimizada" target="_top">Economía pública optimizada</a>, y cuánto margen tiene el Gobierno al asignar.</li>
+<li><span class="pri alta">Alta</span><b>Cómo se reforma la nueva Constitución</b> y quién protege las competencias de cada oficio y de cada escala frente a las demás.</li>
+<li><span class="pri media">Media</span><b>Conflictos entre escalas.</b> Quién arbitra entre las Cámaras Generales de distintas escalas, y cómo se reparte el dinero entre territorios ricos y pobres.</li>
+<li><span class="pri media">Media</span><b>Los partidos.</b> Qué papel les queda si solo compiten en la Cámara General y por el Gobierno, y cómo se evita que colonicen las candidaturas de los oficios.</li>
+<li><span class="pri media">Media</span><b>El Derecho europeo.</b> Las normas de los oficios tienen que respetar las directivas de la Unión (por ejemplo, la de reconocimiento de cualificaciones profesionales).</li>
+</ul>
 </div>
 </div>
 </section>
 
 <section id="transicion" class="alt">
 <div class="w">
-<p class="ceja">10 · Transición</p>
+<p class="ceja">11 · Transición</p>
 <h2>Cómo se llegaría, paso a paso</h2>
 <p class="lede">Lo más profundo del modelo exige el procedimiento más difícil de la Constitución. Por eso empieza por lo que se puede hacer por ley y por pilotos, y deja para el final lo que necesita el artículo 168.</p>
 <figure>
@@ -956,11 +779,11 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <text x="550" y="124" text-anchor="middle" font-size="11.5" fill="#64748b">años 2-5 · 3/5 de cada cámara (+ referéndum si lo pide 1/10)</text>
 <text x="905" y="124" text-anchor="middle" font-size="11.5" fill="#64748b">2/3, disolución, nuevas Cortes y referéndum</text>
 <g font-size="11.5" fill="#334155">
-<text x="40" y="160">· Publicidad institucional con fórmula y tope</text><text x="40" y="180">· RTVE por concurso, o sin informativos públicos</text><text x="40" y="200">· Financiación de partidos por contrapartida</text><text x="40" y="220">· Jueces eligen a los 12 vocales jueces</text><text x="40" y="240">· Junta Electoral por sorteo</text>
-<text x="395" y="160">· Constitucional y CGPJ con orígenes mezclados</text><text x="395" y="180">· Fiscal General por terna y concurso</text><text x="395" y="200">· Iniciativa con el 1 % y referéndum con el 2 %</text><text x="395" y="220">· Voto proporcional nacional y revocatorio</text><text x="395" y="240">· Cámara de la Sociedad (o fase 3)</text>
-<text x="750" y="160">· Presidencia elegida directamente</text><text x="750" y="180">· Funciones de la Corona (arts. 1.3 y 62)</text><text x="750" y="200">· Doble aprobación por 2/3 y referéndum</text>
+<text x="40" y="160">· Publicidad institucional con fórmula y tope</text><text x="40" y="180">· RTVE por concurso, o sin informativos públicos</text><text x="40" y="200">· Consulta pública obligatoria y con respuesta</text><text x="40" y="220">· Jueces eligen a los 12 vocales jueces</text><text x="40" y="240">· Mandos policiales por concurso</text>
+<text x="395" y="160">· Constitucional y CGPJ de abajo arriba</text><text x="395" y="180">· Fiscal General por terna y concurso</text><text x="395" y="200">· Iniciativa con el 1 % y referéndum con el 2 %</text><text x="395" y="220">· Voto proporcional y revocatorio</text><text x="395" y="240">· Guardianes que dependen de la ley</text>
+<text x="750" y="160">· Cámara General y cámaras de oficios</text><text x="750" y="180">· Gobierno elegido para recaudar y asignar</text><text x="750" y="200">· Funciones de la Corona (arts. 1.3 y 62)</text><text x="750" y="220">· Doble aprobación por 2/3 y referéndum</text>
 </g>
-<rect x="30" y="258" width="1040" height="34" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/><text x="550" y="280" text-anchor="middle" font-size="12" fill="#334155"><tspan font-weight="800">En todo momento:</tspan> pilotos municipales (consejos de oficios y asambleas por sorteo) y evaluación de las siete hipótesis</text>
+<rect x="30" y="258" width="1040" height="34" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/><text x="550" y="280" text-anchor="middle" font-size="12" fill="#334155"><tspan font-weight="800">En todo momento:</tspan> pilotos con colegios profesionales y municipios, y evaluación de las ocho hipótesis</text>
 </g>
 </svg></div>
 </figure>
@@ -968,22 +791,22 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <div class="caja color" style="--c:#059669"><h4>Fase 1 · por ley</h4><ul style="padding-left:1.1em;margin:6px 0">
 <li>Publicidad institucional con fórmula y tope (Ley 29/2005).</li>
 <li>Gobierno de RTVE por concurso, o fin de los informativos públicos (Ley 17/2006).</li>
-<li>Financiación de partidos por contrapartida (LO 8/2007).</li>
-<li>Listas desbloqueadas (Ley electoral).</li>
+<li>Financiación de partidos por contrapartida (LO 8/2007) y listas desbloqueadas (ley electoral).</li>
 <li>Los 12 vocales jueces del CGPJ, elegidos por los jueces (LOPJ: el art. 122.3 lo permite).</li>
-<li>Junta Electoral por sorteo; concursos para los reguladores.</li>
-<li>Asambleas por sorteo y voto por temas como consultas; pilotos municipales.</li>
+<li>Mandos de la policía por concurso (LO 2/1986) y una inspección independiente del uso de la fuerza.</li>
+<li>Consulta pública obligatoria, con plazo suficiente y respuesta motivada a cada aporte (Ley 39/2015, art. 133, y Ley 50/1997, art. 26).</li>
+<li>Pilotos: colegios profesionales que voten sus normas deontológicas con tecnócratas y consulta pública (Ley 2/1974), y cámaras de oficios consultivas en municipios.</li>
 </ul></div>
 <div class="caja color" style="--c:#d97706"><h4>Fase 2 · art. 167</h4><ul style="padding-left:1.1em;margin:6px 0">
-<li>Composición del Constitucional (art. 159) y del CGPJ (art. 122.3).</li>
-<li>Elección del Fiscal General (art. 124.4).</li>
+<li>Composición del Constitucional (art. 159) y del CGPJ (art. 122.3), y elección del Fiscal General (art. 124.4): jueces de abajo arriba y concursos. Hasta la fase 3, las Cortes hacen el papel de la Cámara General, y los colegios de abogados y la universidad, el del oficio jurídico.</li>
 <li>Iniciativa con el 1 % (art. 87.3) y referéndum de iniciativa ciudadana (art. 92).</li>
-<li>Sistema electoral proporcional nacional (art. 68).</li>
-<li>Revocatorio de diputados: exige tocar la prohibición del mandato imperativo (art. 67.2), que está en una parte que se reforma por el art. 167.</li>
-<li>Cámara de la Sociedad en lugar del Senado (arts. 66 y 69). Si se entiende que el voto por oficios, el sorteo o el revocatorio afectan al derecho de participación (art. 23), pasarían a la fase 3.</li>
+<li>Sistema electoral proporcional nacional (art. 68) y revocatorio (art. 67.2).</li>
+<li>Guardianes que dependen de la ley y no del Gobierno (art. 104).</li>
 </ul></div>
 <div class="caja color" style="--c:#7c3aed"><h4>Fase 3 · art. 168</h4><ul style="padding-left:1.1em;margin:6px 0">
-<li>Elección directa del Presidente: cambia lo que hoy hace el Rey al proponer candidato, disolver y convocar (art. 62), y la «monarquía parlamentaria» del art. 1.3.</li>
+<li>Cámara General y cámaras de oficios en lugar de las Cortes, con validación de los representantes de oficio: tocan la soberanía del pueblo (art. 1.2) y la participación en condiciones de igualdad (art. 23).</li>
+<li>Gobierno elegido directamente: cambia lo que hoy hace el Rey al proponer candidato, disolver y convocar (art. 62), y la «monarquía parlamentaria» del art. 1.3.</li>
+<li>Fuerzas Armadas (art. 8), cuando se resuelva su encaje.</li>
 <li>Exige 2/3 en cada cámara, disolución, nuevas Cortes que lo ratifiquen por 2/3 y un referéndum obligatorio.</li>
 </ul></div>
 </div>
@@ -1004,12 +827,17 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <dt>Mandato imperativo</dt><dd>Obligar a un representante a votar lo que le ordenan. La Constitución lo prohíbe.</dd>
 <dt>Mayoría reforzada</dt><dd>Más de la mitad: por ejemplo 3/5 o 2/3. Obliga a pactar, pero puede bloquear.</dd>
 <dt>Veto suspensivo</dt><dd>Un «no» que retrasa una ley pero puede superarse; no la entierra.</dd>
-<dt>Doble llave</dt><dd>En el modelo, la ley de un sector necesita el sí de los representantes de ese sector y el del tercio por sorteo, que vota como usuario. Si falta, tras dos meses de comisión mixta decide la Cámara de los Ciudadanos por 3/5, o un referéndum.</dd>
-<dt>Sorteo estratificado</dt><dd>Sorteo hecho de forma que el grupo elegido se parezca a la población en edad, sexo, territorio y estudios.</dd>
+<dt>Cámara General</dt><dd>En el modelo, la cámara que elige toda la ciudadanía en cada escala: hace las leyes comunes, coordina los oficios y evalúa el sistema entero.</dd>
+<dt>Cámara de oficio</dt><dd>La de quienes ejercen un oficio y lo acreditan. Hace las normas de su ámbito; lo que afecta a terceros lo valida la Cámara General.</dd>
+<dt>Tecnócratas</dt><dd>El comité técnico de cada oficio: profesionales que superan un concurso de méritos, elegidos por los miembros, que redactan las propuestas.</dd>
+<dt>Consulta pública</dt><dd>Plazo en el que cualquiera puede leer una propuesta y aportar mejoras antes de que se apruebe.</dd>
+<dt>Validación</dt><dd>Voto con el que los miembros de un oficio confirman, o no, lo que su representante decidió en la escala de arriba.</dd>
+<dt>Acreditación</dt><dd>Prueba de que alguien ejerce un oficio: un título, la experiencia demostrada o la validación de sus pares.</dd>
+<dt>Guardianes</dt><dd>Quienes tienen el uso legítimo de la fuerza: policía, protección civil, bomberos, salvamento.</dd>
+<dt>Visión holística</dt><dd>Mirar cómo encajan y se afectan las partes de un sistema, no solo cada parte. Las disciplinas más cercanas son la ciencia de sistemas y la evaluación integrada de políticas.</dd>
 <dt>Convalidar</dt><dd>Que el Parlamento confirme un decreto-ley del Gobierno; si no lo hace, el decreto decae.</dd>
 <dt>Aforamiento</dt><dd>Privilegio de ser juzgado por un tribunal superior por razón del cargo.</dd>
-<dt>Juicio político</dt><dd>Procedimiento para destituir al Presidente por delitos graves o por violar la Constitución.</dd>
-<dt>Disolución recíproca</dt><dd>Quien convoca elecciones anticipadas también pone su propio cargo en juego.</dd>
+<dt>Juicio político</dt><dd>Procedimiento para destituir al Gobierno por delitos graves o por violar la Constitución.</dd>
 <dt>Revocatorio</dt><dd>Votación para destituir a un cargo electo antes de que acabe su mandato.</dd>
 </dl>
 </div>
@@ -1017,7 +845,7 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 
 <section id="fuentes" class="alt">
 <div class="w">
-<p class="ceja">11 · Fuentes</p>
+<p class="ceja">12 · Fuentes</p>
 <h2>De dónde sale cada dato</h2>
 <ol class="fuentes">
 <li><a href="https://www.lamoncloa.gob.es/espana/leyfundamental/Paginas/titulo_noveno.aspx">Constitución española, título IX (Tribunal Constitucional, art. 159)</a>.</li>
@@ -1035,7 +863,10 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 <li><a href="https://en.wikipedia.org/wiki/Corporative_Chamber">Cámara Corporativa del Estado Novo</a> y <a href="https://en.wikipedia.org/wiki/Bavarian_Senate">Senado bávaro</a> (resúmenes con sus referencias).</li>
 <li><a href="https://www.gov.ie/en/department-of-housing-local-government-and-heritage/publications/how-the-seanad-is-elected/">Gobierno de Irlanda: cómo se elige el Seanad</a>; <a href="https://www.irishtimes.com/news/politics/how-it-works-the-bonkers-seanad-election-1.4189620">The Irish Times sobre su electorado</a>.</li>
 <li><a href="https://ds-rs.si/en/about-national-council/general/composition">Consejo Nacional de Eslovenia: composición</a>.</li>
-<li><a href="https://oecd-opsi.org/innovations/the-irish-citizens-assembly/">OCDE sobre la Asamblea Ciudadana irlandesa</a>; <a href="https://www.idea.int/democracytracker/report/ireland/march-2024">IDEA Internacional: referendos de marzo de 2024</a>.</li>
+<li><a href="https://www.droit-bilingue.ch/de-en/1/17/172.061-4-8.html">Ley federal suiza sobre el procedimiento de consulta (2005), art. 4</a>; <a href="https://biz.libretexts.org/Bookshelves/Law/Book%253A_Introduction_to_Swiss_Law_(Thommen)/Untitled_Page_08">Introducción al Derecho suizo: el procedimiento de consulta</a>.</li>
+<li><a href="https://www.boe.es/buscar/act.php?id=BOE-A-2015-10565">Ley 39/2015, del procedimiento administrativo común, art. 133 (consulta y audiencia pública)</a>.</li>
+<li><a href="https://www.g-ba.de/downloads/17-98-2804/2015-06-08_GBA-Flyer_EN_bf.pdf">Comité Federal Conjunto (G-BA) de Alemania</a>; <a href="https://en.wikipedia.com/wiki/Federal_Joint_Committee_(Germany)">resumen con sus referencias</a>.</li>
+<li><a href="https://www.law.georgetown.edu/georgetown-law-journal/?p=23850">F. Heydari, «The Sheriff's Constitution», Georgetown Law Journal (2025)</a>; <a href="https://www.npr.org/2019/02/21/696400737/when-sheriffs-wont-enforce-the-law">NPR: sheriffs que no aplican la ley (2019)</a>.</li>
 <li>Katz y Mair (1995), «Changing Models of Party Organization and Party Democracy: The Emergence of the Cartel Party», <i>Party Politics</i> 1(1).</li>
 <li><a href="https://kellogg.nd.edu/sites/default/files/old_files/documents/200_0.pdf">Mainwaring y Shugart, revisión crítica de Juan Linz sobre el presidencialismo</a>.</li>
 <li>Gidron, Adams y Horne (2020), <i>American Affective Polarization in Comparative Perspective</i>, Cambridge University Press (<a href="https://ces.fas.harvard.edu/uploads/files/events/GAH-Affective-Polarization-in-Democratic-Polities.pdf">versión de trabajo</a>); <a href="https://repositori.upf.edu/server/api/core/bitstreams/a70f729b-6a32-4e79-85a7-99fa0f3c0e9c/content">Torcal y Comellas, polarización afectiva en el sur de Europa</a>.</li>
@@ -1049,7 +880,7 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 </main>
 
 <footer>
-<p>Democracia orgánica moderna · una propuesta de <a href="https://luzhumanidad.com/" target="_top">Luz &amp; Humanidad</a>, área de Política · versión 1, noviembre de 2026.</p>
+<p>Democracia orgánica moderna · una propuesta de <a href="https://luzhumanidad.com/" target="_top">Luz &amp; Humanidad</a>, área de Política · versión 2, noviembre de 2026.</p>
 <p>Herramienta educativa sin afiliación política. Otras herramientas: <a href="https://luzhumanidad.com/politica" target="_top">Política</a>.</p>
 </footer>
 
@@ -1057,13 +888,13 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
 (() => {
   // The eight steps, drawn from data so they stay aligned
   const P = [
-    ['COMUNIDAD', 'vecinal: edificio, barrio', 'lo común del lugar'],
-    ['MUNICIPIO', 'pueblo o ciudad', 'urbanismo, servicios'],
-    ['PROVINCIA', 'o comarca', 'agua, residuos, vías'],
-    ['REGIÓN', 'comunidad autónoma', 'sanidad, educación'],
-    ['NACIÓN', 'España', 'leyes, justicia'],
-    ['CONTINENTE', 'aspiración: tratados UE', 'clima, mercado, paz'],
-    ['PLANETA', 'aspiración: ONU', 'bienes comunes'],
+    ['COMUNIDAD', 'vecinal: edificio, barrio', 'lo común del lugar', 'CE'],
+    ['MUNICIPIO', 'pueblo o ciudad', 'urbanismo, servicios', 'COEG'],
+    ['PROVINCIA', 'o comarca', 'agua, residuos, vías', 'COEJ'],
+    ['REGIÓN', 'comunidad autónoma', 'sanidad, educación', 'COEJG'],
+    ['NACIÓN', 'España', 'leyes, justicia', 'COEJG'],
+    ['CONTINENTE', 'aspiración: tratados UE', 'clima, mercado, paz', 'CO'],
+    ['PLANETA', 'aspiración: ONU', 'bienes comunes', 'C'],
   ];
   const g = document.getElementById('peldanos'); if (!g) return;
   const NS = 'http://www.w3.org/2000/svg', el = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; g.appendChild(e); return e; };
@@ -1072,16 +903,17 @@ Los jueces son mayoría, como recomienda el Consejo de Europa: es la excepción 
     el('rect', { x, y, width: 124, height: 96, rx: 10, fill: asp ? '#f8fafc' : '#fff', stroke: asp ? '#cbd5e1' : '#94a3b8', 'stroke-dasharray': asp ? '5 4' : '' });
     el('text', { x: x + 62, y: y + 18, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 800, fill: '#0f172a' }, p[0]);
     el('text', { x: x + 62, y: y + 33, 'text-anchor': 'middle', 'font-size': 9.5, fill: '#64748b' }, p[1]);
-    [['C', '#0284c7'], ['O', '#d97706'], ['S', '#059669'], ['T', '#475569']].forEach(([l, c], j) => {
-      el('circle', { cx: x + 23 + j * 26, cy: y + 54, r: 10, fill: c, opacity: asp ? .55 : 1 });
-      el('text', { x: x + 23 + j * 26, y: y + 58, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 800, fill: '#fff' }, l);
+    [['C', '#0369a1'], ['O', '#d97706'], ['E', '#e11d48'], ['J', '#7c3aed'], ['G', '#0f766e']].forEach(([l, c], j) => {
+      const tiene = p[3].includes(l);
+      el('circle', { cx: x + 18 + j * 22, cy: y + 54, r: 9, fill: tiene ? c : '#e2e8f0', opacity: tiene && asp ? .55 : 1 });
+      el('text', { x: x + 18 + j * 22, y: y + 58, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 800, fill: tiene ? '#fff' : '#94a3b8' }, l);
     });
     el('text', { x: x + 62, y: y + 84, 'text-anchor': 'middle', 'font-size': 9.5, fill: '#334155' }, p[2]);
     // delegate arrow from the step below
     const px = i ? x - 11 : 138, py = i ? y + 92 : 412;
     el('path', { d: `M${px},${py} C${x - 4},${py} ${x - 4},${y + 60} ${x - 1},${y + 60}`, fill: 'none', stroke: '#94a3b8', 'stroke-width': 1.4, 'marker-end': 'url(#fl3)' });
   });
-  el('text', { x: 150, y: 462, 'font-size': 11, fill: '#64748b' }, 'Cada escala envía delegados a la de arriba (flechas). La de arriba coordina y ayuda; no sustituye.');
+  el('text', { x: 150, y: 462, 'font-size': 11, fill: '#64748b' }, 'Cada escala envía representantes a la de arriba (flechas). La de arriba coordina y ayuda; no sustituye.');
 
   // Highlight the section in the top bar
   const links = [...document.querySelectorAll('.barra nav a')];
