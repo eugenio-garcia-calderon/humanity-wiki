@@ -14,7 +14,9 @@ import { useEffect, useRef, useState } from 'react';
 // 'democracia-organica' (SubpaginaSitio.tsx, migration 0251) shows it at `/democracia-organica`.
 // The frame gets the parent's hash (`#espana`, `#modelo`…) so a shared link opens the same section.
 // Same origin: the frame scrolls on its own and reaches exactly the bottom of the screen.
-const DOC = '/democracia-organica-moderna/index.html';
+// The version in the query is the cache key: a browser or proxy that kept the old study (v1, with
+// sortition) would otherwise keep serving it. Bump it whenever the study changes in substance.
+const DOC = '/democracia-organica-moderna/index.html?v=2';
 
 export default function DemocraciaOrganica() {
   const marco = useRef<HTMLIFrameElement>(null);
