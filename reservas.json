@@ -17,6 +17,12 @@
       "ruta": "src/pages/PoliticaHerramientas.tsx",
       "motivo": "Democracia orgánica moderna",
       "desde": "2026-11-28T18:14:22.536Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/politica/VisualesHerramientas.tsx",
+      "motivo": "Democracia orgánica moderna",
+      "desde": "2026-11-28T18:14:25.156Z"
     }
   ]
 }
