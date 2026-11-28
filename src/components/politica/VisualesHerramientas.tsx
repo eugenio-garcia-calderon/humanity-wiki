@@ -230,3 +230,56 @@ export function VisualEconomia() {
     </svg>
   );
 }
+
+/* ── Democracia orgánica moderna: de la persona a los poderes, por tres raíces (2026-11-28) ──
+   The same scheme as the study's cover (public/democracia-organica-moderna/index.html): every person
+   votes (bottom), and also speaks through three roots — territory, trade, lot — which feed the powers
+   (the study counts six: these five plus direct citizen power), each with a different origin. */
+const RAICES = [
+  { n: 'Territorio', x: 70, c: 'stroke-sky-500', f: 'fill-sky-500' },
+  { n: 'Oficios', x: 160, c: 'stroke-amber-500', f: 'fill-amber-500' },
+  { n: 'Sorteo', x: 250, c: 'stroke-emerald-500', f: 'fill-emerald-500' },
+];
+const PODERES = [
+  { n: 'Gobierno', x: 32, f: 'fill-rose-500' },
+  { n: 'Ciudadanos', x: 96, f: 'fill-sky-600' },
+  { n: 'Sociedad', x: 160, f: 'fill-amber-500' },
+  { n: 'Justicia', x: 224, f: 'fill-violet-600' },
+  { n: 'Control', x: 288, f: 'fill-slate-600' },
+];
+
+export function VisualOrganica() {
+  const W = 320, H = 180;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img"
+      aria-label="Democracia orgánica moderna: cada persona vota y además tiene voz por su territorio, su oficio y por sorteo; los poderes tienen orígenes distintos">
+      {/* the people: one equal vote each */}
+      {Array.from({ length: 15 }, (_, i) => (
+        <g key={i} className="transition-transform duration-500 group-hover:-translate-y-0.5" style={{ transitionDelay: `${i * 15}ms` }}>
+          <circle cx={27 + i * 19} cy={152} r={4} className="fill-slate-700" />
+          <path d={`M${21 + i * 19},${166} q6,-10 12,0`} className="fill-slate-700" />
+        </g>
+      ))}
+      <text x={W / 2} y={177} textAnchor="middle" className="fill-slate-500 text-[8.5px] uppercase tracking-[0.14em]">Una persona, un voto</text>
+      {/* the three roots */}
+      {RAICES.map(r => (
+        <g key={r.n}>
+          <path d={`M${r.x},140 C${r.x},118 ${r.x},110 ${r.x},98`} fill="none" className={r.c} strokeWidth={3} strokeLinecap="round" />
+          <rect x={r.x - 34} y={84} width={68} height={16} rx={8} className={r.f} />
+          <text x={r.x} y={95.5} textAnchor="middle" className="fill-white text-[9px] font-bold">{r.n}</text>
+          {PODERES.map(p => (
+            <line key={p.n} x1={r.x} y1={84} x2={p.x} y2={46} className={r.c} strokeWidth={0.7} opacity={0.35} />
+          ))}
+        </g>
+      ))}
+      {/* the five powers */}
+      {PODERES.map(p => (
+        <g key={p.n}>
+          <rect x={p.x - 29} y={26} width={58} height={20} rx={5} className={p.f} />
+          <text x={p.x} y={39.5} textAnchor="middle" className="fill-white text-[8.5px] font-bold">{p.n}</text>
+        </g>
+      ))}
+      <text x={W / 2} y={16} textAnchor="middle" className="fill-slate-500 text-[9px] uppercase tracking-[0.14em]">Sobre el voto igual, tres raíces más</text>
+    </svg>
+  );
+}

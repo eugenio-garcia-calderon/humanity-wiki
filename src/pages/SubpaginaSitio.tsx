@@ -41,6 +41,7 @@ const VISTAS_DOC = new Set(['geometria', 'observatorio', 'perfiles', 'decidir'])
 const SolSolidario = lazy(() => import('./SolSolidario'));
 const CadenaSolar = lazy(() => import('./CadenaSolar'));
 const AgriculturaSintropica = lazy(() => import('./AgriculturaSintropica'));
+const DemocraciaOrganica = lazy(() => import('./DemocraciaOrganica'));
 const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
@@ -60,6 +61,8 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagi
   // 2026-11-25 (Eugenio): «vamos a crear dentro de Luz de Humanidad una nueva página… agricultura sintrópica».
   // The designer and simulator, full screen (it has its own header with a link to luzhumanidad.com).
   'agricultura-sintropica': () => <AgriculturaSintropica />,
+  // 2026-11-28 (Eugenio): «un modelo de democracia orgánica moderna… en /politica este sexto bloque». The study, framed.
+  'democracia-organica': () => <DemocraciaOrganica />,
 };
 // Apps that sit under the site's own top bar, like any other page of the site
 // (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
