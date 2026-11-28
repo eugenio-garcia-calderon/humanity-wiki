@@ -8,6 +8,9 @@ import SelectorIdioma from './SelectorIdioma';
 import { enlaceColabora } from './PresentacionSitio';
 import { useSitio } from './ContextoSitio';
 import { useDiseno, elegirDiseno, type Diseno } from './disenoUno/diseno';
+import { useBarraOculta } from './barraAlBajar';
+import { Menu, X } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -66,6 +69,35 @@ function BotonLoco({ loco, cambiar }: { loco: boolean; cambiar: () => void }) {
   );
 }
 
+/** The ☰ of the phone bar (2026-11-28): Participa, the languages and whatever else the bar carries on a computer,
+ *  folded into one button at the right. Only below `sm`; closes on a tap outside, on Esc and on choosing. */
+function MenuMovil({ children }: { children: ReactNode }) {
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: PointerEvent) => { if (!caja.current?.contains(e.target as Node)) setAbierto(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('pointerdown', fuera); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', fuera); document.removeEventListener('keydown', esc); };
+  }, [abierto]);
+  return (
+    <div ref={caja} className="relative justify-self-end [grid-area:menu] sm:hidden">
+      <button type="button" onClick={() => setAbierto(v => !v)} aria-expanded={abierto} aria-haspopup="true"
+        aria-label={abierto ? 'Cerrar el menú' : 'Abrir el menú'}
+        className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-800 hover:text-slate-950">
+        {abierto ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+      </button>
+      {abierto && (
+        <div onClick={e => { if ((e.target as HTMLElement).closest('a')) setAbierto(false); }}
+          className="absolute right-0 top-full z-50 mt-2 flex w-56 flex-col items-stretch gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl [&>a]:justify-center [&>button]:self-center [&>nav]:justify-center">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** The logo as a button: a small menu to try the two designs of the home page (disenoUno/diseno.ts). */
 function SelectorDiseno({ titulo, children }: { titulo: string; children: ReactNode }) {
   const diseno = useDiseno();
@@ -119,6 +151,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   const [raiz, setRaiz] = useState<Raiz | null>(null);
   const sitio = useSitio();
   const [loco, cambiarLoco] = useNombreLoco();
+  const oculta = useBarraOculta();
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
   // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
@@ -129,43 +162,56 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   const eslogan: string | null = (typeof c.sitio?.eslogan === 'string' && c.sitio.eslogan.trim()) || c.subtitulo || null;
   // EL ESCAPARATE, CENTRADO (2026-11-06, Eugenio: «el logotipo con el nombre y el subtítulo en el
   // centro, y la barra de buscar más hacia la derecha»): tres columnas, la marca en medio y el
-  // buscador pegado a la derecha. En el móvil, la marca arriba y el buscador debajo, a la derecha.
+  // buscador pegado a la derecha. (El móvil, desde el 2026-11-28: una sola línea, ver más abajo.)
   // 2026-11-12 (Eugenio): «cambia el colaborar por Participa en el menú, y reduce un 25 % el tamaño del logo».
   // LA BARRA DEL ESCAPARATE, TERCERA FORMA (2026-11-12, Eugenio: «la barra de buscar, más grande y a la izquierda
   // del todo; lo de colaborar, arriba a la derecha; y el logo un poco más grande para que no quede tan pequeña la
-  // letra inferior»). En el ordenador, tres columnas: buscador | marca | Colaborar e idiomas. En el móvil, la marca
-  // arriba y debajo el buscador, Colaborar y los idiomas. `sitio.colaborarEnBarra` pone el botón (lo quita de la portada).
+  // letra inferior»). En el ordenador, tres columnas: buscador | marca | Colaborar e idiomas. En el móvil, desde el
+  // 2026-11-28, logo | buscador | ☰ (abajo). `sitio.colaborarEnBarra` pone el botón (lo quita de la portada).
   const colabora = c.sitio?.colaborarEnBarra === true ? enlaceColabora(c.sitio?.colabora, sitio) : null;
   const botonColabora = 'inline-flex h-10 shrink-0 items-center rounded-full bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-700 sm:px-5';
-  if (escaparate && proyecto) return <CabeceraProyecto raiz={raiz && loco ? { ...raiz, titulo: NOMBRE_LOCO } : raiz} icono={icono} proyecto={proyecto} colabora={colabora} botonColabora={botonColabora} />;
+  const participa = colabora && (colabora.fuera
+    ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
+    : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>);
+  if (escaparate && proyecto) return <CabeceraProyecto raiz={raiz && loco ? { ...raiz, titulo: NOMBRE_LOCO } : raiz} icono={icono} proyecto={proyecto} participa={participa} oculta={oculta} />;
+  // EN EL MÓVIL, UNA SOLA LÍNEA (2026-11-28, Eugenio: «en la versión móvil colapsa el menú de participa, donde pone
+  // también lo de los idiomas, para que solo se quede arriba el logotipo, un poquito más pequeño, un menú colapsado
+  // con 3 rayas a la derecha y la barra de buscar, todo en primera línea, que no haya 2 líneas»): logo | buscar | ☰.
+  // Participa, los idiomas y el puntito escondido van dentro del ☰ (`MenuMovil`). Sin eslogan en el móvil: a ese
+  // ancho no se leería. Desde `sm`, la barra de siempre: buscador | marca | Participa e idiomas.
+  // Y se esconde al bajar y vuelve al subir (`barraAlBajar.ts`), solo en el móvil.
   if (escaparate) return (
-    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'marca_marca'_'buscar_acciones'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'buscar_marca_acciones']"
+    <header data-cabecera-sitio className={cn("sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 border-b border-slate-100 bg-white/95 px-3 py-2 backdrop-blur transition-transform duration-300 [grid-template-areas:'marca_buscar_menu'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'buscar_marca_acciones']",
+      oculta && 'max-sm:-translate-y-full')}
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       <style>{'html { overflow-x: clip; }'}</style>
       <div className="min-w-0 [grid-area:buscar]"><BuscarBarra raizId={raizId} enLinea ancha /></div>
       {/* La marca y el eslogan del mismo ancho que el nombre (2026-11-06, Eugenio). */}
-      <div className="flex min-w-0 items-center justify-center gap-3 [grid-area:marca]">
+      <div className="flex min-w-0 items-center justify-center gap-1.5 [grid-area:marca] sm:gap-3">
         {/* TOCANDO EL LOGO SE ELIGE EL DISEÑO (2026-11-27, Eugenio): the picture opens «Diseño 1 / Diseño 2»;
             the name still goes home. */}
         {icono && <SelectorDiseno titulo={raiz?.titulo || ''}>{(/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain sm:h-[44px] sm:w-[44px] lg:h-[48px] lg:w-[48px]" />
+          ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[30px] w-[30px] shrink-0 rounded-lg object-contain sm:h-[44px] sm:w-[44px] lg:h-[48px] lg:w-[48px]" />
           : <span className="text-[1.6rem] leading-none">{icono}</span>)}</SelectorDiseno>}
       <Link to="/" className="flex min-w-0 items-center" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
-            <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{loco ? NOMBRE_LOCO : raiz.titulo}</span>
+            <span className="whitespace-nowrap text-[1rem] font-black tracking-tight text-slate-900 min-[380px]:text-[1.08rem] sm:text-[1.76rem] lg:text-[2rem]">{loco ? NOMBRE_LOCO : raiz.titulo}</span>
             {(loco || eslogan) && <Eslogan key={loco ? 'loco' : 'luz'} texto={loco ? ESLOGAN_LOCO : eslogan!} />}
           </span>
         )}
       </Link>
       </div>
-      <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
-        {colabora && (colabora.fuera
-          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
-          : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
+      <div className="hidden min-w-0 items-center justify-end gap-2 [grid-area:acciones] sm:flex">
+        {participa}
         <SelectorIdioma />
         <BotonLoco loco={loco} cambiar={cambiarLoco} />
       </div>
+      <MenuMovil>
+        {participa}
+        <SelectorIdioma />
+        <BotonLoco loco={loco} cambiar={cambiarLoco} />
+      </MenuMovil>
     </header>
   );
   return (
@@ -260,16 +306,16 @@ function Eslogan({ texto }: { texto: string }) {
     document.fonts?.ready.then(medir).catch(() => {});
   }, [texto]);
   return (
-    <span ref={ref} data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap font-semibold text-slate-500"
+    <span ref={ref} data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap font-semibold text-slate-500 max-sm:hidden"
       style={{ fontSize: medida ? `${medida.tam}px` : '11.5px', letterSpacing: medida ? `${medida.espacio}px` : undefined }}>{texto}</span>
   );
 }
 
 /** The site bar over a project: the site, small, top left («Proyecto impulsado por …»); the project's name in the
  *  middle, back to the project's own front page; Participa and the languages on the right. */
-function CabeceraProyecto({ raiz, icono, proyecto, colabora, botonColabora }: {
+function CabeceraProyecto({ raiz, icono, proyecto, participa, oculta }: {
   raiz: Raiz | null; icono: string | null; proyecto: { titulo: string; href: string };
-  colabora: ReturnType<typeof enlaceColabora> | null; botonColabora: string;
+  participa: ReactNode; oculta: boolean;
 }) {
   // The project's front page is the same address without a section (#…): going there from inside the project
   // must not reload the app, only clear the section, so the app hears it as a hash change.
@@ -281,7 +327,8 @@ function CabeceraProyecto({ raiz, icono, proyecto, colabora, botonColabora }: {
     window.scrollTo({ top: 0 });
   };
   return (
-    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'sitio_acciones'_'proyecto_proyecto'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'sitio_proyecto_acciones']"
+    <header data-cabecera-sitio className={cn("sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur transition-transform duration-300 [grid-template-areas:'sitio_menu'_'proyecto_proyecto'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'sitio_proyecto_acciones']",
+      oculta && 'max-sm:-translate-y-full')}
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       <style>{'html { overflow-x: clip; }'}</style>
       <Link to="/" className="flex min-w-0 items-center gap-2 [grid-area:sitio]" aria-label={raiz ? `Proyecto impulsado por ${raiz.titulo}: ir a su inicio` : 'Inicio'}>
@@ -297,12 +344,14 @@ function CabeceraProyecto({ raiz, icono, proyecto, colabora, botonColabora }: {
         className="min-w-0 justify-self-center text-center text-[1.15rem] font-black leading-tight tracking-tight text-slate-900 hover:text-slate-700 [grid-area:proyecto] sm:text-[1.5rem] lg:text-[1.75rem]">
         {proyecto.titulo}
       </a>
-      <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
-        {colabora && (colabora.fuera
-          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
-          : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
+      <div className="hidden min-w-0 items-center justify-end gap-2 [grid-area:acciones] sm:flex">
+        {participa}
         <SelectorIdioma />
       </div>
+      <MenuMovil>
+        {participa}
+        <SelectorIdioma />
+      </MenuMovil>
     </header>
   );
 }

@@ -93,7 +93,7 @@ export default function BuscarBarra({ raizId, enLinea = false, ancha = false }: 
       )}
       <form role="search" onSubmit={e => { e.preventDefault(); if (texto.length < 2) return; const r = res?.[elegido]; cerrar(); ir(r ? enlace(r.id) : todos()); }}
         className={cn('items-center gap-2 rounded-full border border-slate-200 bg-white px-3 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200',
-          ancha ? 'flex h-11 sm:h-12' : enLinea ? 'flex h-9' : desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
+          ancha ? 'flex h-10 sm:h-12' : enLinea ? 'flex h-9' : desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
         <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
         <input ref={campo} type="search" value={q} placeholder={ancha && typeof window !== 'undefined' && window.innerWidth >= 640 ? 'Buscar proyectos' : 'Buscar'} aria-label="Buscar en esta web"
           onChange={e => { setQ(e.target.value); setAbierta(true); }} onFocus={() => setAbierta(true)}
@@ -114,7 +114,10 @@ export default function BuscarBarra({ raizId, enLinea = false, ancha = false }: 
       {abierta && texto.length >= 2 && res && (
         // En el móvil la caja no está pegada al borde derecho: la lista va de lado a lado, fija bajo la caja.
         <div data-resultados-barra style={movil ? { position: 'fixed', left: 12, right: 12, top: movil.top, width: 'auto', marginTop: 0 } : undefined}
-          className={cn('absolute top-full z-50 mt-2 max-h-[min(36rem,calc(100dvh-6rem))] w-[min(40rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 shadow-2xl', ancha ? 'left-0' : 'right-0')}>
+          className={cn('absolute top-full z-50 mt-2 max-h-[min(36rem,calc(100dvh-6rem))] w-[min(40rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 shadow-2xl', ancha ? 'left-0' : 'right-0',
+            // On a phone the wide bar sits in the middle of the line (2026-11-28): the results take the screen's width
+            // under the bar instead of starting at the field and running off the right edge.
+            ancha && 'max-sm:fixed max-sm:inset-x-3 max-sm:top-[3.6rem] max-sm:mt-0 max-sm:w-auto')}>
           {res.length === 0 ? <p className="px-4 py-4 text-base text-slate-500">Nada con «{texto}».</p> : (
             <ul>
               {res.map((r, i) => {
