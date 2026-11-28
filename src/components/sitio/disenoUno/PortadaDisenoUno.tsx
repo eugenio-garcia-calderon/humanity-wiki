@@ -22,7 +22,9 @@ import { miniatura } from '../../../utils/miniatura';
 // a project that is not there yet gets its area's icon and its page's own description, so nothing new disappears.
 
 export type FilaPortada = { id: string; pagina_id?: string | null; orden: number; pagina?: { titulo?: string | null; descripcion?: string | null; imagen?: string | null; encuadre?: { x?: number; y?: number } | null } | null };
-export type GrupoPortada = { titulo: string; icono?: string; filas: FilaPortada[] };
+/** The future an area works towards (`sitio.sectores[].vision`, `sitio.visionOtros`), 2026-11-28. */
+export type VisionArea = { texto?: string; claves?: string[] };
+export type GrupoPortada = { titulo: string; icono?: string; vision?: VisionArea | null; filas: FilaPortada[] };
 type Destino = { href: string; fuera: boolean };
 
 const plano = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -31,8 +33,6 @@ const sinInnovacion = (t: string) => t.replace(/^Innovaci[oó]n en (?:el sector 
 
 /** How many cards an area shows before «Ver más herramientas». */
 const PRIMERAS = 3;
-/** Up to how many tools an area shares its row with other small areas. */
-const PEQUENA = 2;
 
 export default function PortadaDisenoUno({ grupos, beneficiarias, destino, nombreFila }: {
   grupos: GrupoPortada[];
@@ -46,24 +46,18 @@ export default function PortadaDisenoUno({ grupos, beneficiarias, destino, nombr
     // The most powerful first: the order chosen in herramientas.tsx, then the table's.
     const filas = [...g.filas].sort((a, b) => (HERRAMIENTAS[a.id]?.orden ?? 99) - (HERRAMIENTAS[b.id]?.orden ?? 99) || a.orden - b.orden);
     const nombre = info?.nombre || sinInnovacion(g.titulo);
-    return { id: `area-${plano(nombre)}`, area, nombre, corto: info?.corto || nombre, lema: info?.lema || '', filas };
+    return { id: `area-${plano(nombre)}`, area, nombre, corto: info?.corto || nombre, lema: info?.lema || '', vision: g.vision || null, filas };
   });
-  // Eugenio, 2026-11-27: «las secciones de innovación que solo tengan un proyecto colócalas al lado de otras que
-  // también tengan 1 o 2, para que la web no sea tan alargada». Areas with three or more tools keep their full
-  // row, in the order of `sitio.sectores`; the small ones follow, side by side, each as wide as its cards. The
-  // menu follows the same order as the page, so it never jumps backwards.
-  const grandes = secciones.filter(s => s.filas.length > PEQUENA);
-  const pequenas = secciones.filter(s => s.filas.length <= PEQUENA);
+  // 2026-11-27 the areas with one or two tools were packed side by side at the end. 2026-11-28, Eugenio: «debajo
+  // de cada sección de innovación pon la visión de futuro… que tenga una relevancia grande, el título del área con
+  // la visión justo debajo, y los proyectos debajo de esa visión». A vision does not fit in a third of the width, so
+  // every area is a row again, in the order of `sitio.sectores`; an area with a single tool puts its title and
+  // vision beside the card instead of above it, which keeps most of the compactness.
 
   return (
     <div data-diseno="1" className="pb-10">
-      <MenuAreas secciones={[...grandes, ...pequenas]} />
-      {grandes.map(s => <SeccionArea key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
-      {!!pequenas.length && (
-        <div className="grid grid-cols-1 gap-x-4 [grid-auto-flow:dense] sm:grid-cols-2 lg:grid-cols-3">
-          {pequenas.map(s => <SeccionPequena key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
-        </div>
-      )}
+      <MenuAreas secciones={secciones} />
+      {secciones.map(s => <SeccionArea key={s.id} id={s.id} area={s.area} nombre={s.nombre} lema={s.lema} vision={s.vision} filas={s.filas} destino={destino} nombreFila={nombreFila} />)}
       {!!beneficiarias?.length && <Beneficiarias grupos={beneficiarias} destino={destino} nombreFila={nombreFila} />}
     </div>
   );
@@ -149,24 +143,67 @@ function Flecha({ lado, onClick }: { lado: 'izq' | 'der'; onClick: () => void })
 }
 
 // ── One area: its name big, one line, three cards and «Ver más herramientas» for the rest ──
-function SeccionArea({ id, area, nombre, lema, filas, destino, nombreFila }: {
-  id: string; area: string; nombre: string; lema: string; filas: FilaPortada[];
+/** Per area: the colour of the vision's bar, its eyebrow and its key words. Literal classes, for Tailwind. */
+const TINTA: Record<string, { barra: string; texto: string; chip: string }> = {
+  energia: { barra: 'border-amber-400', texto: 'text-amber-600', chip: 'bg-amber-50 text-amber-800 ring-amber-200' },
+  movilidad: { barra: 'border-sky-400', texto: 'text-sky-600', chip: 'bg-sky-50 text-sky-800 ring-sky-200' },
+  vivienda: { barra: 'border-emerald-400', texto: 'text-emerald-600', chip: 'bg-emerald-50 text-emerald-800 ring-emerald-200' },
+  politica: { barra: 'border-rose-400', texto: 'text-rose-600', chip: 'bg-rose-50 text-rose-800 ring-rose-200' },
+  economia: { barra: 'border-indigo-400', texto: 'text-indigo-600', chip: 'bg-indigo-50 text-indigo-800 ring-indigo-200' },
+  agricultura: { barra: 'border-lime-500', texto: 'text-lime-700', chip: 'bg-lime-50 text-lime-800 ring-lime-200' },
+  informatica: { barra: 'border-cyan-400', texto: 'text-cyan-700', chip: 'bg-cyan-50 text-cyan-800 ring-cyan-200' },
+  conciencia: { barra: 'border-violet-400', texto: 'text-violet-600', chip: 'bg-violet-50 text-violet-800 ring-violet-200' },
+  salud: { barra: 'border-red-400', texto: 'text-red-600', chip: 'bg-red-50 text-red-800 ring-red-200' },
+  seguridad: { barra: 'border-blue-400', texto: 'text-blue-700', chip: 'bg-blue-50 text-blue-800 ring-blue-200' },
+};
+
+/** The vision: big, right under the area's name, with its key words. */
+function Vision({ area, vision }: { area: string; vision: VisionArea }) {
+  const t = TINTA[area] || TINTA.informatica;
+  return (
+    <div className={cn('mt-4 border-l-4 pl-4 sm:pl-5', t.barra)}>
+      <p className={cn('text-xs font-black uppercase tracking-[0.18em]', t.texto)}>La visión</p>
+      <p className="mt-1.5 max-w-4xl text-lg font-semibold leading-snug text-slate-800 [text-wrap:pretty] sm:text-[21px] sm:leading-[1.4]">{vision.texto}</p>
+      {!!vision.claves?.length && (
+        <ul className="mt-3 flex list-none flex-wrap gap-1.5 p-0">
+          {vision.claves.map(c => <li key={c} className={cn('rounded-full px-3 py-1 text-[13px] font-semibold ring-1 ring-inset', t.chip)}>{c}</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function SeccionArea({ id, area, nombre, lema, vision, filas, destino, nombreFila }: {
+  id: string; area: string; nombre: string; lema: string; vision: VisionArea | null; filas: FilaPortada[];
   destino: (f: FilaPortada) => Destino | null; nombreFila: (f: FilaPortada) => string;
 }) {
   const [todas, setTodas] = useState(false);
   const vistas = todas ? filas : filas.slice(0, PRIMERAS);
-  return (
-    <section id={id} aria-labelledby={`${id}-t`} className="pt-8 sm:pt-10">
-      <div className="flex items-end justify-between gap-4">
-        <div className="min-w-0">
-          <h2 id={`${id}-t`} className="flex items-center gap-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            <IconoArea area={area} className="hidden h-10 w-10 sm:block" />{nombre}
-          </h2>
-          {lema && <p className="mt-1.5 text-base text-slate-600 sm:text-lg">{lema}</p>}
-        </div>
+  const conVision = !!vision?.texto;
+  const cabecera = (
+    <>
+      <h2 id={`${id}-t`} className="flex items-center gap-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <IconoArea area={area} className="hidden h-10 w-10 sm:block" />{nombre}
+      </h2>
+      {conVision ? <Vision area={area} vision={vision!} /> : lema && <p className="mt-1.5 text-base text-slate-600 sm:text-lg">{lema}</p>}
+    </>
+  );
+  const tarjeta = (f: FilaPortada) => <li key={f.id}><Tarjeta f={f} area={area} destino={destino(f)} nombre={nombreFila(f)} /></li>;
+  // One tool: the title and the vision take two columns and the card the third.
+  if (filas.length === 1) return (
+    <section id={id} aria-labelledby={`${id}-t`} className="pt-10 sm:pt-14">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="min-w-0 sm:col-span-1 lg:col-span-2">{cabecera}</div>
+        <ul className="m-0 grid list-none content-start p-0">{filas.map(tarjeta)}</ul>
       </div>
-      <ul className="mt-5 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
-        {vistas.map(f => <li key={f.id}><Tarjeta f={f} area={area} destino={destino(f)} nombre={nombreFila(f)} /></li>)}
+    </section>
+  );
+  return (
+    <section id={id} aria-labelledby={`${id}-t`} className="pt-10 sm:pt-14">
+      {cabecera}
+      {conVision && <p className="mt-6 text-sm font-semibold text-slate-500">Los proyectos que nos acercan a esa visión</p>}
+      <ul className={cn('grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3', conVision ? 'mt-3' : 'mt-5')}>
+        {vistas.map(tarjeta)}
       </ul>
       {filas.length > PRIMERAS && (
         <button type="button" onClick={() => setTodas(v => !v)} aria-expanded={todas}
@@ -175,25 +212,6 @@ function SeccionArea({ id, area, nombre, lema, filas, destino, nombreFila }: {
           <ChevronDown aria-hidden className={cn('h-4 w-4 transition-transform', todas && 'rotate-180')} />
         </button>
       )}
-    </section>
-  );
-}
-
-/** A small area (one or two tools): its title and its cards in one or two of the three columns. */
-function SeccionPequena({ id, area, nombre, lema, filas, destino, nombreFila }: {
-  id: string; area: string; nombre: string; lema: string; filas: FilaPortada[];
-  destino: (f: FilaPortada) => Destino | null; nombreFila: (f: FilaPortada) => string;
-}) {
-  const doble = filas.length > 1;
-  return (
-    <section id={id} aria-labelledby={`${id}-t`} className={cn('flex min-w-0 flex-col pt-8 sm:pt-10', doble && 'sm:col-span-2')}>
-      <h2 id={`${id}-t`} className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[28px]">
-        <IconoArea area={area} className="hidden h-8 w-8 sm:block" />{nombre}
-      </h2>
-      {lema && <p className="mt-1 text-[15px] leading-snug text-slate-600 sm:line-clamp-2 sm:min-h-[2.6em]">{lema}</p>}
-      <ul className={cn('mt-4 grid list-none grid-cols-1 gap-4 p-0', doble && 'sm:grid-cols-2')}>
-        {filas.map(f => <li key={f.id}><Tarjeta f={f} area={area} destino={destino(f)} nombre={nombreFila(f)} /></li>)}
-      </ul>
     </section>
   );
 }

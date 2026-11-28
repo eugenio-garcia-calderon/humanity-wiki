@@ -6,7 +6,7 @@
 // area's colour behind a thin, round-capped line drawing, plus one soft second tone.
 // viewBox 0 0 32 32. Colours are literal Tailwind classes so the build keeps them.
 
-type Area = 'energia' | 'movilidad' | 'vivienda' | 'politica' | 'economia' | 'agricultura' | 'informatica' | 'conciencia' | 'salud';
+type Area = 'energia' | 'movilidad' | 'vivienda' | 'politica' | 'economia' | 'agricultura' | 'informatica' | 'conciencia' | 'salud' | 'seguridad';
 
 const TONO: Record<Area | 'otra', { disco: string; trazo: string; suave: string }> = {
   energia: { disco: 'fill-amber-100', trazo: 'stroke-amber-600', suave: 'fill-amber-300' },
@@ -18,6 +18,7 @@ const TONO: Record<Area | 'otra', { disco: string; trazo: string; suave: string 
   informatica: { disco: 'fill-cyan-100', trazo: 'stroke-cyan-600', suave: 'fill-cyan-300' },
   conciencia: { disco: 'fill-violet-100', trazo: 'stroke-violet-500', suave: 'fill-violet-300' },
   salud: { disco: 'fill-red-100', trazo: 'stroke-red-500', suave: 'fill-red-300' },
+  seguridad: { disco: 'fill-blue-100', trazo: 'stroke-blue-600', suave: 'fill-blue-300' },
   otra: { disco: 'fill-slate-100', trazo: 'stroke-slate-500', suave: 'fill-slate-300' },
 };
 
@@ -37,6 +38,15 @@ function Dibujo({ area }: { area: string }) {
           <path d="M21,4.5v1.3M26.5,10h-1.3M24.9,6.1l-.9.9M17.1,6.1l.9.9M24.9,13.9l-.9-.9" />
           <path d="M8,16h11l3,8H5z" />
           <path d="M6.5,20h14M11.5,16l-1.4,8M15.5,16l1.4,8M13.5,24v3.5M10,27.5h7" />
+        </g>
+      </>}
+      {area === 'seguridad' && <>
+        {/* Escudo con una rama de olivo: proteger, en paz */}
+        <path d="M16,6.5 L24.5,9.5 V16 C24.5,21 20.8,24.6 16,26 C11.2,24.6 7.5,21 7.5,16 V9.5 Z" className={t.suave} opacity={0.45} />
+        <g {...s}>
+          <path d="M16,6.5 L24.5,9.5 V16 C24.5,21 20.8,24.6 16,26 C11.2,24.6 7.5,21 7.5,16 V9.5 Z" />
+          <path d="M12,20 C14,16.5 17,13.5 20.5,12" />
+          <path d="M14.2,17 c-1.6,-0.4 -2.4,-1.6 -2.2,-3 c1.5,0.1 2.4,1.2 2.2,3z M17,14.2 c-0.6,-1.5 -0.1,-2.9 1.2,-3.5 c0.6,1.4 0.1,2.8 -1.2,3.5z M15.8,18.6 c1.4,-0.6 2.8,-0.2 3.5,1 c-1.4,0.6 -2.8,0.2 -3.5,-1z" />
         </g>
       </>}
       {area === 'salud' && <>
