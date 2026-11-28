@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { VisualDemocracia, VisualEconomia, VisualGeometria, VisualObservatorio, VisualPerfiles } from '../../politica/VisualesHerramientas';
+import { VisualDemocracia, VisualEconomia, VisualGeometria, VisualObservatorio, VisualOrganica, VisualPerfiles } from '../../politica/VisualesHerramientas';
 import * as Energia from './visuales/energia';
 import * as Movilidad from './visuales/movilidad';
 import * as Vivienda from './visuales/vivienda';
@@ -72,10 +72,12 @@ export const HERRAMIENTAS: Record<string, Herramienta> = {
     texto: 'Votar cosas concretas, no colores, con los datos de cada tema.' },
   BDFMODELOSOCIO1: { Visual: VisualEconomia, fondo: 'bg-gradient-to-br from-yellow-50 via-white to-teal-50', orden: 3,
     texto: 'Un solo impuesto repartido entre ocho escalas, de la persona al planeta.' },
-  BDFOBSERVPOL01: { Visual: VisualObservatorio, fondo: 'bg-gradient-to-br from-rose-50 via-white to-indigo-50', orden: 4,
+  BDFOBSERVPOL01: { Visual: VisualObservatorio, fondo: 'bg-gradient-to-br from-rose-50 via-white to-indigo-50', orden: 5,
     texto: 'Cómo está dividida España y cómo se pasa del desacuerdo al enemigo.' },
-  BDFPERFILESPOL1: { Visual: VisualPerfiles, fondo: 'bg-gradient-to-br from-amber-50 via-white to-violet-50', orden: 5,
+  BDFPERFILESPOL1: { Visual: VisualPerfiles, fondo: 'bg-gradient-to-br from-amber-50 via-white to-violet-50', orden: 6,
     texto: 'Doce perfiles políticos: su relato, sus contradicciones y cómo se miran.' },
+  BDFDEMOORGANI01: { Visual: VisualOrganica, fondo: 'bg-gradient-to-br from-violet-50 via-white to-amber-50', orden: 4,
+    texto: 'Un voto por persona y voz para territorios, oficios y ciudadanos por sorteo.' },
   // ── Economía ──
   BDFNTSTY4XY5SH4B: { Visual: Otras.VisualCrowd, fondo: f(Otras, 'VisualCrowd'), orden: 1,
     titulo: 'Solar Crowd', texto: 'Préstamos colectivos para instalar energía solar donde más se necesita.' },

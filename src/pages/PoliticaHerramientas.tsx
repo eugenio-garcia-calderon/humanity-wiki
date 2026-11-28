@@ -2,7 +2,7 @@ import { useEffect, type ComponentType } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { VisualDemocracia, VisualEconomia, VisualGeometria, VisualObservatorio, VisualPerfiles } from '../components/politica/VisualesHerramientas';
+import { VisualDemocracia, VisualEconomia, VisualGeometria, VisualObservatorio, VisualOrganica, VisualPerfiles } from '../components/politica/VisualesHerramientas';
 
 // ============================================================================
 // POLÍTICA: LAS HERRAMIENTAS, EN TARJETAS (2026-11-24, Eugenio)
@@ -24,6 +24,8 @@ import { VisualDemocracia, VisualEconomia, VisualGeometria, VisualObservatorio, 
 //   democracia-directa            the document, view «decidir» (0235)
 //   economia-publica-optimizada   the socioeconomic model renamed (0237). Eugenio wants this card to
 //                                 open humanity.wiki/economia-publica-optimizada, so it always goes there.
+//   democracia-organica           the sixth (2026-11-28, «en /politica este sexto bloque»): the study framed
+//                                 (DemocraciaOrganica.tsx, migration 0251).
 //
 // The page's blocks link the five pages as subpages: that is what makes them hang
 // from /politica for the server, the sitemap and the HTML that search engines read.
@@ -41,7 +43,7 @@ type Herramienta = {
   Visual: ComponentType;
   /** Tailwind classes for the picture's background and the card's hover border. */
   acento: { fondo: string; borde: string };
-  /** Width on large screens: three cards on the first row, two wider on the second. */
+  /** Width on large screens: three cards per row (two rows since the sixth tool, 2026-11-28). */
   ancho: string;
 };
 
@@ -66,12 +68,17 @@ export const HERRAMIENTAS_POLITICA: Herramienta[] = [
   {
     destino: 'democracia-directa', titulo: 'Democracia directa', Visual: VisualDemocracia,
     texto: 'Votar cosas concretas, no colores: ver el estado de cada tema con sus datos y decidir cuánto subir, bajar, abrir o cerrar.',
-    acento: { fondo: 'bg-gradient-to-br from-emerald-50 via-white to-sky-50', borde: 'hover:border-emerald-300' }, ancho: 'lg:col-span-3',
+    acento: { fondo: 'bg-gradient-to-br from-emerald-50 via-white to-sky-50', borde: 'hover:border-emerald-300' }, ancho: 'lg:col-span-2',
   },
   {
     destino: MODELO, titulo: 'Economía pública optimizada', Visual: VisualEconomia,
     texto: 'Un solo impuesto repartido entre ocho escalas, de la persona al planeta: recaudación, pensiones, presupuestos, deuda y servicios, comparados con la España de hoy.',
-    acento: { fondo: 'bg-gradient-to-br from-yellow-50 via-white to-teal-50', borde: 'hover:border-teal-300' }, ancho: 'lg:col-span-3',
+    acento: { fondo: 'bg-gradient-to-br from-yellow-50 via-white to-teal-50', borde: 'hover:border-teal-300' }, ancho: 'lg:col-span-2',
+  },
+  {
+    destino: 'democracia-organica', titulo: 'Democracia orgánica moderna', Visual: VisualOrganica,
+    texto: 'Cada persona, un voto, y además voz por su territorio, su oficio y por sorteo. Poderes separados de verdad, comparados con la España de hoy, fallo por fallo.',
+    acento: { fondo: 'bg-gradient-to-br from-violet-50 via-white to-amber-50', borde: 'hover:border-violet-300' }, ancho: 'lg:col-span-2',
   },
 ];
 
