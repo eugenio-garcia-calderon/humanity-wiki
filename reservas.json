@@ -11,6 +11,12 @@
       "ruta": "public/democracia-organica-moderna/index.html",
       "motivo": "democracia orgánica: modelo de gremios sin sorteo",
       "desde": "2026-11-28T19:12:57.223Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/politica/VisualesHerramientas.tsx",
+      "motivo": "democracia orgánica: modelo de gremios sin sorteo",
+      "desde": "2026-11-28T19:12:59.871Z"
     }
   ]
 }
