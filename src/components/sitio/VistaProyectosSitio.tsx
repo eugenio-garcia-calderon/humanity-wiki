@@ -308,11 +308,11 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   // (2026-11-12). Dentro de cada sector, el orden de la tabla: el que se cambia arrastrando las tarjetas.
   // `destacado` (2026-11-24, Eugenio: «Innovación en Política, bien grande»): el sector ocupa las dos columnas de la
   // matriz y su título es más grande.
-  type Sector = { titulo: string; areas?: string[]; icono?: string; destacado?: boolean };
+  type Sector = { titulo: string; areas?: string[]; icono?: string; destacado?: boolean; vision?: { texto?: string; claves?: string[] } };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
   // Economía teal since it has its own sector again (2026-11-27), so it does not look like Política.
-  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'teal', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime', Salud: 'red' };
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'teal', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime', Salud: 'red', Seguridad: 'blue' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const agrupar = (todas: Fila[], beneficiarias = false) => {
     const usados = new Set<string>();
@@ -323,12 +323,12 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       filas.forEach(f => usados.add(f.id));
       // El color va con el sector (por su icono), no con su sitio: así no cambia al reordenarlos (2026-11-13).
       const color = COLOR_DEL_ICONO[d.icono || ''] || COLORES_SECTOR[defSectores!.indexOf(d) % COLORES_SECTOR.length];
-      return { titulo: d.titulo, icono: d.icono, color, otros: false, destacado: d.destacado === true, filas };
+      return { titulo: d.titulo, icono: d.icono, color, otros: false, destacado: d.destacado === true, vision: d.vision || null, filas };
     });
     const resto = todas.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
     // Su icono, por su nombre cuando lo tiene (2026-11-24: «Otras innovaciones» pasa a llamarse «Informática»).
     // `sitio.otrosDestacado` (2026-11-24, «todas las tarjetas en el mismo formato»): también a todo el ancho.
-    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: raiz.config?.sitio?.otrosDestacado === true, filas: resto });
+    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: raiz.config?.sitio?.otrosDestacado === true, vision: raiz.config?.sitio?.visionOtros || null, filas: resto });
     // Abajo, el nombre del sector sin «Innovación en»: «Energía», «Vivienda».
     if (beneficiarias) grupos.forEach(g => { g.titulo = g.titulo.replace(/^Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?/i, '').replace(/^./, l => l.toUpperCase()); g.destacado = true; });
     return grupos.filter(g => g.filas.length);
@@ -348,7 +348,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
               amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
               rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
-              teal: { borde: 'sm:border-t-teal-500', icono: 'text-teal-600' }, red: { borde: 'sm:border-t-red-500', icono: 'text-red-600' },
+              teal: { borde: 'sm:border-t-teal-500', icono: 'text-teal-600' }, red: { borde: 'sm:border-t-red-500', icono: 'text-red-600' }, blue: { borde: 'sm:border-t-blue-500', icono: 'text-blue-600' },
               slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
             };
             let n = desdeN;

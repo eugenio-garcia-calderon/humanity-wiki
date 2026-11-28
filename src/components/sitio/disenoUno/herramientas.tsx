@@ -5,6 +5,7 @@ import * as Movilidad from './visuales/movilidad';
 import * as Vivienda from './visuales/vivienda';
 import * as Otras from './visuales/otras';
 import * as Salud from './visuales/salud';
+import * as Seguridad from './visuales/seguridad';
 
 /** The sliders of «Democracia directa» are laid out in HTML for the taller card of /politica: here they are
  *  drawn at 75 % so the four rows fit the 144 px header instead of being cut at the top and bottom. */
@@ -79,6 +80,9 @@ export const HERRAMIENTAS: Record<string, Herramienta> = {
   BDFNTSTY4XY5SH4B: { Visual: Otras.VisualCrowd, fondo: f(Otras, 'VisualCrowd'), orden: 1,
     titulo: 'Solar Crowd', texto: 'Préstamos colectivos para instalar energía solar donde más se necesita.' },
   // ── Informática ──
+  // ── Seguridad ──
+  BDFDESMILITAR01: { Visual: Seguridad.VisualDesmantelamiento, fondo: f(Seguridad, 'VisualDesmantelamiento'), orden: 1,
+    titulo: 'Desmantelamiento militar progresivo', texto: 'De los ejércitos a una seguridad cercana y en paz, paso a paso. En construcción.' },
   // ── Salud ──
   BDFSALUDMEDIC01: { Visual: Salud.VisualConocimientoMedicina, fondo: f(Salud, 'VisualConocimientoMedicina'), orden: 1,
     titulo: 'Conocimiento de la medicina', texto: 'Una plataforma que une todas las ramas de la medicina en un solo mapa.' },
@@ -102,6 +106,7 @@ export const AREAS: Record<string, { nombre: string; corto?: string; lema: strin
   informatica: { nombre: 'Informática', lema: 'Conocimiento abierto para toda la humanidad.' },
   conciencia: { nombre: 'Cultura y conciencia', corto: 'Conciencia', lema: 'Arte y ciencia para explorar la conciencia.' },
   salud: { nombre: 'Salud', lema: 'Todo lo que se sabe de la salud, unido y al alcance de todos.' },
+  seguridad: { nombre: 'Seguridad', lema: 'Una protección cercana, que cuida la paz y la libertad.' },
 };
 
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -109,6 +114,7 @@ const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLo
 export function areaDeIcono(icono: string, titulo = ''): string {
   const t = sinTildes(`${icono} ${titulo}`);
   if (/salud|medicin/.test(t)) return 'salud';
+  if (/seguridad|defensa/.test(t)) return 'seguridad';
   if (/energ/.test(t)) return 'energia';
   if (/movilidad/.test(t)) return 'movilidad';
   if (/politic/.test(t)) return 'politica';
