@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/politica/VisualesHerramientas.tsx",
-      "motivo": "democracia orgánica: modelo de gremios sin sorteo",
-      "desde": "2026-11-28T19:12:59.871Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/disenoUno/herramientas.tsx",
       "motivo": "democracia orgánica: modelo de gremios sin sorteo",
       "desde": "2026-11-28T19:13:02.684Z"
