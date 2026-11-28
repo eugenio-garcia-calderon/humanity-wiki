@@ -77,7 +77,7 @@ export const HERRAMIENTAS_POLITICA: Herramienta[] = [
   },
   {
     destino: 'democracia-organica', titulo: 'Democracia orgánica moderna', Visual: VisualOrganica,
-    texto: 'Cada persona, un voto, y además voz por su territorio, su oficio y por sorteo. Poderes separados de verdad, comparados con la España de hoy, fallo por fallo.',
+    texto: 'Todos votan lo común; cada oficio regula lo suyo con sus tecnócratas, consulta pública y el voto de sus profesionales. Justicia, seguridad y medios, sin mando de partido.',
     acento: { fondo: 'bg-gradient-to-br from-violet-50 via-white to-amber-50', borde: 'hover:border-violet-300' }, ancho: 'lg:col-span-2',
   },
 ];

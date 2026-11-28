@@ -77,7 +77,7 @@ export const HERRAMIENTAS: Record<string, Herramienta> = {
   BDFPERFILESPOL1: { Visual: VisualPerfiles, fondo: 'bg-gradient-to-br from-amber-50 via-white to-violet-50', orden: 6,
     texto: 'Doce perfiles políticos: su relato, sus contradicciones y cómo se miran.' },
   BDFDEMOORGANI01: { Visual: VisualOrganica, fondo: 'bg-gradient-to-br from-violet-50 via-white to-amber-50', orden: 4,
-    texto: 'Un voto por persona y voz para territorios, oficios y ciudadanos por sorteo.' },
+    texto: 'Todos votan lo común y cada oficio regula lo suyo, con consulta pública.' },
   // ── Economía ──
   BDFNTSTY4XY5SH4B: { Visual: Otras.VisualCrowd, fondo: f(Otras, 'VisualCrowd'), orden: 1,
     titulo: 'Solar Crowd', texto: 'Préstamos colectivos para instalar energía solar donde más se necesita.' },

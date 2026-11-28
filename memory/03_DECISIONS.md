@@ -2588,3 +2588,7 @@ Eugenio asked for three selectable projects (bicycle, car, aircraft), each with 
 **Name**: kept «Democracia orgánica moderna» because Eugenio used it, with the explicit contrast to the Francoist term and the subtitle «democracia de doble raíz»; renaming is one migration line plus the page title.
 **Alternatives**: (a) an interactive React tool (≈ 2 days; worth it if the model becomes editable by users); (b) a Docs-style text page without diagrams (cheaper, but he asked for schemes).
 **Cost of switching later**: the content is one file; moving to React is a port of the SVG, ≈ 1 day now or later.
+
+## 2026-11-28 — Organic democracy v2: one Cámara General instead of separate territorial and citizen chambers
+
+Eugenio sketched a technocratic chamber, a territorial one, a citizen one and «a general one for everyone», and asked to simplify. **Chosen**: one Cámara General per scale (everyone votes) plus trade chambers per scale. Territory is represented by the scales themselves, each with its own chambers and competences, so a territorial chamber would duplicate them. **Alternative**: keep a territorial chamber at national level (protects low-population regions and languages more directly; one more chamber and one more veto). Logged as an open gap in the page's «Lagunas», not hidden. The holistic requirement for General chamber candidates is option A with option B (open candidacy + evaluation office) shown, because it limits the right to stand (art. 23.2).

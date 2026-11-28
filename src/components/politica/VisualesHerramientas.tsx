@@ -231,55 +231,57 @@ export function VisualEconomia() {
   );
 }
 
-/* ── Democracia orgánica moderna: de la persona a los poderes, por tres raíces (2026-11-28) ──
-   The same scheme as the study's cover (public/democracia-organica-moderna/index.html): every person
-   votes (bottom), and also speaks through three roots — territory, trade, lot — which feed the powers
-   (the study counts six: these five plus direct citizen power), each with a different origin. */
+/* ── Democracia orgánica moderna: dos raíces, seis poderes (2026-11-28, v2) ──
+   The same scheme as the study's cover (public/democracia-organica-moderna/index.html): everyone votes
+   what is common (the citizens' root feeds the Cámara General and the Gobierno), and whoever practises a
+   trade also decides on it (the trades' root feeds the trade chambers, and justice, guardians and media
+   choose their own bodies from within). Some of the people carry a trade badge: one can hold several. */
 const RAICES = [
-  { n: 'Territorio', x: 70, c: 'stroke-sky-500', f: 'fill-sky-500' },
-  { n: 'Oficios', x: 160, c: 'stroke-amber-500', f: 'fill-amber-500' },
-  { n: 'Sorteo', x: 250, c: 'stroke-emerald-500', f: 'fill-emerald-500' },
+  { n: 'Ciudadanía', x: 96, c: 'stroke-slate-700', f: 'fill-slate-700', a: ['General', 'Gobierno'] },
+  { n: 'Oficios', x: 224, c: 'stroke-amber-500', f: 'fill-amber-500', a: ['Oficios', 'Justicia', 'Guardianes', 'Medios'] },
 ];
 const PODERES = [
-  { n: 'Gobierno', x: 32, f: 'fill-rose-500' },
-  { n: 'Ciudadanos', x: 96, f: 'fill-sky-600' },
-  { n: 'Sociedad', x: 160, f: 'fill-amber-500' },
-  { n: 'Justicia', x: 224, f: 'fill-violet-600' },
-  { n: 'Control', x: 288, f: 'fill-slate-600' },
+  { n: 'General', x: 30, f: 'fill-sky-700' },
+  { n: 'Gobierno', x: 82, f: 'fill-rose-500' },
+  { n: 'Oficios', x: 134, f: 'fill-amber-600' },
+  { n: 'Justicia', x: 186, f: 'fill-violet-600' },
+  { n: 'Guardianes', x: 238, f: 'fill-teal-700' },
+  { n: 'Medios', x: 290, f: 'fill-pink-700' },
 ];
 
 export function VisualOrganica() {
   const W = 320, H = 180;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" role="img"
-      aria-label="Democracia orgánica moderna: cada persona vota y además tiene voz por su territorio, su oficio y por sorteo; los poderes tienen orígenes distintos">
-      {/* the people: one equal vote each */}
+      aria-label="Democracia orgánica moderna: todos votan lo común en la Cámara General y al Gobierno; quien ejerce un oficio decide además sobre lo suyo, y justicia, guardianes y medios eligen sus órganos desde dentro">
+      {/* the people: one equal vote each; some practise one or more trades */}
       {Array.from({ length: 15 }, (_, i) => (
         <g key={i} className="transition-transform duration-500 group-hover:-translate-y-0.5" style={{ transitionDelay: `${i * 15}ms` }}>
           <circle cx={27 + i * 19} cy={152} r={4} className="fill-slate-700" />
           <path d={`M${21 + i * 19},${166} q6,-10 12,0`} className="fill-slate-700" />
+          {i % 3 !== 1 && <circle cx={31 + i * 19} cy={147} r={2} className="fill-amber-500" />}
         </g>
       ))}
-      <text x={W / 2} y={177} textAnchor="middle" className="fill-slate-500 text-[8.5px] uppercase tracking-[0.14em]">Una persona, un voto</text>
-      {/* the three roots */}
+      <text x={W / 2} y={177} textAnchor="middle" className="fill-slate-500 text-[8.5px] uppercase tracking-[0.14em]">Todos votan lo común</text>
+      {/* the two roots */}
       {RAICES.map(r => (
         <g key={r.n}>
           <path d={`M${r.x},140 C${r.x},118 ${r.x},110 ${r.x},98`} fill="none" className={r.c} strokeWidth={3} strokeLinecap="round" />
-          <rect x={r.x - 34} y={84} width={68} height={16} rx={8} className={r.f} />
+          <rect x={r.x - 36} y={84} width={72} height={16} rx={8} className={r.f} />
           <text x={r.x} y={95.5} textAnchor="middle" className="fill-white text-[9px] font-bold">{r.n}</text>
-          {PODERES.map(p => (
-            <line key={p.n} x1={r.x} y1={84} x2={p.x} y2={46} className={r.c} strokeWidth={0.7} opacity={0.35} />
+          {PODERES.filter(p => r.a.includes(p.n)).map(p => (
+            <line key={p.n} x1={r.x} y1={84} x2={p.x} y2={46} className={r.c} strokeWidth={0.8} opacity={0.45} />
           ))}
         </g>
       ))}
-      {/* the five powers */}
+      {/* the six powers */}
       {PODERES.map(p => (
         <g key={p.n}>
-          <rect x={p.x - 29} y={26} width={58} height={20} rx={5} className={p.f} />
-          <text x={p.x} y={39.5} textAnchor="middle" className="fill-white text-[8.5px] font-bold">{p.n}</text>
+          <rect x={p.x - 24} y={26} width={48} height={20} rx={5} className={p.f} />
+          <text x={p.x} y={39} textAnchor="middle" className="fill-white text-[7.5px] font-bold">{p.n}</text>
         </g>
       ))}
-      <text x={W / 2} y={16} textAnchor="middle" className="fill-slate-500 text-[9px] uppercase tracking-[0.14em]">Sobre el voto igual, tres raíces más</text>
+      <text x={W / 2} y={16} textAnchor="middle" className="fill-slate-500 text-[9px] uppercase tracking-[0.14em]">Dos raíces: todos y cada oficio</text>
     </svg>
   );
 }
