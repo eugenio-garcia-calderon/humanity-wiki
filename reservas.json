@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/DemocraciaOrganica.tsx",
+      "motivo": "versión en la URL del estudio",
+      "desde": "2026-11-28T19:33:51.365Z"
+    }
+  ]
 }
