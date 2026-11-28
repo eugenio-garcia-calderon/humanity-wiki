@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0251_democracia_organica.sql",
+      "motivo": "Democracia orgánica moderna",
+      "desde": "2026-11-28T18:14:11.645Z"
+    }
+  ]
 }
