@@ -5,6 +5,7 @@ import { cn } from '../../../utils/cn';
 import { HERRAMIENTAS, AREAS, areaDeIcono } from './herramientas';
 import { IconoArea } from './visuales/iconosAreas';
 import { miniatura } from '../../../utils/miniatura';
+import { useBarraOculta } from '../barraAlBajar';
 
 // ============================================================================
 // DISEÑO 1 DE LA PORTADA DE luzhumanidad.com (2026-11-27, Eugenio)
@@ -69,6 +70,7 @@ function MenuAreas({ secciones }: { secciones: Array<{ id: string; area: string;
   const fila = useRef<HTMLDivElement>(null);
   const [alto, setAlto] = useState(64);
   const [bordes, setBordes] = useState({ izq: false, der: false });
+  const oculta = useBarraOculta();
 
   // Sticks just under the site's bar, whose height changes with the screen.
   useEffect(() => {
@@ -109,18 +111,22 @@ function MenuAreas({ secciones }: { secciones: Array<{ id: string; area: string;
   const mover = (d: number) => fila.current?.scrollBy({ left: d * fila.current.clientWidth * 0.7, behavior: 'smooth' });
 
   return (
-    <nav aria-label="Áreas de innovación" className="sticky z-30 -mx-4 mb-2 border-b border-slate-200 bg-slate-50/95 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6"
-      style={{ top: alto, width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
+    // On a phone it leaves with the site bar when scrolling down and comes back with it (`barraAlBajar.ts`): up by
+    // the bar's height plus its own. Smaller pills there, and the arrows small and at the very edges, so more areas
+    // fit in one line and the arrows do not cover them (2026-11-28, Eugenio).
+    <nav aria-label="Áreas de innovación" className="sticky z-30 -mx-4 mb-2 border-b border-slate-200 bg-slate-50/95 px-2 py-2 backdrop-blur transition-transform duration-300 sm:-mx-6 sm:px-6 sm:py-2.5"
+      style={{ top: alto, width: '100vw', marginLeft: 'calc(50% - 50vw)',
+        transform: oculta ? `translateY(calc(-100% - ${Math.ceil(alto)}px))` : undefined }}>
       <div className="relative mx-auto max-w-6xl">
         {bordes.izq && <Flecha lado="izq" onClick={() => mover(-1)} />}
-        <div ref={fila} className="flex gap-1.5 overflow-x-auto scroll-smooth px-0.5 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>:first-child]:ml-auto [&>:last-child]:mr-auto">
+        <div ref={fila} className="flex gap-1 overflow-x-auto scroll-smooth px-0.5 py-0.5 [scrollbar-width:none] sm:gap-1.5 [&::-webkit-scrollbar]:hidden [&>:first-child]:ml-auto [&>:last-child]:mr-auto">
           {secciones.map(s => (
             <a key={s.id} href={`#${s.id}`} data-area={s.id} onClick={e => { e.preventDefault(); ir(s.id); }}
               aria-current={activa === s.id ? 'true' : undefined}
-              className={cn('inline-flex h-10 shrink-0 items-center gap-1.5 rounded-2xl border bg-white pl-1 pr-3 text-[14px] font-semibold text-slate-700 shadow-sm transition',
+              className={cn('inline-flex h-8 shrink-0 items-center gap-1 rounded-xl border bg-white pl-0.5 pr-2 text-[12.5px] font-semibold text-slate-700 shadow-sm transition sm:h-10 sm:gap-1.5 sm:rounded-2xl sm:pl-1 sm:pr-3 sm:text-[14px]',
                 'hover:border-slate-300 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
                 activa === s.id ? 'border-sky-300 text-slate-950 ring-2 ring-sky-200' : 'border-slate-200')}>
-              <IconoArea area={s.area} className="h-7 w-7" />
+              <IconoArea area={s.area} className="h-6 w-6 sm:h-7 sm:w-7" />
               {s.corto}
             </a>
           ))}
@@ -135,9 +141,9 @@ function Flecha({ lado, onClick }: { lado: 'izq' | 'der'; onClick: () => void })
   const Icono = lado === 'izq' ? ChevronLeft : ChevronRight;
   return (
     <button type="button" onClick={onClick} aria-label={lado === 'izq' ? 'Áreas anteriores' : 'Más áreas'}
-      className={cn('absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-md hover:text-slate-950',
-        lado === 'izq' ? 'left-0' : 'right-0')}>
-      <Icono className="h-5 w-5" />
+      className={cn('absolute top-1/2 z-10 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md hover:text-slate-950 sm:h-11 sm:w-11 sm:rounded-2xl',
+        lado === 'izq' ? '-left-1 sm:left-0' : '-right-1 sm:right-0')}>
+      <Icono className="h-4 w-4 sm:h-5 sm:w-5" />
     </button>
   );
 }
